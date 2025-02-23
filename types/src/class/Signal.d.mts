@@ -44,5 +44,4 @@ export class Signal<Value> {
      */
     call$: () => void;
 }
-export function NewSignal<Value>(value: Value): Signal<Value>;
-import { $ } from './New$.mjs';
+import { $ } from '../class/$.mjs';

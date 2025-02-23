@@ -7,12 +7,15 @@
  * @description
  * ## HOW TO INSTALL
  */
-export { New$ } from './src/New$.mjs';
-export { NewDerived } from './src/NewDerived.mjs';
-export { NewPingFIFO } from './src/NewPingFIFO.mjs';
-export { NewPingUnique } from './src/NewPingUnique.mjs';
-export { NewSignal } from './src/NewSignal.mjs';
-export { Q } from './src/Q.mjs';
+export { $ } from './src/class/$.mjs';
+export { Derived } from './src/class/Derived.mjs';
+export { Q } from './src/class/Q.mjs';
+export { Signal } from './src/class/Signal.mjs';
+export { New$ } from './src/function/New$.mjs';
+export { NewDerived } from './src/function/NewDerived.mjs';
+export { NewPingFIFO } from './src/function/NewPingFIFO.mjs';
+export { NewPingUnique } from './src/function/NewPingUnique.mjs';
+export { NewSignal } from './src/function/NewSignal.mjs';
 /**
  * @typedef {{}|null|number|string|boolean|symbol|bigint|function} anyButUndefined
  */

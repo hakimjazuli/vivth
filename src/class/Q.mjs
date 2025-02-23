@@ -2,7 +2,7 @@
 
 export class Q {
 	/**
-	 * @typedef {import('./anyButUndefined.type.mjs').anyButUndefined} anyButUndefined
+	 * @typedef {import('../types/anyButUndefined.type.mjs').anyButUndefined} anyButUndefined
 	 */
 	/**
 	 * @private

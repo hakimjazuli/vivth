@@ -1,6 +1,6 @@
 // @ts-check
 
-import { $ } from './New$.mjs';
+import { $ } from '../class/$.mjs';
 
 /**
  * @template Value
@@ -58,7 +58,7 @@ export class Signal {
 	 * @type {Value}
 	 */
 	get value() {
-		if (!$.R) {
+		if ($.R) {
 			$.A.push(this);
 		}
 		return this.V;
@@ -77,12 +77,9 @@ export class Signal {
 	 * @returns {void}
 	 */
 	call$ = () => {
+		if (!this.S) {
+			return;
+		}
 		this.S.forEach((subsciber) => subsciber());
 	};
 }
-/**
- * @template Value
- * @param {Value} value
- * @returns {Signal<Value>}
- */
-export const NewSignal = (value) => new Signal(value);

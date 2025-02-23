@@ -1,10 +1,10 @@
 // @ts-check
 
-import { timeout } from './common.mjs';
+import { timeout } from '../common.mjs';
 
-class QUnique {
+class qUnique {
 	/**
-	 * @typedef {import('./anyButUndefined.type.mjs').anyButUndefined} anyButUndefined
+	 * @typedef {import('../types/anyButUndefined.type.mjs').anyButUndefined} anyButUndefined
 	 * @typedef {Object} queueUniqueObject
 	 * @property {any} i
 	 * @property {()=>(any|Promise<any>)} c
@@ -26,9 +26,9 @@ class QUnique {
 	 * @type {(queueUniqueObject:queueUniqueObject)=>void}
 	 */
 	static A = (_queue) => {
-		QUnique.p(_queue);
-		if (!QUnique.r) {
-			QUnique.R();
+		qUnique.p(_queue);
+		if (!qUnique.r) {
+			qUnique.R();
 		}
 	};
 	/**
@@ -38,20 +38,20 @@ class QUnique {
 	 */
 	static p = (_queue) => {
 		const { i, c, d } = _queue;
-		QUnique.queue.set(i, [c, d ? d : 0]);
+		qUnique.queue.set(i, [c, d ? d : 0]);
 	};
 	/**
 	 * run
 	 * @private
 	 */
 	static R = async () => {
-		QUnique.r = true;
-		const keysIterator = QUnique.queue.keys();
+		qUnique.r = true;
+		const keysIterator = qUnique.queue.keys();
 		let keys = keysIterator.next();
 		while (!keys.done) {
 			const key = keys.value;
-			const [callback, debounce] = QUnique.queue.get(key);
-			QUnique.queue.delete(key);
+			const [callback, debounce] = qUnique.queue.get(key);
+			qUnique.queue.delete(key);
 			/**
 			 * debounce anyway;
 			 * queue with unique id have characteristic of messing up when have no debouncer;
@@ -61,7 +61,7 @@ class QUnique {
 			await callback();
 			keys = keysIterator.next();
 		}
-		QUnique.r = false;
+		qUnique.r = false;
 	};
 }
 
@@ -72,4 +72,4 @@ class QUnique {
  * @returns
  */
 export const NewPingUnique = (id, callback, debounce = 0) =>
-	QUnique.A({ i: id, c: callback, d: debounce });
+	qUnique.A({ i: id, c: callback, d: debounce });

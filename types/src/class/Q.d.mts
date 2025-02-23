@@ -1,6 +1,6 @@
 export class Q {
     /**
-     * @typedef {import('./anyButUndefined.type.mjs').anyButUndefined} anyButUndefined
+     * @typedef {import('../types/anyButUndefined.type.mjs').anyButUndefined} anyButUndefined
      */
     /**
      * @private
@@ -24,7 +24,7 @@ export class Q {
      * @param {anyButUndefined} id
      * @returns {Promise<{resume:()=>void}>} Resolves when it's safe to proceed for the given id, returning a cleanup function
      */
-    static unique: (id: import("./anyButUndefined.type.mjs").anyButUndefined) => Promise<{
+    static unique: (id: import("../types/anyButUndefined.type.mjs").anyButUndefined) => Promise<{
         resume: () => void;
     }>;
 }

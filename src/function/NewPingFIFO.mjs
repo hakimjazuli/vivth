@@ -1,75 +1,61 @@
 // @ts-check
 
-import { timeout } from './common.mjs';
+import { timeout } from '../common.mjs';
 
-class queueFIFO {
+class qFIFO {
+	static {
+		new qFIFO();
+	}
 	/**
 	 * @typedef {[callback:()=>(any|Promise<any>),debounce?:(number)]} queueFIFODetails
 	 */
 	/**
-	 * instance
-	 * @type {queueFIFO}
-	 */
-	static I;
-	/**
 	 * @private
 	 */
-	constructor() {
-		if (queueFIFO.I instanceof queueFIFO) {
-			return;
-		}
-		queueFIFO.I = this;
-		/**
-		 * @param {queueFIFODetails} _queue
-		 */
-		queueFIFO.a = (..._queue) => {
-			this.p(_queue);
-			if (!this.R) {
-				this.r();
-			}
-		};
-	}
+	constructor() {}
 	/**
 	 * queue
 	 * @private
 	 * @type {queueFIFODetails[]}
 	 */
-	q = [];
+	static q = [];
 	/**
 	 * isRunning
 	 * @private
 	 * @type {boolean}
 	 */
-	R = false;
+	static R = false;
 	/**
 	 * auto initiator
 	 * @private
 	 */
-	static {
-		new queueFIFO();
-	}
 	/**
 	 * assign
 	 * @type {(...queueFIFODetails:queueFIFODetails)=>void}
 	 */
-	static a;
+	static a = (..._queue) => {
+		qFIFO.p(_queue);
+		if (!qFIFO.R) {
+			qFIFO.r();
+		}
+	};
 	/**
 	 * push
 	 * @private
 	 * @param {queueFIFODetails} _queue
 	 */
-	p = (_queue) => {
-		this.q.push(_queue);
+	static p = (_queue) => {
+		qFIFO.q.push(_queue);
 	};
 	/**
 	 * run
 	 * @private
 	 */
-	r = async () => {
-		this.R = true;
-		while (this.q.length !== 0) {
-			const [callback, debounceMs = 0] = this.q[0];
-			this.q.shift();
+	static r = async () => {
+		qFIFO.R = true;
+		while (qFIFO.q.length !== 0) {
+			const [callback, debounceMs = 0] = qFIFO.q[0];
+			qFIFO.q.shift();
 			await callback();
 			/**
 			 * conditional debounce;
@@ -79,13 +65,12 @@ class queueFIFO {
 			await timeout(debounceMs);
 			// }
 		}
-		this.R = false;
+		qFIFO.R = false;
 	};
 }
-
 /**
  * @param {()=>(any|Promise<any>)} callback
  * @param {number} debounce
  * @returns
  */
-export const NewPingFIFO = (callback, debounce = 0) => queueFIFO.a(callback, debounce);
+export const NewPingFIFO = (callback, debounce = 0) => qFIFO.a(callback, debounce);

@@ -1,11 +1,11 @@
 // @ts-check
 
-import { NewPingFIFO } from './NewPingFIFO.mjs';
-import { isAsync } from './common.mjs';
+import { NewPingFIFO } from '../function/NewPingFIFO.mjs';
+import { isAsync } from '../common.mjs';
 
 export class $ {
 	/**
-	 * @typedef {import('./NewSignal.mjs').Signal} Signal
+	 * @typedef {import('../class/Signal.mjs').Signal} Signal
 	 */
 	/**
 	 * effects
@@ -69,8 +69,3 @@ export class $ {
 		});
 	}
 }
-/**
- * @param {()=>void} effect
- * @returns {$}
- */
-export const New$ = (effect) => new $(effect);

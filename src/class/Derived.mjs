@@ -1,8 +1,8 @@
 // @ts-check
 
-import { Signal } from './NewSignal.mjs';
-import { New$ } from './New$.mjs';
-import { isAsync } from './common.mjs';
+import { Signal } from './Signal.mjs';
+import { New$ } from '../function//New$.mjs';
+import { isAsync } from '../common.mjs';
 
 /**
  * @template V
@@ -40,10 +40,3 @@ export class Derived extends Signal {
 		});
 	}
 }
-
-/**
- * @template V
- * @param {()=>(V)} derivedFunction
- * @returns {Derived<V>}
- */
-export const NewDerived = (derivedFunction) => new Derived(derivedFunction);

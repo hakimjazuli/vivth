@@ -8,5 +8,4 @@ export class Derived<V> extends Signal<V> {
      */
     constructor(derivedFunction: () => V);
 }
-export function NewDerived<V>(derivedFunction: () => (V)): Derived<V>;
-import { Signal } from './NewSignal.mjs';
+import { Signal } from './Signal.mjs';
