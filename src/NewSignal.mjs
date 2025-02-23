@@ -70,8 +70,8 @@ export class Signal {
 		if (this.V === newValue) {
 			return;
 		}
-		this.call$();
 		this.V = newValue;
+		this.call$();
 	}
 	/**
 	 * @returns {void}

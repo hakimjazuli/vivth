@@ -42,7 +42,8 @@ export class Derived extends Signal {
 }
 
 /**
- * @param {()=>(void|Promise<void>)} derivedFunction
- * @returns
+ * @template V
+ * @param {()=>(V)} derivedFunction
+ * @returns {Derived<V>}
  */
 export const NewDerived = (derivedFunction) => new Derived(derivedFunction);
