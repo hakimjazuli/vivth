@@ -2,6 +2,10 @@
 
 import { timeout } from '../common.mjs';
 
+/**
+ * @description
+ * - function to auto queue callbacks that will be called `first in first out` style;
+ */
 class qFIFO {
 	static {
 		new qFIFO();
@@ -68,6 +72,7 @@ class qFIFO {
 		qFIFO.R = false;
 	};
 }
+
 /**
  * @param {()=>(any|Promise<any>)} callback
  * @param {number} debounce

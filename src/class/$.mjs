@@ -3,6 +3,11 @@
 import { NewPingFIFO } from '../function/NewPingFIFO.mjs';
 import { isAsync } from '../common.mjs';
 
+/**
+ * @description
+ * - a class to `autosubscribe` to an signal changes (`Derived` and `Signal` alike);
+ * - for minimal total bundle size use `function` [New$](#new$) instead;
+ */
 export class $ {
 	/**
 	 * @typedef {import('../class/Signal.mjs').Signal} Signal

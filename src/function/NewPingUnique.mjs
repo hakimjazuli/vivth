@@ -2,6 +2,12 @@
 
 import { timeout } from '../common.mjs';
 
+/**
+ * @description
+ * - function to auto queue callbacks:
+ * > - different `uniqueID`: called `first in first out` style;
+ * > - same `uniqueID`: will be grouped, only the already running callback and the last callback will be called;
+ */
 class qUnique {
 	/**
 	 * @typedef {import('../types/anyButUndefined.type.mjs').anyButUndefined} anyButUndefined
@@ -66,10 +72,10 @@ class qUnique {
 }
 
 /**
- * @param {anyButUndefined} id
+ * @param {anyButUndefined} uniqueID
  * @param {()=>(any|Promise<any>)} callback
  * @param {number} debounce
  * @returns
  */
-export const NewPingUnique = (id, callback, debounce = 0) =>
-	qUnique.A({ i: id, c: callback, d: debounce });
+export const NewPingUnique = (uniqueID, callback, debounce = 0) =>
+	qUnique.A({ i: uniqueID, c: callback, d: debounce });

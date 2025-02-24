@@ -1,3 +1,29 @@
+/**
+ * @description
+ * - class that containts static methods to generate Promise based `awaiter` inside async function, to prevent race condition, including but not limited to:
+ * > - modifying the same `Map`, `Set`(etc.) `Object`/`Instance` inside a `Promise.all`/any code that might fired simultanously;
+ * ```js
+ * import { Q } from 'vivth';
+ *
+ * const handler = async () => {
+ * 	// your code;
+ * 	const { resume } = await Q.fifo() // or await Q.unique(uniqueID);
+ * 	// your code that modifies same `Map`;
+ * 	resume();
+ * 	// the rest of your code;
+ * 	return;
+ * }
+ *
+ * const runtime = async () => {
+ * 	// await Promise.all(handler1, handler2, ..., handlern);
+ * }
+ *
+ * runtime();
+ * ```
+ * - behaviour:
+ * > - `fifo`: call all queued callback `first in first out` style;
+ * > - `unique`: call all queued callback with the same `uniqueID` `first in first out` style, if the `uniqueID` is different it will be called in parallel;
+ */
 export class Q {
     /**
      * @typedef {import('../types/anyButUndefined.type.mjs').anyButUndefined} anyButUndefined

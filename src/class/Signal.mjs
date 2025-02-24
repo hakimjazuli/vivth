@@ -3,6 +3,12 @@
 import { $ } from '../class/$.mjs';
 
 /**
+ * @description
+ * - a class for creating signal;
+ * - can be subscribed by using [New$](#new$) or [NewDerived](#newderived);
+ * - for minimal total bundle size use `function` [NewSignal](#newSignal) instead;
+ */
+/**
  * @template Value
  */
 export class Signal {
@@ -30,7 +36,7 @@ export class Signal {
 				signals.delete(this);
 			}
 		});
-		this.S.clear();
+		this.S?.clear();
 	};
 	/**
 	 * remove effect
