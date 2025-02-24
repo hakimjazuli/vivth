@@ -10,7 +10,7 @@
  * const handler = async () => {
  * 	// your code;
  * 	const { resume } = await Q.fifo() // or await Q.unique(uniqueID);
- * 	// your code that modifies same `Map`;
+ * 	// your code that modifies and/or access same `Map`;
  * 	resume();
  * 	// the rest of your code;
  * 	return;
