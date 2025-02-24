@@ -4,7 +4,7 @@ import { Signal } from '../class/Signal.mjs';
 
 /**
  * @description
- *  - function to create `autosubscriber`;
+ *  - function to create `signal`;
  *  - syntatic sugar for [Signal](#signal);
  * ```js
  * import { New$, NewDerived, NewSignal } from 'vivth';

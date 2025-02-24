@@ -4,7 +4,7 @@ import { Derived } from '../class/Derived.mjs';
 
 /**
  * @description
- *  - function to create `autosubscriber`;
+ *  - function to create `signal` that its value are derived from another `signal`;
  *  - syntatic sugar for [Derived](#derived);
  * ```js
  * import { New$, NewDerived, NewSignal } from 'vivth';

@@ -56,7 +56,7 @@ bun i vivth
 
 <h2 id="newderived">NewDerived</h2>
 
-- function to create `autosubscriber`; - syntatic sugar for [Derived](#derived);```jsimport { New$, NewDerived, NewSignal } from 'vivth';const signal = NewSignal(0);const derived = NewDerived(async () =>{ // runs everytime signal.value changes; return signal.value * 2;});const autosubscriber = New$(async ()=>{ // runs everytime derived.value changes; console.log(derived.value);});signal.value = 1;```
+- function to create `signal` that its value are derived from another `signal`; - syntatic sugar for [Derived](#derived);```jsimport { New$, NewDerived, NewSignal } from 'vivth';const signal = NewSignal(0);const derived = NewDerived(async () =>{ // runs everytime signal.value changes; return signal.value * 2;});const autosubscriber = New$(async ()=>{ // runs everytime derived.value changes; console.log(derived.value);});signal.value = 1;```
 
 *) <sub>[go to exported list](#exported-api-and-type-list)</sub>
 
@@ -74,6 +74,6 @@ bun i vivth
 
 <h2 id="newsignal">NewSignal</h2>
 
-- function to create `autosubscriber`; - syntatic sugar for [Signal](#signal);```jsimport { New$, NewDerived, NewSignal } from 'vivth';const signal = NewSignal(0);const derived = NewDerived(async () =>{ // runs everytime signal.value changes; return signal.value * 2;});const autosubscriber = New$(async ()=>{ // runs everytime signal.value changes; console.log(signal.value);});signal.value = 1;```
+- function to create `signal`; - syntatic sugar for [Signal](#signal);```jsimport { New$, NewDerived, NewSignal } from 'vivth';const signal = NewSignal(0);const derived = NewDerived(async () =>{ // runs everytime signal.value changes; return signal.value * 2;});const autosubscriber = New$(async ()=>{ // runs everytime signal.value changes; console.log(signal.value);});signal.value = 1;```
 
 *) <sub>[go to exported list](#exported-api-and-type-list)</sub>
