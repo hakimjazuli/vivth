@@ -4,7 +4,7 @@ import { $ } from '../class/$.mjs';
 
 /**
  * @description
- *  - funtion to create `autosubscriber`;
+ *  - function to create `autosubscriber`;
  *  - syntatic sugar for [$](#$);
  * ```js
  * import { New$, NewDerived, NewSignal } from 'vivth';

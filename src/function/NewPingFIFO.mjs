@@ -5,6 +5,16 @@ import { timeout } from '../common.mjs';
 /**
  * @description
  * - function to auto queue callbacks that will be called `first in first out` style;
+ * ```js
+ * // @ts-check
+ * import { NewPingFIFO } from 'vivth';
+ * const handler = () =>{
+ * const debounceMS = 0; // in miliseconds, optionals, default is 0;
+ * 	NewPingFIFO(async () => {
+ * 		// your code
+ * 	}, debounceMS);
+ * }
+ * ```
  */
 class qFIFO {
 	static {

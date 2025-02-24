@@ -50,30 +50,30 @@ bun i vivth
 
 <h2 id="new$">New$</h2>
 
-- funtion to create `autosubscriber`; - syntatic sugar for [$](#$);```jsimport { New$, NewDerived, NewSignal } from 'vivth';const signal = NewSignal(0);const derived = NewDerived(async () =>{ // runs everytime signal.value changes; return signal.value * 2;});const autosubscriber = New$(async ()=>{ // runs everytime signal.value changes; console.log(signal.value); // console.log(derived.value);});signal.value = 1;```
+- function to create `autosubscriber`; - syntatic sugar for [$](#$);```jsimport { New$, NewDerived, NewSignal } from 'vivth';const signal = NewSignal(0);const derived = NewDerived(async () =>{ // runs everytime signal.value changes; return signal.value * 2;});const autosubscriber = New$(async ()=>{ // runs everytime signal.value changes; console.log(signal.value); // console.log(derived.value);});signal.value = 1;```
 
 *) <sub>[go to exported list](#exported-api-and-type-list)</sub>
 
 <h2 id="newderived">NewDerived</h2>
 
-- funtion to create `autosubscriber`; - syntatic sugar for [Derived](#derived);```jsimport { New$, NewDerived, NewSignal } from 'vivth';const signal = NewSignal(0);const derived = NewDerived(async () =>{ // runs everytime signal.value changes; return signal.value * 2;});const autosubscriber = New$(async ()=>{ // runs everytime derived.value changes; console.log(derived.value);});signal.value = 1;```
+- function to create `autosubscriber`; - syntatic sugar for [Derived](#derived);```jsimport { New$, NewDerived, NewSignal } from 'vivth';const signal = NewSignal(0);const derived = NewDerived(async () =>{ // runs everytime signal.value changes; return signal.value * 2;});const autosubscriber = New$(async ()=>{ // runs everytime derived.value changes; console.log(derived.value);});signal.value = 1;```
 
 *) <sub>[go to exported list](#exported-api-and-type-list)</sub>
 
 <h2 id="newpingfifo">NewPingFIFO</h2>
 
-- function to auto queue callbacks that will be called `first in first out` style;
+- function to auto queue callbacks that will be called `first in first out` style;```js// @ts-checkimport { NewPingFIFO } from 'vivth';const handler = () =>{const debounceMS = 0; // in miliseconds, optionals, default is 0;	NewPingFIFO(async () => {		// your code	}, debounceMS);}```
 
 *) <sub>[go to exported list](#exported-api-and-type-list)</sub>
 
 <h2 id="newpingunique">NewPingUnique</h2>
 
-- function to auto queue callbacks:> - different `uniqueID`: called `first in first out` style;> - same `uniqueID`: will be grouped, only the already running callback and the last callback will be called;
+- function to auto queue callbacks:> - different `uniqueID`: called `first in first out` style;> - same `uniqueID`: will be grouped, only the already running callback and the last callback will be called;```js// @ts-checkimport { NewPingUnique } from 'vivth';const uniqueID = 'yourUniqueID'; // can be anything, even a reference to an object;const debounceMS = 0; // in miliseconds, optionals, default is 0;const handler = () =>{	NewPingUnique(uniqueID, async () => {		// your code	}, debounceMS);}```
 
 *) <sub>[go to exported list](#exported-api-and-type-list)</sub>
 
 <h2 id="newsignal">NewSignal</h2>
 
-- funtion to create `autosubscriber`; - syntatic sugar for [Derived](#derived);```jsimport { New$, NewDerived, NewSignal } from 'vivth';const signal = NewSignal(0);const derived = NewDerived(async () =>{ // runs everytime signal.value changes; return signal.value * 2;});const autosubscriber = New$(async ()=>{ // runs everytime signal.value changes; console.log(signal.value);});signal.value = 1;```
+- function to create `autosubscriber`; - syntatic sugar for [Derived](#derived);```jsimport { New$, NewDerived, NewSignal } from 'vivth';const signal = NewSignal(0);const derived = NewDerived(async () =>{ // runs everytime signal.value changes; return signal.value * 2;});const autosubscriber = New$(async ()=>{ // runs everytime signal.value changes; console.log(signal.value);});signal.value = 1;```
 
 *) <sub>[go to exported list](#exported-api-and-type-list)</sub>

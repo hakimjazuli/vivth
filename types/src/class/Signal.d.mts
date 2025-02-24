@@ -50,4 +50,4 @@ export class Signal<Value> {
      */
     call$: () => void;
 }
-import { $ } from '../class/$.mjs';
+import { $ } from './$.mjs';

@@ -1,6 +1,6 @@
 // @ts-check
 
-import { $ } from '../class/$.mjs';
+import { $ } from './$.mjs';
 
 /**
  * @description
