@@ -62,7 +62,7 @@ bun i vivth
 
 <h2 id="newpingfifo">NewPingFIFO</h2>
 
-- function to auto queue callbacks that will be called `first in first out` style;```js// @ts-checkimport { NewPingFIFO } from 'vivth';const handler = () =>{const debounceMS = 0; // in miliseconds, optionals, default is 0;	NewPingFIFO(async () => {		// your code	}, debounceMS);}```
+- function to auto queue callbacks that will be called `first in first out` style;```js// @ts-checkimport { NewPingFIFO } from 'vivth';const debounceMS = 0; // in miliseconds, optionals, default is 0;const handler = () =>{	NewPingFIFO(async () => {		// your code	}, debounceMS);}```
 
 *) <sub>[go to exported list](#exported-api-and-type-list)</sub>
 
@@ -74,6 +74,6 @@ bun i vivth
 
 <h2 id="newsignal">NewSignal</h2>
 
-- function to create `autosubscriber`; - syntatic sugar for [Derived](#derived);```jsimport { New$, NewDerived, NewSignal } from 'vivth';const signal = NewSignal(0);const derived = NewDerived(async () =>{ // runs everytime signal.value changes; return signal.value * 2;});const autosubscriber = New$(async ()=>{ // runs everytime signal.value changes; console.log(signal.value);});signal.value = 1;```
+- function to create `autosubscriber`; - syntatic sugar for [Signal](#signal);```jsimport { New$, NewDerived, NewSignal } from 'vivth';const signal = NewSignal(0);const derived = NewDerived(async () =>{ // runs everytime signal.value changes; return signal.value * 2;});const autosubscriber = New$(async ()=>{ // runs everytime signal.value changes; console.log(signal.value);});signal.value = 1;```
 
 *) <sub>[go to exported list](#exported-api-and-type-list)</sub>

@@ -5,7 +5,7 @@ import { Signal } from '../class/Signal.mjs';
 /**
  * @description
  *  - function to create `autosubscriber`;
- *  - syntatic sugar for [Derived](#derived);
+ *  - syntatic sugar for [Signal](#signal);
  * ```js
  * import { New$, NewDerived, NewSignal } from 'vivth';
  * const signal = NewSignal(0);

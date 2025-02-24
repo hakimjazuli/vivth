@@ -8,8 +8,8 @@ import { timeout } from '../common.mjs';
  * ```js
  * // @ts-check
  * import { NewPingFIFO } from 'vivth';
- * const handler = () =>{
  * const debounceMS = 0; // in miliseconds, optionals, default is 0;
+ * const handler = () =>{
  * 	NewPingFIFO(async () => {
  * 		// your code
  * 	}, debounceMS);
