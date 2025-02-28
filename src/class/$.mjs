@@ -14,12 +14,12 @@ export class $ {
 	 */
 	/**
 	 * effects
-	 * @type {Map<$["effect"], Set<Signal>>}
+	 * @type {Map<$, Set<Signal>>}
 	 */
 	static E = new Map();
 	/**
 	 * signalInstance
-	 * @type {Map<Signal, Set<$["effect"]>>}
+	 * @type {Map<Signal, Set<$>>}
 	 */
 	static S = new Map();
 	/**
@@ -36,13 +36,13 @@ export class $ {
 	 * @returns {void}
 	 */
 	remove$ = () => {
-		if (!$.E.has(this.effect)) {
+		if (!$.E.has(this)) {
 			return;
 		}
-		$.E.get(this.effect).forEach((signalInstance) => {
-			$.S.get(signalInstance).delete(this.effect);
+		$.E.get(this).forEach((signalInstance) => {
+			$.S.get(signalInstance).delete(this);
 		});
-		$.E.delete(this.effect);
+		$.E.delete(this);
 	};
 	/**
 	 * @type {()=>void}
@@ -62,13 +62,13 @@ export class $ {
 			}
 			$.R = false;
 			const signalInstances = $.A;
-			$.E.set(effect, new Set(signalInstances));
+			$.E.set(this, new Set(signalInstances));
 			for (let i = 0; i < signalInstances.length; i++) {
 				const signal = signalInstances[i];
 				if (!$.S.has(signal)) {
 					$.S.set(signal, new Set());
 				}
-				$.S.get(signal).add(effect);
+				$.S.get(signal).add(this);
 			}
 			$.A = [];
 		});

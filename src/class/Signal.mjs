@@ -31,12 +31,9 @@ export class Signal {
 	 * @return {void}
 	 */
 	removeAll$ = () => {
-		$.E.forEach((signals) => {
-			if (signals.has(this)) {
-				signals.delete(this);
-			}
+		this.S.forEach(($_) => {
+			$_.remove$();
 		});
-		this.S?.clear();
 	};
 	/**
 	 * remove effect
@@ -44,10 +41,9 @@ export class Signal {
 	 * @return {void}
 	 */
 	remove$ = ($_) => {
-		if ($.E.has($_.effect)) {
-			$.E.get($_.effect).delete(this);
+		if ($.E.get($_).has(this)) {
+			$_.remove$();
 		}
-		this.S.delete($_.effect);
 	};
 	/**
 	 * @param {Value} value
@@ -86,6 +82,6 @@ export class Signal {
 		if (!this.S) {
 			return;
 		}
-		this.S.forEach((subsciber) => subsciber());
+		this.S.forEach(($_) => $_.effect());
 	};
 }

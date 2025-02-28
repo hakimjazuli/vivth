@@ -9,14 +9,14 @@ export class $ {
      */
     /**
      * effects
-     * @type {Map<$["effect"], Set<Signal>>}
+     * @type {Map<$, Set<Signal>>}
      */
-    static E: Map<$["effect"], Set<import("../class/Signal.mjs").Signal<any>>>;
+    static E: Map<$, Set<import("../class/Signal.mjs").Signal<any>>>;
     /**
      * signalInstance
-     * @type {Map<Signal, Set<$["effect"]>>}
+     * @type {Map<Signal, Set<$>>}
      */
-    static S: Map<import("../class/Signal.mjs").Signal<any>, Set<$["effect"]>>;
+    static S: Map<import("../class/Signal.mjs").Signal<any>, Set<$>>;
     /**
      * activeSignalUponRegistering
      * @type {Signal[]}

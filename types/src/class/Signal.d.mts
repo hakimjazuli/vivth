@@ -16,7 +16,7 @@ export class Signal<Value> {
      * subscribed
      * @protected
      */
-    protected get S(): Set<() => void>;
+    protected get S(): Set<$>;
     /**
      * destroy all props
      */
