@@ -24,9 +24,9 @@ export class $ {
 	static S = new Map();
 	/**
 	 * activeSignalUponRegistering
-	 * @type {Signal[]}
+	 * @type {Set<Signal>}
 	 */
-	static A = [];
+	static A = new Set();
 	/**
 	 * isRegistering
 	 * @type {boolean}
@@ -36,12 +36,10 @@ export class $ {
 	 * @returns {void}
 	 */
 	remove$ = () => {
-		if (!$.E.has(this)) {
-			return;
-		}
-		$.E.get(this).forEach((signalInstance) => {
+		$.E.get(this)?.forEach((signalInstance) => {
 			$.S.get(signalInstance).delete(this);
 		});
+		$.E.set(this, new Set());
 		$.E.delete(this);
 	};
 	/**
@@ -62,15 +60,14 @@ export class $ {
 			}
 			$.R = false;
 			const signalInstances = $.A;
-			$.E.set(this, new Set(signalInstances));
-			for (let i = 0; i < signalInstances.length; i++) {
-				const signal = signalInstances[i];
+			$.E.set(this, $.A);
+			signalInstances.forEach((signal) => {
 				if (!$.S.has(signal)) {
 					$.S.set(signal, new Set());
 				}
 				$.S.get(signal).add(this);
-			}
-			$.A = [];
+			});
+			$.A = new Set();
 		});
 	}
 }

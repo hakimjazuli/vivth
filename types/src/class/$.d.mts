@@ -19,9 +19,9 @@ export class $ {
     static S: Map<import("../class/Signal.mjs").Signal<any>, Set<$>>;
     /**
      * activeSignalUponRegistering
-     * @type {Signal[]}
+     * @type {Set<Signal>}
      */
-    static A: import("../class/Signal.mjs").Signal<any>[];
+    static A: Set<import("../class/Signal.mjs").Signal<any>>;
     /**
      * isRegistering
      * @type {boolean}

@@ -61,7 +61,7 @@ export class Signal {
 	 */
 	get value() {
 		if ($.R) {
-			$.A.push(this);
+			$.A.add(this);
 		}
 		return this.V;
 	}
