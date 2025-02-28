@@ -23,10 +23,10 @@ export class Derived extends Signal {
 		super(0);
 		const real = isAsync(derivedFunction)
 			? async () => {
-					this.value = await derivedFunction();
+					super.value = await derivedFunction();
 			  }
 			: () => {
-					this.value = derivedFunction();
+					super.value = derivedFunction();
 			  };
 		New$(real);
 	}
