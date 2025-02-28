@@ -24,6 +24,8 @@ bun i vivth
 - [NewPingFIFO](#newpingfifo)
 - [NewPingUnique](#newpingunique)
 - [NewSignal](#newsignal)
+- [tryAsync](#tryasync)
+- [trySync](#trysync)
 <h2 id="$">$</h2>
 
 - a class to `autosubscribe` to an signal changes (`Derived` and `Signal` alike);- for minimal total bundle size use `function` [New$](#new$) instead;
@@ -75,5 +77,17 @@ bun i vivth
 <h2 id="newsignal">NewSignal</h2>
 
 - function to create `signal`; - syntatic sugar for [Signal](#signal);```jsimport { New$, NewDerived, NewSignal } from 'vivth';const signal = NewSignal(0);const derived = NewDerived(async () =>{ // runs everytime signal.value changes; return signal.value * 2;});const autosubscriber = New$(async ()=>{ // runs everytime signal.value changes; console.log(signal.value);});signal.value = 1;```
+
+*) <sub>[go to exported list](#exported-api-and-type-list)</sub>
+
+<h2 id="tryasync">tryAsync</h2>
+
+- error as value for asynchronous operationreturns: Promise<[`Error`|`null`, `ResultType`|`null`]>
+
+*) <sub>[go to exported list](#exported-api-and-type-list)</sub>
+
+<h2 id="trysync">trySync</h2>
+
+- error as value for synchronous operationreturns: [`Error`|`null`, `ResultType`|`null`]
 
 *) <sub>[go to exported list](#exported-api-and-type-list)</sub>

@@ -7,4 +7,6 @@ export { NewDerived } from "./src/function/NewDerived.mjs";
 export { NewPingFIFO } from "./src/function/NewPingFIFO.mjs";
 export { NewPingUnique } from "./src/function/NewPingUnique.mjs";
 export { NewSignal } from "./src/function/NewSignal.mjs";
+export { tryAsync } from "./src/function/tryAsync.export.mjs";
+export { trySync } from "./src/function/trySync.export.mjs";
 export type anyButUndefined = {} | null | number | string | boolean | symbol | bigint | Function;
