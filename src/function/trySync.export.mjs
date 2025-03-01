@@ -3,18 +3,18 @@
 /**
  * @description
  * - error as value for synchronous operation
- * returns: [`ResultType`|`null`, `Error`|`null`]
+ * returns: [`ResultType`|`undefined`, `Error`|`undefined`]
  */
 /**
  * @template ResultType
  * @param {()=>ResultType} function_
- * @returns {[ResultType|null, Error|null]}
+ * @returns {[ResultType|undefined, Error|undefined]}
  */
 export const trySync = (function_) => {
 	try {
 		const result = function_();
-		return [result, null];
+		return [result, undefined];
 	} catch (error) {
-		return [null, error];
+		return [undefined, error];
 	}
 };

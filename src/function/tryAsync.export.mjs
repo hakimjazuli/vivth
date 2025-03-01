@@ -3,18 +3,18 @@
 /**
  * @description
  * - error as value for asynchronous operation
- * returns: Promise<[`ResultType`|`null`, `Error`|`null`]>
+ * returns: Promise<[`ResultType`|`undefined`, `Error`|`undefined`]>
  */
 /**
  * @template ResultType
  * @param {()=>Promise<ResultType>} asyncFunction_
- * @returns {Promise<[ResultType|null, Error|null]>}
+ * @returns {Promise<[ResultType|undefined, Error|undefined]>}
  */
 export const tryAsync = async (asyncFunction_) => {
 	try {
 		const result = await asyncFunction_();
-		return [result, null];
+		return [result, undefined];
 	} catch (error) {
-		return [null, error];
+		return [undefined, error];
 	}
 };

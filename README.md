@@ -82,12 +82,12 @@ bun i vivth
 
 <h2 id="tryasync">tryAsync</h2>
 
-- error as value for asynchronous operationreturns: Promise<[`ResultType`|`null`, `Error`|`null`]>
+- error as value for asynchronous operationreturns: Promise<[`ResultType`|`undefined`, `Error`|`undefined`]>
 
 *) <sub>[go to exported list](#exported-api-and-type-list)</sub>
 
 <h2 id="trysync">trySync</h2>
 
-- error as value for synchronous operationreturns: [`ResultType`|`null`, `Error`|`null`]
+- error as value for synchronous operationreturns: [`ResultType`|`undefined`, `Error`|`undefined`]
 
 *) <sub>[go to exported list](#exported-api-and-type-list)</sub>

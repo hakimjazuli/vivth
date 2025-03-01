@@ -1,1 +1,1 @@
-export function trySync<ResultType>(function_: () => ResultType): [ResultType | null, Error | null];
+export function trySync<ResultType>(function_: () => ResultType): [ResultType | undefined, Error | undefined];
