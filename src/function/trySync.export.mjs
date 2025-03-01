@@ -8,13 +8,13 @@
 /**
  * @template ResultType
  * @param {()=>ResultType} function_
- * @returns {[Error|null, ResultType|null]}
+ * @returns {[ResultType|null, Error|null]}
  */
 export const trySync = (function_) => {
 	try {
 		const result = function_();
-		return [null, result];
+		return [result, null];
 	} catch (error) {
-		return [error, null];
+		return [null, error];
 	}
 };

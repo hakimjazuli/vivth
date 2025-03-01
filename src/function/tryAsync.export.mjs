@@ -8,13 +8,13 @@
 /**
  * @template ResultType
  * @param {()=>Promise<ResultType>} asyncFunction_
- * @returns {Promise<[Error|null, ResultType|null]>}
+ * @returns {Promise<[ResultType|null, Error|null]>}
  */
 export const tryAsync = async (asyncFunction_) => {
 	try {
 		const result = await asyncFunction_();
-		return [null, result];
+		return [result, null];
 	} catch (error) {
-		return [error, null];
+		return [null, error];
 	}
 };
