@@ -3,7 +3,7 @@
 /**
  * @description
  * - error as value for synchronous operation
- * returns: [`Error`|`null`, `ResultType`|`null`]
+ * returns: [`ResultType`|`null`, `Error`|`null`]
  */
 /**
  * @template ResultType

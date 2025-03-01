@@ -3,7 +3,7 @@
 /**
  * @description
  * - error as value for asynchronous operation
- * returns: Promise<[`Error`|`null`, `ResultType`|`null`]>
+ * returns: Promise<[`ResultType`|`null`, `Error`|`null`]>
  */
 /**
  * @template ResultType
