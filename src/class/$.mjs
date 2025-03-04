@@ -40,7 +40,6 @@ export class $ {
 			$.S.get(signalInstance).delete(this);
 		});
 		$.E.set(this, new Set());
-		$.E.delete(this);
 	};
 	/**
 	 * @type {()=>void}
