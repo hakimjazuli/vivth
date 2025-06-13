@@ -55,6 +55,14 @@ export class Signal {
 	 * @private
 	 * @type {Value}
 	 */
+	P = undefined;
+	get prev() {
+		return this.P;
+	}
+	/**
+	 * @private
+	 * @type {Value}
+	 */
 	V;
 	/**
 	 * @type {Value}
@@ -72,6 +80,7 @@ export class Signal {
 		if (this.V === newValue) {
 			return;
 		}
+		this.P = this.V;
 		this.V = newValue;
 		this.call$();
 	}

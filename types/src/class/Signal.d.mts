@@ -38,6 +38,12 @@ export class Signal<Value> {
      */
     remove$: ($_: $) => void;
     /**
+     * @private
+     * @type {Value}
+     */
+    private P;
+    get prev(): Value;
+    /**
      * @type {Value}
      */
     set value(newValue: Value);
