@@ -46,6 +46,10 @@ export class Signal<Value> {
     /**
      * @type {Value}
      */
+    get nonReactiveValue(): Value;
+    /**
+     * @type {Value}
+     */
     set value(newValue: Value);
     /**
      * @type {Value}

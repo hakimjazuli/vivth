@@ -31,7 +31,7 @@ export class Signal {
 	 * @return {void}
 	 */
 	removeAll$ = () => {
-		this.S.forEach(($_) => {
+		this.S?.forEach(($_) => {
 			$_.remove$();
 		});
 	};
@@ -41,7 +41,7 @@ export class Signal {
 	 * @return {void}
 	 */
 	remove$ = ($_) => {
-		if ($.E.get($_).has(this)) {
+		if ($.E.get($_)?.has(this)) {
 			$_.remove$();
 		}
 	};
@@ -64,6 +64,12 @@ export class Signal {
 	 * @type {Value}
 	 */
 	V;
+	/**
+	 * @type {Value}
+	 */
+	get nonReactiveValue() {
+		return this.V;
+	}
 	/**
 	 * @type {Value}
 	 */
