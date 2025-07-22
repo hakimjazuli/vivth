@@ -13,25 +13,24 @@ import { $ } from './$.mjs';
  */
 export class Signal {
 	/**
-	 * subscribed
 	 * @protected
 	 */
-	get S() {
-		return $.S.get(this);
+	get subscribed() {
+		return $.mappedSignals.get(this);
 	}
 	/**
 	 * destroy all props
 	 */
 	unRef = () => {
 		this.removeAll$();
-		this.V = null;
+		this.#Value = null;
 	};
 	/**
 	 * remove all effects
 	 * @return {void}
 	 */
 	removeAll$ = () => {
-		this.S?.forEach(($_) => {
+		this.subscribed?.forEach(($_) => {
 			$_.remove$();
 		});
 	};
@@ -41,7 +40,7 @@ export class Signal {
 	 * @return {void}
 	 */
 	remove$ = ($_) => {
-		if ($.E.get($_)?.has(this)) {
+		if ($.effects.get($_)?.has(this)) {
 			$_.remove$();
 		}
 	};
@@ -49,54 +48,52 @@ export class Signal {
 	 * @param {Value} value
 	 */
 	constructor(value) {
-		this.V = value;
+		this.#Value = value;
 	}
 	/**
-	 * @private
 	 * @type {Value}
 	 */
-	P = undefined;
+	#prev = undefined;
 	get prev() {
-		return this.P;
+		return this.#prev;
 	}
 	/**
-	 * @private
 	 * @type {Value}
 	 */
-	V;
+	#Value;
 	/**
 	 * @type {Value}
 	 */
 	get nonReactiveValue() {
-		return this.V;
+		return this.#Value;
 	}
 	/**
 	 * @type {Value}
 	 */
 	get value() {
-		if ($.R) {
-			$.A.add(this);
+		if ($.isRegistering) {
+			$.activeSignal.add(this);
 		}
-		return this.V;
+		return this.#Value;
 	}
 	/**
 	 * @type {Value}
 	 */
 	set value(newValue) {
-		if (this.V === newValue) {
+		if (this.#Value === newValue) {
 			return;
 		}
-		this.P = this.V;
-		this.V = newValue;
+		this.#prev = this.#Value;
+		this.#Value = newValue;
 		this.call$();
 	}
 	/**
 	 * @returns {void}
 	 */
 	call$ = () => {
-		if (!this.S) {
+		if (!this.subscribed) {
 			return;
 		}
-		this.S.forEach(($_) => $_.effect());
+		this.subscribed.forEach(($_) => $_.effect());
 	};
 }

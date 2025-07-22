@@ -25,16 +25,26 @@
  * - behaviour:
  * > - `fifo`: call all queued callback `first in first out` style;
  * > - `unique`: call all queued callback with the same `uniqueID` `first in first out` style, if the `uniqueID` is different it will be called in parallel;
+ * - this class provides `Q.makeQClass`;
+ * >- this method will setup `Q` to use the inputed `uniqueMap`(as arg0) as centralized lookup for queue managed by `Q`;
+ * >- usefull to modify this class for browser runtime, since `vivth` cannot just refer to window, you can just add `window["someobject"]`: `Array<Map<any, Promise<any>>>` as lookups;
  */
 export class Q {
+	/**
+	 * @param {Map<any, Promise<any>>} uniqueMap
+	 * @returns {typeof Q}
+	 */
+	static makeQClass = (uniqueMap) => {
+		Q.#unique = uniqueMap;
+		return Q;
+	};
 	/**
 	 * @typedef {import('../types/anyButUndefined.type.mjs').anyButUndefined} anyButUndefined
 	 */
 	/**
-	 * @private
 	 * @type {Promise<void>}
 	 */
-	static f = Promise.resolve();
+	static #fifo = Promise.resolve();
 	/**
 	 * Blocks execution for subsequent calls until the current one finishes.
 	 * @returns {Promise<{resume:()=>void}>} Resolves when it's safe to proceed, returning a cleanup function
@@ -44,8 +54,8 @@ export class Q {
 		const next = new Promise((resolve) => {
 			resolveFn = resolve;
 		});
-		const prev = Q.f;
-		Q.f = next;
+		const prev = Q.#fifo;
+		Q.#fifo = next;
 		await prev;
 		return {
 			resume: () => {
@@ -56,7 +66,7 @@ export class Q {
 	/**
 	 * @type {Map<any, Promise<any>>}
 	 */
-	static u = new Map();
+	static #unique = new Map();
 	/**
 	 * Ensures that each id has only one task running at a time.
 	 * Calls with the same id will wait for the previous call to finish.
@@ -64,23 +74,23 @@ export class Q {
 	 * @returns {Promise<{resume:()=>void}>} Resolves when it's safe to proceed for the given id, returning a cleanup function
 	 */
 	static unique = async (id) => {
-		if (!Q.u.has(id)) {
-			Q.u.set(id, Promise.resolve());
+		if (!Q.#unique.has(id)) {
+			Q.#unique.set(id, Promise.resolve());
 			let resolveFn;
 			const next = new Promise((resolve) => {
 				resolveFn = resolve;
 			});
-			const prev = Q.u.get(id);
-			Q.u.set(id, next);
+			const prev = Q.#unique.get(id);
+			Q.#unique.set(id, next);
 			await prev;
 			return {
 				resume: () => {
 					resolveFn();
-					Q.u.delete(id);
+					Q.#unique.delete(id);
 				},
 			};
 		} else {
-			const prev = Q.u.get(id);
+			const prev = Q.#unique.get(id);
 			await prev;
 			return await Q.unique(id);
 		}

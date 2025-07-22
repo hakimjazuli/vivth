@@ -18,6 +18,8 @@ bun i vivth
 - [$](#$)
 - [Derived](#derived)
 - [Q](#q)
+- [QFIFO](#qfifo)
+- [QUnique](#qunique)
 - [Signal](#signal)
 - [New$](#new$)
 - [NewDerived](#newderived)
@@ -40,7 +42,19 @@ bun i vivth
 
 <h2 id="q">Q</h2>
 
-- class that containts static methods to generate Promise based `awaiter` inside async function, to prevent race condition, including but not limited to:> - modifying the same `Map`, `Set`(etc.) `Object`/`Instance` inside a `Promise.all`/any code that might fired simultanously;```jsimport { Q } from 'vivth';const handler = async () => {	// your code;	const { resume } = await Q.fifo() // or await Q.unique(uniqueID);	// your code that modifies and/or access same `Map`;	resume();	// the rest of your code;	return;}const runtime = async () => {	// await Promise.all(handler1, handler2, ..., handlern);}runtime();```- behaviour:> - `fifo`: call all queued callback `first in first out` style;> - `unique`: call all queued callback with the same `uniqueID` `first in first out` style, if the `uniqueID` is different it will be called in parallel;
+- class that containts static methods to generate Promise based `awaiter` inside async function, to prevent race condition, including but not limited to:> - modifying the same `Map`, `Set`(etc.) `Object`/`Instance` inside a `Promise.all`/any code that might fired simultanously;```jsimport { Q } from 'vivth';const handler = async () => {	// your code;	const { resume } = await Q.fifo() // or await Q.unique(uniqueID);	// your code that modifies and/or access same `Map`;	resume();	// the rest of your code;	return;}const runtime = async () => {	// await Promise.all(handler1, handler2, ..., handlern);}runtime();```- behaviour:> - `fifo`: call all queued callback `first in first out` style;> - `unique`: call all queued callback with the same `uniqueID` `first in first out` style, if the `uniqueID` is different it will be called in parallel;- this class provides `Q.makeQClass`;>- this method will setup `Q` to use the inputed `uniqueMap`(as arg0) as centralized lookup for queue managed by `Q`;>- usefull to modify this class for browser runtime, since `vivth` cannot just refer to window, you can just add `window["someobject"]`: `Array<Map<any, Promise<any>>>` as lookups;
+
+*) <sub>[go to exported list](#exported-api-and-type-list)</sub>
+
+<h2 id="qfifo">QFIFO</h2>
+
+```js/** * @typedef {[callback:()=>(any|Promise<any>),debounce?:(number)]} queueFIFODetails */```- a class for Queue;- for minimal total bundle size use `function` [NewPingFIFO](#newpingfifo) instead;- this class provides `QFIFO.makeQClass`;>- this method will setup `QFIFO` to use the inputed `queueArray`(as arg0) as centralized lookup for queue managed by `QFIFO`;>- usefull to modify this class for browser runtime, since `vivth` cannot just refer to window, you can just add `window["someobject"]`: `Array<queueFIFODetails>` as lookups;
+
+*) <sub>[go to exported list](#exported-api-and-type-list)</sub>
+
+<h2 id="qunique">QUnique</h2>
+
+- a class for Queue;- for minimal total bundle size use `function` [NewPingUnique](#newpingunique) instead;- this class provides `QUnique.makeQClass`;>- this method will setup `QUnique` to use the inputed `queueMap`(as arg0) as centralized lookup for queue managed by `QUnique`;>- usefull to modify this class for browser runtime, since `vivth` cannot just refer to window, you can just add `window["someobject"]`: `Map<any, [()=>Promise<any>,number]>` as lookups;
 
 *) <sub>[go to exported list](#exported-api-and-type-list)</sub>
 

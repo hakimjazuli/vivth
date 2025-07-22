@@ -13,19 +13,13 @@ export class Signal<Value> {
      */
     constructor(value: Value);
     /**
-     * subscribed
      * @protected
      */
-    protected get S(): Set<$>;
+    protected get subscribed(): Set<$>;
     /**
      * destroy all props
      */
     unRef: () => void;
-    /**
-     * @private
-     * @type {Value}
-     */
-    private V;
     /**
      * remove all effects
      * @return {void}
@@ -37,11 +31,6 @@ export class Signal<Value> {
      * @return {void}
      */
     remove$: ($_: $) => void;
-    /**
-     * @private
-     * @type {Value}
-     */
-    private P;
     get prev(): Value;
     /**
      * @type {Value}
@@ -59,5 +48,6 @@ export class Signal<Value> {
      * @returns {void}
      */
     call$: () => void;
+    #private;
 }
 import { $ } from './$.mjs';

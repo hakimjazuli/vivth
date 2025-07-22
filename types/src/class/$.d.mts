@@ -8,25 +8,21 @@ export class $ {
      * @typedef {import('../class/Signal.mjs').Signal} Signal
      */
     /**
-     * effects
      * @type {Map<$, Set<Signal>>}
      */
-    static E: Map<$, Set<import("../class/Signal.mjs").Signal<any>>>;
+    static effects: Map<$, Set<import("../class/Signal.mjs").Signal<any>>>;
     /**
-     * signalInstance
      * @type {Map<Signal, Set<$>>}
      */
-    static S: Map<import("../class/Signal.mjs").Signal<any>, Set<$>>;
+    static mappedSignals: Map<import("../class/Signal.mjs").Signal<any>, Set<$>>;
     /**
-     * activeSignalUponRegistering
      * @type {Set<Signal>}
      */
-    static A: Set<import("../class/Signal.mjs").Signal<any>>;
+    static activeSignal: Set<import("../class/Signal.mjs").Signal<any>>;
     /**
-     * isRegistering
      * @type {boolean}
      */
-    static R: boolean;
+    static isRegistering: boolean;
     /**
      * @param {$["effect"]} effect
      */

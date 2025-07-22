@@ -1,1 +1,1 @@
-export function NewPingUnique(uniqueID: import("../types/anyButUndefined.type.mjs").anyButUndefined, callback: () => (any | Promise<any>), debounce?: number): void;
+export function NewPingUnique(uniqueID: import("../../index.mjs").anyButUndefined, callback: () => (any | Promise<any>), debounce?: number): void;

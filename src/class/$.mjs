@@ -13,33 +13,29 @@ export class $ {
 	 * @typedef {import('../class/Signal.mjs').Signal} Signal
 	 */
 	/**
-	 * effects
 	 * @type {Map<$, Set<Signal>>}
 	 */
-	static E = new Map();
+	static effects = new Map();
 	/**
-	 * signalInstance
 	 * @type {Map<Signal, Set<$>>}
 	 */
-	static S = new Map();
+	static mappedSignals = new Map();
 	/**
-	 * activeSignalUponRegistering
 	 * @type {Set<Signal>}
 	 */
-	static A = new Set();
+	static activeSignal = new Set();
 	/**
-	 * isRegistering
 	 * @type {boolean}
 	 */
-	static R = false;
+	static isRegistering = false;
 	/**
 	 * @returns {void}
 	 */
 	remove$ = () => {
-		$.E.get(this)?.forEach((signalInstance) => {
-			$.S.get(signalInstance).delete(this);
+		$.effects.get(this)?.forEach((signalInstance) => {
+			$.mappedSignals.get(signalInstance).delete(this);
 		});
-		$.E.set(this, new Set());
+		$.effects.set(this, new Set());
 	};
 	/**
 	 * @type {()=>void}
@@ -51,22 +47,22 @@ export class $ {
 	constructor(effect) {
 		this.effect = effect;
 		NewPingFIFO(async () => {
-			$.R = true;
+			$.isRegistering = true;
 			if (isAsync(effect)) {
 				await effect();
 			} else {
 				effect();
 			}
-			$.R = false;
-			const signalInstances = $.A;
-			$.E.set(this, $.A);
+			$.isRegistering = false;
+			const signalInstances = $.activeSignal;
+			$.effects.set(this, $.activeSignal);
 			signalInstances.forEach((signal) => {
-				if (!$.S.has(signal)) {
-					$.S.set(signal, new Set());
+				if (!$.mappedSignals.has(signal)) {
+					$.mappedSignals.set(signal, new Set());
 				}
-				$.S.get(signal).add(this);
+				$.mappedSignals.get(signal).add(this);
 			});
-			$.A = new Set();
+			$.activeSignal = new Set();
 		});
 	}
 }

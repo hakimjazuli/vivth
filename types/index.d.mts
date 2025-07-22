@@ -1,6 +1,8 @@
 export { $ } from "./src/class/$.mjs";
 export { Derived } from "./src/class/Derived.mjs";
 export { Q } from "./src/class/Q.mjs";
+export { QFIFO } from "./src/class/QFIFO.mjs";
+export { QUnique } from "./src/class/QUnique.mjs";
 export { Signal } from "./src/class/Signal.mjs";
 export { New$ } from "./src/function/New$.mjs";
 export { NewDerived } from "./src/function/NewDerived.mjs";
