@@ -94,6 +94,6 @@ export class Signal {
 		if (!this.subscribed) {
 			return;
 		}
-		this.subscribed.forEach(($_) => $_.effect());
+		this.subscribed.forEach(($_) => $_.effect({ remove$: $_.remove$ }));
 	};
 }

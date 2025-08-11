@@ -10,8 +10,10 @@
  */
 export class Derived<V> extends Signal<V> {
     /**
-     * @param {()=>V} derivedFunction
+     * @param {(arg0:{remove$:()=>void})=>V} derivedFunction
      */
-    constructor(derivedFunction: () => V);
+    constructor(derivedFunction: (arg0: {
+        remove$: () => void;
+    }) => V);
 }
 import { Signal } from './Signal.mjs';

@@ -16,17 +16,22 @@ import { isAsync } from '../common.mjs';
  */
 export class Derived extends Signal {
 	/**
-	 * @param {()=>V} derivedFunction
+	 * @param {(arg0:{remove$:()=>void})=>V} derivedFunction
 	 */
 	constructor(derivedFunction) {
-		// @ts-expect-error
-		super(0);
+		super(undefined);
 		const real = isAsync(derivedFunction)
-			? async () => {
-					super.value = await derivedFunction();
+			? /**
+			   * @param {{remove$:()=>void}} options
+			   */
+			  async (options) => {
+					super.value = await derivedFunction(options);
 			  }
-			: () => {
-					super.value = derivedFunction();
+			: /**
+			   * @param {{remove$:()=>void}} options
+			   */
+			  (options) => {
+					super.value = derivedFunction(options);
 			  };
 		new $(real);
 	}

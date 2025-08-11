@@ -32,7 +32,9 @@ export class $ {
      */
     remove$: () => void;
     /**
-     * @type {()=>void}
+     * @type {(arg0:{remove$:()=>void})=>void}
      */
-    effect: () => void;
+    effect: (arg0: {
+        remove$: () => void;
+    }) => void;
 }

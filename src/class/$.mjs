@@ -38,7 +38,7 @@ export class $ {
 		$.effects.set(this, new Set());
 	};
 	/**
-	 * @type {()=>void}
+	 * @type {(arg0:{remove$:()=>void})=>void}
 	 */
 	effect;
 	/**
@@ -49,9 +49,9 @@ export class $ {
 		new PingFIFO(async () => {
 			$.isRegistering = true;
 			if (isAsync(effect)) {
-				await effect();
+				await effect({ remove$: this.remove$ });
 			} else {
-				effect();
+				effect({ remove$: this.remove$ });
 			}
 			$.isRegistering = false;
 			const signalInstances = $.activeSignal;
