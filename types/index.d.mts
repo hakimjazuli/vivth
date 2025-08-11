@@ -3,6 +3,8 @@ export { Derived } from "./src/class/Derived.mjs";
 export { PingFIFO } from "./src/class/PingFIFO.mjs";
 export { PingUnique } from "./src/class/PingUnique.mjs";
 export { Q } from "./src/class/Q.mjs";
+export { QFIFO } from "./src/class/QFIFO.mjs";
+export { QUnique } from "./src/class/QUnique.mjs";
 export { Signal } from "./src/class/Signal.mjs";
 export { NewQBlock } from "./src/function/NewQBlock.mjs";
 export { TryAsync } from "./src/function/TryAsync.mjs";

@@ -1,25 +1,14 @@
 // @ts-check
 
 import { Signal } from './Signal.mjs';
-import { isAsync } from '../common.mjs';
 import { $ } from './$.mjs';
+import { isAsync } from '../common.mjs';
 
 /**
  * @description
  * - a class for creating signal which its value are derived from other signal (`Derived` and `Signal` alike);
- * ```js
- * import { $, Derived, Signal } from 'vivth';
- * const signal = new Signal(0);
- * const derived = new Derived(async () =>{
- *  // runs everytime signal.value changes;
- *  return signal.value * 2;
- * });
- * const autosubscriber = new $(async ()=>{
- *  // runs everytime derived.value changes;
- *  console.log(derived.value);
- * });
- * signal.value = 1;
- * ```
+ * - can be subscribed by using [New$](#new$);
+ * - for minimal total bundle size use `function` [NewDerived](#newderived) instead;
  */
 /**
  * @template V
@@ -27,22 +16,17 @@ import { $ } from './$.mjs';
  */
 export class Derived extends Signal {
 	/**
-	 * @param {(arg:{remove$:$["remove$"]})=>V} derivedFunction
+	 * @param {()=>V} derivedFunction
 	 */
 	constructor(derivedFunction) {
-		super(undefined);
+		// @ts-expect-error
+		super(0);
 		const real = isAsync(derivedFunction)
-			? /**
-			   * @param {{remove$:$["remove$"]}} options
-			   */
-			  async (options) => {
-					super.value = await derivedFunction(options);
+			? async () => {
+					super.value = await derivedFunction();
 			  }
-			: /**
-			   * @param {{remove$:$["remove$"]}} options
-			   */
-			  (options) => {
-					super.value = derivedFunction(options);
+			: () => {
+					super.value = derivedFunction();
 			  };
 		new $(real);
 	}

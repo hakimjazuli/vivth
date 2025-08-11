@@ -30,16 +30,16 @@ export class PingFIFO {
     /**
      * @type {queueFIFODetails[]}
      */
-    static "__#3@#queue": queueFIFODetails[];
+    static "__#1@#queue": queueFIFODetails[];
     /**
      * @type {boolean}
      */
-    static "__#3@#isRunning": boolean;
+    static "__#1@#isRunning": boolean;
     /**
      * @param {queueFIFODetails} _queue
      */
-    static "__#3@#push": (_queue: queueFIFODetails) => void;
-    static "__#3@#run": () => Promise<void>;
+    static "__#1@#push": (_queue: queueFIFODetails) => void;
+    static "__#1@#run": () => Promise<void>;
     /**
      * @param {()=>(any|Promise<any>)} callback
      * @param {number} [debounce]

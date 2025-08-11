@@ -1,25 +1,12 @@
 // @ts-check
 
+import { PingFIFO } from './PingFIFO.mjs';
 import { isAsync } from '../common.mjs';
-import { NewQBlock } from '../function/NewQBlock.mjs';
 
 /**
  * @description
  * - a class to `autosubscribe` to an signal changes (`Derived` and `Signal` alike);
- * ```js
- * import { $, Derived, Signal } from 'vivth';
- * const signal = new Signal(0);
- * const derived = new Derived(async () =>{
- *  // runs everytime signal.value changes;
- *  return signal.value * 2;
- * });
- * const autosubscriber = new $(async ()=>{
- *  // runs everytime signal.value changes;
- *  console.log(signal.value);
- *  // console.log(derived.value);
- * });
- * signal.value = 1;
- * ```
+ * - for minimal total bundle size use `function` [New$](#new$) instead;
  */
 export class $ {
 	/**
@@ -45,27 +32,26 @@ export class $ {
 	 * @returns {void}
 	 */
 	remove$ = () => {
-		NewQBlock(async () => {
-			$.effects.get(this)?.forEach((signalInstance) => {
-				$.mappedSignals.get(signalInstance).delete(this);
-			});
-			$.effects.set(this, new Set());
-		}, $);
+		$.effects.get(this)?.forEach((signalInstance) => {
+			$.mappedSignals.get(signalInstance).delete(this);
+		});
+		$.effects.set(this, new Set());
 	};
 	/**
-	 * @type {(arg:{remove$:$["remove$"]})=>void};
+	 * @type {()=>void}
 	 */
 	effect;
 	/**
-	 * @param {(arg:{remove$:$["remove$"]})=>void} effect
+	 * @param {$["effect"]} effect
 	 */
 	constructor(effect) {
 		this.effect = effect;
-		NewQBlock(async () => {
+		new PingFIFO(async () => {
 			$.isRegistering = true;
-			const check = this.effect({ remove$: this.remove$ });
 			if (isAsync(effect)) {
-				await check;
+				await effect();
+			} else {
+				effect();
 			}
 			$.isRegistering = false;
 			const signalInstances = $.activeSignal;
@@ -77,6 +63,6 @@ export class $ {
 				$.mappedSignals.get(signal).add(this);
 			});
 			$.activeSignal = new Set();
-		}, $);
+		});
 	}
 }

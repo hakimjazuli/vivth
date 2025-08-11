@@ -14,27 +14,27 @@ bun i vivth
 - `vivth` technically can run in any `js runtime`, since it uses non platform specific api;
 - it is written specifically to be used as a primitives for javascript library or runtime, so there are no complex abstraction is, nor will be, added in `vivth` it self;
 
-### version
-- 0.11.x: drop function wrapper for all classes, for better runtime performance
 ## exported-api-and-type-list
 - [$](#$)
 - [Derived](#derived)
 - [PingFIFO](#pingfifo)
 - [PingUnique](#pingunique)
 - [Q](#q)
+- [QFIFO](#qfifo)
+- [QUnique](#qunique)
 - [Signal](#signal)
 - [NewQBlock](#newqblock)
 - [TryAsync](#tryasync)
 - [TrySync](#trysync)
 <h2 id="$">$</h2>
 
-- a class to `autosubscribe` to an signal changes (`Derived` and `Signal` alike);```jsimport { $, Derived, Signal } from 'vivth';const signal = new Signal(0);const derived = new Derived(async () =>{ // runs everytime signal.value changes; return signal.value * 2;});const autosubscriber = new $(async ()=>{ // runs everytime signal.value changes; console.log(signal.value); // console.log(derived.value);});signal.value = 1;```
+- a class to `autosubscribe` to an signal changes (`Derived` and `Signal` alike);- for minimal total bundle size use `function` [New$](#new$) instead;
 
 *) <sub>[go to exported list](#exported-api-and-type-list)</sub>
 
 <h2 id="derived">Derived</h2>
 
-- a class for creating signal which its value are derived from other signal (`Derived` and `Signal` alike);```jsimport { $, Derived, Signal } from 'vivth';const signal = new Signal(0);const derived = new Derived(async () =>{ // runs everytime signal.value changes; return signal.value * 2;});const autosubscriber = new $(async ()=>{ // runs everytime derived.value changes; console.log(derived.value);});signal.value = 1;```
+- a class for creating signal which its value are derived from other signal (`Derived` and `Signal` alike);- can be subscribed by using [New$](#new$);- for minimal total bundle size use `function` [NewDerived](#newderived) instead;
 
 *) <sub>[go to exported list](#exported-api-and-type-list)</sub>
 
@@ -56,9 +56,21 @@ bun i vivth
 
 *) <sub>[go to exported list](#exported-api-and-type-list)</sub>
 
+<h2 id="qfifo">QFIFO</h2>
+
+```js/** * @typedef {[callback:()=>(any|Promise<any>),debounce?:(number)]} queueFIFODetails */```- a class for Queue;- for minimal total bundle size use `function` [NewPingFIFO](#newpingfifo) instead;- this class provides `QFIFO.makeQClass`;>- this method will setup `QFIFO` to use the inputed `queueArray`(as arg0) as centralized lookup for queue managed by `QFIFO`;>- usefull to modify this class for browser runtime, since `vivth` cannot just refer to window, you can just add `window["someobject"]`: `Array<queueFIFODetails>` as lookups;
+
+*) <sub>[go to exported list](#exported-api-and-type-list)</sub>
+
+<h2 id="qunique">QUnique</h2>
+
+- a class for Queue;- for minimal total bundle size use `function` [NewPingUnique](#newpingunique) instead;- this class provides `QUnique.makeQClass`;>- this method will setup `QUnique` to use the inputed `queueMap`(as arg0) as centralized lookup for queue managed by `QUnique`;>- usefull to modify this class for browser runtime, since `vivth` cannot just refer to window, you can just add `window["someobject"]`: `Map<any, [()=>Promise<any>,number]>` as lookups;
+
+*) <sub>[go to exported list](#exported-api-and-type-list)</sub>
+
 <h2 id="signal">Signal</h2>
 
-- a class for creating signal;```jsimport { $, Derived, Signal } from 'vivth';const signal = new Signal(0);const derived = new Derived(async () =>{ // runs everytime signal.value changes; return signal.value * 2;});const autosubscriber = new $(async ()=>{ // runs everytime signal.value changes; console.log(signal.value);});signal.value = 1;```
+- a class for creating signal;- can be subscribed by using [New$](#new$) or [NewDerived](#newderived);- for minimal total bundle size use `function` [NewSignal](#newSignal) instead;
 
 *) <sub>[go to exported list](#exported-api-and-type-list)</sub>
 

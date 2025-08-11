@@ -39,7 +39,7 @@ export class Q {
     /**
      * @type {Promise<void>}
      */
-    static "__#1@#fifo": Promise<void>;
+    static "__#4@#fifo": Promise<void>;
     /**
      * Blocks execution for subsequent calls until the current one finishes.
      * @returns {Promise<{resume:()=>void}>} Resolves when it's safe to proceed, returning a cleanup function
@@ -50,7 +50,7 @@ export class Q {
     /**
      * @type {Map<any, Promise<any>>}
      */
-    static "__#1@#unique": Map<any, Promise<any>>;
+    static "__#4@#unique": Map<any, Promise<any>>;
     /**
      * Ensures that each id has only one task running at a time.
      * Calls with the same id will wait for the previous call to finish.

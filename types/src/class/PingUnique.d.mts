@@ -27,18 +27,18 @@ export class PingUnique {
     /**
      * @type {Map<any, [()=>Promise<void>,number]>}
      */
-    static "__#4@#queue": Map<any, [() => Promise<void>, number]>;
+    static "__#3@#queue": Map<any, [() => Promise<void>, number]>;
     /**
      * @type {boolean}
      */
-    static "__#4@#isRunning": boolean;
+    static "__#3@#isRunning": boolean;
     /**
      * @param {any} id
      * @param {()=>Promise<void>} callback
      * @param {number} debounceMS
      */
-    static "__#4@#push": (id: any, callback: () => Promise<void>, debounceMS: number) => void;
-    static "__#4@#run": () => Promise<void>;
+    static "__#3@#push": (id: any, callback: () => Promise<void>, debounceMS: number) => void;
+    static "__#3@#run": () => Promise<void>;
     /**
      * @param {any} id
      * @param {()=>Promise<void>} callback
