@@ -10,7 +10,7 @@
  * @param {()=>Promise<ResultType>} asyncFunction_
  * @returns {Promise<[ResultType|undefined, Error|undefined]>}
  */
-export const tryAsync = async (asyncFunction_) => {
+export const TryAsync = async (asyncFunction_) => {
 	try {
 		const result = await asyncFunction_();
 		return [result, undefined];

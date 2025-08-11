@@ -1,8 +1,19 @@
 /**
  * @description
  * - a class for creating signal;
- * - can be subscribed by using [New$](#new$) or [NewDerived](#newderived);
- * - for minimal total bundle size use `function` [NewSignal](#newSignal) instead;
+ * ```js
+ * import { $, Derived, Signal } from 'vivth';
+ * const signal = new Signal(0);
+ * const derived = new Derived(async () =>{
+ *  // runs everytime signal.value changes;
+ *  return signal.value * 2;
+ * });
+ * const autosubscriber = new $(async ()=>{
+ *  // runs everytime signal.value changes;
+ *  console.log(signal.value);
+ * });
+ * signal.value = 1;
+ * ```
  */
 /**
  * @template Value

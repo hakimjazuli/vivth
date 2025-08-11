@@ -1,1 +1,1 @@
-export type anyButUndefined = {} | null | number | string | boolean | symbol | bigint | Function;
+export type AnyButUndefined = {} | null | number | string | boolean | symbol | bigint | Function;

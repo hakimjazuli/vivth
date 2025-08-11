@@ -10,7 +10,7 @@
  * @param {()=>ResultType} function_
  * @returns {[ResultType|undefined, Error|undefined]}
  */
-export const trySync = (function_) => {
+export const TrySync = (function_) => {
 	try {
 		const result = function_();
 		return [result, undefined];

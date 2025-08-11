@@ -14,29 +14,39 @@ bun i vivth
 - `vivth` technically can run in any `js runtime`, since it uses non platform specific api;
 - it is written specifically to be used as a primitives for javascript library or runtime, so there are no complex abstraction is, nor will be, added in `vivth` it self;
 
+### version
+- 0.11.x: drop function wrapper for all classes, for better runtime performance
 ## exported-api-and-type-list
 - [$](#$)
 - [Derived](#derived)
+- [PingFIFO](#pingfifo)
+- [PingUnique](#pingunique)
 - [Q](#q)
-- [QFIFO](#qfifo)
-- [QUnique](#qunique)
 - [Signal](#signal)
-- [New$](#new$)
-- [NewDerived](#newderived)
-- [NewPingFIFO](#newpingfifo)
-- [NewPingUnique](#newpingunique)
-- [NewSignal](#newsignal)
-- [tryAsync](#tryasync)
-- [trySync](#trysync)
+- [NewQBlock](#newqblock)
+- [TryAsync](#tryasync)
+- [TrySync](#trysync)
 <h2 id="$">$</h2>
 
-- a class to `autosubscribe` to an signal changes (`Derived` and `Signal` alike);- for minimal total bundle size use `function` [New$](#new$) instead;
+- a class to `autosubscribe` to an signal changes (`Derived` and `Signal` alike);```jsimport { $, Derived, Signal } from 'vivth';const signal = new Signal(0);const derived = new Derived(async () =>{ // runs everytime signal.value changes; return signal.value * 2;});const autosubscriber = new $(async ()=>{ // runs everytime signal.value changes; console.log(signal.value); // console.log(derived.value);});signal.value = 1;```
 
 *) <sub>[go to exported list](#exported-api-and-type-list)</sub>
 
 <h2 id="derived">Derived</h2>
 
-- a class for creating signal which its value are derived from other signal (`Derived` and `Signal` alike);- can be subscribed by using [New$](#new$);- for minimal total bundle size use `function` [NewDerived](#newderived) instead;
+- a class for creating signal which its value are derived from other signal (`Derived` and `Signal` alike);```jsimport { $, Derived, Signal } from 'vivth';const signal = new Signal(0);const derived = new Derived(async () =>{ // runs everytime signal.value changes; return signal.value * 2;});const autosubscriber = new $(async ()=>{ // runs everytime derived.value changes; console.log(derived.value);});signal.value = 1;```
+
+*) <sub>[go to exported list](#exported-api-and-type-list)</sub>
+
+<h2 id="pingfifo">PingFIFO</h2>
+
+```js/** * @typedef {[callback:()=>(any|Promise<any>),debounce?:(number)]} queueFIFODetails */```- a class for Queue;- function to auto queue callbacks that will be called `first in first out` style;```js// @ts-checkimport { PingFIFO } from 'vivth';const debounceMS = 0; // in miliseconds, optionals, default is 0;const handler = () =>{	new PingFIFO(async () => {		// your code	}, debounceMS);}```- this class provides `QFIFO.makeQClass`;>- this method will setup `QFIFO` to use the inputed `queueArray`(as arg0) as centralized lookup for queue managed by `QFIFO`;>- usefull to modify this class for browser runtime, since `vivth` cannot just refer to window, you can just add `window["someobject"]`: `Array<queueFIFODetails>` as lookups;
+
+*) <sub>[go to exported list](#exported-api-and-type-list)</sub>
+
+<h2 id="pingunique">PingUnique</h2>
+
+- a class for Queue;> - different `uniqueID`: called `first in first out` style;> - same `uniqueID`: will be grouped, only the already running callback and the last callback will be called;```js// @ts-checkimport { PingUnique } from 'vivth';const uniqueID = 'yourUniqueID'; // can be anything, even a reference to an object;const debounceMS = 0; // in miliseconds, optionals, default is 0;const handler = () =>{ new PingUnique(uniqueID, async () => {		// your code	}, debounceMS);}```- this class provides `QUnique.makeQClass`;>- this method will setup `QUnique` to use the inputed `queueMap`(as arg0) as centralized lookup for queue managed by `QUnique`;>- usefull to modify this class for browser runtime, since `vivth` cannot just refer to window, you can just add `window["someobject"]`: `Map<any, [()=>Promise<any>,number]>` as lookups;
 
 *) <sub>[go to exported list](#exported-api-and-type-list)</sub>
 
@@ -46,61 +56,25 @@ bun i vivth
 
 *) <sub>[go to exported list](#exported-api-and-type-list)</sub>
 
-<h2 id="qfifo">QFIFO</h2>
-
-```js/** * @typedef {[callback:()=>(any|Promise<any>),debounce?:(number)]} queueFIFODetails */```- a class for Queue;- for minimal total bundle size use `function` [NewPingFIFO](#newpingfifo) instead;- this class provides `QFIFO.makeQClass`;>- this method will setup `QFIFO` to use the inputed `queueArray`(as arg0) as centralized lookup for queue managed by `QFIFO`;>- usefull to modify this class for browser runtime, since `vivth` cannot just refer to window, you can just add `window["someobject"]`: `Array<queueFIFODetails>` as lookups;
-
-*) <sub>[go to exported list](#exported-api-and-type-list)</sub>
-
-<h2 id="qunique">QUnique</h2>
-
-- a class for Queue;- for minimal total bundle size use `function` [NewPingUnique](#newpingunique) instead;- this class provides `QUnique.makeQClass`;>- this method will setup `QUnique` to use the inputed `queueMap`(as arg0) as centralized lookup for queue managed by `QUnique`;>- usefull to modify this class for browser runtime, since `vivth` cannot just refer to window, you can just add `window["someobject"]`: `Map<any, [()=>Promise<any>,number]>` as lookups;
-
-*) <sub>[go to exported list](#exported-api-and-type-list)</sub>
-
 <h2 id="signal">Signal</h2>
 
-- a class for creating signal;- can be subscribed by using [New$](#new$) or [NewDerived](#newderived);- for minimal total bundle size use `function` [NewSignal](#newSignal) instead;
+- a class for creating signal;```jsimport { $, Derived, Signal } from 'vivth';const signal = new Signal(0);const derived = new Derived(async () =>{ // runs everytime signal.value changes; return signal.value * 2;});const autosubscriber = new $(async ()=>{ // runs everytime signal.value changes; console.log(signal.value);});signal.value = 1;```
 
 *) <sub>[go to exported list](#exported-api-and-type-list)</sub>
 
-<h2 id="new$">New$</h2>
+<h2 id="newqblock">NewQBlock</h2>
 
-- function to create `autosubscriber`; - syntatic sugar for [$](#$);```jsimport { New$, NewDerived, NewSignal } from 'vivth';const signal = NewSignal(0);const derived = NewDerived(async () =>{ // runs everytime signal.value changes; return signal.value * 2;});const autosubscriber = New$(async ()=>{ // runs everytime signal.value changes; console.log(signal.value); // console.log(derived.value);});signal.value = 1;```
-
-*) <sub>[go to exported list](#exported-api-and-type-list)</sub>
-
-<h2 id="newderived">NewDerived</h2>
-
-- function to create `signal` that its value are derived from another `signal`; - syntatic sugar for [Derived](#derived);```jsimport { New$, NewDerived, NewSignal } from 'vivth';const signal = NewSignal(0);const derived = NewDerived(async () =>{ // runs everytime signal.value changes; return signal.value * 2;});const autosubscriber = New$(async ()=>{ // runs everytime derived.value changes; console.log(derived.value);});signal.value = 1;```
+- a function for Queue;- will wait next execution of the same `arg1`:`objectReferenceID`, without blocking other calls;```js// @ts-checkimport { NewQBlock } from 'vivth'; const objectReferenceID = 'yourUniqueID'; // can be anything, reference to object is preferable;const handler = () =>{	NewQBlock(async () => {		// your code	 }, objectReferenceID //- default, will refer to `arg0`:`asyncCallaback`; );}```
 
 *) <sub>[go to exported list](#exported-api-and-type-list)</sub>
 
-<h2 id="newpingfifo">NewPingFIFO</h2>
-
-- function to auto queue callbacks that will be called `first in first out` style;```js// @ts-checkimport { NewPingFIFO } from 'vivth';const debounceMS = 0; // in miliseconds, optionals, default is 0;const handler = () =>{	NewPingFIFO(async () => {		// your code	}, debounceMS);}```
-
-*) <sub>[go to exported list](#exported-api-and-type-list)</sub>
-
-<h2 id="newpingunique">NewPingUnique</h2>
-
-- function to auto queue callbacks:> - different `uniqueID`: called `first in first out` style;> - same `uniqueID`: will be grouped, only the already running callback and the last callback will be called;```js// @ts-checkimport { NewPingUnique } from 'vivth';const uniqueID = 'yourUniqueID'; // can be anything, even a reference to an object;const debounceMS = 0; // in miliseconds, optionals, default is 0;const handler = () =>{	NewPingUnique(uniqueID, async () => {		// your code	}, debounceMS);}```
-
-*) <sub>[go to exported list](#exported-api-and-type-list)</sub>
-
-<h2 id="newsignal">NewSignal</h2>
-
-- function to create `signal`; - syntatic sugar for [Signal](#signal);```jsimport { New$, NewDerived, NewSignal } from 'vivth';const signal = NewSignal(0);const derived = NewDerived(async () =>{ // runs everytime signal.value changes; return signal.value * 2;});const autosubscriber = New$(async ()=>{ // runs everytime signal.value changes; console.log(signal.value);});signal.value = 1;```
-
-*) <sub>[go to exported list](#exported-api-and-type-list)</sub>
-
-<h2 id="tryasync">tryAsync</h2>
+<h2 id="tryasync">TryAsync</h2>
 
 - error as value for asynchronous operationreturns: Promise<[`ResultType`|`undefined`, `Error`|`undefined`]>
 
 *) <sub>[go to exported list](#exported-api-and-type-list)</sub>
 
-<h2 id="trysync">trySync</h2>
+<h2 id="trysync">TrySync</h2>
 
 - error as value for synchronous operationreturns: [`ResultType`|`undefined`, `Error`|`undefined`]
 

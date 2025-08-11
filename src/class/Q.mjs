@@ -39,7 +39,7 @@ export class Q {
 		return Q;
 	};
 	/**
-	 * @typedef {import('../types/anyButUndefined.type.mjs').anyButUndefined} anyButUndefined
+	 * @typedef {import('../types/AnyButUndefined.type.mjs').AnyButUndefined} anyButUndefined
 	 */
 	/**
 	 * @type {Promise<void>}

@@ -1,5 +1,5 @@
 // @ts-check
 
 /**
- * @typedef {{}|null|number|string|boolean|symbol|bigint|function} anyButUndefined
+ * @typedef {{}|null|number|string|boolean|symbol|bigint|function} AnyButUndefined
  */

@@ -1,7 +1,20 @@
 /**
  * @description
  * - a class to `autosubscribe` to an signal changes (`Derived` and `Signal` alike);
- * - for minimal total bundle size use `function` [New$](#new$) instead;
+ * ```js
+ * import { $, Derived, Signal } from 'vivth';
+ * const signal = new Signal(0);
+ * const derived = new Derived(async () =>{
+ *  // runs everytime signal.value changes;
+ *  return signal.value * 2;
+ * });
+ * const autosubscriber = new $(async ()=>{
+ *  // runs everytime signal.value changes;
+ *  console.log(signal.value);
+ *  // console.log(derived.value);
+ * });
+ * signal.value = 1;
+ * ```
  */
 export class $ {
     /**
@@ -24,15 +37,19 @@ export class $ {
      */
     static isRegistering: boolean;
     /**
-     * @param {$["effect"]} effect
+     * @param {(arg:{remove$:$["remove$"]})=>void} effect
      */
-    constructor(effect: $["effect"]);
+    constructor(effect: (arg: {
+        remove$: $["remove$"];
+    }) => void);
     /**
      * @returns {void}
      */
     remove$: () => void;
     /**
-     * @type {()=>void}
+     * @type {(arg:{remove$:$["remove$"]})=>void};
      */
-    effect: () => void;
+    effect: (arg: {
+        remove$: $["remove$"];
+    }) => void;
 }

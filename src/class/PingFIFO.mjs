@@ -10,19 +10,29 @@ import { timeout } from '../common.mjs';
  *  *[blank]/
  * ```
  * - a class for Queue;
- * - for minimal total bundle size use `function` [NewPingFIFO](#newpingfifo) instead;
+ * - function to auto queue callbacks that will be called `first in first out` style;
+ * ```js
+ * // @ts-check
+ * import { PingFIFO } from 'vivth';
+ * const debounceMS = 0; // in miliseconds, optionals, default is 0;
+ * const handler = () =>{
+ * 	new PingFIFO(async () => {
+ * 		// your code
+ * 	}, debounceMS);
+ * }
+ * ```
  * - this class provides `QFIFO.makeQClass`;
  * >- this method will setup `QFIFO` to use the inputed `queueArray`(as arg0) as centralized lookup for queue managed by `QFIFO`;
  * >- usefull to modify this class for browser runtime, since `vivth` cannot just refer to window, you can just add `window["someobject"]`: `Array<queueFIFODetails>` as lookups;
  */
-export class QFIFO {
+export class PingFIFO {
 	/**
 	 * @param {queueFIFODetails[]} queueArray
-	 * @returns {typeof QFIFO}
+	 * @returns {typeof PingFIFO}
 	 */
 	static makeQClass = (queueArray) => {
-		QFIFO.#queue = queueArray;
-		return QFIFO;
+		PingFIFO.#queue = queueArray;
+		return PingFIFO;
 	};
 	/**
 	 * @type {queueFIFODetails[]}
@@ -33,25 +43,27 @@ export class QFIFO {
 	 */
 	static #isRunning = false;
 	/**
-	 * @type {(...queueFIFODetails:queueFIFODetails)=>void}
+	 * @param {()=>(any|Promise<any>)} callback
+	 * @param {number} [debounce]
 	 */
-	static assign = (..._queue) => {
-		QFIFO.#push(_queue);
-		if (!QFIFO.#isRunning) {
-			QFIFO.#run();
+	constructor(callback, debounce = 0) {
+		PingFIFO.#push([callback, debounce]);
+		if (PingFIFO.#isRunning) {
+			return;
 		}
-	};
+		PingFIFO.#run();
+	}
 	/**
 	 * @param {queueFIFODetails} _queue
 	 */
 	static #push = (_queue) => {
-		QFIFO.#queue.push(_queue);
+		PingFIFO.#queue.push(_queue);
 	};
 	static #run = async () => {
-		QFIFO.#isRunning = true;
-		while (QFIFO.#queue.length !== 0) {
-			const [callback, debounceMs = 0] = QFIFO.#queue[0];
-			QFIFO.#queue.shift();
+		PingFIFO.#isRunning = true;
+		while (PingFIFO.#queue.length !== 0) {
+			const [callback, debounceMs = 0] = PingFIFO.#queue[0];
+			PingFIFO.#queue.shift();
 			await callback();
 			/**
 			 * conditional debounce;
@@ -61,6 +73,6 @@ export class QFIFO {
 			await timeout(debounceMs);
 			// }
 		}
-		QFIFO.#isRunning = false;
+		PingFIFO.#isRunning = false;
 	};
 }
