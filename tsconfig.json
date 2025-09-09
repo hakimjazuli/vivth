@@ -4,11 +4,11 @@
 		"declaration": true,
 		"emitDeclarationOnly": true,
 		"outDir": "./types",
-		"module": "ESNext",
-		"target": "ES2020",
+		"module": "esnext",
+		"target": "esnext",
 		"moduleResolution": "node",
 		"esModuleInterop": true,
 		"skipLibCheck": true
 	},
-	"include": ["./index.mjs", "./src"]
+	"include": ["./index.mjs", "./src", "./dev"]
 }

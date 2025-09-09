@@ -1,0 +1,1 @@
+export function Try<Key extends string, ReturnType_, RecordTryType extends Record<Key, () => Promise<ReturnType_>>>(tryRecord: RecordTryType): Promise<[[keyof RecordTryType, ReturnType_], undefined] | [[undefined, undefined], Error]>;

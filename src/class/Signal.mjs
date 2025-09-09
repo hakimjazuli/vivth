@@ -1,99 +1,197 @@
 // @ts-check
 
-import { $ } from './$.mjs';
+import { LazyFactory } from '../function/LazyFactory.mjs';
+import { TryAsync } from '../function/TryAsync.mjs';
+import { TrySync } from '../function/TrySync.mjs';
+import { Console } from './Console.mjs';
+import { Effect, setOfEffects } from './Effect.mjs';
+
+/**
+ * @type {Set<Signal>}
+ */
+export const setOFSignals = new Set();
 
 /**
  * @description
- * - a class for creating signal;
- * - can be subscribed by using [New$](#new$) or [NewDerived](#newderived);
- * - for minimal total bundle size use `function` [NewSignal](#newSignal) instead;
- */
-/**
+ * - a class for creating effect to signals;
  * @template Value
  */
 export class Signal {
 	/**
-	 * @protected
+	 * @description
+	 * - subsrcibers reference of this instance;
 	 */
-	get subscribed() {
-		return $.mappedSignals.get(this);
-	}
+	subscribers = LazyFactory(() => ({
+		/**
+		 * @instance subscribers
+		 * @description
+		 * - subscribedEffects
+		 * @type {Set<Effect>}
+		 */
+		setOf: new Set(),
+		/**
+		 * @instance subscribers
+		 * @description
+		 * - manually notify on non primitive value or value that have depths;
+		 * @param {(options:{signalInstance:Signal<Value>})=>Promise<void>} [callback]
+		 * @returns {void}
+		 * @example
+		 * // for deep signal like array or object you can:
+		 *
+		 * const arraySignal = new Signal([1,2]);
+		 * arraySignal.value.push(3);
+		 * arraySignal.subscribers.notify();
+		 *
+		 * // OR for more complex mutation:
+		 *
+		 * const objectSignal = new Signal({a:'test', b:'test'});
+		 * objectSignal.subscribers.notify(async ({ signalInstance }) => {
+		 * 	signalInstance.value['c'] = 'testc';
+		 * 	signalInstance.value['d'] = 'testd';
+		 * });
+		 */
+		notify: (callback = undefined) => {
+			if (!callback) {
+				Signal.#notify(this.subscribers.setOf);
+				return;
+			}
+			TryAsync(async () => {
+				await callback({ signalInstance: this });
+			}).then(([_, error]) => {
+				if (error) {
+					Console.error({ message: 'unable to run callback', callback, error });
+					return;
+				}
+				Signal.#notify(this.subscribers.setOf);
+			});
+		},
+	}));
 	/**
-	 * destroy all props
+	 * @param {Set<Effect>} setOfSubscribers
 	 */
-	unRef = () => {
-		this.removeAll$();
-		this.#Value = null;
-	};
-	/**
-	 * remove all effects
-	 * @return {void}
-	 */
-	removeAll$ = () => {
-		this.subscribed?.forEach(($_) => {
-			$_.remove$();
+	static #notify = (setOfSubscribers) => {
+		const [_, error] = TrySync(() => {
+			const effects = setOfSubscribers;
+			effects.forEach((effect) => {
+				if (!setOfEffects.has(effect)) {
+					effects.delete(effect);
+					return;
+				}
+				/**
+				 * effect.run is already TryAsync
+				 */
+				effect.run();
+			});
 		});
-	};
-	/**
-	 * remove effect
-	 * @param {$} $_
-	 * @return {void}
-	 */
-	remove$ = ($_) => {
-		if ($.effects.get($_)?.has(this)) {
-			$_.remove$();
+		if (!error) {
+			return;
 		}
+		Console.error(error);
 	};
 	/**
+	 * @description
+	 * - collection of remove methods
+	 */
+	remove = LazyFactory(() => ({
+		/**
+		 * @instance remove
+		 * @description
+		 * - remove effect subscriber to react from this instance value changes;
+		 * @param {Effect} effectInstance
+		 * @returns {void}
+		 */
+		subscriber: (effectInstance) => {
+			effectInstance.options.removeEffect();
+			this.subscribers.setOf.delete(effectInstance);
+		},
+		/**
+		 * @instance remove
+		 * @description
+		 * - remove all effect subscribers to react from this instance value changes;
+		 * @type {()=>void}
+		 */
+		allSubscribers: () => {
+			const $ = this.subscribers.setOf;
+			$.forEach(this.remove.subscriber);
+		},
+		/**
+		 * @instance remove
+		 * @description
+		 * - remove this instance from `vivth` reactivity engine, and nullify it's own value;
+		 * @type {()=>void}
+		 */
+		ref: () => {
+			this.remove.allSubscribers();
+			this.#value = null;
+			setOFSignals.delete(this);
+		},
+	}));
+	/**
+	 * @description
 	 * @param {Value} value
+	 * @example
+	 * import { Signal, Effect } from  'vivth';
+	 *
+	 * const count = new Signal(0);
 	 */
 	constructor(value) {
-		this.#Value = value;
+		this.#value = value;
+		setOFSignals.add(this);
 	}
 	/**
 	 * @type {Value}
 	 */
 	#prev = undefined;
+	/**
+	 * @description
+	 * - value before change;
+	 * @type {Value}
+	 */
 	get prev() {
 		return this.#prev;
 	}
 	/**
 	 * @type {Value}
 	 */
-	#Value;
+	#value;
 	/**
+	 * @description
+	 * - value after change;
 	 * @type {Value}
-	 */
-	get nonReactiveValue() {
-		return this.#Value;
-	}
-	/**
-	 * @type {Value}
+	 * @example
+	 * import { Signal, Effect, Derived } from  'vivth';
+	 *
+	 * const count = new Signal(0);
+	 * count.value; // not reactive
+	 *
+	 * new Effect(async ({ subscribe }) =>{
+	 * 	const countValue = subscribe(count).value; // reactive
+	 * })
+	 * const oneMoreThanCount = new Effect(async ({ subscribe }) =>{
+	 * 	return subscribe(count).value + 1; // reactive
+	 * })
 	 */
 	get value() {
-		if ($.isRegistering) {
-			$.activeSignal.add(this);
-		}
-		return this.#Value;
+		return this.#value;
 	}
 	/**
+	 * @description
+	 * - assign new value then automatically notify all subscribers;
 	 * @type {Value}
+	 * @example
+	 * import { Signal } from  'vivth';
+	 *
+	 * const count = new Signal(0);
+	 * count.value++;
+	 * // OR
+	 * count.value = 9;
 	 */
 	set value(newValue) {
-		if (this.#Value === newValue) {
+		if (this.#value === newValue) {
 			return;
 		}
-		this.#prev = this.#Value;
-		this.#Value = newValue;
-		this.call$();
+		this.#prev = this.#value;
+		this.#value = newValue;
+		this.subscribers.notify();
 	}
-	/**
-	 * @returns {void}
-	 */
-	call$ = () => {
-		if (!this.subscribed) {
-			return;
-		}
-		this.subscribed.forEach(($_) => $_.effect({ remove$: $_.remove$ }));
-	};
 }
