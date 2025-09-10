@@ -264,9 +264,6 @@ export class JSautoDOC {
 					}';`
 				);
 			}
-			if (/\/\*\*[\s\*]*?@noautodoc[\s\*]*?\*\//.test(await content.string())) {
-				continue;
-			}
 			const currentDescription = [];
 			const { readme, typedef } = documented;
 			const [typedefString, error] = await TryAsync(async () => {
@@ -278,13 +275,15 @@ export class JSautoDOC {
 			});
 			if (!error && typedefString) {
 				mjsTypes.push(typedefString.module);
-				const nameVarID = noExt.toLowerCase();
-				tableOfContent.push(`[${noExt}](#${nameVarID})`);
-				apiDocuments.push(
-					`<h2 id="${nameVarID}">${noExt}</h2>\n\n- jsdoc types:\n\n\`\`\`js\n${
-						typedefString.readme
-					}\n\`\`\`\n*) <sub>[go to ${this.#tableOfContentTitle}](#${tableID})</sub>`
-				);
+				if (!/\/\*\*[\s\*]*?@noautodoc[\s\*]*?\*\//.test(await content.string())) {
+					const nameVarID = noExt.toLowerCase();
+					tableOfContent.push(`[${noExt}](#${nameVarID})`);
+					apiDocuments.push(
+						`<h2 id="${nameVarID}">${noExt}</h2>\n\n- jsdoc types:\n\n\`\`\`js\n${
+							typedefString.readme
+						}\n\`\`\`\n*) <sub>[go to ${this.#tableOfContentTitle}](#${tableID})</sub>`
+					);
+				}
 			}
 			readme.forEach((ref) => {
 				const {

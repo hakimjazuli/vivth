@@ -901,7 +901,7 @@ npm i vivth
 
 ```js
 /**
- * @template {AnyButUndefinedType} T
+ * @template {AnyButUndefined} T
  */
 ```
 
@@ -910,7 +910,7 @@ npm i vivth
 
 ```js
 /**
- * @param {Map<AnyButUndefinedType, [Promise<any>, {}]>} uniqueMap 	 
+ * @param {Map<AnyButUndefined, [Promise<any>, {}]>} uniqueMap 	 
  * @returns {typeof QChannel} 	 
  * - usefull for Queue primitive on multiple library but single reference, like the Web by making the `Map` on `window` object;
  */

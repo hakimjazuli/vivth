@@ -6,18 +6,18 @@ import { TryAsync } from '../function/TryAsync.mjs';
 /**
  * @description
  * - class for `Queue` handling;
- * @template {AnyButUndefinedType} T
+ * @template {AnyButUndefined} T
  */
 export class QChannel {
 	/**
-	 * @typedef {import('../types/AnyButUndefined.mjs').AnyButUndefined} AnyButUndefinedType
+	 * @typedef {import('../types/AnyButUndefined.mjs').AnyButUndefined} AnyButUndefined
 	 * @typedef {import('../types/QCBReturn.mjs').QCBReturn} QCBReturn
 	 * @typedef {import('../types/QCBFIFOReturn.mjs').QCBFIFOReturn} QCBFIFOReturn
 	 */
 	/**
 	 * @description
 	 * - to modify `MapReference`
-	 * @param {Map<AnyButUndefinedType, [Promise<any>, {}]>} uniqueMap
+	 * @param {Map<AnyButUndefined, [Promise<any>, {}]>} uniqueMap
 	 * @returns {typeof QChannel}
 	 * - usefull for Queue primitive on multiple library but single reference, like the Web by making the `Map` on `window` object;
 	 */
@@ -26,13 +26,13 @@ export class QChannel {
 		return QChannel;
 	};
 	/**
-	 * @type {Map<AnyButUndefinedType, [Promise<any>, {}]>}
+	 * @type {Map<AnyButUndefined, [Promise<any>, {}]>}
 	 */
 	static #uniquePromiser = new Map();
 	/**
 	 * - ensures that each id has only one task running at a time.
 	 * - calls with the same id will wait for the previous call to finish.
-	 * @param {AnyButUndefinedType} id
+	 * @param {AnyButUndefined} id
 	 * @returns {Promise<QCBReturn>} Resolves when it's safe to proceed for the given id, returning a cleanup function
 	 */
 	static #uniqueCB = async (id) => {
