@@ -37,7 +37,7 @@ const acceptableExt = new Set(['.mjs', '.mts', '.ts']);
  * - this autodocumenter uses [chokidar](https://npmjs.com/package/chokidar) under the hood;
  * - this class also is used to generate this `README.md`;
  * - behaviours:
- * >1) add `"at"noautodoc` to opt out from generating documentation on said file;
+ * >1) add `"at"noautodoc` on self closing jsdoc comment to opt out from generating documentation on said file;
  * >>- auto export must follows the following rules, and there's no way to override;
  * >2) export all named exported 'const'|'function'|'async function'|'class', alphanumeric name, started with Capital letter, same name with fileName on `options.pahts.file`;
  * >3) declare typedef of existing typedef with alphanumeric name, started with Capital letter, same name with fileName, and have no valid export like on point <sup>1</sup> on `options.pahts.file`;
