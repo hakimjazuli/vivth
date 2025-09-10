@@ -4,10 +4,12 @@
  * - this autodocumenter uses [chokidar](https://npmjs.com/package/chokidar) under the hood;
  * - this class also is used to generate this `README.md`;
  * - behaviours:
- * >1) export all named exported 'const'|'function'|'async function'|'class', alphanumeric name, started with Capital letter, same name with fileName on `options.pahts.file`;
- * >2) declare typedef of existing typedef with alphanumeric name, started with Capital letter, same name with fileName, and have no valid export like on point <sup>1</sup> on `options.pahts.file`;
- * >3) create `README.md` based on, `options.paths.dir` and `README.src.md`;
- * >4) extract `"at"description` jsdoc:
+ * >1) add `"at"noautodoc` to opt out from generating documentation on said file;
+ * >>- auto export must follows the following rules, and there's no way to override;
+ * >2) export all named exported 'const'|'function'|'async function'|'class', alphanumeric name, started with Capital letter, same name with fileName on `options.pahts.file`;
+ * >3) declare typedef of existing typedef with alphanumeric name, started with Capital letter, same name with fileName, and have no valid export like on point <sup>1</sup> on `options.pahts.file`;
+ * >4) create `README.md` based on, `options.paths.dir` and `README.src.md`;
+ * >5) extract `"at"description` jsdoc:
  * >>- on static/prop that have depths, all of children should have `"at"static`/`"at"instance` `nameOfImmediateParent`, same block but before `"at"description` comment line;
  * >>- `"at"description` are treated as plain `markdown`;
  * >>- first `"at"${string}` after `"at"description` until `"at"example` will be treated as `javascript` comment block on the `markdown`;
