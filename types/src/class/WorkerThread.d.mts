@@ -8,7 +8,7 @@ export class WorkerThread<Receive, Post> {
     /**
      * @type {{parentPort:()=>Promise<any>}}
      */
-    static "__#16626@#parentPortRef": {
+    static "__#10@#parentPortRef": {
         parentPort: () => Promise<any>;
     };
     /**
@@ -32,7 +32,7 @@ export class WorkerThread<Receive, Post> {
     /**
      * @param {any} ev
      */
-    static "__#16626@#isCloseWorkerEvent": (ev: any) => boolean;
+    static "__#10@#isCloseWorkerEvent": (ev: any) => boolean;
     /**
      * @description
      * - instantiate via created class from `setup` static method;

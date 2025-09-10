@@ -416,7 +416,7 @@ npm i vivth
  export const myEnv = new EnvSignal(true); 	 
  	 
  // somewhere else on the program 	 
- import { myEnv } from '$src/myEnv' 	 
+ import { myEnv } from './myEnv.mjs' 	 
  	 
  myEnv.correction(false); // this will notify all subscribers;
  
@@ -1708,9 +1708,7 @@ npm i vivth
 ```
  - <i>example</i>:
 ```js  
- import { Console } from '../src/class/Console.mjs'; 	 
- import { Setup } from '../src/class/Setup.mjs'; 	 
- import { JSautoDOC } from '../src/doc/JSautoDOC.mjs'; 	 
+ import { Console, Setup, JSautoDOC } from 'vivth'; 	 
  	 
  const { paths, safeExit } = Setup; 	 
  	 

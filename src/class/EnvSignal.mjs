@@ -63,7 +63,7 @@ export class EnvSignal {
 	 * export const myEnv = new EnvSignal(true);
 	 *
 	 * // somewhere else on the program
-	 * import { myEnv } from '$src/myEnv'
+	 * import { myEnv } from './myEnv.mjs'
 	 *
 	 * myEnv.correction(false); // this will notify all subscribers;
 	 */

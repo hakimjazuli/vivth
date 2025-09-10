@@ -20,14 +20,14 @@ export class QChannel<T extends import("../types/AnyButUndefined.mjs").AnyButUnd
     /**
      * @type {Map<AnyButUndefinedType, [Promise<any>, {}]>}
      */
-    static "__#7@#uniquePromiser": Map<import("../types/AnyButUndefined.mjs").AnyButUndefined, [Promise<any>, {}]>;
+    static "__#6@#uniquePromiser": Map<import("../types/AnyButUndefined.mjs").AnyButUndefined, [Promise<any>, {}]>;
     /**
      * - ensures that each id has only one task running at a time.
      * - calls with the same id will wait for the previous call to finish.
      * @param {AnyButUndefinedType} id
      * @returns {Promise<QCBReturn>} Resolves when it's safe to proceed for the given id, returning a cleanup function
      */
-    static "__#7@#uniqueCB": (id: import("../types/AnyButUndefined.mjs").AnyButUndefined) => Promise<import("../types/QCBReturn.mjs").QCBReturn>;
+    static "__#6@#uniqueCB": (id: import("../types/AnyButUndefined.mjs").AnyButUndefined) => Promise<import("../types/QCBReturn.mjs").QCBReturn>;
     /**
      * @description
      * - first in first out handler

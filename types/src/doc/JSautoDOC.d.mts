@@ -18,7 +18,7 @@ export class JSautoDOC {
     /**
      * @type {JSautoDOC}
      */
-    static "__#17292@#instance": JSautoDOC;
+    static "__#4682@#instance": JSautoDOC;
     /**
      * @description
      * @param {Object} [options]
@@ -34,9 +34,7 @@ export class JSautoDOC {
      * @param {import('chokidar').ChokidarOptions} [options.option]
      * - ChokidarOptions;
      * @example
-     * import { Console } from '../src/class/Console.mjs';
-     * import { Setup } from '../src/class/Setup.mjs';
-     * import { JSautoDOC } from '../src/doc/JSautoDOC.mjs';
+     * import { Console, Setup, JSautoDOC } from 'vivth';
      *
      * const { paths, safeExit } = Setup;
      *
