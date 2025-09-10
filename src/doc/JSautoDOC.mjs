@@ -257,6 +257,7 @@ export class JSautoDOC {
 				path: { relative: relativePath },
 				baseName: { noExt },
 			} = (await this.#parsedFilesRef.get(path_)).value;
+			const hasNoAutoDoc = /\/\*\*[\s\*]*?@noautodoc[\s\*]*?\*\//.test(await content.string());
 			if (hasValidExportObject) {
 				mjsMain.push(
 					`export { ${noExt} } from '${
@@ -275,7 +276,7 @@ export class JSautoDOC {
 			});
 			if (!error && typedefString) {
 				mjsTypes.push(typedefString.module);
-				if (!/\/\*\*[\s\*]*?@noautodoc[\s\*]*?\*\//.test(await content.string())) {
+				if (!hasNoAutoDoc) {
 					const nameVarID = noExt.toLowerCase();
 					tableOfContent.push(`[${noExt}](#${nameVarID})`);
 					apiDocuments.push(
@@ -285,19 +286,19 @@ export class JSautoDOC {
 					);
 				}
 			}
-			readme.forEach((ref) => {
-				const {
-					// fullDescription,
-					// instanceOrStatic,
-					// namedVar,
-					// typeOfVar,
-					parsedFullDescription,
-					reference,
-				} = ref;
-				const { description, jsPreview } = parsedFullDescription;
-				currentDescription.push(`\n#### reference:${reference}\n${description}\n${jsPreview}`);
-			});
-			if (hasValidExportObject) {
+			if (!hasNoAutoDoc && hasValidExportObject) {
+				readme.forEach((ref) => {
+					const {
+						// fullDescription,
+						// instanceOrStatic,
+						// namedVar,
+						// typeOfVar,
+						parsedFullDescription,
+						reference,
+					} = ref;
+					const { description, jsPreview } = parsedFullDescription;
+					currentDescription.push(`\n#### reference:${reference}\n${description}\n${jsPreview}`);
+				});
 				const nameVarID = noExt.toLowerCase();
 				tableOfContent.push(`[${noExt}](#${noExt.toLowerCase()})`);
 				apiDocuments.push(
