@@ -18,7 +18,7 @@ export class JSautoDOC {
     /**
      * @type {JSautoDOC}
      */
-    static "__#4682@#instance": JSautoDOC;
+    static #instance: JSautoDOC;
     /**
      * @description
      * @param {Object} [options]

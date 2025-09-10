@@ -12,7 +12,7 @@ export class Console {
      * @param {string} bgcolor
      * @returns {void}
      */
-    static "__#1@#call": (prefix: string, mode: "log" | "info" | "error" | "warn", data: any, color: string, bgcolor: string) => void;
+    static #call: (prefix: string, mode: "log" | "info" | "error" | "warn", data: any, color: string, bgcolor: string) => void;
     /**
      * @description
      * @param {any} data

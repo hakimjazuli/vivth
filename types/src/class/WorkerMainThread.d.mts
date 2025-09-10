@@ -11,7 +11,7 @@
  * @template {WorkerThread} WT
  */
 export class WorkerMainThread<WT extends WorkerThread> {
-    static "__#11@#isRegistered": boolean;
+    static #isRegistered: boolean;
     /**
      * @description
      * - need to be called first, before any `WorkerMainThread` instantiation:
@@ -70,7 +70,7 @@ export class WorkerMainThread<WT extends WorkerThread> {
         root: string;
         base: string;
     }) => Promise<string>;
-    static "__#11@#options": import("worker_threads").WorkerOptions & {
+    static #options: import("worker_threads").WorkerOptions & {
         type?: "module";
     };
     /**
@@ -82,11 +82,11 @@ export class WorkerMainThread<WT extends WorkerThread> {
      * @param {boolean} isInline
      * @returns {Promise<void>}
      */
-    static "__#11@#workerFilehandler": (handler: string, options: WorkerOptions | import("worker_threads").WorkerOptions, worker: WorkerMainThread<any>, listener: (any: any) => void, isInline: boolean) => Promise<void>;
+    static #workerFilehandler: (handler: string, options: WorkerOptions | import("worker_threads").WorkerOptions, worker: WorkerMainThread<any>, listener: (any: any) => void, isInline: boolean) => Promise<void>;
     /**
      * @type {boolean}
      */
-    static "__#11@#isBrowser": boolean;
+    static #isBrowser: boolean;
     /**
      * @description
      * - check whether js run in browser

@@ -7,7 +7,7 @@ export class Paths {
     /**
      * @type {Paths}
      */
-    static "__#8@#instance": Paths;
+    static #instance: Paths;
     /**
      * @description
      * - reference for rootPath

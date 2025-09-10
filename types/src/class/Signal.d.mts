@@ -11,7 +11,7 @@ export class Signal<Value> {
     /**
      * @param {Set<Effect>} setOfSubscribers
      */
-    static "__#3@#notify": (setOfSubscribers: Set<Effect>) => void;
+    static #notify: (setOfSubscribers: Set<Effect>) => void;
     /**
      * @description
      * @param {Value} value
