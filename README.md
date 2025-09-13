@@ -1051,6 +1051,15 @@ npm i vivth
 /**
  * @param {Object} options 	 
  * @param {ExitEventNames} options.exitEventNames 	 
+ * @param {()=>void} options.exitCallback 	 
+ * - standard node/bun: 	 
+ * ```js 	 
+ * () => process.exit(0), 	 
+ * ``` 	 
+ * - Deno: 	 
+ * ```js 	 
+ * () => Deno.exit(0), 	 
+ * ``` 	 
  * @param {(eventName:string)=>void} [options.exitCallbackListeners] 	 
  * - default value 	 
  * ```js 	 
@@ -1070,7 +1079,9 @@ npm i vivth
  	 
  new SafeExit({ 	 
  	// exitEventNames are blank by default, you need to manually name them all; 	 
+ 	// 'exit' will be omited, as it might cause async callbacks failed to execute; 	 
  	exitEventNames: ['SIGINT', 'SIGTERM', ...otherExitEventNames], 	 
+ 	exitCallback = () => process.exit(0), // OR on deno () => Deno.exit(0), 	 
  	// optional deno example 	 
  	exitCallbackListeners = (eventName) => { 	 
  		const sig = Deno.signal(eventName); 	 
