@@ -68,12 +68,12 @@ npm i vivth
  - [TsToMjs](#tstomjs)
  - [WriteFileSafe](#writefilesafe)
  - [AnyButUndefined](#anybutundefined)
- - [ExtnameType](#extnametype)
- - [IsListSignal](#islistsignal)
- - [ListArg](#listarg)
- - [MutationType](#mutationtype)
- - [QCBFIFOReturn](#qcbfiforeturn)
  - [QCBReturn](#qcbreturn)
+ - [QCBFIFOReturn](#qcbfiforeturn)
+ - [MutationType](#mutationtype)
+ - [ListArg](#listarg)
+ - [IsListSignal](#islistsignal)
+ - [ExtnameType](#extnametype)
 
 <h2 id="compilemjs">CompileMJS</h2>
 
@@ -1031,7 +1031,7 @@ npm i vivth
 
 ```js
 /**
- * @template {[string, ...string[]]} ExitEventNames
+ * @template {[string, ...string[]]} eventNames
  */
 ```
 
@@ -1050,8 +1050,8 @@ npm i vivth
 ```js
 /**
  * @param {Object} options 	 
- * @param {ExitEventNames} options.exitEventNames 	 
- * @param {()=>void} options.exitCallback 	 
+ * @param {eventNames} options.eventNames 	 
+ * @param {()=>void} options.terminator 	 
  * - standard node/bun: 	 
  * ```js 	 
  * () => process.exit(0), 	 
@@ -1060,7 +1060,7 @@ npm i vivth
  * ```js 	 
  * () => Deno.exit(0), 	 
  * ``` 	 
- * @param {(eventName:string)=>void} [options.exitCallbackListeners] 	 
+ * @param {(eventName:string)=>void} [options.listener] 	 
  * - default value 	 
  * ```js 	 
  * (eventName) => { 	 
@@ -1078,12 +1078,12 @@ npm i vivth
  import { SafeExit, Console } from 'vivth'; 	 
  	 
  new SafeExit({ 	 
- 	// exitEventNames are blank by default, you need to manually name them all; 	 
+ 	// eventNames are blank by default, you need to manually name them all; 	 
  	// 'exit' will be omited, as it might cause async callbacks failed to execute; 	 
- 	exitEventNames: ['SIGINT', 'SIGTERM', ...otherExitEventNames], 	 
- 	exitCallback = () => process.exit(0), // OR on deno () => Deno.exit(0), 	 
+ 	eventNames: ['SIGINT', 'SIGTERM', ...eventNames], 	 
+ 	terminator = () => process.exit(0), // OR on deno () => Deno.exit(0), 	 
  	// optional deno example 	 
- 	exitCallbackListeners = (eventName) => { 	 
+ 	listener = (eventName) => { 	 
  		const sig = Deno.signal(eventName); 	 
  			for await (const _ of sig) { 	 
  				exiting.correction(true); 	 
@@ -2134,38 +2134,26 @@ npm i vivth
 ```
 *) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
-<h2 id="extnametype">ExtnameType</h2>
+<h2 id="qcbreturn">QCBReturn</h2>
 
 - jsdoc types:
 
 ```js
 /**
- * - jsRuntime extention naming convention;
- * @typedef {`.${string}`} ExtnameType
+ * - return type of Q callback;
+ * @typedef {{resume:()=>void, isLastOnQ:boolean}} QCBReturn
  */
 ```
 *) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
-<h2 id="islistsignal">IsListSignal</h2>
+<h2 id="qcbfiforeturn">QCBFIFOReturn</h2>
 
 - jsdoc types:
 
 ```js
 /**
- * - `EnvSignal.get` argument whether signal need to be a list or not;
- * @typedef {boolean} IsListSignal
- */
-```
-*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
-
-<h2 id="listarg">ListArg</h2>
-
-- jsdoc types:
-
-```js
-/**
- * - ListSignal argument type;
- * @typedef {Record<string, string>} ListArg
+ * - return type of Q callback fifo;
+ * @typedef {Omit<import("./src/types/QCBReturn.mjs").QCBReturn, "isLastOnQ">} QCBFIFOReturn
  */
 ```
 *) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
@@ -2184,26 +2172,38 @@ npm i vivth
 ```
 *) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
-<h2 id="qcbfiforeturn">QCBFIFOReturn</h2>
+<h2 id="listarg">ListArg</h2>
 
 - jsdoc types:
 
 ```js
 /**
- * - return type of Q callback fifo;
- * @typedef {Omit<import("./src/types/QCBReturn.mjs").QCBReturn, "isLastOnQ">} QCBFIFOReturn
+ * - ListSignal argument type;
+ * @typedef {Record<string, string>} ListArg
  */
 ```
 *) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
-<h2 id="qcbreturn">QCBReturn</h2>
+<h2 id="islistsignal">IsListSignal</h2>
 
 - jsdoc types:
 
 ```js
 /**
- * - return type of Q callback;
- * @typedef {{resume:()=>void, isLastOnQ:boolean}} QCBReturn
+ * - `EnvSignal.get` argument whether signal need to be a list or not;
+ * @typedef {boolean} IsListSignal
+ */
+```
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+<h2 id="extnametype">ExtnameType</h2>
+
+- jsdoc types:
+
+```js
+/**
+ * - jsRuntime extention naming convention;
+ * @typedef {`.${string}`} ExtnameType
  */
 ```
 *) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>

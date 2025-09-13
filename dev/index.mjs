@@ -11,9 +11,9 @@ new paths({
 });
 
 new safeExit({
-	exitEventNames: ['SIGINT', 'SIGTERM', 'exit'],
-	exitCallback: () => process.exit(0),
-	exitCallbackListeners: (eventName) => {
+	eventNames: ['SIGINT', 'SIGTERM', 'exit'],
+	terminator: () => process.exit(0),
+	listener: (eventName) => {
 		process.once(eventName, function () {
 			safeExit.instance.exiting.correction(true);
 			Console.log(`safe exit via "${eventName}"`);

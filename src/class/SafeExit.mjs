@@ -15,7 +15,7 @@ export const safeCleanUpCBs = new Set();
  * @description
  * - class helper for describing how to Safely Response on exit events
  * - singleton;
- * @template {[string, ...string[]]} ExitEventNames
+ * @template {[string, ...string[]]} eventNames
  */
 export class SafeExit {
 	/**
@@ -27,8 +27,8 @@ export class SafeExit {
 	/**
 	 * @description
 	 * @param {Object} options
-	 * @param {ExitEventNames} options.exitEventNames
-	 * @param {()=>void} options.exitCallback
+	 * @param {eventNames} options.eventNames
+	 * @param {()=>void} options.terminator
 	 * - standard node/bun:
 	 * ```js
 	 * () => process.exit(0),
@@ -37,7 +37,7 @@ export class SafeExit {
 	 * ```js
 	 * () => Deno.exit(0),
 	 * ```
-	 * @param {(eventName:string)=>void} [options.exitCallbackListeners]
+	 * @param {(eventName:string)=>void} [options.listener]
 	 * - default value
 	 * ```js
 	 * (eventName) => {
@@ -52,12 +52,12 @@ export class SafeExit {
 	 * import { SafeExit, Console } from 'vivth';
 	 *
 	 * new SafeExit({
-	 * 	// exitEventNames are blank by default, you need to manually name them all;
+	 * 	// eventNames are blank by default, you need to manually name them all;
 	 * 	// 'exit' will be omited, as it might cause async callbacks failed to execute;
-	 * 	exitEventNames: ['SIGINT', 'SIGTERM', ...otherExitEventNames],
-	 * 	exitCallback = () => process.exit(0), // OR on deno () => Deno.exit(0),
+	 * 	eventNames: ['SIGINT', 'SIGTERM', ...eventNames],
+	 * 	terminator = () => process.exit(0), // OR on deno () => Deno.exit(0),
 	 * 	// optional deno example
-	 * 	exitCallbackListeners = (eventName) => {
+	 * 	listener = (eventName) => {
 	 * 		const sig = Deno.signal(eventName);
 	 * 			for await (const _ of sig) {
 	 * 				exiting.correction(true);
@@ -67,16 +67,16 @@ export class SafeExit {
 	 * 	}
 	 * });
 	 */
-	constructor({ exitEventNames, exitCallback, exitCallbackListeners = undefined }) {
+	constructor({ eventNames, terminator, listener = undefined }) {
 		if (SafeExit.instance) {
 			return SafeExit.instance;
 		}
 		SafeExit.instance = this;
-		this.#exit = exitCallback;
-		if (exitCallbackListeners) {
-			this.#exitCallbackListeners = exitCallbackListeners;
+		this.#exit = terminator;
+		if (listener) {
+			this.#listener = listener;
 		}
-		this.#register(exitEventNames);
+		this.#register(eventNames);
 	}
 	/**
 	 * @description
@@ -86,21 +86,21 @@ export class SafeExit {
 	 */
 	exiting = new EnvSignal(false);
 	/**
-	 * @param {ExitEventNames} exitEventNames
+	 * @param {eventNames} eventNames
 	 * @returns {void}
 	 */
-	#register = (exitEventNames) => {
-		exitEventNames.forEach((eventName) => {
+	#register = (eventNames) => {
+		eventNames.forEach((eventName) => {
 			if (eventName == 'exit') {
 				return;
 			}
-			this.#exitCallbackListeners(eventName);
+			this.#listener(eventName);
 		});
 	};
 	/**
 	 * @type {(eventName:string)=>void}
 	 */
-	#exitCallbackListeners = (eventName) => {
+	#listener = (eventName) => {
 		SafeExit.instance.exiting.env.value;
 		process.once(eventName, function () {
 			Console.log(`safe exit via "${eventName}"`);
