@@ -41,20 +41,20 @@ export { WriteFileSafe } from './src/function/WriteFileSafe.mjs';
  * @typedef {import('./src/types/AnyButUndefined.mjs').AnyButUndefined} AnyButUndefined
  */
 /**
- * @typedef {import('./src/types/QCBReturn.mjs').QCBReturn} QCBReturn
- */
-/**
- * @typedef {import('./src/types/QCBFIFOReturn.mjs').QCBFIFOReturn} QCBFIFOReturn
- */
-/**
- * @typedef {import('./src/types/MutationType.mjs').MutationType} MutationType
- */
-/**
- * @typedef {import('./src/types/ListArg.mjs').ListArg} ListArg
+ * @typedef {import('./src/types/ExtnameType.mjs').ExtnameType} ExtnameType
  */
 /**
  * @typedef {import('./src/types/IsListSignal.mjs').IsListSignal} IsListSignal
  */
 /**
- * @typedef {import('./src/types/ExtnameType.mjs').ExtnameType} ExtnameType
+ * @typedef {import('./src/types/ListArg.mjs').ListArg} ListArg
+ */
+/**
+ * @typedef {import('./src/types/MutationType.mjs').MutationType} MutationType
+ */
+/**
+ * @typedef {import('./src/types/QCBFIFOReturn.mjs').QCBFIFOReturn} QCBFIFOReturn
+ */
+/**
+ * @typedef {import('./src/types/QCBReturn.mjs').QCBReturn} QCBReturn
  */

@@ -17,12 +17,18 @@ export class WorkerMainThread<WT extends WorkerThread> {
      * - need to be called first, before any `WorkerMainThread` instantiation:
      * @param {Object} param0
      * @param {typeof WorkerMainThread["workerClass"]} param0.workerClass
-     * @param {typeof WorkerMainThread["pathValidator"]} param0.pathValidator
+     * - example:
      * ```js
-     *	async(relativePath) => {
-     *		// verify whether relativePath exist, then return the full path
-     *		// use fetch | fs, chained with Paths.instance.root + WorkerMainThread.basePath;
-     *	}
+     * async () => await (import('worker_threads')).Worker
+     * ```
+     * @param {typeof WorkerMainThread["pathValidator"]} param0.pathValidator
+     * - example:
+     * ```js
+     * async (workerPath, root, base) => {
+     * 	const res = await fetch(`${root}/${base}/${workerPath}`);
+     * 	// might also check wheter it need base or not
+     * 	return await res.ok;
+     * }
      * ```
      * @param {typeof WorkerMainThread["basePath"]} [param0.basePath]
      * - additonal realtivePath from rootPath;

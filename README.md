@@ -68,12 +68,12 @@ npm i vivth
  - [TsToMjs](#tstomjs)
  - [WriteFileSafe](#writefilesafe)
  - [AnyButUndefined](#anybutundefined)
- - [QCBReturn](#qcbreturn)
- - [QCBFIFOReturn](#qcbfiforeturn)
- - [MutationType](#mutationtype)
- - [ListArg](#listarg)
- - [IsListSignal](#islistsignal)
  - [ExtnameType](#extnametype)
+ - [IsListSignal](#islistsignal)
+ - [ListArg](#listarg)
+ - [MutationType](#mutationtype)
+ - [QCBFIFOReturn](#qcbfiforeturn)
+ - [QCBReturn](#qcbreturn)
 
 <h2 id="compilemjs">CompileMJS</h2>
 
@@ -846,9 +846,18 @@ npm i vivth
 /**
  * @param {Object} options 	 
  * @param {string} options.root 	 
- * - browser: location.origin 	 
- * - node/bun compatible: process?.env?.INIT_CWD ?? process?.cwd(); 	 
- * - deno: Deno.env.get("INIT_CWD") ?? Deno.cwd(); need for `deno run --allow-env --allow-read your_script.ts` 	 
+ * - browser: 	 
+ * ```js 	 
+ * location.origin 	 
+ * ``` 	 
+ * - node/bun compatible: 	 
+ * ```js 	 
+ * process?.env?.INIT_CWD ?? process?.cwd() 	 
+ * ``` 	 
+ * - deno: need for `deno run --allow-env --allow-read your_script.ts`: 	 
+ * ```js 	 
+ * Deno.env.get("INIT_CWD") ?? Deno.cwd() 	 
+ * ``` 	 
  * - other: you need to check your JSRuntime for the rootPath reference; 	 
  */
 ```
@@ -1142,15 +1151,17 @@ npm i vivth
  import { Setup, Console } from 'vivth'; 	 
  	 
  new Setup.safeExit({ 	 
- 	// exitEventNames are blank by default, you need to manually name them all; 	 
- 	exitEventNames: ['SIGINT', 'SIGTERM', ...otherExitEventNames], 	 
+ 	// eventNames are blank by default, you need to manually name them all; 	 
+ 	// 'exit' will be omited, as it might cause async callbacks failed to execute; 	 
+ 	eventNames: ['SIGINT', 'SIGTERM', ...eventNames], 	 
+ 	terminator = () => process.exit(0), // OR on deno () => Deno.exit(0), 	 
  	// optional deno example 	 
- 	exitCallbackListeners = (eventName) => { 	 
+ 	listener = (eventName) => { 	 
  		const sig = Deno.signal(eventName); 	 
  			for await (const _ of sig) { 	 
- 				SafeExit.instance.exiting.correction(true); 	 
+ 				exiting.correction(true); 	 
  				sig.dispose(); 	 
- 				Console.info(`safe exit via "${eventName}"`); 	 
+ 				Console.log(`safe exit via "${eventName}"`); 	 
  			} 	 
  	} 	 
  });
@@ -1199,7 +1210,7 @@ npm i vivth
 ```js  
  import { Setup } from 'vivth'; 	 
  	 
- Setup.workerThread({ parentPort: async () => await import('node:worker_threads') }); 	 
+ Setup.workerThread({ parentPort: async () => (await import('node:worker_threads')).parentPort }); 	 
  // that is the default value, if your parentPort/equivalent API is not that; 	 
  // you need to call this method;
  
@@ -1380,12 +1391,18 @@ npm i vivth
 /**
  * @param {Object} param0 	 
  * @param {typeof WorkerMainThread["workerClass"]} param0.workerClass 	 
- * @param {typeof WorkerMainThread["pathValidator"]} param0.pathValidator 	 
+ * - example: 	 
  * ```js 	 
- *	async(relativePath) => { 	 
- *		// verify whether relativePath exist, then return the full path 	 
- *		// use fetch | fs, chained with Paths.instance.root + WorkerMainThread.basePath; 	 
- *	} 	 
+ * async () => await (import('worker_threads')).Worker 	 
+ * ``` 	 
+ * @param {typeof WorkerMainThread["pathValidator"]} param0.pathValidator 	 
+ * - example: 	 
+ * ```js 	 
+ * async (workerPath, root, base) => { 	 
+ * 	const res = await fetch(`${root}/${base}/${workerPath}`); 	 
+ * 	// might also check wheter it need base or not 	 
+ * 	return await res.ok; 	 
+ * } 	 
  * ``` 	 
  * @param {typeof WorkerMainThread["basePath"]} [param0.basePath] 	 
  * - additonal realtivePath from rootPath; 	 
@@ -1573,7 +1590,10 @@ npm i vivth
  * @template Receive_ 	 
  * @template Post_ 	 
  * @param {{parentPort:()=>Promise<any>}} parentPortRef 	 
- * - correct parentPort reference; 	 
+ * - correct parentPort reference, example: 	 
+ * ```js 	 
+ * async () => (await import('node:worker_threads')).parentPort 	 
+ * ``` 	 
  * @returns {typeof WorkerThread<Receive_, Post_>} 	 
  */
 ```
@@ -1581,7 +1601,7 @@ npm i vivth
 ```js  
  import { WorkerThread } from 'vivth'; 	 
  	 
- WorkerThread.setup({ parentPort: async () => await import('node:worker_threads') }); 	 
+ WorkerThread.setup({ parentPort: async () => (await import('node:worker_threads')).parentPort }); 	 
  // that is the default value, if your parentPort/equivalent API is not that; 	 
  // you need to call this method;
  
@@ -2134,26 +2154,38 @@ npm i vivth
 ```
 *) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
-<h2 id="qcbreturn">QCBReturn</h2>
+<h2 id="extnametype">ExtnameType</h2>
 
 - jsdoc types:
 
 ```js
 /**
- * - return type of Q callback;
- * @typedef {{resume:()=>void, isLastOnQ:boolean}} QCBReturn
+ * - jsRuntime extention naming convention;
+ * @typedef {`.${string}`} ExtnameType
  */
 ```
 *) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
-<h2 id="qcbfiforeturn">QCBFIFOReturn</h2>
+<h2 id="islistsignal">IsListSignal</h2>
 
 - jsdoc types:
 
 ```js
 /**
- * - return type of Q callback fifo;
- * @typedef {Omit<import("./src/types/QCBReturn.mjs").QCBReturn, "isLastOnQ">} QCBFIFOReturn
+ * - `EnvSignal.get` argument whether signal need to be a list or not;
+ * @typedef {boolean} IsListSignal
+ */
+```
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+<h2 id="listarg">ListArg</h2>
+
+- jsdoc types:
+
+```js
+/**
+ * - ListSignal argument type;
+ * @typedef {Record<string, string>} ListArg
  */
 ```
 *) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
@@ -2172,38 +2204,26 @@ npm i vivth
 ```
 *) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
-<h2 id="listarg">ListArg</h2>
+<h2 id="qcbfiforeturn">QCBFIFOReturn</h2>
 
 - jsdoc types:
 
 ```js
 /**
- * - ListSignal argument type;
- * @typedef {Record<string, string>} ListArg
+ * - return type of Q callback fifo;
+ * @typedef {Omit<import("./src/types/QCBReturn.mjs").QCBReturn, "isLastOnQ">} QCBFIFOReturn
  */
 ```
 *) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
-<h2 id="islistsignal">IsListSignal</h2>
+<h2 id="qcbreturn">QCBReturn</h2>
 
 - jsdoc types:
 
 ```js
 /**
- * - `EnvSignal.get` argument whether signal need to be a list or not;
- * @typedef {boolean} IsListSignal
- */
-```
-*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
-
-<h2 id="extnametype">ExtnameType</h2>
-
-- jsdoc types:
-
-```js
-/**
- * - jsRuntime extention naming convention;
- * @typedef {`.${string}`} ExtnameType
+ * - return type of Q callback;
+ * @typedef {{resume:()=>void, isLastOnQ:boolean}} QCBReturn
  */
 ```
 *) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>

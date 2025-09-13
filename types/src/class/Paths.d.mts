@@ -32,9 +32,18 @@ export class Paths {
      * @description
      * @param {Object} options
      * @param {string} options.root
-     * - browser: location.origin
-     * - node/bun compatible: process?.env?.INIT_CWD ?? process?.cwd();
-     * - deno: Deno.env.get("INIT_CWD") ?? Deno.cwd(); need for `deno run --allow-env --allow-read your_script.ts`
+     * - browser:
+     * ```js
+     * location.origin
+     * ```
+     * - node/bun compatible:
+     * ```js
+     * process?.env?.INIT_CWD ?? process?.cwd()
+     * ```
+     * - deno: need for `deno run --allow-env --allow-read your_script.ts`:
+     * ```js
+     * Deno.env.get("INIT_CWD") ?? Deno.cwd()
+     * ```
      * - other: you need to check your JSRuntime for the rootPath reference;
      * @example
      * import { Paths } from 'vivth';

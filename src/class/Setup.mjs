@@ -17,15 +17,17 @@ export class Setup {
 	 * import { Setup, Console } from 'vivth';
 	 *
 	 * new Setup.safeExit({
-	 * 	// exitEventNames are blank by default, you need to manually name them all;
-	 * 	exitEventNames: ['SIGINT', 'SIGTERM', ...otherExitEventNames],
+	 * 	// eventNames are blank by default, you need to manually name them all;
+	 * 	// 'exit' will be omited, as it might cause async callbacks failed to execute;
+	 * 	eventNames: ['SIGINT', 'SIGTERM', ...eventNames],
+	 * 	terminator = () => process.exit(0), // OR on deno () => Deno.exit(0),
 	 * 	// optional deno example
-	 * 	exitCallbackListeners = (eventName) => {
+	 * 	listener = (eventName) => {
 	 * 		const sig = Deno.signal(eventName);
 	 * 			for await (const _ of sig) {
-	 * 				SafeExit.instance.exiting.correction(true);
+	 * 				exiting.correction(true);
 	 * 				sig.dispose();
-	 * 				Console.info(`safe exit via "${eventName}"`);
+	 * 				Console.log(`safe exit via "${eventName}"`);
 	 * 			}
 	 * 	}
 	 * });
@@ -65,7 +67,7 @@ export class Setup {
 	 * @example
 	 * import { Setup } from 'vivth';
 	 *
-	 * Setup.workerThread({ parentPort: async () => await import('node:worker_threads') });
+	 * Setup.workerThread({ parentPort: async () => (await import('node:worker_threads')).parentPort });
 	 * // that is the default value, if your parentPort/equivalent API is not that;
 	 * // you need to call this method;
 	 */

@@ -17,12 +17,15 @@ export class WorkerThread<Receive, Post> {
      * @template Receive_
      * @template Post_
      * @param {{parentPort:()=>Promise<any>}} parentPortRef
-     * - correct parentPort reference;
+     * - correct parentPort reference, example:
+     * ```js
+     * async () => (await import('node:worker_threads')).parentPort
+     * ```
      * @returns {typeof WorkerThread<Receive_, Post_>}
      * @example
      * import { WorkerThread } from 'vivth';
      *
-     * WorkerThread.setup({ parentPort: async () => await import('node:worker_threads') });
+     * WorkerThread.setup({ parentPort: async () => (await import('node:worker_threads')).parentPort });
      * // that is the default value, if your parentPort/equivalent API is not that;
      * // you need to call this method;
      */
