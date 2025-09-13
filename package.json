@@ -1,6 +1,6 @@
 {
 	"name": "vivth",
-	"version": "1.1.0",
+	"version": "1.1.1",
 	"description": "extremely simple signal as library primitives",
 	"main": "index.mjs",
 	"types": "./types/index.d.mts",
