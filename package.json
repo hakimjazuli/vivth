@@ -1,7 +1,7 @@
 {
 	"name": "vivth",
 	"version": "1.2.0",
-	"description": "extremely simple signal as library primitives",
+	"description": "library primitives",
 	"main": "index.mjs",
 	"types": "./types/index.d.mts",
 	"devDependencies": {
@@ -33,8 +33,7 @@
 	"homepage": "https://github.com/hakimjazuli/vivth#readme",
 	"scripts": {
 		"dev-wo": "concurrently 'bun ./dev/index.mjs' 'bun tsc --watch'",
-		"dev": "concurrently 'bun --watch ./dev/index.mjs' 'bun tsc --watch'",
-		"test_test": "bun --watch ./dev/test.mjs"
+		"dev": "concurrently 'bun --watch ./dev/index.mjs' 'bun tsc --watch'"
 	},
 	"sideEffects": false
 }
