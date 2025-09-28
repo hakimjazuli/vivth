@@ -18,28 +18,21 @@ export class WorkerMainThread<WT extends WorkerThread> {
      * @param {Object} param0
      * @param {typeof WorkerMainThread["workerClass"]} param0.workerClass
      * @param {typeof WorkerMainThread["pathValidator"]} param0.pathValidator
-     * @param {typeof WorkerMainThread["basePath"]} [param0.basePath]
      */
-    static setup: ({ workerClass, pathValidator, basePath }: {
+    static setup: ({ workerClass, pathValidator }: {
         workerClass: (typeof WorkerMainThread)["workerClass"];
         pathValidator: (typeof WorkerMainThread)["pathValidator"];
-        basePath?: (typeof WorkerMainThread)["basePath"];
     }) => void;
     /**
      * @type {typeof Worker|typeof import('worker_threads').Worker}
      */
     static workerClass: typeof Worker | typeof import("worker_threads").Worker;
     /**
-     * @type {string}
-     */
-    static basePath: string;
-    /**
-     * @type {(paths:{worker: string, root:string, base: string})=>Promise<string>}
+     * @type {(paths:{worker: string, root:string})=>Promise<string>}
      */
     static pathValidator: (paths: {
         worker: string;
         root: string;
-        base: string;
     }) => Promise<string>;
     static #options: import("worker_threads").WorkerOptions & {
         type?: "module";

@@ -62,7 +62,6 @@ npm i vivth
  - [Base64URL](#base64url)
  - [Base64URLFromFile](#base64urlfromfile)
  - [EventNameSpace](#eventnamespace)
- - [JSautoDOC](#jsautodoc)
  - [CreateImmutable](#createimmutable)
  - [EventCheck](#eventcheck)
  - [EventObject](#eventobject)
@@ -74,6 +73,7 @@ npm i vivth
  - [TryAsync](#tryasync)
  - [TrySync](#trysync)
  - [TsToMjs](#tstomjs)
+ - [JSautoDOC](#jsautodoc)
  - [AnyButUndefined](#anybutundefined)
  - [ExtnameType](#extnametype)
  - [IsListSignal](#islistsignal)
@@ -2129,16 +2129,13 @@ npm i vivth
  * @param {typeof WorkerMainThread["pathValidator"]} param0.pathValidator 	 
  * - example: 	 
  * ```js 	 
- * async (workerPath, root, base) => { 	 
+ * async (workerPath, root) => { 	 
  *  const truePathCheck = `${root}/${base}/${workerPath}`; 	 
  * 	const res = await fetch(truePathCheck); 	 
  * 	// might also check wheter it need base or not 	 
  * 	return await res.ok; 	 
  * } 	 
  * ``` 	 
- * @param {typeof WorkerMainThread["basePath"]} [param0.basePath] 	 
- * - additonal realtivePath from rootPath; 	 
- * - default: ''; 	 
  */
 ```
  - <i>example</i>:
@@ -2148,11 +2145,15 @@ npm i vivth
  	 
  WorkerMainThread.setup({ 	 
  	workerClass: Worker, 	 
- 	basePath: 'public/assets/js/workers', 	 
- 	pathValidator: async (workerPath, root, base) => { 	 
- 		const res = await fetch(`${root}/${base}/${workerPath}`); 	 
- 		// might also check wheter it need base or not 	 
- 		return await res.ok; 	 
+ 	pathValidator: async ({worker, root}) => { 	 
+ 		const res = await fetch(`${root}/${worker}`); 	 
+ 		if (res.ok) { 	 
+ 			return res 	 
+ 		} 	 
+ 		const res2 = await fetch(`${root}/someAdditionalPath/${worker}`); 	 
+ 		if (res2.ok) { 	 
+ 			return res2 	 
+ 		} 	 
  	}, 	 
  });
  
@@ -2168,23 +2169,13 @@ npm i vivth
  */
 ```
 
-#### reference:`WorkerMainThread.basePath`
-- reference for worker file `basePath`; 	 
-- edit via `setup`;
-
-```js
-/**
- * @type {string}
- */
-```
-
 #### reference:`WorkerMainThread.pathValidator`
 - reference for validating path; 	 
 - edit via `setup`;
 
 ```js
 /**
- * @type {(paths:{worker: string, root:string, base: string})=>Promise<string>}
+ * @type {(paths:{worker: string, root:string})=>Promise<string>}
  */
 ```
 
@@ -2324,60 +2315,6 @@ npm i vivth
 /**
  * @type {'vivthEvent'}
  */
-```
-
-*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
-
-<h2 id="jsautodoc">JSautoDOC</h2>
-
-
-#### reference:`JSautoDOC`
-- class for auto documenting mjs package/project, using jsdoc;  
-- this autodocumenter uses [chokidar](https://npmjs.com/package/chokidar) under the hood;  
-- this class also is used to generate this `README.md`;  
-- behaviours:  
->1) add `"at"noautodoc` on self closing jsdoc comment to opt out from generating documentation on said file;  
->>- auto export must follows the following rules, and there's no way to override;  
->2) export all named exported 'const'|'function'|'async function'|'class', alphanumeric name, started with Capital letter, same name with fileName on `options.pahts.file`;  
->3) declare typedef of existing typedef with alphanumeric name, started with Capital letter, same name with fileName, and have no valid export like on point <sup>1</sup> on `options.pahts.file`;  
->4) create `README.md` based on, `options.paths.dir` and `README.src.md`;  
->5) extract `"at"description` jsdoc:  
->>- on static/prop that have depths, all of children should have `"at"static`/`"at"instance` `nameOfImmediateParent`, same block but before `"at"description` comment line;  
->>- `"at"description` are treated as plain `markdown`;  
->>- first `"at"${string}` after `"at"description` until `"at"example` will be treated as `javascript` comment block on the `markdown`;  
->>- `"at"example` are treated as `javascript` block on the `markdown` file, and should be placed last on the same comment block;  
->>- you can always look at `vivth/src` files to check how the source, and the `README.md` and `index.mjs` documentation/generation results;
-
-
-#### reference:`new JSautoDOC`
-
-
-```js
-/**
- * @param {Object} [options] 	 
- * @param {Object} [options.paths] 	 
- * @param {string} [options.paths.file] 	 
- * - entry point; 	 
- * @param {string} [options.paths.readMe] 	 
- * - readme target; 	 
- * @param {string} [options.paths.dir] 	 
- * - source directory; 	 
- * @param {string} [options.copyright] 	 
- * @param {string} [options.tableOfContentTitle] 	 
- * @param {import('chokidar').ChokidarOptions} [options.option] 	 
- * - ChokidarOptions; 	 
- */
-```
- - <i>example</i>:
-```js  
- import { JSautoDOC } from 'vivth'; 	 
- 	 
-  new JSautoDOC({ 	 
- 	paths: { dir: 'src', file: 'index.mjs', readMe: 'README.md' }, 	 
- 	copyright: 'this library is made and distributed under MIT license;', 	 
- 	tableOfContentTitle: 'list of exported API and typehelpers', 	 
- }); 	 
-  
 ```
 
 *) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
@@ -2745,6 +2682,60 @@ npm i vivth
   
  TsToMjs('./myFile.mts', { encoding: 'utf-8', overrideDir: './other/dir' });
  
+```
+
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+<h2 id="jsautodoc">JSautoDOC</h2>
+
+
+#### reference:`JSautoDOC`
+- class for auto documenting mjs package/project, using jsdoc;  
+- this autodocumenter uses [chokidar](https://npmjs.com/package/chokidar) under the hood;  
+- this class also is used to generate this `README.md`;  
+- behaviours:  
+>1) add `"at"noautodoc` on self closing jsdoc comment to opt out from generating documentation on said file;  
+>>- auto export must follows the following rules, and there's no way to override;  
+>2) export all named exported 'const'|'function'|'async function'|'class', alphanumeric name, started with Capital letter, same name with fileName on `options.pahts.file`;  
+>3) declare typedef of existing typedef with alphanumeric name, started with Capital letter, same name with fileName, and have no valid export like on point <sup>1</sup> on `options.pahts.file`;  
+>4) create `README.md` based on, `options.paths.dir` and `README.src.md`;  
+>5) extract `"at"description` jsdoc:  
+>>- on static/prop that have depths, all of children should have `"at"static`/`"at"instance` `nameOfImmediateParent`, same block but before `"at"description` comment line;  
+>>- `"at"description` are treated as plain `markdown`;  
+>>- first `"at"${string}` after `"at"description` until `"at"example` will be treated as `javascript` comment block on the `markdown`;  
+>>- `"at"example` are treated as `javascript` block on the `markdown` file, and should be placed last on the same comment block;  
+>>- you can always look at `vivth/src` files to check how the source, and the `README.md` and `index.mjs` documentation/generation results;
+
+
+#### reference:`new JSautoDOC`
+
+
+```js
+/**
+ * @param {Object} [options] 	 
+ * @param {Object} [options.paths] 	 
+ * @param {string} [options.paths.file] 	 
+ * - entry point; 	 
+ * @param {string} [options.paths.readMe] 	 
+ * - readme target; 	 
+ * @param {string} [options.paths.dir] 	 
+ * - source directory; 	 
+ * @param {string} [options.copyright] 	 
+ * @param {string} [options.tableOfContentTitle] 	 
+ * @param {import('chokidar').ChokidarOptions} [options.option] 	 
+ * - ChokidarOptions; 	 
+ */
+```
+ - <i>example</i>:
+```js  
+ import { JSautoDOC } from 'vivth'; 	 
+ 	 
+  new JSautoDOC({ 	 
+ 	paths: { dir: 'src', file: 'index.mjs', readMe: 'README.md' }, 	 
+ 	copyright: 'this library is made and distributed under MIT license;', 	 
+ 	tableOfContentTitle: 'list of exported API and typehelpers', 	 
+ }); 	 
+  
 ```
 
 *) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>

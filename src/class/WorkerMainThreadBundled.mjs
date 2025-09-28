@@ -33,9 +33,8 @@ export class WorkerMainThread {
 	 * @param {Object} param0
 	 * @param {typeof WorkerMainThread["workerClass"]} param0.workerClass
 	 * @param {typeof WorkerMainThread["pathValidator"]} param0.pathValidator
-	 * @param {typeof WorkerMainThread["basePath"]} [param0.basePath]
 	 */
-	static setup = ({ workerClass, pathValidator, basePath = '' }) => {
+	static setup = ({ workerClass, pathValidator }) => {
 		if (!Paths.root) {
 			return;
 		}
@@ -46,18 +45,13 @@ export class WorkerMainThread {
 		WorkerMainThread.#isRegistered = true;
 		WorkerMainThread.workerClass = workerClass;
 		WorkerMainThread.pathValidator = pathValidator;
-		WorkerMainThread.basePath = basePath;
 	};
 	/**
 	 * @type {typeof Worker|typeof import('worker_threads').Worker}
 	 */
 	static workerClass;
 	/**
-	 * @type {string}
-	 */
-	static basePath;
-	/**
-	 * @type {(paths:{worker: string, root:string, base: string})=>Promise<string>}
+	 * @type {(paths:{worker: string, root:string})=>Promise<string>}
 	 */
 	static pathValidator;
 	static #options = /** @type {import('worker_threads').WorkerOptions & { type?: 'module' }} */ ({

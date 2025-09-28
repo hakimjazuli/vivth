@@ -54,10 +54,9 @@ export class Setup {
      * 	},
      * });
      */
-    static workerMain: ({ workerClass, pathValidator, basePath }: {
+    static workerMain: ({ workerClass, pathValidator }: {
         workerClass: (typeof WorkerMainThread)["workerClass"];
         pathValidator: (typeof WorkerMainThread)["pathValidator"];
-        basePath?: (typeof WorkerMainThread)["basePath"];
     }) => void;
     /**
      * @description

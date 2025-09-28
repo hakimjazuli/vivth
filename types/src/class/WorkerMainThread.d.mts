@@ -29,34 +29,34 @@ export class WorkerMainThread<WT extends WorkerThread> {
      * @param {typeof WorkerMainThread["pathValidator"]} param0.pathValidator
      * - example:
      * ```js
-     * async (workerPath, root, base) => {
+     * async (workerPath, root) => {
      *  const truePathCheck = `${root}/${base}/${workerPath}`;
      * 	const res = await fetch(truePathCheck);
      * 	// might also check wheter it need base or not
      * 	return await res.ok;
      * }
      * ```
-     * @param {typeof WorkerMainThread["basePath"]} [param0.basePath]
-     * - additonal realtivePath from rootPath;
-     * - default: '';
      * @example
      * import { Worker } from 'node:worker_threads';
      * import { WorkerMainThread } from 'vivth';
      *
      * WorkerMainThread.setup({
      * 	workerClass: Worker,
-     * 	basePath: 'public/assets/js/workers',
-     * 	pathValidator: async (workerPath, root, base) => {
-     * 		const res = await fetch(`${root}/${base}/${workerPath}`);
-     * 		// might also check wheter it need base or not
-     * 		return await res.ok;
+     * 	pathValidator: async ({worker, root}) => {
+     * 		const res = await fetch(`${root}/${worker}`);
+     * 		if (res.ok) {
+     * 			return res
+     * 		}
+     * 		const res2 = await fetch(`${root}/someAdditionalPath/${worker}`);
+     * 		if (res2.ok) {
+     * 			return res2
+     * 		}
      * 	},
      * });
      */
-    static setup: ({ workerClass, pathValidator, basePath }: {
+    static setup: ({ workerClass, pathValidator }: {
         workerClass: (typeof WorkerMainThread)["workerClass"];
         pathValidator: (typeof WorkerMainThread)["pathValidator"];
-        basePath?: (typeof WorkerMainThread)["basePath"];
     }) => void;
     /**
      * @description
@@ -67,21 +67,13 @@ export class WorkerMainThread<WT extends WorkerThread> {
     static workerClass: typeof Worker | typeof import("worker_threads").Worker;
     /**
      * @description
-     * - reference for worker file `basePath`;
-     * - edit via `setup`;
-     * @type {string}
-     */
-    static basePath: string;
-    /**
-     * @description
      * - reference for validating path;
      * - edit via `setup`;
-     * @type {(paths:{worker: string, root:string, base: string})=>Promise<string>}
+     * @type {(paths:{worker: string, root:string})=>Promise<string>}
      */
     static pathValidator: (paths: {
         worker: string;
         root: string;
-        base: string;
     }) => Promise<string>;
     static #options: import("worker_threads").WorkerOptions & {
         type?: "module";
