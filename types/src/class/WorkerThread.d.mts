@@ -1,37 +1,38 @@
 /**
  * @description
  * - class helper for `WorkerThread` creation;
- * @template Receive
- * @template Post
+ * - before any `Worker` functionaily to be used, you need to setup it with `WorkerThread.setup` and `WorkerMainThread.setup` before runing anytyhing;
+ * @template RECEIVE
+ * @template POST
  */
-export class WorkerThread<Receive, Post> {
+export class WorkerThread<RECEIVE, POST> {
     /**
-     * @type {{parentPort:()=>Promise<any>}}
+     * @typedef {import('../types/QCBReturn.mjs').QCBReturn} QCBReturn
      */
-    static #parentPortRef: {
-        parentPort: () => Promise<any>;
-    };
+    /**
+     * @type {Parameters<typeof WorkerThread["setup"]>[0]}
+     */
+    static #refs: Parameters<(typeof WorkerThread)["setup"]>[0];
     /**
      * @description
      * - need to be called and exported as new `WorkerThread` class reference;
-     * @template Receive_
-     * @template Post_
-     * @param {{parentPort:()=>Promise<any>}} parentPortRef
-     * - correct parentPort reference, example:
+     * @template RECEIVE
+     * @template POST
+     * @param {{parentPort:import('worker_threads')["parentPort"]}} refs
+     * -example:
      * ```js
-     * async () => (await import('node:worker_threads')).parentPort
+     * import { parentPort } from 'node:worker_threads';
      * ```
-     * @returns {typeof WorkerThread<Receive_, Post_>}
+     * @returns {typeof WorkerThread<RECEIVE, POST>}
      * @example
      * import { WorkerThread } from 'vivth';
+     * import { parentPort } from 'node:worker_threads';
      *
-     * WorkerThread.setup({ parentPort: async () => (await import('node:worker_threads')).parentPort });
-     * // that is the default value, if your parentPort/equivalent API is not that;
-     * // you need to call this method;
+     * export const MyWorkerThreadRef = WorkerThread.setup({ parentPort });
      */
-    static setup: (parentPortRef: {
-        parentPort: () => Promise<any>;
-    }) => typeof WorkerThread<Receive_, Post_>;
+    static setup<RECEIVE_1, POST_1>(refs: {
+        parentPort: typeof import("worker_threads")["parentPort"];
+    }): typeof WorkerThread<RECEIVE_1, POST_1>;
     /**
      * @param {any} ev
      */
@@ -44,30 +45,34 @@ export class WorkerThread<Receive, Post> {
      * import { MyWorkerThread } from './MyWorkerThread.mjs';
      *
      * const doubleWorker = new MyWorkerThread((ev, isLastOnQ) => {
-     * 	// if(!isLastOnQ) {
+     * 	// if(!isLastOnQ()) {
      * 	// 	return null; // can be used for imperative debouncing;
+     * 	// }
+     * 	// await fetch('some/path')
+     * 	// if(!isLastOnQ()) {
+     * 	// 	return;
      * 	// }
      * 	return ev = ev \* 2;
      * });
      */
-    constructor(handler: (ev: any, isLastOnQ: boolean) => any);
+    constructor(handler: (ev: any, isLastOnQ: () => boolean) => any);
     /**
      * @description
      * - type helper;
-     * @type {(ev: Receive, isLastOnQ:boolean) => Post}
+     * @type {(ev: RECEIVE, isLastOnQ:QCBReturn["isLastOnQ"]) => POST}
      */
-    handler: (ev: Receive, isLastOnQ: boolean) => Post;
+    handler: (ev: RECEIVE, isLastOnQ: () => boolean) => POST;
     /**
      * @description
      * - helper type, hold no actual value;
-     * @type {Receive}
+     * @type {RECEIVE}
      */
-    Receive: Receive;
+    RECEIVE: RECEIVE;
     /**
      * @description
      * - helper type, hold no actual value;
-     * @type {Post}
+     * @type {POST}
      */
-    Post: Post;
+    POST: POST;
     #private;
 }

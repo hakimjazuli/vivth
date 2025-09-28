@@ -1,11 +1,14 @@
 // @ts-check
 
+import { relative } from 'node:path';
+
 import { Console } from './Console.mjs';
 
 /**
  * @description
  * - class helpers to define pathReference;
  * - is a singleton;
+ * - most of functionality need to access `Paths.root`, if you get warning, you can instantiate `Paths` before running anything;
  */
 export class Paths {
 	/**
@@ -27,6 +30,10 @@ export class Paths {
 	 * - deno: need for `deno run --allow-env --allow-read your_script.ts`:
 	 * ```js
 	 * Deno.env.get("INIT_CWD") ?? Deno.cwd()
+	 * ```
+	 * - pkg:
+	 * ```js
+	 * __dirname
 	 * ```
 	 * - other: you need to check your JSRuntime for the rootPath reference;
 	 * @example
@@ -73,7 +80,26 @@ export class Paths {
 	 * @example
 	 * import { Paths } from 'vivth';
 	 *
-	 * Paths.normalize('file:\\D:\\myFile.mjs'); // return 'file://D://myFile.mjs'
+	 * Paths.normalize('file:\\D:\\myFile.mjs'); //  "file://D://myFile.mjs"
 	 */
 	static normalize = (path_) => path_.replace(/\\/g, '/');
+	/**
+	 * @description
+	 * - normalize path separator to forward slash `/`;
+	 * - then starts with forward slash `/`;
+	 * @param {string} path_
+	 * @returns {`/${string}`}
+	 * @example
+	 * import { Paths } from 'vivth';
+	 *
+	 * Paths.normalizesForRoot('path\\myFile.mjs'); //  "/path/myFile.mjs"
+	 */
+	static normalizesForRoot = (path_) => {
+		let normalized = Paths.normalize(path_);
+		if (!normalized.startsWith('/')) {
+			normalized = `/${normalized}`;
+		}
+		// @ts-expect-error
+		return normalized;
+	};
 }

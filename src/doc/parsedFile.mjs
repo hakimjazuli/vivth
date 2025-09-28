@@ -35,34 +35,35 @@ export class parsedFile {
 		}
 		this.#relativePath = Paths.normalize(relative(root, this.#fullPath));
 		this.#encoding = encoding;
-		this.content.parsed().then(({ details, error, exportName }) => {
-			if (error) {
-				return;
-			}
-			for (let i = 0; i < details.length; i++) {
-				const [
-					_,
-					__,
-					instanceOrStaticDef,
-					fullDescription,
-					isExport,
-					typeOfVar,
-					getterOrSetter,
-					namedVar,
-				] = details[i];
-				const interpreted = this.#interpreteArrayDesc(
-					exportName,
-					instanceOrStaticDef,
-					fullDescription,
-					isExport,
-					typeOfVar,
-					getterOrSetter,
-					namedVar
-				);
-				this.documented.readme.add(interpreted);
-			}
-		});
 	}
+	parse = async () => {
+		const { details, error, exportName } = await this.content.parsed();
+		if (error) {
+			return;
+		}
+		for (let i = 0; i < details.length; i++) {
+			const [
+				_,
+				__,
+				instanceOrStaticDef,
+				fullDescription,
+				isExport,
+				typeOfVar,
+				getterOrSetter,
+				namedVar,
+			] = details[i];
+			const interpreted = this.#interpreteArrayDesc(
+				exportName,
+				instanceOrStaticDef,
+				fullDescription,
+				isExport,
+				typeOfVar,
+				getterOrSetter,
+				namedVar
+			);
+			this.documented.readme.add(interpreted);
+		}
+	};
 	documented = LazyFactory(() => {
 		return {
 			typedef: async () => {
@@ -373,13 +374,13 @@ export class parsedFile {
 		const this_ = this;
 		return {
 			/**
-			 * @type {string}
+			 * @returns {string}
 			 */
 			get withExt() {
 				return basename(this_.#fullPath);
 			},
 			/**
-			 * @type {string}
+			 * @returns {string}
 			 */
 			get noExt() {
 				return basename(this_.#fullPath, extname(this_.#fullPath));
@@ -390,13 +391,13 @@ export class parsedFile {
 		const this_ = this;
 		return {
 			/**
-			 * @type {string}
+			 * @returns {string}
 			 */
 			get relative() {
 				return this_.#relativePath;
 			},
 			/**
-			 * @type {string}
+			 * @returns {string}
 			 */
 			get full() {
 				return this_.#fullPath;
@@ -407,13 +408,13 @@ export class parsedFile {
 		const this_ = this;
 		return {
 			/**
-			 * @type {string}
+			 * @returns {string}
 			 */
 			get relative() {
 				return dirname(this_.#relativePath);
 			},
 			/**
-			 * @type {string}
+			 * @returns {string}
 			 */
 			get full() {
 				return dirname(this_.#fullPath);
@@ -424,7 +425,7 @@ export class parsedFile {
 		const this_ = this;
 		return {
 			/**
-			 * @type {string|undefined}
+			 * @returns {string|undefined}
 			 */
 			get withDot() {
 				if (this_.isDirectory && !this_.isFile) {
@@ -433,7 +434,7 @@ export class parsedFile {
 				return extname(this_.#fullPath);
 			},
 			/**
-			 * @type {string|undefined}
+			 * @returns {string|undefined}
 			 */
 			get noDot() {
 				if (this_.isDirectory && !this_.isFile) {
@@ -515,7 +516,7 @@ export class parsedFile {
 		};
 	});
 	/**
-	 * @type {[Promise<any>, undefined]|[undefined, Error]}
+	 * @returns {[Promise<any>, undefined]|[undefined, Error]}
 	 */
 	get importAsModuleJS() {
 		const realTimePath = `${this.#fullPath}?${Date.now()}`;

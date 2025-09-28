@@ -14,9 +14,22 @@ export const setOFSignals = new Set();
 /**
  * @description
  * - a class for creating effect to signals;
- * @template Value
+ * @template VALUE
  */
 export class Signal {
+	/**
+	 * @description
+	 * - create a `Signal`;
+	 * @param {VALUE} value
+	 * @example
+	 * import { Signal, Effect } from  'vivth';
+	 *
+	 * const count = new Signal(0);
+	 */
+	constructor(value) {
+		this.#value = value;
+		setOFSignals.add(this);
+	}
 	/**
 	 * @description
 	 * - subsrcibers reference of this instance;
@@ -33,17 +46,17 @@ export class Signal {
 		 * @instance subscribers
 		 * @description
 		 * - manually notify on non primitive value or value that have depths;
-		 * @param {(options:{signalInstance:Signal<Value>})=>Promise<void>} [callback]
+		 * @param {(options:{signalInstance:Signal<VALUE>})=>Promise<void>} [callback]
 		 * @returns {void}
 		 * @example
-		 * // for deep signal like array or object you can:
+		 * import { Signal } from 'vivth';
 		 *
+		 * // for deep signal like array or object you can:
 		 * const arraySignal = new Signal([1,2]);
 		 * arraySignal.value.push(3);
 		 * arraySignal.subscribers.notify();
 		 *
 		 * // OR for more complex mutation:
-		 *
 		 * const objectSignal = new Signal({a:'test', b:'test'});
 		 * objectSignal.subscribers.notify(async ({ signalInstance }) => {
 		 * 	signalInstance.value['c'] = 'testc';
@@ -57,7 +70,7 @@ export class Signal {
 			}
 			TryAsync(async () => {
 				await callback({ signalInstance: this });
-			}).then(([_, error]) => {
+			}).then(([, error]) => {
 				if (error) {
 					Console.error({ message: 'unable to run callback', callback, error });
 					return;
@@ -70,7 +83,7 @@ export class Signal {
 	 * @param {Set<Effect>} setOfSubscribers
 	 */
 	static #notify = (setOfSubscribers) => {
-		const [_, error] = TrySync(() => {
+		const [, error] = TrySync(() => {
 			const effects = setOfSubscribers;
 			effects.forEach((effect) => {
 				if (!setOfEffects.has(effect)) {
@@ -126,38 +139,27 @@ export class Signal {
 			setOFSignals.delete(this);
 		},
 	}));
+
 	/**
-	 * @description
-	 * @param {Value} value
-	 * @example
-	 * import { Signal, Effect } from  'vivth';
-	 *
-	 * const count = new Signal(0);
-	 */
-	constructor(value) {
-		this.#value = value;
-		setOFSignals.add(this);
-	}
-	/**
-	 * @type {Value}
+	 * @type {VALUE}
 	 */
 	#prev = undefined;
 	/**
 	 * @description
 	 * - value before change;
-	 * @type {Value}
+	 * @returns {VALUE}
 	 */
 	get prev() {
 		return this.#prev;
 	}
 	/**
-	 * @type {Value}
+	 * @type {VALUE}
 	 */
 	#value;
 	/**
 	 * @description
 	 * - value after change;
-	 * @type {Value}
+	 * @returns {VALUE}
 	 * @example
 	 * import { Signal, Effect, Derived } from  'vivth';
 	 *
@@ -167,7 +169,7 @@ export class Signal {
 	 * new Effect(async ({ subscribe }) =>{
 	 * 	const countValue = subscribe(count).value; // reactive
 	 * })
-	 * const oneMoreThanCount = new Effect(async ({ subscribe }) =>{
+	 * const oneMoreThanCount = new Derived(async ({ subscribe }) =>{
 	 * 	return subscribe(count).value + 1; // reactive
 	 * })
 	 */
@@ -177,7 +179,7 @@ export class Signal {
 	/**
 	 * @description
 	 * - assign new value then automatically notify all subscribers;
-	 * @type {Value}
+	 * @type {VALUE}
 	 * @example
 	 * import { Signal } from  'vivth';
 	 *

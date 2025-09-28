@@ -5,10 +5,10 @@
 /**
  * @description
  * - class to create list that satisfy `Array<Record<string, string>>`.
- * @template {import('../types/ListArg.mjs').ListArg} LA
- * @extends {Signal<LA[]>}
+ * @template {import('../types/ListArg.mjs').ListArg} LISTARG
+ * @extends {Signal<LISTARG[]>}
  */
-export class ListSignal<LA extends import("../types/ListArg.mjs").ListArg> extends Signal<LA[]> {
+export class ListSignal<LISTARG extends import("../types/ListArg.mjs").ListArg> extends Signal<LISTARG[]> {
     /**
      * @description
      * - Checks if the input is an array whose first item (if present) is a plain object
@@ -20,7 +20,7 @@ export class ListSignal<LA extends import("../types/ListArg.mjs").ListArg> exten
     /**
      * @description
      * - usefull for `loops`;
-     * @param {LA[]} [value]
+     * @param {LISTARG[]} [value]
      * @example
      * import { ListSignal } from 'vivth';
      *
@@ -29,7 +29,7 @@ export class ListSignal<LA extends import("../types/ListArg.mjs").ListArg> exten
      *      {key1: "test2",},
      * ]);
      */
-    constructor(value?: LA[]);
+    constructor(value?: LISTARG[]);
     /**
      * @description
      * - methods collection that mimics `Array` API;
@@ -41,17 +41,17 @@ export class ListSignal<LA extends import("../types/ListArg.mjs").ListArg> exten
          * @description
          * - reference to structuredClone elements of `value`;
          * - calling doesn't notify
-         * @type {Array<LA>}
+         * @returns {Array<LISTARG>}
          */
-        readonly structuredClone: Array<LA>;
+        readonly structuredClone: Array<LISTARG>;
         /**
          * @instance arrayMethods
          * @description
          * - appends new elements to the end;
-         * @param {...LA} listArg
+         * @param {...LISTARG} listArg
          * @returns {void}
          */
-        push: (...listArg: LA[]) => void;
+        push: (...listArg: LISTARG[]) => void;
         /**
          * @instance arrayMethods
          * @description
@@ -63,10 +63,10 @@ export class ListSignal<LA extends import("../types/ListArg.mjs").ListArg> exten
          * @instance arrayMethods
          * @description
          * - inserts new element at the start;
-         * @param  {...LA} listArg
+         * @param  {...LISTARG} listArg
          * @returns {void}
          */
-        unshift: (...listArg: LA[]) => void;
+        unshift: (...listArg: LISTARG[]) => void;
         /**
          * @instance arrayMethods
          * @description
@@ -82,11 +82,11 @@ export class ListSignal<LA extends import("../types/ListArg.mjs").ListArg> exten
          * @instance arrayMethods
          * @description
          * - replace whole `List` data with new array.
-         * @param {LA[]} listArgs
+         * @param {LISTARG[]} listArgs
          * - new array in place of the deleted array.
          * @returns {void}
          */
-        replace: (listArgs: LA[]) => void;
+        replace: (listArgs: LISTARG[]) => void;
         /**
          * @instance arrayMethods
          * @description
@@ -95,11 +95,11 @@ export class ListSignal<LA extends import("../types/ListArg.mjs").ListArg> exten
          * - The zero-based location in the data from which to start removing elements.
          * @param {number} deleteCount
          * -The number of elements to remove.
-         * @param {...LA} listArg
+         * @param {...LISTARG} listArg
          * - new data in place of the deleted data.
          * @returns {void}
          */
-        splice: (start: number, deleteCount: number, ...listArg: LA[]) => void;
+        splice: (start: number, deleteCount: number, ...listArg: LISTARG[]) => void;
         /**
          * @instance arrayMethods
          * @description
@@ -114,10 +114,10 @@ export class ListSignal<LA extends import("../types/ListArg.mjs").ListArg> exten
          * @description
          * - modify `List` element at specific index;
          * @param {number} index
-         * @param {Partial<LA>} listArg
+         * @param {Partial<LISTARG>} listArg
          * @returns {void}
          */
-        modify: (index: number, listArg: Partial<LA>) => void;
+        modify: (index: number, listArg: Partial<LISTARG>) => void;
         /**
          * @instance arrayMethods
          * @description
@@ -141,7 +141,112 @@ export class ListSignal<LA extends import("../types/ListArg.mjs").ListArg> exten
          */
         pop: () => void;
     } & {
-        "vivth:unwrapLazy;": string;
+        "vivth:unwrapLazy;": () => {
+            /**
+             * @instance arrayMethods
+             * @description
+             * - reference to structuredClone elements of `value`;
+             * - calling doesn't notify
+             * @returns {Array<LISTARG>}
+             */
+            readonly structuredClone: Array<LISTARG>;
+            /**
+             * @instance arrayMethods
+             * @description
+             * - appends new elements to the end;
+             * @param {...LISTARG} listArg
+             * @returns {void}
+             */
+            push: (...listArg: LISTARG[]) => void;
+            /**
+             * @instance arrayMethods
+             * @description
+             * - removes the first element;
+             * @type {()=>void}
+             */
+            shift: () => void;
+            /**
+             * @instance arrayMethods
+             * @description
+             * - inserts new element at the start;
+             * @param  {...LISTARG} listArg
+             * @returns {void}
+             */
+            unshift: (...listArg: LISTARG[]) => void;
+            /**
+             * @instance arrayMethods
+             * @description
+             * - for both start and end, a negative index can be used to indicate an offset from the end of the data. For example, -2 refers to the second to last element of the data;
+             * @param {number} [start]
+             * - the beginning index of the specified portion of the data. If start is undefined, then the slice begins at index 0.
+             * @param {number} [end]
+             * - the end index of the specified portion of the data. This is exclusive of the element at the index 'end'. If end is undefined, then the slice extends to the end of the data.
+             * @returns {void}
+             */
+            slice: (start?: number, end?: number) => void;
+            /**
+             * @instance arrayMethods
+             * @description
+             * - replace whole `List` data with new array.
+             * @param {LISTARG[]} listArgs
+             * - new array in place of the deleted array.
+             * @returns {void}
+             */
+            replace: (listArgs: LISTARG[]) => void;
+            /**
+             * @instance arrayMethods
+             * @description
+             * - removes elements from an data and, if necessary, inserts new elements in their place;
+             * @param {number} start
+             * - The zero-based location in the data from which to start removing elements.
+             * @param {number} deleteCount
+             * -The number of elements to remove.
+             * @param {...LISTARG} listArg
+             * - new data in place of the deleted data.
+             * @returns {void}
+             */
+            splice: (start: number, deleteCount: number, ...listArg: LISTARG[]) => void;
+            /**
+             * @instance arrayMethods
+             * @description
+             * - swap `List` data between two indexes;
+             * @param {number} indexA
+             * @param {number} indexB
+             * @returns {void}
+             */
+            swap: (indexA: number, indexB: number) => void;
+            /**
+             * @instance arrayMethods
+             * @description
+             * - modify `List` element at specific index;
+             * @param {number} index
+             * @param {Partial<LISTARG>} listArg
+             * @returns {void}
+             */
+            modify: (index: number, listArg: Partial<LISTARG>) => void;
+            /**
+             * @instance arrayMethods
+             * @description
+             * - remove `List` element at specific index;
+             * @param {number} index
+             * @returns {void}
+             */
+            remove: (index: number) => void;
+            /**
+             * @instance arrayMethods
+             * @description
+             * - reverses the elements in an `List` in place.
+             * @returns {void}
+             */
+            reverse: () => void;
+            /**
+             * @instance arrayMethods
+             * @description
+             * - removes the last element;
+             * @returns {void}
+             */
+            pop: () => void;
+        };
     };
     #private;
 }

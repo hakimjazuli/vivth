@@ -2,6 +2,7 @@
 
 import { unwrapLazy } from '../common/lazie.mjs';
 import { LazyFactory } from '../function/LazyFactory.mjs';
+import { Timeout } from '../function/Timeout.mjs';
 import { TryAsync } from '../function/TryAsync.mjs';
 import { Console } from './Console.mjs';
 import { Signal } from './Signal.mjs';
@@ -22,8 +23,95 @@ export const setOfEffects = new Set();
  */
 export class Effect {
 	/**
+	 * @typedef {import('../common/lazie.mjs').unwrapLazy} unwrapLazy
+	 */
+	/**
 	 * @description
-	 * @param {(arg0:Effect["options"])=>Promise<void>} effect
+	 * - collections of lazy methods to handle effect calls of this instance;
+	 */
+	options = LazyFactory(() => {
+		const this_ = this;
+		return {
+			/**
+			 * @instance options
+			 * @description
+			 * @returns {(timeoutMS?:number)=>Promise<boolean>}
+			 * - timeoutMS only necessary if the operation doesn't naturally await;
+			 * - if it's operation such as `fetch`, you can just leave it blank;
+			 * @example
+			 *
+			 * import { Effect } from 'vivth';
+			 *
+			 * const effect = new Effect(async ({ isLastCalled }) => {
+			 * 	if (!(await isLastCalled(100))) {
+			 * 		return;
+			 * 	}
+			 * 	// OR
+			 * 	const res = await fetch('some/path');
+			 * 	if (!(await isLastCalled(
+			 * 		// no need to add timeoutMS argument, as fetch are naturally add delay;
+			 * 	))) {
+			 * 		return;
+			 * 	}
+			 * })
+			 */
+			get isLastCalled() {
+				const current = {};
+				this_.#current = current;
+				return async (timeoutMS = 0) => {
+					if (timeoutMS) {
+						await Timeout(timeoutMS);
+					}
+					return current === this_.#current;
+				};
+			},
+			/**
+			 * @instance options
+			 * @description
+			 * - normally it's passed as argument to constructor, however it is also accessible from `options` property;
+			 * @template {Signal} SIGNAL
+			 * @param {SIGNAL} signal
+			 * @returns {SIGNAL}
+			 * @example
+			 * import { Effect } from 'vivth';
+			 *
+			 * const effect = new Effect(async () => {
+			 * 	// code
+			 * })
+			 * effect.options.subscribe(signalInstance);
+			 */
+			subscribe: (signal) => {
+				if (!(signal instanceof Signal)) {
+					// @ts-expect-error
+					signal = signal[unwrapLazy]();
+				}
+				signal.subscribers.setOf.add(this_);
+				return signal;
+			},
+			/**
+			 * @instance options
+			 * @description
+			 * - normally it's passed as argument to constructor, however it is also accessible from `options` property;
+			 * @type {()=>void}
+			 * @example
+			 * import { Effect } from 'vivth';
+			 *
+			 * const effect = new Effect(async () => {
+			 * 	// code
+			 * })
+			 * effect.options.removeEffect();
+			 */
+			removeEffect: () => {
+				setOfEffects.delete(this);
+			},
+		};
+	});
+	/**
+	 * @description
+	 * @param {( arg0:
+	 * Omit<Effect["options"], typeof unwrapLazy>
+	 * ) =>
+	 * Promise<void>} effect
 	 * @example
 	 * import { Signal, Derived, Effect, Console } from  'vivth';
 	 *
@@ -32,6 +120,7 @@ export class Effect {
 	 * new Effect(async ({
 	 * 			subscribe, // : registrar callback for this effect instance, immediately return the signal instance
 	 * 			removeEffect, // : disable this effect instance from reacting to dependency changes;
+	 * 			isLastCalled, // : check whether this callback run is this instant last called effect;
 	 * 		}) => {
 	 * 			Console.log(subscribe(double).value); // effect listen to double changes
 	 * 			const a = double.value; //  no need to wrap double twice with $
@@ -44,44 +133,12 @@ export class Effect {
 		setOfEffects.add(this);
 		this.run();
 	}
-	options = LazyFactory(() => ({
-		/**
-		 * @instance options
-		 * @description
-		 * - normally it's passed as argument to constructor, however it is also accessible from `options` property;
-		 * @template {Signal} S
-		 * @param {S} signal
-		 * @returns {S}
-		 * @example
-		 * const effect = new Effect(async () => {
-		 * 	// code
-		 * })
-		 * effect.options.subscribe(signalInstance);
-		 */
-		subscribe: (signal) => {
-			if (!(signal instanceof Signal)) {
-				signal = signal[unwrapLazy];
-			}
-			signal.subscribers.setOf.add(this);
-			return signal;
-		},
-		/**
-		 * @instance options
-		 * @description
-		 * - normally it's passed as argument to constructor, however it is also accessible from `options` property;
-		 * @type {()=>void}
-		 * @example
-		 * const effect = new Effect(async () => {
-		 * 	// code
-		 * })
-		 * effect.options.removeEffect();
-		 */
-		removeEffect: () => {
-			setOfEffects.delete(this);
-		},
-	}));
 	/**
-	 * @param {Effect["options"]} effectInstance
+	 * @type {Object}
+	 */
+	#current;
+	/**
+	 * @param {Omit<Effect["options"], typeof unwrapLazy>} effectInstance
 	 * @returns {Promise<void>}
 	 */
 	#effect;
@@ -90,13 +147,17 @@ export class Effect {
 	 * - normally is to let to be automatically run when dependency signals changes, however it's also accessible as instance method;
 	 * @returns {void}
 	 * @example
+	 * import { Effect } from 'vivth';
+	 *
 	 * const effect = new Effect(async ()=>{
 	 * 	// code
 	 * })
 	 * effect.run();
 	 */
 	run = () => {
-		TryAsync(async () => await this.#effect(this.options)).then(([_, error]) => {
+		TryAsync(async () => {
+			await this.#effect(this.options[unwrapLazy]());
+		}).then(([, error]) => {
 			if (!error) {
 				return;
 			}

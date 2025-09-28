@@ -2,5 +2,5 @@
 
 /**
  * - return type of Q callback;
- * @typedef {{resume:()=>void, isLastOnQ:boolean}} QCBReturn
+ * @typedef {{resume:()=>void, isLastOnQ:()=>boolean}} QCBReturn
  */

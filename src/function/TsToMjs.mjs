@@ -8,7 +8,7 @@ import { transform } from 'esbuild';
 import { Console } from '../class/Console.mjs';
 import { Paths } from '../class/Paths.mjs';
 import { TryAsync } from './TryAsync.mjs';
-import { WriteFileSafe } from './WriteFileSafe.mjs';
+import { FileSafe } from '../class/FileSafe.mjs';
 
 /**
  * @description
@@ -16,6 +16,7 @@ import { WriteFileSafe } from './WriteFileSafe.mjs';
  * - on certain circumstance where `.mjs` result needed to be typed, you need to manually add `jsdoc`;
  * >- uses `"at"preserve` to register `jsdoc` inline;
  * @param {string} path_
+ * - path from `Paths.root`;
  * @param {Object} [options]
  * @param {string} [options.overrideDir]
  * - default: write conversion to same directory;
@@ -28,7 +29,7 @@ import { WriteFileSafe } from './WriteFileSafe.mjs';
  *
  * TsToMjs('./myFile.mts', { encoding: 'utf-8', overrideDir: './other/dir' });
  */
-export const TsToMjs = async (path_, { overrideDir = undefined, encoding = 'utf-8' } = {}) => {
+export async function TsToMjs(path_, { overrideDir = undefined, encoding = 'utf-8' } = {}) {
 	const rootPath = Paths.normalize(Paths.root);
 	if (!Paths.normalize(path_).startsWith(rootPath)) {
 		path_ = Paths.normalize(join(rootPath, path_));
@@ -59,9 +60,9 @@ export const TsToMjs = async (path_, { overrideDir = undefined, encoding = 'utf-
 	}
 	const outputDir = overrideDir ? join(rootPath, overrideDir) : dirname(path_);
 	const outputPath = join(outputDir, basename(path_).replace(ext, '.mjs'));
-	const [_, writeError] = await WriteFileSafe(outputPath, result.code, { encoding });
+	const [_, writeError] = await FileSafe.write(outputPath, result.code, { encoding });
 	if (!writeError) {
 		return;
 	}
 	Console.error(writeError);
-};
+}

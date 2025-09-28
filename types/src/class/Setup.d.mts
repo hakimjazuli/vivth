@@ -42,9 +42,10 @@ export class Setup {
      * - proxy `WorkerMainThread_instance` for Setup;
      * @example
      * import { Setup } from 'vivth';
+     * import { Worker } from 'node:worker_threads';
      *
      * Setup.workerMain({
-     * 	workerClass: async () => await (import('worker_threads')).Worker,
+     * 	workerClass: Worker,
      * 	basePath: 'public/assets/js/workers',
      * 	pathValidator: async (workerPath, root, base) => {
      * 		const res = await fetch(`${root}/${base}/${workerPath}`);
@@ -61,16 +62,16 @@ export class Setup {
     /**
      * @description
      * - correct `parentPort` reference when needed;
+     * - export to create new reference to be use to create new WorkerThread instance;
      * @example
      * import { Setup } from 'vivth';
+     * import { parentPort } from 'node:worker_threads';
      *
-     * Setup.workerThread({ parentPort: async () => (await import('node:worker_threads')).parentPort });
+     * export const MyWorkerThreadRef = Setup.workerThread({parentPort});
      * // that is the default value, if your parentPort/equivalent API is not that;
      * // you need to call this method;
      */
-    static workerThread: <Receive_, Post_>(parentPortRef: {
-        parentPort: () => Promise<any>;
-    }) => typeof WorkerThread<Receive_, Post_>;
+    static workerThread: typeof WorkerThread.setup;
 }
 import { SafeExit } from './SafeExit.mjs';
 import { Paths } from './Paths.mjs';

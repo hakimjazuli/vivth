@@ -1,16 +1,21 @@
 /**
- * @template A
- * @typedef {import('./WorkerResult.mjs').WorkerResult<A>} WorkerResult
+ * @template POST
+ * @typedef {import('./WorkerResult.mjs').WorkerResult<POST>} WorkerResult
  */
 /**
  * @typedef {import('./WorkerThread.mjs').WorkerThread} WorkerThread
+ * @typedef {import('../common/lazie.mjs').unwrapLazy} unwrapLazy
  */
 /**
  * @description
  * - class helper to create `Worker` instance;
+ * - before any `Worker` functionaily to be used, you need to setup it with `WorkerThread.setup` and `WorkerMainThread.setup` before runing anytyhing;
  * @template {WorkerThread} WT
  */
 export class WorkerMainThread<WT extends WorkerThread> {
+    /**
+     * @type {boolean}
+     */
     static #isRegistered: boolean;
     /**
      * @description
@@ -19,13 +24,14 @@ export class WorkerMainThread<WT extends WorkerThread> {
      * @param {typeof WorkerMainThread["workerClass"]} param0.workerClass
      * - example:
      * ```js
-     * async () => await (import('worker_threads')).Worker
+     * import { Worker } from 'node:worker_threads';
      * ```
      * @param {typeof WorkerMainThread["pathValidator"]} param0.pathValidator
      * - example:
      * ```js
      * async (workerPath, root, base) => {
-     * 	const res = await fetch(`${root}/${base}/${workerPath}`);
+     *  const truePathCheck = `${root}/${base}/${workerPath}`;
+     * 	const res = await fetch(truePathCheck);
      * 	// might also check wheter it need base or not
      * 	return await res.ok;
      * }
@@ -34,10 +40,11 @@ export class WorkerMainThread<WT extends WorkerThread> {
      * - additonal realtivePath from rootPath;
      * - default: '';
      * @example
+     * import { Worker } from 'node:worker_threads';
      * import { WorkerMainThread } from 'vivth';
      *
      * WorkerMainThread.setup({
-     * 	workerClass: async () => await (import('worker_threads')).Worker,
+     * 	workerClass: Worker,
      * 	basePath: 'public/assets/js/workers',
      * 	pathValidator: async (workerPath, root, base) => {
      * 		const res = await fetch(`${root}/${base}/${workerPath}`);
@@ -55,9 +62,9 @@ export class WorkerMainThread<WT extends WorkerThread> {
      * @description
      * - reference for `Worker` class;
      * - edit via `setup`;
-     * @type {()=>Promise<typeof Worker|typeof import('worker_threads').Worker>}
+     * @type {typeof Worker|typeof import('worker_threads').Worker}
      */
-    static workerClass: () => Promise<typeof Worker | typeof import("worker_threads").Worker>;
+    static workerClass: typeof Worker | typeof import("worker_threads").Worker;
     /**
      * @description
      * - reference for worker file `basePath`;
@@ -80,43 +87,37 @@ export class WorkerMainThread<WT extends WorkerThread> {
         type?: "module";
     };
     /**
+     * @template {WorkerThread} WT
+     * @description
+     * - create Worker_instance;
+     * @param {string} handler
+     * @param {Omit<WorkerOptions|import('worker_threads').WorkerOptions, 'eval'|'type'>} [options]
+     * @returns {WorkerMainThread<WT>}
+     * @example
+     * import { WorkerMainThread } from 'vivth';
+     *
+     * export const myDoubleWorker = WorkerMainThread.newVivthWorker('./doubleWorkerThread.mjs');
+     */
+    static newVivthWorker: (handler: string, options?: Omit<WorkerOptions | import("worker_threads").WorkerOptions, "eval" | "type">) => WorkerMainThread<WT_1>;
+    /**
      * @param {string} handler
      * @param { WorkerOptions
      * | import('worker_threads').WorkerOptions} options
      * @param {WorkerMainThread} worker
      * @param {(any:any)=>void} listener
-     * @param {boolean} isInline
      * @returns {Promise<void>}
      */
-    static #workerFilehandler: (handler: string, options: WorkerOptions | import("worker_threads").WorkerOptions, worker: WorkerMainThread<any>, listener: (any: any) => void, isInline: boolean) => Promise<void>;
+    static #workerFilehandler: (handler: string, options: WorkerOptions | import("worker_threads").WorkerOptions, worker: WorkerMainThread<any>, listener: (any: any) => void) => Promise<void>;
     /**
-     * @type {boolean}
-     */
-    static #isBrowser: boolean;
-    /**
-     * @description
-     * - check whether js run in browser
-     * @type {boolean}
-     */
-    static get isBrowser(): boolean;
-    /**
-     * @description
-     * - create Worker_instance;
-     * @param {string} handler
-     * - if `isInline` === `false`, `handler` should be:
-     * >- pointing to worker thread file; WHICH
-     * >- the path must be relative to `projectRoot`;
-     * - if `isInline` === `true`, `handler` should be
-     * >- string literal of prebundled worker thread script; OR
-     * >- manually made string literal of worker thread script;
-     * @param {Omit<WorkerOptions|import('worker_threads').WorkerOptions, 'eval'|'type'>} [options]
-     * @param {boolean} [isInline]
+     * @private
+     * @param {Parameters<typeof WorkerMainThread<WT>["newVivthWorker"]>[0]} handler
+     * @param {Parameters<typeof WorkerMainThread<WT>["newVivthWorker"]>[1]} [options]
      * @example
      * import { WorkerMainThread } from 'vivth';
      *
-     * export const myDoubleWorker = new WorkerMainThread('./doubleWorkerThread.mjs');
+     * export const myDoubleWorker = WorkerMainThread.newVivthWorker('./doubleWorkerThread.mjs');
      */
-    constructor(handler: string, options?: Omit<WorkerOptions | import("worker_threads").WorkerOptions, "eval" | "type">, isInline?: boolean);
+    private constructor();
     /**
      * @description
      * - terminate all signals that are used on this instance;
@@ -126,7 +127,7 @@ export class WorkerMainThread<WT extends WorkerThread> {
     /**
      * @description
      * - result signal of the processed message;
-     * @type {Derived<WorkerResult<WT["Post"]>>}
+     * @type {Derived<WorkerResult<WT["POST"]>>}
      * @example
      * import { Effect } from 'vivth';
      * import { myDoubleWorker } from './myDoubleWorker.mjs';
@@ -137,19 +138,20 @@ export class WorkerMainThread<WT extends WorkerThread> {
      * 	// code
      * })
      */
-    receiverSignal: Derived<WorkerResult<WT["Post"]>>;
+    receiverSignal: Derived<WorkerResult<WT["POST"]>>;
     /**
      * @description
      * - callback to send message to the worker thread;
-     * @type {(event: WT["Receive"])=>void}
+     * @type {(event: WT["RECEIVE"])=>void}
      * @example
      * import { myDoubleWorker } from './myDoubleWorker.mjs';
      *
      * myDoubleWorker.postMessage(90);
      */
-    postMessage: (event: WT["Receive"]) => void;
+    postMessage: (event: WT["RECEIVE"]) => void;
     #private;
 }
-export type WorkerResult<A> = import("./WorkerResult.mjs").WorkerResult<A>;
+export type WorkerResult<POST> = import("./WorkerResult.mjs").WorkerResult<POST>;
 export type WorkerThread = import("./WorkerThread.mjs").WorkerThread<any, any>;
+export type unwrapLazy = "vivth:unwrapLazy;";
 import { Derived } from './Derived.mjs';

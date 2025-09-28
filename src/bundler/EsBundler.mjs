@@ -5,6 +5,8 @@ import { build } from 'esbuild';
 import { Console } from '../class/Console.mjs';
 import { Paths } from '../class/Paths.mjs';
 import { TryAsync } from '../function/TryAsync.mjs';
+import { pluginVivthBundle } from './adds/pluginVivthBundle.mjs';
+import { externals } from './adds/externals.mjs';
 
 /**
  * @description
@@ -13,15 +15,18 @@ import { TryAsync } from '../function/TryAsync.mjs';
  * @param {Object} options
  * @param {string} options.content
  * - the code can also uses composites from the result from multiple readFiles;
- * - the import statements on the content should use absolute path from project root, prefixed with forward slash;
- * @param {string} options.extension
- * @param {boolean} [options.asBinary]
- * @param {Omit<Parameters<build>[0], 'entryPoints'|'bundle'|'write'|'format'|'sourcemap'|'external'|'stdin'>} [esbuildOptions]
- * @returns {Promise<ReturnType<typeof TryAsync<string>>>}
+ * @param {string} options.root
+ * - use dirname of said fileString path;
+ * @param {'.mts'|'.ts'|'.mjs'} options.extension
+ * @param {boolean} [options.withBinHeader]
+ * @param {Omit<Parameters<build>[0],
+ * 'entryPoints'|'bundle'|'write'|'sourcemap'>
+ * } [esbuildOptions]
+ * @returns {ReturnType<typeof TryAsync<string>>}
  * @example
  * import { EsBundler } from 'vivth';
  *
- * const bundledString = EsBundler(,
+ * const bundledString = EsBundler(
  * 	{
  * 		content: ``,
  * 		extension: '.mts',
@@ -31,7 +36,10 @@ import { TryAsync } from '../function/TryAsync.mjs';
  * 	...esbuildOptions,
  * });
  */
-export const EsBundler = async ({ content, extension, asBinary = false }, esbuildOptions = {}) => {
+export async function EsBundler(
+	{ content, extension, root, withBinHeader = false },
+	esbuildOptions = {}
+) {
 	return await TryAsync(async () => {
 		/** @type {Parameters<build>[0]['stdin']['loader']} */
 		let loader;
@@ -52,28 +60,34 @@ export const EsBundler = async ({ content, extension, asBinary = false }, esbuil
 				Console.error(error);
 				throw new Error(JSON.stringify(error));
 		}
+		esbuildOptions.external = [...(esbuildOptions?.external ?? []), ...externals];
+		esbuildOptions.plugins = [...(esbuildOptions?.plugins ?? []), pluginVivthBundle];
 		const result = await build({
 			target: 'esnext',
 			platform: 'node',
+			format: 'esm',
 			...esbuildOptions,
 			stdin: {
 				contents: content,
 				loader,
-				resolveDir: Paths.root,
+				resolveDir: root ?? Paths.root,
+				...esbuildOptions.banner,
 			},
-			format: 'esm',
 			bundle: true,
 			write: false,
 			sourcemap: false,
-			external: [],
 			banner: {
-				js: asBinary ? '#!/usr/bin/env node' : '',
+				js: withBinHeader ? '#!/usr/bin/env node' : '',
+				...esbuildOptions.banner,
 			},
 		});
 		if (result.warnings?.length) {
 			Console.warn(result.warnings.map((w) => w.text).join('\n'));
 		}
 		const resString = result.outputFiles?.[0]?.text;
-		return resString ?? '';
+		if (!resString) {
+			return '';
+		}
+		return resString;
 	});
-};
+}

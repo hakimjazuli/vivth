@@ -4,9 +4,9 @@
  * @description
  * - function for error as value for asynchronous operation;
  * - usefull to flatten indentation for error handlings;
- * @template ResultType
- * @param {()=>Promise<ResultType>} asyncFunction_
- * @returns {Promise<[ResultType|undefined, Error|undefined]>}
+ * @template RESULT
+ * @param {()=>Promise<RESULT>} asyncFunction_
+ * @returns {Promise<[RESULT|undefined, Error|undefined]>}
  * @example
  * import { TryAsync } from 'vivth';
  *
@@ -21,11 +21,11 @@
  * 	return await res.json();
  * })
  */
-export const TryAsync = async (asyncFunction_) => {
+export async function TryAsync(asyncFunction_) {
 	try {
 		const result = await asyncFunction_();
 		return [result, undefined];
 	} catch (error) {
 		return [undefined, error];
 	}
-};
+}

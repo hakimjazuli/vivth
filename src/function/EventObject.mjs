@@ -4,9 +4,9 @@ import { EventNameSpace } from '../common/EventNameSpace.mjs';
 /**
  * @description
  * - simple object generation function helper for [EventCheck](#eventcheck), for multiple context, eg: `mainThread` <-> `workerThread`;
- * @template {string} N
- * @param {N} name
- * @returns {{[EventNameSpace]: N}}
+ * @template {string} NAME
+ * @param {NAME} name
+ * @returns {{[EventNameSpace]: NAME}}
  * @example
  * import { EventCheck } from 'vivth';
  * import { incomingMessage } from './some/where.mjs';
@@ -16,6 +16,6 @@ import { EventNameSpace } from '../common/EventNameSpace.mjs';
  * // or manually {[EventNameSpace]:'worker:exit'};
  * // which either will result true;
  */
-export const EventObject = (name) => {
+export function EventObject(name) {
 	return { [EventNameSpace]: name };
-};
+}

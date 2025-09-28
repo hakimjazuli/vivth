@@ -2,61 +2,82 @@
 
 /**
  * @description
- * - class with static methods to print to standard console with added style;
+ * - class with static methods to print to standard console with bare minimum ANSI styles;
  */
 export class Console {
+	static #ansi = {
+		reset: '\x1b[0m',
+		bold: '\x1b[1m',
+		colors: {
+			log: '\x1b[32m', // green
+			info: '\x1b[34m', // blue
+			warn: '\x1b[33m', // yellow
+			error: '\x1b[31m', // red
+		},
+	};
 	/**
 	 * @param {string} prefix
 	 * @param {'log'|'info'|'error'|'warn'} mode
-	 * - Console method to use
 	 * @param {any} data
-	 * @param {string} color
-	 * @param {string} bgcolor
 	 * @returns {void}
 	 */
-	static #call = (prefix, mode, data, color, bgcolor) => {
-		/** @type {unknown} */
+	static #call = (prefix, mode, data) => {
 		const fn = console[mode];
-		if (typeof fn !== 'function') {
-			return;
-		}
-		fn.call(
-			console,
-			`%c${prefix} ${mode.toUpperCase()}:`,
-			`color:${color};background:${bgcolor};padding:2px 6px;border-radius:4px;`,
-			data
-		);
+		if (typeof fn !== 'function') return;
+
+		const color = Console.#ansi.colors[mode] || '';
+		const styledPrefix = `${color}${Console.#ansi.bold}${prefix} ${mode.toUpperCase()}:${
+			Console.#ansi.reset
+		}`;
+		fn(styledPrefix, data);
 	};
+
 	/**
 	 * @description
 	 * @param {any} data
 	 * @returns {void}
+	 * @example
+	 * import { Console } from 'vivth';
+	 *
+	 * Console.log({
+	 * 	hello: 'world!!',
+	 * });
 	 */
-	static log = (data) => {
-		Console.#call('🟢', 'log', data, 'white', '#2e7d32');
-	};
+	static log = (data) => Console.#call('🟢', 'log', data);
 	/**
 	 * @description
 	 * @param {any} data
 	 * @returns {void}
+	 * @example
+	 * import { Console } from 'vivth';
+	 *
+	 * Console.info({
+	 * 	hello: 'world!!',
+	 * });
 	 */
-	static info = (data) => {
-		Console.#call('🔵', 'info', data, 'white', '#1565c0');
-	};
+	static info = (data) => Console.#call('🔵', 'info', data);
 	/**
 	 * @description
 	 * @param {any} data
 	 * @returns {void}
+	 * @example
+	 * import { Console } from 'vivth';
+	 *
+	 * Console.warn({
+	 * 	hello: 'world!!',
+	 * });
 	 */
-	static warn = (data) => {
-		Console.#call('🟠', 'warn', data, 'black', '#ffb300');
-	};
+	static warn = (data) => Console.#call('🟠', 'warn', data);
 	/**
 	 * @description
 	 * @param {any} data
 	 * @returns {void}
+	 * @example
+	 * import { Console } from 'vivth';
+	 *
+	 * Console.error({
+	 * 	hello: 'world!!',
+	 * });
 	 */
-	static error = (data) => {
-		Console.#call('🔴', 'error', data, 'white', '#c62828');
-	};
+	static error = (data) => Console.#call('🔴', 'error', data);
 }

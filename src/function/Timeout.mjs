@@ -16,8 +16,8 @@
  * }
  * test();
  */
-export const Timeout = (timeMS) => {
+export function Timeout(timeMS) {
 	return new Promise((resolve) => {
 		setTimeout(resolve, timeMS);
 	});
-};
+}

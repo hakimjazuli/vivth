@@ -24,11 +24,14 @@ npm i vivth
   > - fully typed `worker-threads` abstraction;
   > - ` error as value` function helper;
   > - opionated `autoDocumentation`;
-  > - opionated `bundler`;
+  > - opionated `bundler`:
+  >   > - abstracted via `esbuild`;
+  > - opionated `compiler`;
+  >   > - abstracted via `pkg`, `deno`, and `bun`;
 
 ## versions:
 
-- `1.0.0:b`:
+- `1.0.0+:b`:
   > - beta release;
   > - checking edge cases;
   > - stable API, the exposed API access are highly unlikely to changes, only the underlying code

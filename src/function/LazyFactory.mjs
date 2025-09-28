@@ -6,14 +6,15 @@ import { unwrapLazy } from '../common/lazie.mjs';
  * @description
  * - function helper for creating lazyObject:
  * >- usefull for lazily instantiating an object, since instance naturally have props/methods;
- * @template T
- * @param {() => T} factory
- * @returns {T & {[unwrapLazy]: string}}
+ * @template FACTORY
+ * @param {() => FACTORY} factory
+ * @returns {FACTORY & {[unwrapLazy]: ()=> FACTORY}}
  * - the unwrapLazy prop can be accessed to force instatiation/call;
  * >- `unwrapLazy` prop name can be checked by checking the list of possible prop, from your ide;
- * >- as of version 1.0.0, value is `vivth:unwrapLazy;`;
+ * >- as of version `1.0.0`, value is `vivth:unwrapLazy;`;
  * @example
  * import { LazyFactory } from  'vivth';
+ *
  * class MyClass{
  *    constructor() {
  *      this.myProp = 1; // will only available when accessed;
@@ -31,29 +32,28 @@ import { unwrapLazy } from '../common/lazie.mjs';
  *
  * const a = myInstance; // not yet initiated;
  * const b = a.myProp // imediately initiated;
+ * // OR
+ * myInstance["vivth:unwrapLazy;"]() // forcefully call the callback;
  */
-export const LazyFactory = (factory) => {
+export function LazyFactory(factory) {
 	let instance;
 	// @ts-expect-error
 	return new Proxy(
 		{},
 		{
 			get(_, prop) {
-				if (!instance) {
-					instance = factory();
-				}
 				if (prop === unwrapLazy) {
 					if (!instance) {
 						instance = factory();
 					}
-					return instance;
+					return () => instance;
+				}
+				if (!instance) {
+					instance = factory();
 				}
 				return instance[prop];
 			},
 			set(_, prop, newValue) {
-				if (prop === unwrapLazy) {
-					instance = factory();
-				}
 				if (!instance) {
 					instance = factory();
 				}
@@ -68,4 +68,4 @@ export const LazyFactory = (factory) => {
 			},
 		}
 	);
-};
+}

@@ -1,40 +1,71 @@
 /**
  * @description
- * - class with static methods to print to standard console with added style;
+ * - class with static methods to print to standard console with bare minimum ANSI styles;
  */
 export class Console {
+    static #ansi: {
+        reset: string;
+        bold: string;
+        colors: {
+            log: string;
+            info: string;
+            warn: string;
+            error: string;
+        };
+    };
     /**
      * @param {string} prefix
      * @param {'log'|'info'|'error'|'warn'} mode
-     * - Console method to use
      * @param {any} data
-     * @param {string} color
-     * @param {string} bgcolor
      * @returns {void}
      */
-    static #call: (prefix: string, mode: "log" | "info" | "error" | "warn", data: any, color: string, bgcolor: string) => void;
+    static #call: (prefix: string, mode: "log" | "info" | "error" | "warn", data: any) => void;
     /**
      * @description
      * @param {any} data
      * @returns {void}
+     * @example
+     * import { Console } from 'vivth';
+     *
+     * Console.log({
+     * 	hello: 'world!!',
+     * });
      */
     static log: (data: any) => void;
     /**
      * @description
      * @param {any} data
      * @returns {void}
+     * @example
+     * import { Console } from 'vivth';
+     *
+     * Console.info({
+     * 	hello: 'world!!',
+     * });
      */
     static info: (data: any) => void;
     /**
      * @description
      * @param {any} data
      * @returns {void}
+     * @example
+     * import { Console } from 'vivth';
+     *
+     * Console.warn({
+     * 	hello: 'world!!',
+     * });
      */
     static warn: (data: any) => void;
     /**
      * @description
      * @param {any} data
      * @returns {void}
+     * @example
+     * import { Console } from 'vivth';
+     *
+     * Console.error({
+     * 	hello: 'world!!',
+     * });
      */
     static error: (data: any) => void;
 }

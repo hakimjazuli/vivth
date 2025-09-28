@@ -5,7 +5,6 @@ import { readFile, stat } from 'node:fs/promises';
 
 import chokidar from 'chokidar';
 import { EventSignal } from '../class/EventSignal.mjs';
-import { QChannel } from '../class/QChannel.mjs';
 import { parsedFile } from './parsedFile.mjs';
 import { SafeExit } from '../class/SafeExit.mjs';
 import { Effect } from '../class/Effect.mjs';
@@ -13,10 +12,9 @@ import { Paths } from '../class/Paths.mjs';
 import { Signal } from '../class/Signal.mjs';
 import { LazyFactory } from '../function/LazyFactory.mjs';
 import { TryAsync } from '../function/TryAsync.mjs';
-import { Timeout } from '../function/Timeout.mjs';
 import { Console } from '../class/Console.mjs';
 import { TsToMjs } from '../function/TsToMjs.mjs';
-import { WriteFileSafe } from '../function/WriteFileSafe.mjs';
+import { FileSafe } from '../class/FileSafe.mjs';
 
 /**
  * @typedef {import('fs').Stats} Stats
@@ -47,7 +45,7 @@ const acceptableExt = new Set(['.mjs', '.mts', '.ts']);
  * >>- `"at"description` are treated as plain `markdown`;
  * >>- first `"at"${string}` after `"at"description` until `"at"example` will be treated as `javascript` comment block on the `markdown`;
  * >>- `"at"example` are treated as `javascript` block on the `markdown` file, and should be placed last on the same comment block;
- * >>- you can always look at `vivth/src` files to check how the source, and the `README.md` and `index.mjs` is documentation/generation results;
+ * >>- you can always look at `vivth/src` files to check how the source, and the `README.md` and `index.mjs` documentation/generation results;
  */
 export class JSautoDOC {
 	/**
@@ -69,25 +67,9 @@ export class JSautoDOC {
 	 * @param {import('chokidar').ChokidarOptions} [options.option]
 	 * - ChokidarOptions;
 	 * @example
-	 * import { Console, Setup, JSautoDOC } from 'vivth';
+	 * import { JSautoDOC } from 'vivth';
 	 *
-	 * const { paths, safeExit } = Setup;
-	 *
-	 * new paths({
-	 * 	root: process?.env?.INIT_CWD ?? process?.cwd(),
-	 * });
-	 *
-	 * new safeExit({
-	 * 	exitEventNames: ['SIGINT', 'SIGTERM', 'exit'],
-	 * 	exitCallbackListeners: (eventName) => {
-	 * 		process.once(eventName, function () {
-	 * 			safeExit.instance.exiting.correction(true);
-	 * 			Console.log(`safe exit via "${eventName}"`);
-	 * 		});
-	 * 	},
-	 * });
-	 *
-	 * new JSautoDOC({
+	 *  new JSautoDOC({
 	 * 	paths: { dir: 'src', file: 'index.mjs', readMe: 'README.md' },
 	 * 	copyright: 'this library is made and distributed under MIT license;',
 	 * 	tableOfContentTitle: 'list of exported API and typehelpers',
@@ -189,39 +171,32 @@ export class JSautoDOC {
 	 * @type {Signal<string>}
 	 */
 	#readMESRCContent = LazyFactory(() => new Signal(undefined));
-	/**
-	 * @type {QChannel<JSautoDOC>}
-	 */
-	#modQ = new QChannel();
-	#generatedREADME_md = new Effect(async ({ subscribe }) => {
-		this.#modQ.callback(this, async ({ isLastOnQ }) => {
-			if (!isLastOnQ) {
-				return;
-			}
-			await Timeout(1000);
-			const contentSRC = subscribe(this.#readMESRCContent).value;
-			const filepaths = subscribe(this.#filePaths).value;
-			if (!contentSRC || !filepaths) {
-				return;
-			}
-			const { readme, mjsFile } = await this.#generateFromSRC(contentSRC, filepaths);
-			const readmePath = join(Paths.root, this.#paths.readMe);
-			const mjsFilePath = join(Paths.root, this.#paths.file);
-			const [[, errorWriteReadme], [, errorWriteMjsFile]] = await Promise.all([
-				WriteFileSafe(readmePath, readme, { encoding }),
-				WriteFileSafe(join(Paths.root, this.#paths.file), mjsFile, { encoding }),
-			]);
-			if (!errorWriteMjsFile) {
-				Console.info({ message: `successfully generate: '${mjsFilePath}'` });
-			} else {
-				Console.error({ message: `unable to generate: '${mjsFilePath}';`, errorWriteMjsFile });
-			}
-			if (!errorWriteReadme) {
-				Console.info({ message: `successfully generate: '${readmePath}'` });
-			} else {
-				Console.error({ message: `unable to generate: '${readmePath}';`, errorWriteReadme });
-			}
-		});
+	#generatedREADME_md = new Effect(async ({ subscribe, isLastCalled }) => {
+		const contentSRC = subscribe(this.#readMESRCContent).value;
+		const filepaths = subscribe(this.#filePaths).value;
+		if (!(await isLastCalled(100)) || !contentSRC || !filepaths) {
+			return;
+		}
+		const { readme, mjsFile } = await this.#generateFromSRC(contentSRC, filepaths);
+		if (!(await isLastCalled())) {
+			return;
+		}
+		const readmePath = join(Paths.root, this.#paths.readMe);
+		const mjsFilePath = join(Paths.root, this.#paths.file);
+		const [[, errorWriteReadme], [, errorWriteMjsFile]] = await Promise.all([
+			FileSafe.write(readmePath, readme, { encoding }),
+			FileSafe.write(mjsFilePath, mjsFile, { encoding }),
+		]);
+		if (!errorWriteReadme) {
+			Console.info({ message: `successfully generate: '${readmePath}'` });
+		} else {
+			Console.error({ message: `unable to generate: '${readmePath}';`, errorWriteReadme });
+		}
+		if (!errorWriteMjsFile) {
+			Console.info({ message: `successfully generate: '${mjsFilePath}'` });
+		} else {
+			Console.error({ message: `unable to generate: '${mjsFilePath}';`, errorWriteMjsFile });
+		}
 	});
 	/**
 	 * @param {string} string
@@ -355,12 +330,13 @@ export class JSautoDOC {
 				return;
 			}
 			dispatch.value = new parsedFile(path__, encoding);
+			await dispatch.value.parse();
 			dispatch.subscribers.notify();
 			this.#filePaths.subscribers.notify(async ({ signalInstance }) => {
 				Console.info({ [eventName]: path__ });
 				signalInstance.value.add(path__);
 			});
-		}).then(([_, error]) => {
+		}).then(([, error]) => {
 			if (!error) {
 				return;
 			}

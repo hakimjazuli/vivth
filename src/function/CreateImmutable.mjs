@@ -9,14 +9,14 @@ import { TrySync } from './TrySync.mjs';
  * - function for create immutable object;
  * - usefull for binding immutable object to global for shared object:
  * >- e.g. to window object in browser;
- * @template {Object} P
- * @template {Object} O
+ * @template {Object} PARENT
+ * @template {Object} OBJECT
  * @param {string} keyName
- * @param {P} parent
- * @param {(this:P)=>O} object
+ * @param {PARENT} parent
+ * @param {(this:PARENT)=>OBJECT} object
  * @param {Object} [options]
  * @param {boolean} [options.lazy]
- * @return {O}
+ * @return {OBJECT}
  * @example
  * import { CreateImmutable } from 'vivth';
  *
@@ -29,7 +29,7 @@ import { TrySync } from './TrySync.mjs';
  * 	getMap(name_) => mappedObject.get(name_),
  * })
  */
-export const CreateImmutable = (parent, keyName, object, { lazy = true } = {}) => {
+export function CreateImmutable(parent, keyName, object, { lazy = true } = {}) {
 	if (!parent || typeof parent !== 'object') {
 		Console.error({
 			object,
@@ -39,7 +39,7 @@ export const CreateImmutable = (parent, keyName, object, { lazy = true } = {}) =
 		});
 		return;
 	}
-	let [_, error] = TrySync(() => {
+	let [, error] = TrySync(() => {
 		Object.defineProperty(parent, keyName, {
 			value: lazy ? LazyFactory(() => object.call(parent)) : object.call(parent),
 			writable: false,
@@ -48,7 +48,7 @@ export const CreateImmutable = (parent, keyName, object, { lazy = true } = {}) =
 		});
 	});
 	if (error) {
-		[_, error] = TrySync(() => {
+		[, error] = TrySync(() => {
 			parent[keyName] = lazy ? LazyFactory(() => object.call(parent)) : object.call(parent);
 		});
 	}
@@ -61,4 +61,4 @@ export const CreateImmutable = (parent, keyName, object, { lazy = true } = {}) =
 		return;
 	}
 	return parent[keyName];
-};
+}

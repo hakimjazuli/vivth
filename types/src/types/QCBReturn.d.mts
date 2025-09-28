@@ -3,5 +3,5 @@
  */
 export type QCBReturn = {
     resume: () => void;
-    isLastOnQ: boolean;
+    isLastOnQ: () => boolean;
 };

@@ -1,5 +1,6 @@
 // @ts-check
 
+import { Console } from '../class/Console.mjs';
 import { TryAsync } from './TryAsync.mjs';
 
 /**
@@ -9,28 +10,28 @@ import { TryAsync } from './TryAsync.mjs';
  * - usefull to flatten indentation for error handlings;
  * - caveat:
  * >- run in sequence, awaiting each key bofore running next key;
- * @template {string} Key
- * @template ReturnType_
+ * @template {string} KEY
+ * @template RETURNTYPE
  * @template {Record<
- * 	Key,
- * 	() => Promise<ReturnType_>
+ * 	KEY,
+ * 	(err:{prevError:undefined|Error}) => Promise<RETURNTYPE>
  * >} RecordTryType
  * @param {RecordTryType} tryRecord
  * @returns {Promise<
- * 	[[keyof RecordTryType, ReturnType_], undefined]
+ * 	[[keyof RecordTryType, RETURNTYPE], undefined]
  * 	| [[undefined, undefined], Error]
  * >}
  * @example
  * import { Try } from 'vivth';
  *
  * const [[key, result], error] = await Try({
- * 	someRuntime: async () => {
+ * 	someRuntime: async ( prevError ) => {
  * 		// asuming on this one doesn't naturally throw error,
  * 		// yet you need to continue to next key,
  * 		// instead of returning,
  * 		// you should throw new Error(something);
  * 	},
- * 	browser: async () => {
+ * 	browser: async ( prevError ) => {
  * 		return location?.origin;
  * 		// if no error, stop other key function from running;
  * 		// key = 'browser'
@@ -39,7 +40,7 @@ import { TryAsync } from './TryAsync.mjs';
  * 		// if error;
  * 		// run nodeOrBun;
  * 	},
- * 	nodeOrBun: async () => {
+ * 	nodeOrBun: async ( prevError ) => {
  * 		return process?.env?.INIT_CWD ?? process?.cwd();
  * 		// if no error;
  * 		// key = 'nodeOrBun'
@@ -51,14 +52,18 @@ import { TryAsync } from './TryAsync.mjs';
  * 	},
  * });
  */
-export const Try = async (tryRecord) => {
+export async function Try(tryRecord) {
+	let prevError = undefined;
 	for (const key in tryRecord) {
 		const callback = tryRecord[key];
-		const [result, error] = await TryAsync(callback);
+		const [result, error] = await TryAsync(async () => {
+			return await callback({ prevError });
+		});
 		if (error) {
+			prevError = error;
 			continue;
 		}
 		return [[key, result], undefined];
 	}
-	return [[undefined, undefined], new Error('unable to run any key')];
-};
+	return [[undefined, undefined], prevError];
+}

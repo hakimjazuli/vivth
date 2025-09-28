@@ -14,7 +14,10 @@ export const setOfEffects: Set<Effect>;
 export class Effect {
     /**
      * @description
-     * @param {(arg0:Effect["options"])=>Promise<void>} effect
+     * @param {( arg0:
+     * Omit<Effect["options"], typeof unwrapLazy>
+     * ) =>
+     * Promise<void>} effect
      * @example
      * import { Signal, Derived, Effect, Console } from  'vivth';
      *
@@ -23,6 +26,7 @@ export class Effect {
      * new Effect(async ({
      * 			subscribe, // : registrar callback for this effect instance, immediately return the signal instance
      * 			removeEffect, // : disable this effect instance from reacting to dependency changes;
+     * 			isLastCalled, // : check whether this callback run is this instant last called effect;
      * 		}) => {
      * 			Console.log(subscribe(double).value); // effect listen to double changes
      * 			const a = double.value; //  no need to wrap double twice with $
@@ -30,28 +34,63 @@ export class Effect {
      *
      * count.value++;
      */
-    constructor(effect: (arg0: Effect["options"]) => Promise<void>);
+    constructor(effect: (arg0: Omit<Effect["options"], typeof unwrapLazy>) => Promise<void>);
+    /**
+     * @typedef {import('../common/lazie.mjs').unwrapLazy} unwrapLazy
+     */
+    /**
+     * @description
+     * - collections of lazy methods to handle effect calls of this instance;
+     */
     options: {
         /**
          * @instance options
          * @description
-         * - normally it's passed as argument to constructor, however it is also accessible from `options` property;
-         * @template {Signal} S
-         * @param {S} signal
-         * @returns {S}
+         * @returns {(timeoutMS?:number)=>Promise<boolean>}
+         * - timeoutMS only necessary if the operation doesn't naturally await;
+         * - if it's operation such as `fetch`, you can just leave it blank;
          * @example
+         *
+         * import { Effect } from 'vivth';
+         *
+         * const effect = new Effect(async ({ isLastCalled }) => {
+         * 	if (!(await isLastCalled(100))) {
+         * 		return;
+         * 	}
+         * 	// OR
+         * 	const res = await fetch('some/path');
+         * 	if (!(await isLastCalled(
+         * 		// no need to add timeoutMS argument, as fetch are naturally add delay;
+         * 	))) {
+         * 		return;
+         * 	}
+         * })
+         */
+        readonly isLastCalled: (timeoutMS?: number) => Promise<boolean>;
+        /**
+         * @instance options
+         * @description
+         * - normally it's passed as argument to constructor, however it is also accessible from `options` property;
+         * @template {Signal} SIGNAL
+         * @param {SIGNAL} signal
+         * @returns {SIGNAL}
+         * @example
+         * import { Effect } from 'vivth';
+         *
          * const effect = new Effect(async () => {
          * 	// code
          * })
          * effect.options.subscribe(signalInstance);
          */
-        subscribe: <S extends Signal<any>>(signal: S) => S;
+        subscribe: <SIGNAL extends Signal<any>>(signal: SIGNAL) => SIGNAL;
         /**
          * @instance options
          * @description
          * - normally it's passed as argument to constructor, however it is also accessible from `options` property;
          * @type {()=>void}
          * @example
+         * import { Effect } from 'vivth';
+         *
          * const effect = new Effect(async () => {
          * 	// code
          * })
@@ -59,13 +98,70 @@ export class Effect {
          */
         removeEffect: () => void;
     } & {
-        "vivth:unwrapLazy;": string;
+        "vivth:unwrapLazy;": () => {
+            /**
+             * @instance options
+             * @description
+             * @returns {(timeoutMS?:number)=>Promise<boolean>}
+             * - timeoutMS only necessary if the operation doesn't naturally await;
+             * - if it's operation such as `fetch`, you can just leave it blank;
+             * @example
+             *
+             * import { Effect } from 'vivth';
+             *
+             * const effect = new Effect(async ({ isLastCalled }) => {
+             * 	if (!(await isLastCalled(100))) {
+             * 		return;
+             * 	}
+             * 	// OR
+             * 	const res = await fetch('some/path');
+             * 	if (!(await isLastCalled(
+             * 		// no need to add timeoutMS argument, as fetch are naturally add delay;
+             * 	))) {
+             * 		return;
+             * 	}
+             * })
+             */
+            readonly isLastCalled: (timeoutMS?: number) => Promise<boolean>;
+            /**
+             * @instance options
+             * @description
+             * - normally it's passed as argument to constructor, however it is also accessible from `options` property;
+             * @template {Signal} SIGNAL
+             * @param {SIGNAL} signal
+             * @returns {SIGNAL}
+             * @example
+             * import { Effect } from 'vivth';
+             *
+             * const effect = new Effect(async () => {
+             * 	// code
+             * })
+             * effect.options.subscribe(signalInstance);
+             */
+            subscribe: <SIGNAL extends Signal<any>>(signal: SIGNAL) => SIGNAL;
+            /**
+             * @instance options
+             * @description
+             * - normally it's passed as argument to constructor, however it is also accessible from `options` property;
+             * @type {()=>void}
+             * @example
+             * import { Effect } from 'vivth';
+             *
+             * const effect = new Effect(async () => {
+             * 	// code
+             * })
+             * effect.options.removeEffect();
+             */
+            removeEffect: () => void;
+        };
     };
     /**
      * @description
      * - normally is to let to be automatically run when dependency signals changes, however it's also accessible as instance method;
      * @returns {void}
      * @example
+     * import { Effect } from 'vivth';
+     *
      * const effect = new Effect(async ()=>{
      * 	// code
      * })
@@ -75,3 +171,6 @@ export class Effect {
     #private;
 }
 import { Signal } from './Signal.mjs';
+type unwrapLazy = "vivth:unwrapLazy;";
+import { unwrapLazy } from '../common/lazie.mjs';
+export {};

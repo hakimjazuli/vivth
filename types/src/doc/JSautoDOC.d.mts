@@ -14,7 +14,7 @@
  * >>- `"at"description` are treated as plain `markdown`;
  * >>- first `"at"${string}` after `"at"description` until `"at"example` will be treated as `javascript` comment block on the `markdown`;
  * >>- `"at"example` are treated as `javascript` block on the `markdown` file, and should be placed last on the same comment block;
- * >>- you can always look at `vivth/src` files to check how the source, and the `README.md` and `index.mjs` is documentation/generation results;
+ * >>- you can always look at `vivth/src` files to check how the source, and the `README.md` and `index.mjs` documentation/generation results;
  */
 export class JSautoDOC {
     /**
@@ -36,25 +36,9 @@ export class JSautoDOC {
      * @param {import('chokidar').ChokidarOptions} [options.option]
      * - ChokidarOptions;
      * @example
-     * import { Console, Setup, JSautoDOC } from 'vivth';
+     * import { JSautoDOC } from 'vivth';
      *
-     * const { paths, safeExit } = Setup;
-     *
-     * new paths({
-     * 	root: process?.env?.INIT_CWD ?? process?.cwd(),
-     * });
-     *
-     * new safeExit({
-     * 	exitEventNames: ['SIGINT', 'SIGTERM', 'exit'],
-     * 	exitCallbackListeners: (eventName) => {
-     * 		process.once(eventName, function () {
-     * 			safeExit.instance.exiting.correction(true);
-     * 			Console.log(`safe exit via "${eventName}"`);
-     * 		});
-     * 	},
-     * });
-     *
-     * new JSautoDOC({
+     *  new JSautoDOC({
      * 	paths: { dir: 'src', file: 'index.mjs', readMe: 'README.md' },
      * 	copyright: 'this library is made and distributed under MIT license;',
      * 	tableOfContentTitle: 'list of exported API and typehelpers',

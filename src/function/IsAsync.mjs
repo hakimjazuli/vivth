@@ -18,6 +18,6 @@
  * IsAsync(a); // false
  * IsAsync(b); // true
  */
-export const IsAsync = (functionReference) => {
+export function IsAsync(functionReference) {
 	return functionReference.constructor.name === 'AsyncFunction';
-};
+}

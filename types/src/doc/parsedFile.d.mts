@@ -25,6 +25,7 @@ export class parsedFile {
      * @param {BufferEncoding} [encoding]
      */
     constructor(path__: string, encoding?: BufferEncoding);
+    parse: () => Promise<void>;
     documented: {
         typedef: () => Promise<{
             module: string;
@@ -49,7 +50,30 @@ export class parsedFile {
             reference: string;
         }>;
     } & {
-        "vivth:unwrapLazy;": string;
+        "vivth:unwrapLazy;": () => {
+            typedef: () => Promise<{
+                module: string;
+                readme: string;
+            }>;
+            /**
+             * @type {Set<refType>}
+             */
+            readme: Set<{
+                instanceOrStatic: {
+                    parent: string;
+                    type: string;
+                };
+                fullDescription: string;
+                parsedFullDescription: {
+                    description: string;
+                    jsPreview: string;
+                };
+                isExport: boolean;
+                typeOfVar: string;
+                namedVar: string;
+                reference: string;
+            }>;
+        };
     };
     /**
      * @type {undefined|{module:string, readme:string}}
@@ -69,45 +93,63 @@ export class parsedFile {
     isDirectory: () => Promise<boolean>;
     baseName: {
         /**
-         * @type {string}
+         * @returns {string}
          */
         readonly withExt: string;
         /**
-         * @type {string}
+         * @returns {string}
          */
         readonly noExt: string;
     } & {
-        "vivth:unwrapLazy;": string;
+        "vivth:unwrapLazy;": () => {
+            /**
+             * @returns {string}
+             */
+            readonly withExt: string;
+            /**
+             * @returns {string}
+             */
+            readonly noExt: string;
+        };
     };
     path: {
         /**
-         * @type {string}
+         * @returns {string}
          */
         readonly relative: string;
         /**
-         * @type {string}
+         * @returns {string}
          */
         readonly full: string;
     } & {
-        "vivth:unwrapLazy;": string;
+        "vivth:unwrapLazy;": () => {
+            /**
+             * @returns {string}
+             */
+            readonly relative: string;
+            /**
+             * @returns {string}
+             */
+            readonly full: string;
+        };
     };
     get dirName(): {
         /**
-         * @type {string}
+         * @returns {string}
          */
         readonly relative: string;
         /**
-         * @type {string}
+         * @returns {string}
          */
         readonly full: string;
     };
     get ext(): {
         /**
-         * @type {string|undefined}
+         * @returns {string|undefined}
          */
         readonly withDot: string | undefined;
         /**
-         * @type {string|undefined}
+         * @returns {string|undefined}
          */
         readonly noDot: string | undefined;
     };
@@ -144,10 +186,27 @@ export class parsedFile {
             error: undefined;
         }>;
     } & {
-        "vivth:unwrapLazy;": string;
+        "vivth:unwrapLazy;": () => {
+            /**
+             * @return {Promise<string|undefined>}
+             */
+            string: () => Promise<string | undefined>;
+            parsed: () => Promise<{
+                exportName: undefined;
+                details: undefined;
+                error: {
+                    fullpath: string;
+                    message: string;
+                };
+            } | {
+                exportName: string | undefined;
+                details: ReturnType<(typeof parsedFile)["getDescription"]>;
+                error: undefined;
+            }>;
+        };
     };
     /**
-     * @type {[Promise<any>, undefined]|[undefined, Error]}
+     * @returns {[Promise<any>, undefined]|[undefined, Error]}
      */
     get importAsModuleJS(): [Promise<any>, undefined] | [undefined, Error];
     #private;

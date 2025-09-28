@@ -6,19 +6,25 @@ export const safeCleanUpCBs: Set<() => Promise<void>>;
  * @description
  * - class helper for describing how to Safely Response on exit events
  * - singleton;
- * @template {[string, ...string[]]} eventNames
+ * - most of functionality might need to access `SafeExit.instance.exiting`, if you get warning, you can instantiate `SafeExit` before running anything;
  */
-export class SafeExit<eventNames extends [string, ...string[]]> {
+export class SafeExit {
     /**
      * @description
      * - only accessible after instantiation;
      * @type {SafeExit}
      */
-    static instance: SafeExit<any>;
+    static instance: SafeExit;
     /**
      * @description
      * @param {Object} options
-     * @param {eventNames} options.eventNames
+     * @param {[string, ...string[]]} options.eventNames
+     * - eventNames are blank by default, you need to manually name them all;
+     * - 'exit' will be omited, as it might cause async callbacks failed to execute;
+     * - example:
+     * ```js
+     *  ['SIGINT', 'SIGTERM']
+     * ```
      * @param {()=>void} options.terminator
      * - standard node/bun:
      * ```js
@@ -38,17 +44,26 @@ export class SafeExit<eventNames extends [string, ...string[]]> {
      * 	});
      * };
      * ```
+     * - example Deno:
+     * ```js
+     * (eventName) => {
+     * 	const sig = Deno.signal(eventName);
+     * 		for await (const _ of sig) {
+     * 			exiting.correction(true);
+     * 			sig.dispose();
+     * 			Console.log(`safe exit via "${eventName}"`);
+     * 		}
+     * }
+     * ```
      * - if your exit callback doesn't uses `process` global object you need to input on the SafeExit instantiation
      * @example
      * import { SafeExit, Console } from 'vivth';
      *
      * new SafeExit({
-     * 	// eventNames are blank by default, you need to manually name them all;
-     * 	// 'exit' will be omited, as it might cause async callbacks failed to execute;
      * 	eventNames: ['SIGINT', 'SIGTERM', ...eventNames],
-     * 	terminator = () => process.exit(0), // OR on deno () => Deno.exit(0),
+     * 	terminator : () => process.exit(0), // OR on deno () => Deno.exit(0),
      * 	// optional deno example
-     * 	listener = (eventName) => {
+     * 	listener : (eventName) => {
      * 		const sig = Deno.signal(eventName);
      * 			for await (const _ of sig) {
      * 				exiting.correction(true);
@@ -59,7 +74,7 @@ export class SafeExit<eventNames extends [string, ...string[]]> {
      * });
      */
     constructor({ eventNames, terminator, listener }: {
-        eventNames: eventNames;
+        eventNames: [string, ...string[]];
         terminator: () => void;
         listener?: (eventName: string) => void;
     });

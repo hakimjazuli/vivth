@@ -17,11 +17,11 @@ import { EventNameSpace } from '../common/EventNameSpace.mjs';
  * // or manually {[EventNameSpace]:'worker:exit'};
  * // which either will result true;
  */
-export const EventCheck = (object, eventObject) => {
+export function EventCheck(object, eventObject) {
 	return (
 		object &&
 		typeof object === 'object' &&
 		EventNameSpace in object &&
 		object[EventNameSpace] === eventObject[EventNameSpace]
 	);
-};
+}

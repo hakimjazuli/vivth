@@ -9,13 +9,13 @@ import { Signal } from './Signal.mjs';
  * @description
  * - non browser API;
  * - uses [Signal](#signal) and [Derived](#derived) under the hood;
- * @template V
+ * @template VALUE
  */
 export class EnvSignal {
 	/**
 	 * @description
 	 * - create `EnvSignal` instance;
-	 * @param {V} initialValue
+	 * @param {VALUE} initialValue
 	 */
 	constructor(initialValue) {
 		this.#proxyConst = LazyFactory(() => new Signal(initialValue));
@@ -34,13 +34,13 @@ export class EnvSignal {
 	}
 	#isModified = false;
 	/**
-	 * @type {Signal<V>}
+	 * @type {Signal<VALUE>}
 	 */
 	#proxyConst;
 	/**
 	 * @description
 	 * - exposed property to listen to;
-	 * @type {Derived<V>}
+	 * @type {Derived<VALUE>}
 	 * @example
 	 * import { EnvSignal, Effect } from 'vivth';
 	 *
@@ -55,7 +55,7 @@ export class EnvSignal {
 	 * @description
 	 * - call to correct the value of previously declared value;
 	 * - can only be called once;
-	 * @param {V} correctedValue
+	 * @param {VALUE} correctedValue
 	 * @returns {void}
 	 * @example
 	 * import { EnvSignal } from 'vivth';

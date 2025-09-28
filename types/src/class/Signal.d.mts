@@ -5,22 +5,23 @@ export const setOFSignals: Set<Signal<any>>;
 /**
  * @description
  * - a class for creating effect to signals;
- * @template Value
+ * @template VALUE
  */
-export class Signal<Value> {
+export class Signal<VALUE> {
     /**
      * @param {Set<Effect>} setOfSubscribers
      */
     static #notify: (setOfSubscribers: Set<Effect>) => void;
     /**
      * @description
-     * @param {Value} value
+     * - create a `Signal`;
+     * @param {VALUE} value
      * @example
      * import { Signal, Effect } from  'vivth';
      *
      * const count = new Signal(0);
      */
-    constructor(value: Value);
+    constructor(value: VALUE);
     /**
      * @description
      * - subsrcibers reference of this instance;
@@ -37,17 +38,17 @@ export class Signal<Value> {
          * @instance subscribers
          * @description
          * - manually notify on non primitive value or value that have depths;
-         * @param {(options:{signalInstance:Signal<Value>})=>Promise<void>} [callback]
+         * @param {(options:{signalInstance:Signal<VALUE>})=>Promise<void>} [callback]
          * @returns {void}
          * @example
-         * // for deep signal like array or object you can:
+         * import { Signal } from 'vivth';
          *
+         * // for deep signal like array or object you can:
          * const arraySignal = new Signal([1,2]);
          * arraySignal.value.push(3);
          * arraySignal.subscribers.notify();
          *
          * // OR for more complex mutation:
-         *
          * const objectSignal = new Signal({a:'test', b:'test'});
          * objectSignal.subscribers.notify(async ({ signalInstance }) => {
          * 	signalInstance.value['c'] = 'testc';
@@ -55,10 +56,42 @@ export class Signal<Value> {
          * });
          */
         notify: (callback?: (options: {
-            signalInstance: Signal<Value>;
+            signalInstance: Signal<VALUE>;
         }) => Promise<void>) => void;
     } & {
-        "vivth:unwrapLazy;": string;
+        "vivth:unwrapLazy;": () => {
+            /**
+             * @instance subscribers
+             * @description
+             * - subscribedEffects
+             * @type {Set<Effect>}
+             */
+            setOf: Set<Effect>;
+            /**
+             * @instance subscribers
+             * @description
+             * - manually notify on non primitive value or value that have depths;
+             * @param {(options:{signalInstance:Signal<VALUE>})=>Promise<void>} [callback]
+             * @returns {void}
+             * @example
+             * import { Signal } from 'vivth';
+             *
+             * // for deep signal like array or object you can:
+             * const arraySignal = new Signal([1,2]);
+             * arraySignal.value.push(3);
+             * arraySignal.subscribers.notify();
+             *
+             * // OR for more complex mutation:
+             * const objectSignal = new Signal({a:'test', b:'test'});
+             * objectSignal.subscribers.notify(async ({ signalInstance }) => {
+             * 	signalInstance.value['c'] = 'testc';
+             * 	signalInstance.value['d'] = 'testd';
+             * });
+             */
+            notify: (callback?: (options: {
+                signalInstance: Signal<VALUE>;
+            }) => Promise<void>) => void;
+        };
     };
     /**
      * @description
@@ -88,18 +121,41 @@ export class Signal<Value> {
          */
         ref: () => void;
     } & {
-        "vivth:unwrapLazy;": string;
+        "vivth:unwrapLazy;": () => {
+            /**
+             * @instance remove
+             * @description
+             * - remove effect subscriber to react from this instance value changes;
+             * @param {Effect} effectInstance
+             * @returns {void}
+             */
+            subscriber: (effectInstance: Effect) => void;
+            /**
+             * @instance remove
+             * @description
+             * - remove all effect subscribers to react from this instance value changes;
+             * @type {()=>void}
+             */
+            allSubscribers: () => void;
+            /**
+             * @instance remove
+             * @description
+             * - remove this instance from `vivth` reactivity engine, and nullify it's own value;
+             * @type {()=>void}
+             */
+            ref: () => void;
+        };
     };
     /**
      * @description
      * - value before change;
-     * @type {Value}
+     * @returns {VALUE}
      */
-    get prev(): Value;
+    get prev(): VALUE;
     /**
      * @description
      * - assign new value then automatically notify all subscribers;
-     * @type {Value}
+     * @type {VALUE}
      * @example
      * import { Signal } from  'vivth';
      *
@@ -108,11 +164,11 @@ export class Signal<Value> {
      * // OR
      * count.value = 9;
      */
-    set value(newValue: Value);
+    set value(newValue: VALUE);
     /**
      * @description
      * - value after change;
-     * @type {Value}
+     * @returns {VALUE}
      * @example
      * import { Signal, Effect, Derived } from  'vivth';
      *
@@ -122,11 +178,11 @@ export class Signal<Value> {
      * new Effect(async ({ subscribe }) =>{
      * 	const countValue = subscribe(count).value; // reactive
      * })
-     * const oneMoreThanCount = new Effect(async ({ subscribe }) =>{
+     * const oneMoreThanCount = new Derived(async ({ subscribe }) =>{
      * 	return subscribe(count).value + 1; // reactive
      * })
      */
-    get value(): Value;
+    get value(): VALUE;
     #private;
 }
 import { Effect } from './Effect.mjs';

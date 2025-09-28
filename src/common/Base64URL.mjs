@@ -9,18 +9,23 @@
  * @param {string} mimeType
  * @param {(string:string)=>string} btoaFunction
  * - check your js runtime `btoa`;
- * @returns {string}
+ * - node compatible:
+ * ```js
+ * (str, prevBufferEncoding) =>
+ * 	Buffer.from(str, prevBufferEncoding).toString('base64')
+ * ```
+ * @returns {Base64URLString}
  * @example
  * import { Base64URL } from 'vivth'
- * import { fileString } from './fileString.mjs';
+ * import fileString from './fileString.mjs';
  *
  * Base64URL(fileString, 'application/javascript', btoa);
  */
-export const Base64URL = (fileString, mimeType, btoaFunction) => {
+export function Base64URL(fileString, mimeType, btoaFunction) {
 	const utf8 = new TextEncoder().encode(fileString);
 	let binary = '';
 	for (let byte of utf8) {
 		binary += String.fromCharCode(byte);
 	}
-	return `data:${mimeType};base64,${btoaFunction(binary)}`;
-};
+	return `data:${mimeType.toString()};base64,${btoaFunction(binary)}`;
+}

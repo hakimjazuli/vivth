@@ -2,19 +2,19 @@
  * @description
  * - non browser API;
  * - uses [Signal](#signal) and [Derived](#derived) under the hood;
- * @template V
+ * @template VALUE
  */
-export class EnvSignal<V> {
+export class EnvSignal<VALUE> {
     /**
      * @description
      * - create `EnvSignal` instance;
-     * @param {V} initialValue
+     * @param {VALUE} initialValue
      */
-    constructor(initialValue: V);
+    constructor(initialValue: VALUE);
     /**
      * @description
      * - exposed property to listen to;
-     * @type {Derived<V>}
+     * @type {Derived<VALUE>}
      * @example
      * import { EnvSignal, Effect } from 'vivth';
      *
@@ -24,12 +24,12 @@ export class EnvSignal<V> {
      * 	// code
      * })
      */
-    env: Derived<V>;
+    env: Derived<VALUE>;
     /**
      * @description
      * - call to correct the value of previously declared value;
      * - can only be called once;
-     * @param {V} correctedValue
+     * @param {VALUE} correctedValue
      * @returns {void}
      * @example
      * import { EnvSignal } from 'vivth';
@@ -41,7 +41,7 @@ export class EnvSignal<V> {
      *
      * myEnv.correction(false); // this will notify all subscribers;
      */
-    correction: (correctedValue: V) => void;
+    correction: (correctedValue: VALUE) => void;
     #private;
 }
 import { Derived } from './Derived.mjs';

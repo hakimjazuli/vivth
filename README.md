@@ -24,11 +24,14 @@ npm i vivth
   > - fully typed `worker-threads` abstraction;
   > - ` error as value` function helper;
   > - opionated `autoDocumentation`;
-  > - opionated `bundler`;
+  > - opionated `bundler`:
+  >   > - abstracted via `esbuild`;
+  > - opionated `compiler`;
+  >   > - abstracted via `pkg`, `deno`, and `bun`;
 
 ## versions:
 
-- `1.0.0:b`:
+- `1.0.0+:b`:
   > - beta release;
   > - checking edge cases;
   > - stable API, the exposed API access are highly unlikely to changes, only the underlying code
@@ -36,29 +39,34 @@ npm i vivth
 
 <h2 id="list-of-exported-api-and-typehelpers">list of exported API and typehelpers</h2>
 
- - [CompileMJS](#compilemjs)
+ - [CompileJS](#compilejs)
+ - [CreateESPlugin](#createesplugin)
  - [EsBundler](#esbundler)
+ - [FSInline](#fsinline)
+ - [FSInlineAnalyzer](#fsinlineanalyzer)
  - [Console](#console)
  - [Derived](#derived)
  - [Effect](#effect)
  - [EnvSignal](#envsignal)
  - [EventSignal](#eventsignal)
+ - [FileSafe](#filesafe)
  - [ListDerived](#listderived)
  - [ListSignal](#listsignal)
+ - [LitExp](#litexp)
  - [Paths](#paths)
  - [QChannel](#qchannel)
  - [SafeExit](#safeexit)
  - [Setup](#setup)
  - [Signal](#signal)
  - [WorkerMainThread](#workermainthread)
- - [WorkerResult](#workerresult)
- - [WorkerThread](#workerthread)
  - [Base64URL](#base64url)
+ - [Base64URLFromFile](#base64urlfromfile)
  - [EventNameSpace](#eventnamespace)
  - [JSautoDOC](#jsautodoc)
  - [CreateImmutable](#createimmutable)
  - [EventCheck](#eventcheck)
  - [EventObject](#eventobject)
+ - [GetRuntime](#getruntime)
  - [IsAsync](#isasync)
  - [LazyFactory](#lazyfactory)
  - [Timeout](#timeout)
@@ -66,50 +74,121 @@ npm i vivth
  - [TryAsync](#tryasync)
  - [TrySync](#trysync)
  - [TsToMjs](#tstomjs)
- - [WriteFileSafe](#writefilesafe)
  - [AnyButUndefined](#anybutundefined)
  - [ExtnameType](#extnametype)
  - [IsListSignal](#islistsignal)
  - [ListArg](#listarg)
+ - [LitExpKeyType](#litexpkeytype)
  - [MutationType](#mutationtype)
  - [QCBFIFOReturn](#qcbfiforeturn)
  - [QCBReturn](#qcbreturn)
+ - [Runtime](#runtime)
+ - [WorkerResult](#workerresult)
+ - [WorkerThread](#workerthread)
+ - [ToBundledJSPlugin](#tobundledjsplugin)
 
-<h2 id="compilemjs">CompileMJS</h2>
+<h2 id="compilejs">CompileJS</h2>
 
 
-#### reference:`CompileMJS`
-- function to bundle to single mjs file, including the workerThread;
+#### reference:`CompileJS`
+- function to compile `.ts`|`.mts`|`.mjs` file, into a single executable;  
+- also generate js representation;  
+- uses [pkg](https://www.npmjs.com/package/pkg), [bun](https://bun.com/docs/bundler/executables), and [deno](https://docs.deno.com/runtime/reference/cli/compile/) compiler under the hood;  
+>- they are used only as packaging agent, and doesn't necessarily supports their advanced feature, such as, assets bundling(use [FSInline](#fsinline) instead);  
+>- `WorkerThread` will be converted to inline using `FSInline` too;  
+ 
+!!!WARNING!!!  
+!!!WARNING!!!  
+!!!WARNING!!!  
+ 
+- This function does not obfuscate and will not prevent decompilation. Do not embed environment variables or sensitive information inside `options.entryPoint`;  
+- It is designed for quick binarization, allowing execution on machines without `Node.js`, `Bun`, or `Deno` installed;  
+- The resulting binary will contain `FSInline` and `WorkerMainThread` target paths Buffers, which are loaded into memory at runtime. If your logic depends on the file system, use `node:fs` or `node:fs/promises` APIs and ship external files alongside the binary (not compiled);  
+ 
+!!!WARNING!!!  
+!!!WARNING!!!  
+!!!WARNING!!!
 
 ```js
 /**
  * @param {Object} options  
  * @param {string} options.entryPoint  
- * @param {string} options.outputNoExt  
- * - no extention needed, result will always be '.mjs';  
- * @param {BufferEncoding} options.encoding  
- * @param {boolean} [options.minify]  
- * - default false;  
- * @param {boolean} [options.asBinary]  
- * - default false;  
- * @returns {Promise<ReturnType<typeof WriteFileSafe>>}  
+ * - need to be manually prefixed;  
+ * @param {BufferEncoding} [options.encoding]  
+ * - write and read encoding for the sources;  
+ * - default: `utf-8`;  
+ * @param {boolean} options.minifyFirst  
+ * - minify the bundle before compilation;  
+ * @param {string} options.outDir  
+ * - need manual prefix;  
+ * @param {'pkg'|'bun'|'deno'} [options.compiler]  
+ * - default: no comilation, just bundling;  
+ * - `bun` and `pkg` is checked, if there's bug on `deno`, please report on github for issues;  
+ * @param {Record<string, string>} [options.compilerArguments]  
+ * - `key` are to used as `--keyName`;  
+ * - value are the following value of the key;  
+ * - no need to add the output/outdir, as it use the `options.outDir`;  
+ * @return {ReturnType<TryAsync<{compileResult:Promise<any>,  
+ * commandCalled: string;  
+ * compiledBinFile: string;  
+ * bundledJSFile:string  
+ * }>>}  
  */
 ```
  - <i>example</i>:
 ```js 
- import { Paths, CompileMJS } from 'vivth';  
+ import { join } from 'node:path';  
   
- new Paths({  
- 	root: process?.env?.INIT_CWD ?? process?.cwd(),  
- });  
+ import { CompileJS, Paths } from 'vivth';  
   
- CompileMJS({  
- 	entryPoint: '/index.mjs',  
- 	encoding: 'utf-8',  
- 	outputNoExt: '/test/compiled',  
- 	minify: false,  
- 	asBinary: true,  
- });
+ const [[resultPkg, errorPkg], [resultBun, errorBun]] = await Promise.all([  
+ 	CompileJS({  
+ 		entryPoint: join(Paths.root, '/dev'),  
+ 		minifyFirst: true,  
+ 		outDir: join(Paths.root, '/dev-pkg'),  
+ 		compiler: 'pkg',  
+ 		compilerArguments: {  
+ 			target: ['node18-win-x64'],  
+ 		}  
+ 	}),  
+ 	CompileJS({  
+ 		entryPoint: join(Paths.root, '/dev'),  
+ 		minifyFirst: true,  
+ 		outDir: join(Paths.root, '/dev-pkg'),  
+ 		compiler: 'bun',  
+ 		compilerArguments: {  
+ 			target: ['bun-win-x64'],  
+ 		}  
+ 	}),  
+ ])
+ 
+```
+
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+<h2 id="createesplugin">CreateESPlugin</h2>
+
+
+#### reference:`CreateESPlugin`
+- typed esbuild Plugin generator;
+
+```js
+/**
+ * @param {string} name  
+ * @param {import('esbuild').Plugin["setup"]} setup  
+ * @returns {import('esbuild').Plugin}  
+ */
+```
+ - <i>example</i>:
+```js 
+ import { CreateESPlugin } from 'vivth';  
+  
+ export const pluginAddCopyRight = CreateESPlugin(  
+ 	'MyCopyrightDeclaration',  
+ 	async (build) => {  
+ 		// build script;  
+ 	}  
+ );
  
 ```
 
@@ -127,18 +206,21 @@ npm i vivth
  * @param {Object} options  
  * @param {string} options.content  
  * - the code can also uses composites from the result from multiple readFiles;  
- * - the import statements on the content should use absolute path from project root, prefixed with forward slash;  
- * @param {string} options.extension  
- * @param {boolean} [options.asBinary]  
- * @param {Omit<Parameters<build>[0], 'entryPoints'|'bundle'|'write'|'format'|'sourcemap'|'external'|'stdin'>} [esbuildOptions]  
- * @returns {Promise<ReturnType<typeof TryAsync<string>>>}  
+ * @param {string} options.root  
+ * - use dirname of said fileString path;  
+ * @param {'.mts'|'.ts'|'.mjs'} options.extension  
+ * @param {boolean} [options.withBinHeader]  
+ * @param {Omit<Parameters<build>[0],  
+ * 'entryPoints'|'bundle'|'write'|'sourcemap'>  
+ * } [esbuildOptions]  
+ * @returns {ReturnType<typeof TryAsync<string>>}  
  */
 ```
  - <i>example</i>:
 ```js 
  import { EsBundler } from 'vivth';  
   
- const bundledString = EsBundler(,  
+ const bundledString = EsBundler(  
  	{  
  		content: ``,  
  		extension: '.mts',  
@@ -152,11 +234,104 @@ npm i vivth
 
 *) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
+<h2 id="fsinline">FSInline</h2>
+
+
+#### reference:`FSInline`
+- class helper to inline file;  
+- use only if you are planning to use [CompileJS](#compilejs);
+
+
+#### reference:`FSInline.vivthFSInlineFile`
+- declare entrypoint of file inlining; 	 
+>- on the dev time, it's just regullar `readFile` from `node:fs/promises`; 	 
+>- on the compiled, it will read file from `FSInline.vivthFSInlinelists`
+
+```js
+/**
+ * @param {string} filePathFromProject 	 
+ * - doesn't require prefix; 	 
+ * @returns {Promise<Buffer<ArrayBuffer>>} 	 
+ */
+```
+ - <i>example</i>:
+```js  
+ import { FSInline } from 'vivth'; 	 
+ 	 
+ (await FSInline.vivthFSInlineFile('/assets/text.txt')).toString('utf-8');
+ 
+```
+
+#### reference:`FSInline.vivthFSInlineDir`
+- declare entrypoint of file inlining, include all files on `dir` and `subdir` that match the `fileRule`;
+
+```js
+/**
+ * @param {string} dirPathFromProject 	 
+ * - doesn't require prefix; 	 
+ * @param {RegExp} fileRule 	 
+ * @returns {Promise<typeof FSInline["vivthFSInlineFile"]>} 	 
+ */
+```
+ - <i>example</i>:
+```js  
+ import { FSInline } from 'vivth'; 	 
+ 	 
+ export const pngAssets = await FSInline.vivthFSInlineDir('/assets', /.png$/g);
+ 
+```
+
+#### reference:`FSInline.vivthFSInlinelists`
+- placeholder for FSInline; 	 
+- it's remain publicly accessible so it doesn't mess with regex analyze on bundle; 	 
+- shouldn't be manually accessed; 	 
+>- access via `FSInline.vivthFSInlineFile` or `FSInline.vivthFSInlineDir`;
+
+```js
+/**
+ * @type {Record<string, Buffer<ArrayBuffer>>}
+ */
+```
+
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+<h2 id="fsinlineanalyzer">FSInlineAnalyzer</h2>
+
+
+#### reference:`FSInlineAnalyzer`
+- collections of static method to analyze content for `FSInline`;
+
+
+#### reference:`FSInlineAnalyzer.finalContent`
+- to be used on bundled content;
+
+```js
+/**
+ * @param {string} content 	 
+ * @param {'cjs'|'esm'} format 	 
+ * @returns {ReturnType<typeof TryAsync<string>>} 	 
+ */
+```
+ - <i>example</i>:
+```js  
+ import { readFile } from 'node:fs/promises'; 	 
+ 	 
+ import { FSInlineAnalyzer } from 'vivth'; 	 
+ 	 
+ const [resultFinalContent, errorFinalContent] = await FSInlineAnalyzer.finalContent( 	 
+ 	await readFile('./resultESBunlded.mjs', {encoding: 'utf-8'}), 	 
+ 	'esm' 	 
+ );
+ 
+```
+
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
 <h2 id="console">Console</h2>
 
 
 #### reference:`Console`
-- class with static methods to print to standard console with added style;
+- class with static methods to print to standard console with bare minimum ANSI styles;
 
 
 #### reference:`Console.log`
@@ -165,8 +340,17 @@ npm i vivth
 ```js
 /**
  * @param {any} data 	 
- * @returns {void}
+ * @returns {void} 	 
  */
+```
+ - <i>example</i>:
+```js  
+ import { Console } from 'vivth'; 	 
+ 	 
+ Console.log({ 	 
+ 	hello: 'world!!', 	 
+ });
+ 
 ```
 
 #### reference:`Console.info`
@@ -175,8 +359,17 @@ npm i vivth
 ```js
 /**
  * @param {any} data 	 
- * @returns {void}
+ * @returns {void} 	 
  */
+```
+ - <i>example</i>:
+```js  
+ import { Console } from 'vivth'; 	 
+ 	 
+ Console.info({ 	 
+ 	hello: 'world!!', 	 
+ });
+ 
 ```
 
 #### reference:`Console.warn`
@@ -185,8 +378,17 @@ npm i vivth
 ```js
 /**
  * @param {any} data 	 
- * @returns {void}
+ * @returns {void} 	 
  */
+```
+ - <i>example</i>:
+```js  
+ import { Console } from 'vivth'; 	 
+ 	 
+ Console.warn({ 	 
+ 	hello: 'world!!', 	 
+ });
+ 
 ```
 
 #### reference:`Console.error`
@@ -195,8 +397,17 @@ npm i vivth
 ```js
 /**
  * @param {any} data 	 
- * @returns {void}
+ * @returns {void} 	 
  */
+```
+ - <i>example</i>:
+```js  
+ import { Console } from 'vivth'; 	 
+ 	 
+ Console.error({ 	 
+ 	hello: 'world!!', 	 
+ });
+ 
 ```
 
 *) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
@@ -209,8 +420,8 @@ npm i vivth
 
 ```js
 /**
- * @template V  
- * @extends Signal<V>
+ * @template VALUE  
+ * @extends Signal<VALUE>
  */
 ```
 
@@ -219,7 +430,9 @@ npm i vivth
 
 ```js
 /**
- * @param {(effectInstanceOptions:Effect["options"])=>Promise<V>} derivedFunction 	 
+ * @param {(effectInstanceOptions:Omit<Effect["options"] & 	 
+ * Derived["options"], unwrapLazy>) => 	 
+ * Promise<VALUE>} derivedFunction 	 
  */
 ```
  - <i>example</i>:
@@ -241,13 +454,50 @@ npm i vivth
  
 ```
 
+#### reference:`Derived_instance.options`
+- additional helper to be accessed on effect;
+
+
+#### reference:`Derived_instance.options.dontUpdate`
+- return this value tandem with `isLastCalled`, to not to update the value of this instance, even when returning early;
+
+```js
+/**
+ * @type {Object} 			 
+ */
+```
+ - <i>example</i>:
+```js 		 
+ import { Signal, Derived } from  'vivth'; 			 
+ 			 
+ const count = new Signal(0); 			 
+ const double = new Derived(async({ 			 
+ 		subscribe, 			 
+ 		dontUpdate, 			 
+ 		isLastCalled, 			 
+ 	}) => { 			 
+ 		const currentValue = subscribe(count).value; 			 
+ 		if (!(await isLastCalled(10))) { 			 
+ 		return dontUpdate; 			 
+ 		} 			 
+ 		const res = await fetch(`some/path/${curentValue.toString()}`); 			 
+ 		if (!(await isLastCalled())) { 			 
+ 		return dontUpdate; // this will prevent race condition, even if the earlier fetch return late; 			 
+ 		} 			 
+ 		return res; 			 
+ }); 			 
+ 			 
+ count.value++;
+ 
+```
+
 #### reference:`Derived_instance.value:getter`
 - the most recent value of the instance 	 
 - can be turn into reactive with Effect or Derived instantiation;
 
 ```js
 /**
- * @type {V}
+ * @returns {VALUE}
  */
 ```
 
@@ -258,7 +508,7 @@ npm i vivth
 ```js
 /**
  * @private 	 
- * @type {V}
+ * @type {VALUE}
  */
 ```
 
@@ -276,12 +526,89 @@ npm i vivth
 >- now can dynamically subscribes to signal, even on conditionals, that are not run during first run;
 
 
+#### reference:`Effect_instance.options`
+- collections of lazy methods to handle effect calls of this instance;
+
+
+#### reference:`Effect_instance.options.isLastCalled:getter`
+
+
+```js
+/**
+ * @returns {(timeoutMS?:number)=>Promise<boolean>} 			 
+ * - timeoutMS only necessary if the operation doesn't naturally await; 			 
+ * - if it's operation such as `fetch`, you can just leave it blank; 			 
+ */
+```
+ - <i>example</i>:
+```js 		 
+ 			 
+ import { Effect } from 'vivth'; 			 
+ 			 
+ const effect = new Effect(async ({ isLastCalled }) => { 			 
+ 	if (!(await isLastCalled(100))) { 			 
+ 		return; 			 
+ 	} 			 
+ 	// OR 			 
+ 	const res = await fetch('some/path'); 			 
+ 	if (!(await isLastCalled( 			 
+ 		// no need to add timeoutMS argument, as fetch are naturally add delay; 			 
+ 	))) { 			 
+ 		return; 			 
+ 	} 			 
+ })
+ 
+```
+
+#### reference:`Effect_instance.options.subscribe`
+- normally it's passed as argument to constructor, however it is also accessible from `options` property;
+
+```js
+/**
+ * @template {Signal} SIGNAL 			 
+ * @param {SIGNAL} signal 			 
+ * @returns {SIGNAL} 			 
+ */
+```
+ - <i>example</i>:
+```js 		 
+ import { Effect } from 'vivth'; 			 
+ 			 
+ const effect = new Effect(async () => { 			 
+ 	// code 			 
+ }) 			 
+ effect.options.subscribe(signalInstance);
+ 
+```
+
+#### reference:`Effect_instance.options.removeEffect`
+- normally it's passed as argument to constructor, however it is also accessible from `options` property;
+
+```js
+/**
+ * @type {()=>void} 			 
+ */
+```
+ - <i>example</i>:
+```js 		 
+ import { Effect } from 'vivth'; 			 
+ 			 
+ const effect = new Effect(async () => { 			 
+ 	// code 			 
+ }) 			 
+ effect.options.removeEffect();
+ 
+```
+
 #### reference:`new Effect`
 
 
 ```js
 /**
- * @param {(arg0:Effect["options"])=>Promise<void>} effect 	 
+ * @param {( arg0: 	 
+ * Omit<Effect["options"], typeof unwrapLazy> 	 
+ * ) => 	 
+ * Promise<void>} effect 	 
  */
 ```
  - <i>example</i>:
@@ -293,48 +620,13 @@ npm i vivth
  new Effect(async ({ 	 
  			subscribe, // : registrar callback for this effect instance, immediately return the signal instance 	 
  			removeEffect, // : disable this effect instance from reacting to dependency changes; 	 
+ 			isLastCalled, // : check whether this callback run is this instant last called effect; 	 
  		}) => { 	 
  			Console.log(subscribe(double).value); // effect listen to double changes 	 
  			const a = double.value; //  no need to wrap double twice with $ 	 
  }) 	 
  	 
  count.value++;
- 
-```
-
-#### reference:`Effect_instance.options.subscribe`
-- normally it's passed as argument to constructor, however it is also accessible from `options` property;
-
-```js
-/**
- * @template {Signal} S 		 
- * @param {S} signal 		 
- * @returns {S} 		 
- */
-```
- - <i>example</i>:
-```js 	 
- const effect = new Effect(async () => { 		 
- 	// code 		 
- }) 		 
- effect.options.subscribe(signalInstance);
- 
-```
-
-#### reference:`Effect_instance.options.removeEffect`
-- normally it's passed as argument to constructor, however it is also accessible from `options` property;
-
-```js
-/**
- * @type {()=>void} 		 
- */
-```
- - <i>example</i>:
-```js 	 
- const effect = new Effect(async () => { 		 
- 	// code 		 
- }) 		 
- effect.options.removeEffect();
  
 ```
 
@@ -348,6 +640,8 @@ npm i vivth
 ```
  - <i>example</i>:
 ```js  
+ import { Effect } from 'vivth'; 	 
+ 	 
  const effect = new Effect(async ()=>{ 	 
  	// code 	 
  }) 	 
@@ -366,7 +660,7 @@ npm i vivth
 
 ```js
 /**
- * @template V
+ * @template VALUE
  */
 ```
 
@@ -375,7 +669,7 @@ npm i vivth
 
 ```js
 /**
- * @param {V} initialValue
+ * @param {VALUE} initialValue
  */
 ```
 
@@ -384,7 +678,7 @@ npm i vivth
 
 ```js
 /**
- * @type {Derived<V>} 	 
+ * @type {Derived<VALUE>} 	 
  */
 ```
  - <i>example</i>:
@@ -405,7 +699,7 @@ npm i vivth
 
 ```js
 /**
- * @param {V} correctedValue 	 
+ * @param {VALUE} correctedValue 	 
  * @returns {void} 	 
  */
 ```
@@ -428,11 +722,12 @@ npm i vivth
 
 
 #### reference:`EventSignal`
-- Signal implementation for `CustomEvent`, to dispatch and listen;
+- Signal implementation for `CustomEvent`, to dispatch and listen;  
+- it's based on string as key, so it can be listened/dispatched even without direct instance reference;
 
 ```js
 /**
- * @template {IsListSignal} isList  
+ * @template {IsListSignal} ISLIST  
  * - boolean;
  */
 ```
@@ -473,8 +768,22 @@ npm i vivth
 
 ```js
 /**
- * @type {Signal|ListSignal}
+ * @type {Signal|ListSignal} 	 
  */
+```
+ - <i>example</i>:
+```js  
+ import { EventSignal, Effect, Console } from 'vivth'; 	 
+ 	 
+ const myEventSignal = await EventSignal.get('dataEvent', false); 	 
+ 	 
+ new Effect(({ subscribe })=>{ 	 
+ 	const listenValue = subscribe(myEventSignal.dispatch).value; 	 
+ 	// dispatch can be used as two way communication; 	 
+ 	Console.log({ listenValue }); 	 
+ }) 	 
+ myEventSignal.dispatch.value = 'hey';
+ 
 ```
 
 #### reference:`EventSignal_instance.listen`
@@ -484,8 +793,22 @@ npm i vivth
 
 ```js
 /**
- * @type {Derived|ListDerived}
+ * @type {Derived|ListDerived} 	 
  */
+```
+ - <i>example</i>:
+```js  
+ import { EventSignal, Effect, Console } from 'vivth'; 	 
+ 	 
+ const myEventSignal = await EventSignal.get('dataEvent', false); 	 
+ 	 
+ new Effect(({ subscribe })=>{ 	 
+ 	const listenValue = subscribe(myEventSignal.listen).value; 	 
+ 	// listen can be used only as listener for one way communication; 	 
+ 	Console.log({ listenValue }); 	 
+ }) 	 
+ myEventSignal.dispatch.value = 'hey';
+ 
 ```
 
 #### reference:`EventSignal.remove`
@@ -507,7 +830,7 @@ npm i vivth
 ```js 	 
  import { EventSignal } from 'vivth'; 		 
  		 
- EventSignal.remove.subscriber('yourEventSignalName', yourEffectInstance);
+ EventSignal.remove.subscriber('yourEventSignalName', myEffectInstance);
  
 ```
 
@@ -556,7 +879,16 @@ npm i vivth
 ```
  - <i>example</i>:
 ```js 	 
- eventSignal_instance.remove.subscriber(yourEffectInstance);
+ import { EventSignal, Effect, Console } from 'vivth'; 		 
+ 		 
+ const myEventSignal = await EventSignal.get('dataEvent', false); 		 
+ 		 
+ const myEffectInstance = new Effect(({ subscribe })=>{ 		 
+ 	const listenValue = subscribe(myEventSignal.dispatch).value; 		 
+ 	Console.log({ listenValue }); 		 
+ }) 		 
+ myEventSignal.dispatch.value = 'hey'; 		 
+ eventSignal_instance.remove.subscriber(myEffectInstance);
  
 ```
 
@@ -570,6 +902,15 @@ npm i vivth
 ```
  - <i>example</i>:
 ```js 	 
+ import { EventSignal, Effect, Console } from 'vivth'; 		 
+ 		 
+ const myEventSignal = await EventSignal.get('dataEvent', false); 		 
+ 		 
+ const myEffectInstance = new Effect(({ subscribe })=>{ 		 
+ 	const listenValue = subscribe(myEventSignal.dispatch).value; 		 
+ 	Console.log({ listenValue }); 		 
+ }) 		 
+ myEventSignal.dispatch.value = 'hey'; 		 
  eventSignal_instance.remove.allSubscribers();
  
 ```
@@ -584,7 +925,130 @@ npm i vivth
 ```
  - <i>example</i>:
 ```js 	 
+ import { EventSignal, Effect, Console } from 'vivth'; 		 
+ 		 
+ const myEventSignal = await EventSignal.get('dataEvent', false); 		 
+ 		 
+ const myEffectInstance = new Effect(({ subscribe })=>{ 		 
+ 	const listenValue = subscribe(myEventSignal.dispatch).value; 		 
+ 	Console.log({ listenValue }); 		 
+ }); 		 
+ 		 
  eventSignal_instance.remove.ref();
+ 
+```
+
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+<h2 id="filesafe">FileSafe</h2>
+
+
+#### reference:`FileSafe`
+- collection of static methods of file access with added safety to mkdir before proceeding;
+
+
+#### reference:`FileSafe.write`
+- method to create file safely by recursively mkdir the dirname of the outFile; 	 
+- also returning promise of result & error as value;
+
+```js
+/**
+ * @param {Parameters<writeFile>[0]} outFile 	 
+ * @param {Parameters<writeFile>[1]} content 	 
+ * @param {Parameters<writeFile>[2]} [options] 	 
+ * @returns {ReturnType<typeof TryAsync<void>>} 	 
+ */
+```
+ - <i>example</i>:
+```js  
+ import { join } from 'node:path'; 	 
+ import { FileSafe, Paths } from 'vivth'; 	 
+ 	 
+ const [, errorWrite] = await FileSafe.write( 	 
+ 	join(Paths.root, '/some/path.mjs'), 	 
+ 	`console.log("hello-world!!");`, 	 
+ 	{ encoding: 'utf-8' } 	 
+ );
+ 
+```
+
+#### reference:`FileSafe.copy`
+- method to copy file/dir safely by recursively mkdir the dirname of the dest; 	 
+- also returning promise of result & error as value;
+
+```js
+/**
+ * @param {Parameters<typeof copyFile>[0]} sourceFile 	 
+ * @param {Parameters<typeof copyFile>[1]} destinationFile 	 
+ * @param {Parameters<typeof copyFile>[2]} mode 	 
+ * @returns {ReturnType<typeof TryAsync<void>>} 	 
+ */
+```
+ - <i>example</i>:
+```js  
+ import { join } from 'node:path'; 	 
+ import { FileSafe, Paths } from 'vivth'; 	 
+ 	 
+ const [, errorWrite] = await FileSafe.copy( 	 
+ 	join(Paths.root, '/some/path.mjs'), 	 
+ 	join(Paths.root, '/other/path.copy.mjs'), 	 
+ 	{ encoding: 'utf-8' } 	 
+ );
+ 
+```
+
+#### reference:`FileSafe.rename`
+- method to rename file/dir safely by recursively mkdir the dirname of the dest; 	 
+- also returning promise of result & error as value;
+
+```js
+/**
+ * @param {Parameters<typeof rename>[0]} oldPath 	 
+ * @param {Parameters<typeof rename>[0]} newPath 	 
+ * @returns {ReturnType<typeof TryAsync<void>>} 	 
+ */
+```
+ - <i>example</i>:
+```js  
+ import { join } from 'node:path'; 	 
+ import { FileSafe, Paths } from 'vivth'; 	 
+ 	 
+ const [, errorRename] = await FileSafe.rename( 	 
+ 	join(Paths.root, 'some/path'), 	 
+ 	join(Paths.root, 'other/path'), 	 
+ );
+ 
+```
+
+#### reference:`FileSafe.rm`
+- function to remove dir and file; 	 
+- also returning promise of result & error as value;
+
+```js
+/**
+ * @param {Parameters<rm>[0]} path 	 
+ * @param {Parameters<rm>[1]} [rmOptions] 	 
+ * @returns {ReturnType<typeof TryAsync<void>>}
+ */
+```
+
+#### reference:`FileSafe.mkdir`
+- create directory recursively; 	 
+- also returning promise of result & error as value;
+
+```js
+/**
+ * @param {Parameters<mkdir>[0]} outDir 	 
+ * - absolute path 	 
+ * @returns {ReturnType<typeof TryAsync<string>>} 	 
+ */
+```
+ - <i>example</i>:
+```js  
+ import { join } from 'node:path'; 	 
+ import { FileSafe, Paths } from 'vivth'; 	 
+ 	 
+ const [str, errorMkDir] = await FileSafe.mkdir(join(Paths.root, '/some/path/example'));
  
 ```
 
@@ -600,8 +1064,8 @@ npm i vivth
 
 ```js
 /**
- * @template {ListArg} LA  
- * @extends {Derived<LA[]>}
+ * @template {ListArg} LISTARG  
+ * @extends {Derived<LISTARG[]>}
  */
 ```
 
@@ -610,7 +1074,9 @@ npm i vivth
 
 ```js
 /**
- * @param {(effectInstanceOptions:Effect["options"])=>Promise<LA[]>} derivedFunction 	 
+ * @param {(effectInstanceOptions:Omit<Effect["options"], 	 
+ * unwrapLazy>)=> 	 
+ * Promise<LISTARG[]>} derivedFunction 	 
  */
 ```
  - <i>example</i>:
@@ -642,8 +1108,8 @@ npm i vivth
 
 ```js
 /**
- * @template {import('../types/ListArg.mjs').ListArg} LA  
- * @extends {Signal<LA[]>}
+ * @template {import('../types/ListArg.mjs').ListArg} LISTARG  
+ * @extends {Signal<LISTARG[]>}
  */
 ```
 
@@ -663,7 +1129,7 @@ npm i vivth
 
 ```js
 /**
- * @param {LA[]} [value] 	 
+ * @param {LISTARG[]} [value] 	 
  */
 ```
  - <i>example</i>:
@@ -682,7 +1148,7 @@ npm i vivth
 
 ```js
 /**
- * @type {LA[]}
+ * @returns {LISTARG[]}
  */
 ```
 
@@ -692,7 +1158,7 @@ npm i vivth
 ```js
 /**
  * @private 	 
- * @type {LA[]}
+ * @type {LISTARG[]}
  */
 ```
 
@@ -707,7 +1173,7 @@ npm i vivth
 
 ```js
 /**
- * @type {Array<LA>}
+ * @returns {Array<LISTARG>}
  */
 ```
 
@@ -716,7 +1182,7 @@ npm i vivth
 
 ```js
 /**
- * @param {...LA} listArg 			 
+ * @param {...LISTARG} listArg 			 
  * @returns {void}
  */
 ```
@@ -735,7 +1201,7 @@ npm i vivth
 
 ```js
 /**
- * @param  {...LA} listArg 			 
+ * @param  {...LISTARG} listArg 			 
  * @returns {void}
  */
 ```
@@ -758,7 +1224,7 @@ npm i vivth
 
 ```js
 /**
- * @param {LA[]} listArgs 			 
+ * @param {LISTARG[]} listArgs 			 
  * - new array in place of the deleted array. 			 
  * @returns {void}
  */
@@ -773,7 +1239,7 @@ npm i vivth
  * - The zero-based location in the data from which to start removing elements. 			 
  * @param {number} deleteCount 			 
  * -The number of elements to remove. 			 
- * @param {...LA} listArg 			 
+ * @param {...LISTARG} listArg 			 
  * - new data in place of the deleted data. 			 
  * @returns {void}
  */
@@ -796,7 +1262,7 @@ npm i vivth
 ```js
 /**
  * @param {number} index 			 
- * @param {Partial<LA>} listArg 			 
+ * @param {Partial<LISTARG>} listArg 			 
  * @returns {void}
  */
 ```
@@ -831,12 +1297,220 @@ npm i vivth
 
 *) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
+<h2 id="litexp">LitExp</h2>
+
+
+#### reference:`LitExp`
+- class helper to created opionated regex helper;  
+- named capture uses `es6+` feature, you might need to add polyfill to target extremely old browser;  
+- class name refer to `Literal Expression`;  
+- please be patient when using this class;  
+>- destructuring is meant for extensive typehelper;  
+>- and destructuring can lead to unhandled error here and there;  
+>- therefore error as value is introduced to help to prevent error on runtime;
+
+```js
+/**
+ * @template {LitExpKeyType} KEYS
+ */
+```
+
+#### reference:`LitExp.prepare`
+- constructor helper; 	 
+- under the hood it is an abstraction of `RegExp`, with more template literal touch; 	 
+>- you can apply inline `RegExp` features on the string template literal(as constructor RegExp arg0); 	 
+>>- by doing so you are opting in to make: 	 
+>>>- your regex detection more robust; but 	 
+>>>- `litExp_instance.make.string` to be `unusable`; 	 
+>>- also mind the needs of escape for special characters;
+
+```js
+/**
+ * @template {LitExpKeyType} KEYS 	 
+ * @param {KEYS} keysAndDefaultValuePair 	 
+ * - keys and whether to override regex detection; 	 
+ * >- example: 	 
+ * ```js 	 
+ *  myKey: /myCustomCapture/ // all flags will be stripped; 	 
+ * ``` 	 
+ * - default value === `false` is "[\\s\\S]
+ *?", as in whiteSpace and nonWhiteSpace 0 to more occurence; 	 
+ * @returns {ReturnType<typeof TrySync<(templateStringArray:TemplateStringsArray, 	 
+ * ...values:(keyof KEYS)[] 	 
+ * )=>LitExp<KEYS>>>} 	 
+ * - placement of `key` will determine the named capture group will be placed in the template literal; 	 
+ * - it is recomended to not end template literal with any of the `key`s as the regex detection might failed to detects the boundary of the end of matched string of that capture group; 	 
+ */
+```
+ - <i>example</i>:
+```js  
+ import { LitExp } from 'vivth'; 	 
+ 	 
+ (()=>{ 	 
+ 	const [liteal, errorPrep] = LitExp.prepare({ 	 
+ 		myKey: /myCustomCapture/, // is placed on (?<myKey>myCustomCapture) 	 
+ 		// use false to place "[\\s\\S]*?" instead; 	 
+ 		...keyCaptureLogicPair 	 
+ 	}) 	 
+ 	if (errorPrep) { 	 
+ 		console.error(error); 	 
+ 		return; 	 
+ 	} 	 
+ 	 const litExp_instance = liteal`templateLiteral:${'myKey'};` 	 
+ 	// recommended to end the template literal with any string but `key`; 	 
+ })()
+ 
+```
+
+#### reference:`LitExp_instance.make`
+- instance methods for generating things;
+
+
+#### reference:`LitExp_instance.make.string`
+- to make string based on the template literal;
+
+```js
+/**
+ * @param {Partial<ReturnType<LitExp<KEYS>["evaluate"]["execGroups"]>>[0]["result"]} overrides 		 
+ * @returns {string} 		 
+ */
+```
+ - <i>example</i>:
+```js 	 
+ import { LitExp } from 'vivth'; 		 
+ 		 
+ const [literal, errorPreparing] = LitExp.prepare({ 		 
+ 	myKey: false, 		 
+ 	...keyCaptureLogicPair 		 
+ }) 		 
+ 		 
+ // asuming no error 		 
+ litExp_instance = `templateLiteral:${'myKey'};`; 		 
+ const [result, error] = litExp_instance.make.string({ 		 
+ 	myKey: 'actualvalue', 		 
+ }); 		 
+ 		 
+ console.log(result); // "templateLiteral:actualvalue;"
+ 
+```
+
+#### reference:`LitExp_instance.evaluate`
+- methods collections to evaluate string with `Literal Expression`;
+
+
+#### reference:`LitExp_instance.evaluate.execGroups`
+- to exec and grouped based on `key`;
+
+```js
+/**
+ * @param {string} string 		 
+ * @param {Object} options 		 
+ * @param {ConstructorParameters<typeof RegExp>[1]} options.flags 		 
+ * @param {boolean} options.whiteSpaceSensitive 		 
+ * - true: leave any whitespace as is to be used as regex detection; 		 
+ * - false: convert all whitespace to `\s+`; 		 
+ * @param {boolean} options.absoluteLeadAndFollowing 		 
+ * - false: standard capture; 		 
+ * - true: add `^` and `<h2 id="litexp">LitExp</h2>
+
+ to capture definition: 		 
+ * >- meaning string will have to match starting and end of line from capture definition; 		 
+ * @returns {ReturnType<typeof TrySync<{ 		 
+ * result:{ whole:string, named: Record<keyof KEYS, string>}, 		 
+ * regexp:RegExp}>> 		 
+ * } 		 
+ */
+```
+ - <i>example</i>:
+```js 	 
+ import { LitExp } from 'vivth'; 		 
+ 		 
+ const [literal, errorPreparing] = LitExp.prepare({ 		 
+ 	myKey: false, 		 
+ 	...keyCaptureLogicPair 		 
+ }) 		 
+ 		 
+ // asuming no eror 		 
+ const litExp_instance = literal`templateLiteral:${'myKey'};` 		 
+ 		 
+ const [{ 		 
+ 		result:{ // asuming there's no error 		 
+ 			named: { myKey }, 		 
+ 			whole, 		 
+ 		}, 		 
+ 		regex, // for reference 		 
+ 	}, error] = litExp_instance.evaluate.execGroups( 		 
+ 	`templateLiteral:Something;`, 		 
+ 	{ ...options } 		 
+ ) 		 
+ 		 
+ console.log(whole); // "templateLiteral:Something;" 		 
+ console.log(myKey); // "Something"
+ 
+```
+
+#### reference:`LitExp_instance.evaluate.matchedAllAndGrouped`
+- to match all and grouped based on `key`;
+
+```js
+/**
+ * @param {Parameters<LitExp<KEYS>["evaluate"]["execGroups"]>[0]} string 		 
+ * @param {Omit<Parameters<LitExp<KEYS>["evaluate"]["execGroups"]>[1], 'absoluteLeadAndFollowing'>} options 		 
+ * @returns {ReturnType<typeof TrySync<{result:{whole:string[], named:Array<Record<keyof KEYS, string>>}, 		 
+ * regexp: RegExp}>> 		 
+ * } 		 
+ */
+```
+ - <i>example</i>:
+```js 	 
+ import { LitExp, Console } from 'vivth'; 		 
+ 		 
+ const [literal, errorPreparing] = LitExp.prepare({ 		 
+ 	myKey: false, 		 
+ 	...keyCaptureLogicPair 		 
+ }) 		 
+ 		 
+ // asuming no error; 		 
+ litExp_instance = literal`templateLiteral:${'myKey'};` 		 
+ 		 
+ const [resultOfMatchedAllAndGrouped, error] = litExp_instance.evaluate.matchedAllAndGrouped( 		 
+ 	`templateLiteral:Something; 		 
+ 	templateLiteral:SomethingElse;`, 		 
+ 	{ ...options } 		 
+ ) 		 
+ (()=>{ 		 
+ 	if (error) { 		 
+ 		Console.error(error); 		 
+ 		return; 		 
+ 	} 		 
+ 	const { 		 
+ 		result: { 		 
+ 				whole: [whole0, whole1], 		 
+ 				named: [ 		 
+ 					{ myKey: myKeyExec0, }, 		 
+ 					{ myKey: myKeyExec1, }, 		 
+ 				], 		 
+ 			}, 		 
+ 		regexp 		 
+ 	} = resultOfMatchedAllAndGrouped; 		 
+ 		 
+ 	console.log(whole0); // "templateLiteral:Something;" 		 
+ 	console.log(whole1); // "templateLiteral:SomethingElse;" 		 
+ 	console.log(myKeyExec0); // "Something" 		 
+ 	console.log(myKeyExec1); // "SomethingElse" 		 
+ })()
+ 
+```
+
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
 <h2 id="paths">Paths</h2>
 
 
 #### reference:`Paths`
 - class helpers to define pathReference;  
-- is a singleton;
+- is a singleton;  
+- most of functionality need to access `Paths.root`, if you get warning, you can instantiate `Paths` before running anything;
 
 
 #### reference:`new Paths`
@@ -857,6 +1531,10 @@ npm i vivth
  * - deno: need for `deno run --allow-env --allow-read your_script.ts`: 	 
  * ```js 	 
  * Deno.env.get("INIT_CWD") ?? Deno.cwd() 	 
+ * ``` 	 
+ * - pkg: 	 
+ * ```js 	 
+ * __dirname 	 
  * ``` 	 
  * - other: you need to check your JSRuntime for the rootPath reference; 	 
  */
@@ -896,7 +1574,25 @@ npm i vivth
 ```js  
  import { Paths } from 'vivth'; 	 
  	 
- Paths.normalize('file:\\D:\\myFile.mjs'); // return 'file://D://myFile.mjs'
+ Paths.normalize('file:\\D:\\myFile.mjs'); //  "file://D://myFile.mjs"
+ 
+```
+
+#### reference:`Paths.normalizesForRoot`
+- normalize path separator to forward slash `/`; 	 
+- then starts with forward slash `/`;
+
+```js
+/**
+ * @param {string} path_ 	 
+ * @returns {`/${string}`} 	 
+ */
+```
+ - <i>example</i>:
+```js  
+ import { Paths } from 'vivth'; 	 
+ 	 
+ Paths.normalizesForRoot('path\\myFile.mjs'); //  "/path/myFile.mjs"
  
 ```
 
@@ -910,7 +1606,7 @@ npm i vivth
 
 ```js
 /**
- * @template {AnyButUndefined} T
+ * @template {AnyButUndefined} DEFINEDANY
  */
 ```
 
@@ -921,8 +1617,16 @@ npm i vivth
 /**
  * @param {Map<AnyButUndefined, [Promise<any>, {}]>} uniqueMap 	 
  * @returns {typeof QChannel} 	 
- * - usefull for Queue primitive on multiple library but single reference, like the Web by making the `Map` on `window` object;
+ * - usefull for Queue primitive on multiple library but single reference, like the Web by making the `Map` on `window` object; 	 
  */
+```
+ - <i>example</i>:
+```js  
+ import { QChannel } from 'vivth'; 	 
+ 	 
+ const myMappedQref = (window['myMappedQref'] = new Map()); 	 
+ export const MyQClass = QChannel.makeQClass(myMappedQref);
+ 
 ```
 
 #### reference:`QChannel.fifo`
@@ -950,9 +1654,9 @@ npm i vivth
 
 ```js
 /**
- * @template ResultType 			 
- * @param {()=>Promise<ResultType>} asyncCallback 			 
- * @returns {Promise<[ResultType|undefined, Error|undefined]>} 			 
+ * @template RESULT 			 
+ * @param {()=>Promise<RESULT>} asyncCallback 			 
+ * @returns {Promise<[RESULT|undefined, Error|undefined]>} 			 
  */
 ```
  - <i>example</i>:
@@ -963,9 +1667,19 @@ npm i vivth
  
 ```
 
-#### reference:`QChannel_instance.clear`
-- clear up all queued on the instance; 	 
-- only clear up the reference, the already called will not be stoped;
+#### reference:`QChannel_instance.close`
+- disable queue; 	 
+- when `closed`, `isLastOnQ` will allways return `false`;
+
+```js
+/**
+ * @returns {void}
+ */
+```
+
+#### reference:`QChannel_instance.open`
+- enable queue; 	 
+- when `opened`, `isLastOnQ` will evaluate whether calls are actually the last of queue;
 
 ```js
 /**
@@ -981,16 +1695,16 @@ npm i vivth
 
 ```js
 /**
- * @param {T} keyID 	 
+ * @param {DEFINEDANY} keyID 	 
  * @returns {Promise<QCBReturn>} 	 
  */
 ```
  - <i>example</i>:
 ```js  
- const q = new QChannel(); 	 
+ const q = new QChannel('channel name'); 	 
  const handler = async () => { 	 
  	const { resume, isLastOnQ } = await q.key(keyID); 	 
- 	// if (!isLastOnQ) { // imperative debounce if needed 	 
+ 	// if (!isLastOnQ()) { // imperative debounce if needed 	 
  	// 	resume(); 	 
  	// 	return; 	 
  	// } 	 
@@ -1011,17 +1725,19 @@ npm i vivth
 
 ```js
 /**
- * @template ResultType 	 
- * @param {T} keyID 	 
- * @param {(options:Omit<QCBReturn, "resume">)=>Promise<ResultType>} asyncCallback 	 
- * @returns {Promise<[ResultType|undefined, Error|undefined]>} 	 
+ * @template RESULT 	 
+ * @param {DEFINEDANY} keyID 	 
+ * @param {(options:Omit<QCBReturn, 	 
+ * "resume">) => 	 
+ * Promise<RESULT>} asyncCallback 	 
+ * @returns {ReturnType<typeof TryAsync<RESULT>>} 	 
  */
 ```
  - <i>example</i>:
 ```js  
- const q = new QChannel(); 	 
+ const q = new QChannel('channel name'); 	 
  const [result, error] = await q.callback(keyID, async ({ isLastOnQ }) = > { 	 
- 	// if (!isLastOnQ) { // imperative debounce if needed 	 
+ 	// if (!isLastOnQ()) { // imperative debounce if needed 	 
  	// 	return; 	 
  	// } 	 
  	// code 	 
@@ -1036,13 +1752,9 @@ npm i vivth
 
 #### reference:`SafeExit`
 - class helper for describing how to Safely Response on exit events  
-- singleton;
+- singleton;  
+- most of functionality might need to access `SafeExit.instance.exiting`, if you get warning, you can instantiate `SafeExit` before running anything;
 
-```js
-/**
- * @template {[string, ...string[]]} eventNames
- */
-```
 
 #### reference:`SafeExit.instance`
 - only accessible after instantiation;
@@ -1059,7 +1771,13 @@ npm i vivth
 ```js
 /**
  * @param {Object} options 	 
- * @param {eventNames} options.eventNames 	 
+ * @param {[string, ...string[]]} options.eventNames 	 
+ * - eventNames are blank by default, you need to manually name them all; 	 
+ * - 'exit' will be omited, as it might cause async callbacks failed to execute; 	 
+ * - example: 	 
+ * ```js 	 
+ *  ['SIGINT', 'SIGTERM'] 	 
+ * ``` 	 
  * @param {()=>void} options.terminator 	 
  * - standard node/bun: 	 
  * ```js 	 
@@ -1079,6 +1797,17 @@ npm i vivth
  * 	}); 	 
  * }; 	 
  * ``` 	 
+ * - example Deno: 	 
+ * ```js 	 
+ * (eventName) => { 	 
+ * 	const sig = Deno.signal(eventName); 	 
+ * 		for await (const _ of sig) { 	 
+ * 			exiting.correction(true); 	 
+ * 			sig.dispose(); 	 
+ * 			Console.log(`safe exit via "${eventName}"`); 	 
+ * 		} 	 
+ * } 	 
+ * ``` 	 
  * - if your exit callback doesn't uses `process` global object you need to input on the SafeExit instantiation 	 
  */
 ```
@@ -1087,12 +1816,10 @@ npm i vivth
  import { SafeExit, Console } from 'vivth'; 	 
  	 
  new SafeExit({ 	 
- 	// eventNames are blank by default, you need to manually name them all; 	 
- 	// 'exit' will be omited, as it might cause async callbacks failed to execute; 	 
  	eventNames: ['SIGINT', 'SIGTERM', ...eventNames], 	 
- 	terminator = () => process.exit(0), // OR on deno () => Deno.exit(0), 	 
+ 	terminator : () => process.exit(0), // OR on deno () => Deno.exit(0), 	 
  	// optional deno example 	 
- 	listener = (eventName) => { 	 
+ 	listener : (eventName) => { 	 
  		const sig = Deno.signal(eventName); 	 
  			for await (const _ of sig) { 	 
  				exiting.correction(true); 	 
@@ -1189,9 +1916,10 @@ npm i vivth
  - <i>example</i>:
 ```js  
  import { Setup } from 'vivth'; 	 
+ import { Worker } from 'node:worker_threads'; 	 
  	 
  Setup.workerMain({ 	 
- 	workerClass: async () => await (import('worker_threads')).Worker, 	 
+ 	workerClass: Worker, 	 
  	basePath: 'public/assets/js/workers', 	 
  	pathValidator: async (workerPath, root, base) => { 	 
  		const res = await fetch(`${root}/${base}/${workerPath}`); 	 
@@ -1203,14 +1931,16 @@ npm i vivth
 ```
 
 #### reference:`Setup.workerThread`
-- correct `parentPort` reference when needed;
+- correct `parentPort` reference when needed; 	 
+- export to create new reference to be use to create new WorkerThread instance;
 
 
  - <i>example</i>:
 ```js  
  import { Setup } from 'vivth'; 	 
+ import { parentPort } from 'node:worker_threads'; 	 
  	 
- Setup.workerThread({ parentPort: async () => (await import('node:worker_threads')).parentPort }); 	 
+ export const MyWorkerThreadRef = Setup.workerThread({parentPort}); 	 
  // that is the default value, if your parentPort/equivalent API is not that; 	 
  // you need to call this method;
  
@@ -1226,8 +1956,24 @@ npm i vivth
 
 ```js
 /**
- * @template Value
+ * @template VALUE
  */
+```
+
+#### reference:`new Signal`
+- create a `Signal`;
+
+```js
+/**
+ * @param {VALUE} value 	 
+ */
+```
+ - <i>example</i>:
+```js  
+ import { Signal, Effect } from  'vivth'; 	 
+ 	 
+ const count = new Signal(0);
+ 
 ```
 
 #### reference:`Signal_instance.subscribers`
@@ -1248,20 +1994,20 @@ npm i vivth
 
 ```js
 /**
- * @param {(options:{signalInstance:Signal<Value>})=>Promise<void>} [callback] 		 
+ * @param {(options:{signalInstance:Signal<VALUE>})=>Promise<void>} [callback] 		 
  * @returns {void} 		 
  */
 ```
  - <i>example</i>:
 ```js 	 
- // for deep signal like array or object you can: 		 
+ import { Signal } from 'vivth'; 		 
  		 
+ // for deep signal like array or object you can: 		 
  const arraySignal = new Signal([1,2]); 		 
  arraySignal.value.push(3); 		 
  arraySignal.subscribers.notify(); 		 
  		 
  // OR for more complex mutation: 		 
- 		 
  const objectSignal = new Signal({a:'test', b:'test'}); 		 
  objectSignal.subscribers.notify(async ({ signalInstance }) => { 		 
  	signalInstance.value['c'] = 'testc'; 		 
@@ -1302,28 +2048,12 @@ npm i vivth
  */
 ```
 
-#### reference:`new Signal`
-
-
-```js
-/**
- * @param {Value} value 	 
- */
-```
- - <i>example</i>:
-```js  
- import { Signal, Effect } from  'vivth'; 	 
- 	 
- const count = new Signal(0);
- 
-```
-
 #### reference:`Signal_instance.prev:getter`
 - value before change;
 
 ```js
 /**
- * @type {Value}
+ * @returns {VALUE}
  */
 ```
 
@@ -1332,7 +2062,7 @@ npm i vivth
 
 ```js
 /**
- * @type {Value} 	 
+ * @returns {VALUE} 	 
  */
 ```
  - <i>example</i>:
@@ -1345,7 +2075,7 @@ npm i vivth
  new Effect(async ({ subscribe }) =>{ 	 
  	const countValue = subscribe(count).value; // reactive 	 
  }) 	 
- const oneMoreThanCount = new Effect(async ({ subscribe }) =>{ 	 
+ const oneMoreThanCount = new Derived(async ({ subscribe }) =>{ 	 
  	return subscribe(count).value + 1; // reactive 	 
  })
  
@@ -1356,7 +2086,7 @@ npm i vivth
 
 ```js
 /**
- * @type {Value} 	 
+ * @type {VALUE} 	 
  */
 ```
  - <i>example</i>:
@@ -1376,7 +2106,8 @@ npm i vivth
 
 
 #### reference:`WorkerMainThread`
-- class helper to create `Worker` instance;
+- class helper to create `Worker` instance;  
+- before any `Worker` functionaily to be used, you need to setup it with `WorkerThread.setup` and `WorkerMainThread.setup` before runing anytyhing;
 
 ```js
 /**
@@ -1393,13 +2124,14 @@ npm i vivth
  * @param {typeof WorkerMainThread["workerClass"]} param0.workerClass 	 
  * - example: 	 
  * ```js 	 
- * async () => await (import('worker_threads')).Worker 	 
+ * import { Worker } from 'node:worker_threads'; 	 
  * ``` 	 
  * @param {typeof WorkerMainThread["pathValidator"]} param0.pathValidator 	 
  * - example: 	 
  * ```js 	 
  * async (workerPath, root, base) => { 	 
- * 	const res = await fetch(`${root}/${base}/${workerPath}`); 	 
+ *  const truePathCheck = `${root}/${base}/${workerPath}`; 	 
+ * 	const res = await fetch(truePathCheck); 	 
  * 	// might also check wheter it need base or not 	 
  * 	return await res.ok; 	 
  * } 	 
@@ -1411,10 +2143,11 @@ npm i vivth
 ```
  - <i>example</i>:
 ```js  
+ import { Worker } from 'node:worker_threads'; 	 
  import { WorkerMainThread } from 'vivth'; 	 
  	 
  WorkerMainThread.setup({ 	 
- 	workerClass: async () => await (import('worker_threads')).Worker, 	 
+ 	workerClass: Worker, 	 
  	basePath: 'public/assets/js/workers', 	 
  	pathValidator: async (workerPath, root, base) => { 	 
  		const res = await fetch(`${root}/${base}/${workerPath}`); 	 
@@ -1431,7 +2164,7 @@ npm i vivth
 
 ```js
 /**
- * @type {()=>Promise<typeof Worker|typeof import('worker_threads').Worker>}
+ * @type {typeof Worker|typeof import('worker_threads').Worker}
  */
 ```
 
@@ -1455,37 +2188,22 @@ npm i vivth
  */
 ```
 
-#### reference:`new WorkerMainThread`
+#### reference:`WorkerMainThread.newVivthWorker`
 - create Worker_instance;
 
 ```js
 /**
  * @param {string} handler 	 
- * - if `isInline` === `false`, `handler` should be: 	 
- * >- pointing to worker thread file; WHICH 	 
- * >- the path must be relative to `projectRoot`; 	 
- * - if `isInline` === `true`, `handler` should be 	 
- * >- string literal of prebundled worker thread script; OR 	 
- * >- manually made string literal of worker thread script; 	 
  * @param {Omit<WorkerOptions|import('worker_threads').WorkerOptions, 'eval'|'type'>} [options] 	 
- * @param {boolean} [isInline] 	 
+ * @returns {WorkerMainThread<WT>} 	 
  */
 ```
  - <i>example</i>:
 ```js  
  import { WorkerMainThread } from 'vivth'; 	 
  	 
- export const myDoubleWorker = new WorkerMainThread('./doubleWorkerThread.mjs');
+ export const myDoubleWorker = WorkerMainThread.newVivthWorker('./doubleWorkerThread.mjs');
  
-```
-
-#### reference:`WorkerMainThread.isBrowser:getter`
-- check whether js run in browser
-
-```js
-/**
- * @type {boolean}
- */
 ```
 
 #### reference:`WorkerMainThread_instance.terminate`
@@ -1502,7 +2220,7 @@ npm i vivth
 
 ```js
 /**
- * @type {Derived<WorkerResult<WT["Post"]>>} 	 
+ * @type {Derived<WorkerResult<WT["POST"]>>} 	 
  */
 ```
  - <i>example</i>:
@@ -1523,7 +2241,7 @@ npm i vivth
 
 ```js
 /**
- * @type {(event: WT["Receive"])=>void} 	 
+ * @type {(event: WT["RECEIVE"])=>void} 	 
  */
 ```
  - <i>example</i>:
@@ -1532,127 +2250,6 @@ npm i vivth
  	 
  myDoubleWorker.postMessage(90);
  
-```
-
-*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
-
-<h2 id="workerresult">WorkerResult</h2>
-
-
-#### reference:`WorkerResult`
-- typeHelper for `Worker` message passing;  
-- uses error as value instead;
-
-```js
-/**
- * @template POST
- */
-```
-
-#### reference:`WorkerResult_instance.data`
-- result value;
-
-```js
-/**
- * @type {POST}
- */
-```
-
-#### reference:`WorkerResult_instance.error`
-- error value;
-
-```js
-/**
- * @type {Error|string|undefined}
- */
-```
-
-*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
-
-<h2 id="workerthread">WorkerThread</h2>
-
-
-#### reference:`WorkerThread`
-- class helper for `WorkerThread` creation;
-
-```js
-/**
- * @template Receive  
- * @template Post
- */
-```
-
-#### reference:`WorkerThread.setup`
-- need to be called and exported as new `WorkerThread` class reference;
-
-```js
-/**
- * @template Receive_ 	 
- * @template Post_ 	 
- * @param {{parentPort:()=>Promise<any>}} parentPortRef 	 
- * - correct parentPort reference, example: 	 
- * ```js 	 
- * async () => (await import('node:worker_threads')).parentPort 	 
- * ``` 	 
- * @returns {typeof WorkerThread<Receive_, Post_>} 	 
- */
-```
- - <i>example</i>:
-```js  
- import { WorkerThread } from 'vivth'; 	 
- 	 
- WorkerThread.setup({ parentPort: async () => (await import('node:worker_threads')).parentPort }); 	 
- // that is the default value, if your parentPort/equivalent API is not that; 	 
- // you need to call this method;
- 
-```
-
-#### reference:`new WorkerThread`
-- instantiate via created class from `setup` static method;
-
-```js
-/**
- * @param {WorkerThread["handler"]} handler 	 
- */
-```
- - <i>example</i>:
-```js  
- import { MyWorkerThread } from './MyWorkerThread.mjs'; 	 
- 	 
- const doubleWorker = new MyWorkerThread((ev, isLastOnQ) => { 	 
- 	// if(!isLastOnQ) { 	 
- 	// 	return null; // can be used for imperative debouncing; 	 
- 	// } 	 
- 	return ev = ev * 2; 	 
- });
- 
-```
-
-#### reference:`WorkerThread_instance.handler`
-- type helper;
-
-```js
-/**
- * @type {(ev: Receive, isLastOnQ:boolean) => Post}
- */
-```
-
-#### reference:`WorkerThread_instance.Receive`
-- helper type, hold no actual value;
-
-```js
-/**
- * @type {Receive}
- */
-```
-
-#### reference:`WorkerThread_instance.Post`
-- helper type, hold no actual value;
-
-```js
-/**
- * @type {Post}
- */
 ```
 
 *) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
@@ -1671,15 +2268,47 @@ npm i vivth
  * @param {string} mimeType  
  * @param {(string:string)=>string} btoaFunction  
  * - check your js runtime `btoa`;  
- * @returns {string}  
+ * - node compatible:  
+ * ```js  
+ * (str, prevBufferEncoding) =>  
+ * 	Buffer.from(str, prevBufferEncoding).toString('base64')  
+ * ```  
+ * @returns {Base64URLString}  
  */
 ```
  - <i>example</i>:
 ```js 
  import { Base64URL } from 'vivth'  
- import { fileString } from './fileString.mjs';  
+ import fileString from './fileString.mjs';  
   
  Base64URL(fileString, 'application/javascript', btoa);
+ 
+```
+
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+<h2 id="base64urlfromfile">Base64URLFromFile</h2>
+
+
+#### reference:`Base64URLFromFile`
+- create inline base64 url;  
+- usage:  
+>- can be extremely usefull to display file on desktop app webview, without exposing http server;  
+>- when using `FSInline`, use [Base64URL](#base64url) instead;
+
+```js
+/**
+ * @param {string} filePath  
+ * @returns {Promise<Base64URLString>}  
+ */
+```
+ - <i>example</i>:
+```js 
+ import { join } from 'node:path'  
+  
+ import { Base64URLFromFile, Paths } from 'vivth'  
+  
+ await Base64URLFromFile(join(Paths.root, '/path/to/file'));
  
 ```
 
@@ -1717,7 +2346,7 @@ npm i vivth
 >>- `"at"description` are treated as plain `markdown`;  
 >>- first `"at"${string}` after `"at"description` until `"at"example` will be treated as `javascript` comment block on the `markdown`;  
 >>- `"at"example` are treated as `javascript` block on the `markdown` file, and should be placed last on the same comment block;  
->>- you can always look at `vivth/src` files to check how the source, and the `README.md` and `index.mjs` is documentation/generation results;
+>>- you can always look at `vivth/src` files to check how the source, and the `README.md` and `index.mjs` documentation/generation results;
 
 
 #### reference:`new JSautoDOC`
@@ -1741,25 +2370,9 @@ npm i vivth
 ```
  - <i>example</i>:
 ```js  
- import { Console, Setup, JSautoDOC } from 'vivth'; 	 
+ import { JSautoDOC } from 'vivth'; 	 
  	 
- const { paths, safeExit } = Setup; 	 
- 	 
- new paths({ 	 
- 	root: process?.env?.INIT_CWD ?? process?.cwd(), 	 
- }); 	 
- 	 
- new safeExit({ 	 
- 	exitEventNames: ['SIGINT', 'SIGTERM', 'exit'], 	 
- 	exitCallbackListeners: (eventName) => { 	 
- 		process.once(eventName, function () { 	 
- 			safeExit.instance.exiting.correction(true); 	 
- 			Console.log(`safe exit via "${eventName}"`); 	 
- 		}); 	 
- 	}, 	 
- }); 	 
- 	 
- new JSautoDOC({ 	 
+  new JSautoDOC({ 	 
  	paths: { dir: 'src', file: 'index.mjs', readMe: 'README.md' }, 	 
  	copyright: 'this library is made and distributed under MIT license;', 	 
  	tableOfContentTitle: 'list of exported API and typehelpers', 	 
@@ -1779,14 +2392,14 @@ npm i vivth
 
 ```js
 /**
- * @template {Object} P  
- * @template {Object} O  
+ * @template {Object} PARENT  
+ * @template {Object} OBJECT  
  * @param {string} keyName  
- * @param {P} parent  
- * @param {(this:P)=>O} object  
+ * @param {PARENT} parent  
+ * @param {(this:PARENT)=>OBJECT} object  
  * @param {Object} [options]  
  * @param {boolean} [options.lazy]  
- * @return {O}  
+ * @return {OBJECT}  
  */
 ```
  - <i>example</i>:
@@ -1841,9 +2454,9 @@ npm i vivth
 
 ```js
 /**
- * @template {string} N  
- * @param {N} name  
- * @returns {{[EventNameSpace]: N}}  
+ * @template {string} NAME  
+ * @param {NAME} name  
+ * @returns {{[EventNameSpace]: NAME}}  
  */
 ```
  - <i>example</i>:
@@ -1855,6 +2468,27 @@ npm i vivth
  // assuming `incomingMessage`, also created using EventObject('worker:exit');  
  // or manually {[EventNameSpace]:'worker:exit'};  
  // which either will result true;
+ 
+```
+
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+<h2 id="getruntime">GetRuntime</h2>
+
+
+#### reference:`GetRuntime`
+- detects the current JavaScript runtime;
+
+```js
+/**
+ * @type {()=>Runtime}  
+ */
+```
+ - <i>example</i>:
+```js 
+ import { GetRuntime } form 'vivth';  
+  
+ const runtime = GetRuntime();
  
 ```
 
@@ -1899,17 +2533,18 @@ npm i vivth
 
 ```js
 /**
- * @template T  
- * @param {() => T} factory  
- * @returns {T & {[unwrapLazy]: string}}  
+ * @template FACTORY  
+ * @param {() => FACTORY} factory  
+ * @returns {FACTORY & {[unwrapLazy]: ()=> FACTORY}}  
  * - the unwrapLazy prop can be accessed to force instatiation/call;  
  * >- `unwrapLazy` prop name can be checked by checking the list of possible prop, from your ide;  
- * >- as of version 1.0.0, value is `vivth:unwrapLazy;`;  
+ * >- as of version `1.0.0`, value is `vivth:unwrapLazy;`;  
  */
 ```
  - <i>example</i>:
 ```js 
  import { LazyFactory } from  'vivth';  
+  
  class MyClass{  
     constructor() {  
       this.myProp = 1; // will only available when accessed;  
@@ -1926,7 +2561,9 @@ npm i vivth
  import { myInstance } from './myInstance.mjs';  
   
  const a = myInstance; // not yet initiated;  
- const b = a.myProp // imediately initiated;
+ const b = a.myProp // imediately initiated;  
+ // OR  
+ myInstance["vivth:unwrapLazy;"]() // forcefully call the callback;
  
 ```
 
@@ -1972,15 +2609,15 @@ npm i vivth
 
 ```js
 /**
- * @template {string} Key  
- * @template ReturnType_  
+ * @template {string} KEY  
+ * @template RETURNTYPE  
  * @template {Record<  
- * 	Key,  
- * 	() => Promise<ReturnType_>  
+ * 	KEY,  
+ * 	(err:{prevError:undefined|Error}) => Promise<RETURNTYPE>  
  * >} RecordTryType  
  * @param {RecordTryType} tryRecord  
  * @returns {Promise<  
- * 	[[keyof RecordTryType, ReturnType_], undefined]  
+ * 	[[keyof RecordTryType, RETURNTYPE], undefined]  
  * 	| [[undefined, undefined], Error]  
  * >}  
  */
@@ -1990,13 +2627,13 @@ npm i vivth
  import { Try } from 'vivth';  
   
  const [[key, result], error] = await Try({  
- 	someRuntime: async () => {  
+ 	someRuntime: async ( prevError ) => {  
  		// asuming on this one doesn't naturally throw error,  
  		// yet you need to continue to next key,  
  		// instead of returning,  
  		// you should throw new Error(something);  
  	},  
- 	browser: async () => {  
+ 	browser: async ( prevError ) => {  
  		return location?.origin;  
  		// if no error, stop other key function from running;  
  		// key = 'browser'  
@@ -2005,7 +2642,7 @@ npm i vivth
  		// if error;  
  		// run nodeOrBun;  
  	},  
- 	nodeOrBun: async () => {  
+ 	nodeOrBun: async ( prevError ) => {  
  		return process?.env?.INIT_CWD ?? process?.cwd();  
  		// if no error;  
  		// key = 'nodeOrBun'  
@@ -2030,9 +2667,9 @@ npm i vivth
 
 ```js
 /**
- * @template ResultType  
- * @param {()=>Promise<ResultType>} asyncFunction_  
- * @returns {Promise<[ResultType|undefined, Error|undefined]>}  
+ * @template RESULT  
+ * @param {()=>Promise<RESULT>} asyncFunction_  
+ * @returns {Promise<[RESULT|undefined, Error|undefined]>}  
  */
 ```
  - <i>example</i>:
@@ -2063,9 +2700,9 @@ npm i vivth
 
 ```js
 /**
- * @template ResultType  
- * @param {()=>ResultType} function_  
- * @returns {[ResultType|undefined, Error|undefined]}  
+ * @template RESULT  
+ * @param {()=>RESULT} function_  
+ * @returns {[RESULT|undefined, Error|undefined]}  
  */
 ```
  - <i>example</i>:
@@ -2092,6 +2729,7 @@ npm i vivth
 ```js
 /**
  * @param {string} path_  
+ * - path from `Paths.root`;  
  * @param {Object} [options]  
  * @param {string} [options.overrideDir]  
  * - default: write conversion to same directory;  
@@ -2106,37 +2744,6 @@ npm i vivth
  import { TsToMjs } from 'vivth';  
   
  TsToMjs('./myFile.mts', { encoding: 'utf-8', overrideDir: './other/dir' });
- 
-```
-
-*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
-
-<h2 id="writefilesafe">WriteFileSafe</h2>
-
-
-#### reference:`WriteFileSafe`
-- function to create file by recursively mkdir the dirname of the outFile;  
-- also returing promise of result & error as value;
-
-```js
-/**
- * @param {string} outFile  
- * @param {string} content  
- * @param {import('node:fs').WriteFileOptions} options  
- * @returns {Promise<ReturnType<typeof TryAsync<void>>>}  
- */
-```
- - <i>example</i>:
-```js 
- import { WriteFileSafe } from 'vivth';  
-  
- const [_, writeError] = await TryAsync(async () => {  
- 	return await WriteFileSafe(  
- 		'/some/path.mjs',  
- 		'console.log("hello-world!!");',  
- 		{ encoding: 'utf-8' }  
- 	);  
- });
  
 ```
 
@@ -2190,6 +2797,17 @@ npm i vivth
 ```
 *) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
+<h2 id="litexpkeytype">LitExpKeyType</h2>
+
+- jsdoc types:
+
+```js
+/**
+ * @typedef {Record<string, RegExp|false>} LitExpKeyType
+ */
+```
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
 <h2 id="mutationtype">MutationType</h2>
 
 - jsdoc types:
@@ -2223,7 +2841,171 @@ npm i vivth
 ```js
 /**
  * - return type of Q callback;
- * @typedef {{resume:()=>void, isLastOnQ:boolean}} QCBReturn
+ * @typedef {{resume:()=>void, isLastOnQ:()=>boolean}} QCBReturn
  */
 ```
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+<h2 id="runtime">Runtime</h2>
+
+- jsdoc types:
+
+```js
+/**
+ * @description
+ * - for popular runtimes check;
+ * @typedef {'node' | 'bun' | 'deno' | 'browser' | 'unknown'} Runtime
+ */
+```
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+<h2 id="workerresult">WorkerResult</h2>
+
+
+#### reference:`WorkerResult`
+- typeHelper for `Worker` message passing;  
+- uses error as value instead;
+
+```js
+/**
+ * @template POST
+ */
+```
+
+#### reference:`WorkerResult_instance.data`
+- result value;
+
+```js
+/**
+ * @type {POST}
+ */
+```
+
+#### reference:`WorkerResult_instance.error`
+- error value;
+
+```js
+/**
+ * @type {Error|string|undefined}
+ */
+```
+
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+<h2 id="workerthread">WorkerThread</h2>
+
+
+#### reference:`WorkerThread`
+- class helper for `WorkerThread` creation;  
+- before any `Worker` functionaily to be used, you need to setup it with `WorkerThread.setup` and `WorkerMainThread.setup` before runing anytyhing;
+
+```js
+/**
+ * @template RECEIVE  
+ * @template POST
+ */
+```
+
+#### reference:`WorkerThread.setup`
+- need to be called and exported as new `WorkerThread` class reference;
+
+```js
+/**
+ * @template RECEIVE 	 
+ * @template POST 	 
+ * @param {{parentPort:import('worker_threads')["parentPort"]}} refs 	 
+ * -example: 	 
+ * ```js 	 
+ * import { parentPort } from 'node:worker_threads'; 	 
+ * ``` 	 
+ * @returns {typeof WorkerThread<RECEIVE, POST>} 	 
+ */
+```
+ - <i>example</i>:
+```js  
+ import { WorkerThread } from 'vivth'; 	 
+ import { parentPort } from 'node:worker_threads'; 	 
+ 	 
+ export const MyWorkerThreadRef = WorkerThread.setup({ parentPort });
+ 
+```
+
+#### reference:`new WorkerThread`
+- instantiate via created class from `setup` static method;
+
+```js
+/**
+ * @param {WorkerThread["handler"]} handler 	 
+ */
+```
+ - <i>example</i>:
+```js  
+ import { MyWorkerThread } from './MyWorkerThread.mjs'; 	 
+ 	 
+ const doubleWorker = new MyWorkerThread((ev, isLastOnQ) => { 	 
+ 	// if(!isLastOnQ()) { 	 
+ 	// 	return null; // can be used for imperative debouncing; 	 
+ 	// } 	 
+ 	// await fetch('some/path') 	 
+ 	// if(!isLastOnQ()) { 	 
+ 	// 	return; 	 
+ 	// } 	 
+ 	return ev = ev * 2; 	 
+ });
+ 
+```
+
+#### reference:`WorkerThread_instance.handler`
+- type helper;
+
+```js
+/**
+ * @type {(ev: RECEIVE, isLastOnQ:QCBReturn["isLastOnQ"]) => POST}
+ */
+```
+
+#### reference:`WorkerThread_instance.RECEIVE`
+- helper type, hold no actual value;
+
+```js
+/**
+ * @type {RECEIVE}
+ */
+```
+
+#### reference:`WorkerThread_instance.POST`
+- helper type, hold no actual value;
+
+```js
+/**
+ * @type {POST}
+ */
+```
+
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+<h2 id="tobundledjsplugin">ToBundledJSPlugin</h2>
+
+
+#### reference:`ToBundledJSPlugin`
+- generate `esbuild.Plugin` for changing dev time file into runtime file;  
+- on using esbuild with this plugin, it will replace any module that have similiar file name but ended with Bundled(before extname);  
+>- works on `.mts`|`.ts`|`.mjs`|`.cjs`|`.js`;  
+>- `anyFileName.mjs` -> seek for and use `anyFileNameBundled.mjs`, if not found use `anyFileName.mjs`;
+
+```js
+/**
+ * @param {string} includedInPath  
+ * - is generalized, you can freely uses forward or backward slash;  
+ * @returns {ReturnType<CreateESPlugin>}  
+ */
+```
+ - <i>example</i>:
+```js 
+ import { ToBundledJSPlugin } from 'vivth';  
+  
+ export const myBundledPlugin = ToBundledJSPlugin('/myProjectName/src/');
+ 
+```
+
 *) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>

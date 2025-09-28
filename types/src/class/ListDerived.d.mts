@@ -3,16 +3,19 @@
  * - class to create `dervivedList` that satisfy `Array<Record<string, string>>`;
  * - usefull for `derivedLoops`, e.g. temporary search values;
  * - is a `Derived` instance;
- * @template {ListArg} LA
- * @extends {Derived<LA[]>}
+ * @template {ListArg} LISTARG
+ * @extends {Derived<LISTARG[]>}
  */
-export class ListDerived<LA extends import("../types/ListArg.mjs").ListArg> extends Derived<LA[]> {
+export class ListDerived<LISTARG extends import("../types/ListArg.mjs").ListArg> extends Derived<LISTARG[]> {
     /**
      * @typedef {import('../types/ListArg.mjs').ListArg} ListArg
+     * @typedef {import('../common/lazie.mjs').unwrapLazy} unwrapLazy
      */
     /**
      * @description
-     * @param {(effectInstanceOptions:Effect["options"])=>Promise<LA[]>} derivedFunction
+     * @param {(effectInstanceOptions:Omit<Effect["options"],
+     * unwrapLazy>)=>
+     * Promise<LISTARG[]>} derivedFunction
      * @example
      * import { ListSignal, ListDerived } from 'vivth';
      *
@@ -29,7 +32,7 @@ export class ListDerived<LA extends import("../types/ListArg.mjs").ListArg> exte
      * 	})
      * });
      */
-    constructor(derivedFunction: (effectInstanceOptions: Effect["options"]) => Promise<LA[]>);
+    constructor(derivedFunction: (effectInstanceOptions: Omit<Effect["options"], "vivth:unwrapLazy;">) => Promise<LISTARG[]>);
 }
 import { Derived } from './Derived.mjs';
 import { Effect } from './Effect.mjs';

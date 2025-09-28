@@ -1,6 +1,7 @@
 // @ts-check
 
 import { TryAsync } from '../function/TryAsync.mjs';
+import { TrySync } from '../function/TrySync.mjs';
 import { Console } from './Console.mjs';
 import { Effect, setOfEffects } from './Effect.mjs';
 import { EnvSignal } from './EnvSignal.mjs';
@@ -15,7 +16,7 @@ export const safeCleanUpCBs = new Set();
  * @description
  * - class helper for describing how to Safely Response on exit events
  * - singleton;
- * @template {[string, ...string[]]} eventNames
+ * - most of functionality might need to access `SafeExit.instance.exiting`, if you get warning, you can instantiate `SafeExit` before running anything;
  */
 export class SafeExit {
 	/**
@@ -27,7 +28,13 @@ export class SafeExit {
 	/**
 	 * @description
 	 * @param {Object} options
-	 * @param {eventNames} options.eventNames
+	 * @param {[string, ...string[]]} options.eventNames
+	 * - eventNames are blank by default, you need to manually name them all;
+	 * - 'exit' will be omited, as it might cause async callbacks failed to execute;
+	 * - example:
+	 * ```js
+	 *  ['SIGINT', 'SIGTERM']
+	 * ```
 	 * @param {()=>void} options.terminator
 	 * - standard node/bun:
 	 * ```js
@@ -47,17 +54,26 @@ export class SafeExit {
 	 * 	});
 	 * };
 	 * ```
+	 * - example Deno:
+	 * ```js
+	 * (eventName) => {
+	 * 	const sig = Deno.signal(eventName);
+	 * 		for await (const _ of sig) {
+	 * 			exiting.correction(true);
+	 * 			sig.dispose();
+	 * 			Console.log(`safe exit via "${eventName}"`);
+	 * 		}
+	 * }
+	 * ```
 	 * - if your exit callback doesn't uses `process` global object you need to input on the SafeExit instantiation
 	 * @example
 	 * import { SafeExit, Console } from 'vivth';
 	 *
 	 * new SafeExit({
-	 * 	// eventNames are blank by default, you need to manually name them all;
-	 * 	// 'exit' will be omited, as it might cause async callbacks failed to execute;
 	 * 	eventNames: ['SIGINT', 'SIGTERM', ...eventNames],
-	 * 	terminator = () => process.exit(0), // OR on deno () => Deno.exit(0),
+	 * 	terminator : () => process.exit(0), // OR on deno () => Deno.exit(0),
 	 * 	// optional deno example
-	 * 	listener = (eventName) => {
+	 * 	listener : (eventName) => {
 	 * 		const sig = Deno.signal(eventName);
 	 * 			for await (const _ of sig) {
 	 * 				exiting.correction(true);
@@ -86,12 +102,12 @@ export class SafeExit {
 	 */
 	exiting = new EnvSignal(false);
 	/**
-	 * @param {eventNames} eventNames
+	 * @param {ConstructorParameters<typeof SafeExit>[0]["eventNames"]} eventNames
 	 * @returns {void}
 	 */
 	#register = (eventNames) => {
 		eventNames.forEach((eventName) => {
-			if (eventName == 'exit') {
+			if (eventName.toLowerCase() === 'exit') {
 				return;
 			}
 			this.#listener(eventName);
@@ -137,14 +153,18 @@ export class SafeExit {
 			effect.options.removeEffect();
 		});
 		for await (const cleanup of safeCleanUpCBs) {
-			const [_, error] = await TryAsync(async () => {
+			const [, error] = await TryAsync(async () => {
 				await cleanup();
 			});
 			if (!error) {
 				continue;
 			}
-			Console.error(error);
+			Console.warn(error);
 		}
-		this.#exit();
+		const [, errorExitting] = TrySync(this.#exit);
+		if (!errorExitting) {
+			return;
+		}
+		Console.error(errorExitting);
 	});
 }

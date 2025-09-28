@@ -11,8 +11,8 @@ import { Signal } from './Signal.mjs';
 /**
  * @description
  * - class to create list that satisfy `Array<Record<string, string>>`.
- * @template {import('../types/ListArg.mjs').ListArg} LA
- * @extends {Signal<LA[]>}
+ * @template {import('../types/ListArg.mjs').ListArg} LISTARG
+ * @extends {Signal<LISTARG[]>}
  */
 export class ListSignal extends Signal {
 	/**
@@ -41,7 +41,7 @@ export class ListSignal extends Signal {
 	/**
 	 * @description
 	 * - usefull for `loops`;
-	 * @param {LA[]} [value]
+	 * @param {LISTARG[]} [value]
 	 * @example
 	 * import { ListSignal } from 'vivth';
 	 *
@@ -56,7 +56,7 @@ export class ListSignal extends Signal {
 	/**
 	 * @description
 	 * - reference to original inputed `value`;
-	 * @type {LA[]}
+	 * @returns {LISTARG[]}
 	 */
 	get value() {
 		return super.value;
@@ -65,7 +65,7 @@ export class ListSignal extends Signal {
 	 * @description
 	 * - you cannot mannually set`value` `ListSignal_instance`;
 	 * @private
-	 * @type {LA[]}
+	 * @type {LISTARG[]}
 	 */
 	set value(_) {
 		Console.error('`List.value` `setter` are not available outside the class or instance');
@@ -82,7 +82,7 @@ export class ListSignal extends Signal {
 			 * @description
 			 * - reference to structuredClone elements of `value`;
 			 * - calling doesn't notify
-			 * @type {Array<LA>}
+			 * @returns {Array<LISTARG>}
 			 */
 			get structuredClone() {
 				return structuredClone(super.value);
@@ -91,7 +91,7 @@ export class ListSignal extends Signal {
 			 * @instance arrayMethods
 			 * @description
 			 * - appends new elements to the end;
-			 * @param {...LA} listArg
+			 * @param {...LISTARG} listArg
 			 * @returns {void}
 			 */
 			push: (...listArg) => {
@@ -112,7 +112,7 @@ export class ListSignal extends Signal {
 			 * @instance arrayMethods
 			 * @description
 			 * - inserts new element at the start;
-			 * @param  {...LA} listArg
+			 * @param  {...LISTARG} listArg
 			 * @returns {void}
 			 */
 			unshift: (...listArg) => {
@@ -137,7 +137,7 @@ export class ListSignal extends Signal {
 			 * @instance arrayMethods
 			 * @description
 			 * - replace whole `List` data with new array.
-			 * @param {LA[]} listArgs
+			 * @param {LISTARG[]} listArgs
 			 * - new array in place of the deleted array.
 			 * @returns {void}
 			 */
@@ -152,7 +152,7 @@ export class ListSignal extends Signal {
 			 * - The zero-based location in the data from which to start removing elements.
 			 * @param {number} deleteCount
 			 * -The number of elements to remove.
-			 * @param {...LA} listArg
+			 * @param {...LISTARG} listArg
 			 * - new data in place of the deleted data.
 			 * @returns {void}
 			 */
@@ -184,7 +184,7 @@ export class ListSignal extends Signal {
 			 * @description
 			 * - modify `List` element at specific index;
 			 * @param {number} index
-			 * @param {Partial<LA>} listArg
+			 * @param {Partial<LISTARG>} listArg
 			 * @returns {void}
 			 */
 			modify: (index, listArg) => {

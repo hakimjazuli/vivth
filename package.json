@@ -11,7 +11,9 @@
 	},
 	"dependencies": {
 		"chokidar": "^4.0.3",
-		"esbuild": "^0.25.9"
+		"esbuild": "^0.25.9",
+		"mime-types": "^3.0.1",
+		"pkg": "^5.8.1"
 	},
 	"peerDependencies": {},
 	"repository": {
@@ -30,7 +32,9 @@
 	},
 	"homepage": "https://github.com/hakimjazuli/vivth#readme",
 	"scripts": {
-		"dev": "concurrently 'bun --watch ./dev/index.mjs' 'bun tsc --watch'"
+		"dev-wo": "concurrently 'bun ./dev/index.mjs' 'bun tsc --watch'",
+		"dev": "concurrently 'bun --watch ./dev/index.mjs' 'bun tsc --watch'",
+		"test_test": "bun --watch ./dev/test.mjs"
 	},
 	"sideEffects": false
 }

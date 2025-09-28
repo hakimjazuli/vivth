@@ -7,16 +7,19 @@ import { Effect } from './Effect.mjs';
  * - class to create `dervivedList` that satisfy `Array<Record<string, string>>`;
  * - usefull for `derivedLoops`, e.g. temporary search values;
  * - is a `Derived` instance;
- * @template {ListArg} LA
- * @extends {Derived<LA[]>}
+ * @template {ListArg} LISTARG
+ * @extends {Derived<LISTARG[]>}
  */
 export class ListDerived extends Derived {
 	/**
 	 * @typedef {import('../types/ListArg.mjs').ListArg} ListArg
+	 * @typedef {import('../common/lazie.mjs').unwrapLazy} unwrapLazy
 	 */
 	/**
 	 * @description
-	 * @param {(effectInstanceOptions:Effect["options"])=>Promise<LA[]>} derivedFunction
+	 * @param {(effectInstanceOptions:Omit<Effect["options"],
+	 * unwrapLazy>)=>
+	 * Promise<LISTARG[]>} derivedFunction
 	 * @example
 	 * import { ListSignal, ListDerived } from 'vivth';
 	 *
