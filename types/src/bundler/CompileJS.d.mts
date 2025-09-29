@@ -35,6 +35,8 @@
  * - `key` are to used as `--keyName`;
  * - value are the following value of the key;
  * - no need to add the output/outdir, as it use the `options.outDir`;
+ * @param {ReturnType<CreateESPlugin>[]} [options.esBundlerPlugins]
+ * - plugins for `EsBundler`;
  * @return {ReturnType<TryAsync<{compileResult:Promise<any>,
  * commandCalled: string;
  * compiledBinFile: string;
@@ -53,7 +55,8 @@
  * 		compiler: 'pkg',
  * 		compilerArguments: {
  * 			target: ['node18-win-x64'],
- * 		}
+ * 		},
+ * 		esBundlerPlugins: [],
  * 	}),
  * 	CompileJS({
  * 		entryPoint: join(Paths.root, '/dev'),
@@ -62,17 +65,20 @@
  * 		compiler: 'bun',
  * 		compilerArguments: {
  * 			target: ['bun-win-x64'],
- * 		}
+ * 		},
+ * 		esBundlerPlugins: [],
  * 	}),
  * ])
  */
-export function CompileJS({ entryPoint, minifyFirst, encoding, outDir, compiler, compilerArguments, }: {
+export function CompileJS({ entryPoint, minifyFirst, encoding, outDir, compiler, compilerArguments, esBundlerPlugins, }: {
     entryPoint: string;
     encoding?: BufferEncoding;
     minifyFirst: boolean;
     outDir: string;
     compiler?: "pkg" | "bun" | "deno";
     compilerArguments?: Record<string, string>;
+    esBundlerPlugins?: ReturnType<CreateESPlugin>[];
 }): ReturnType<typeof TryAsync>;
 export type PlatformKey = "win32" | "linux" | "darwin" | string;
+export type CreateESPlugin = typeof import("./CreateESPlugin.mjs")["CreateESPlugin"];
 import { TryAsync } from '../function/TryAsync.mjs';

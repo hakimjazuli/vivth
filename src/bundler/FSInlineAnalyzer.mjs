@@ -101,9 +101,7 @@ export class FSInlineAnalyzer {
 			}
 			const {
 				result: { named: namedWorker },
-				regexp,
 			} = resultMatchingWorker;
-
 			for (let i = 0; i < namedWorker.length; i++) {
 				const { path } = namedWorker[i];
 				const fullPath = join(Paths.root, path);

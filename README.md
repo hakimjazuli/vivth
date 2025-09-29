@@ -39,12 +39,11 @@ npm i vivth
 
 <h2 id="list-of-exported-api-and-typehelpers">list of exported API and typehelpers</h2>
 
- - [CompileJS](#compilejs)
  - [CreateESPlugin](#createesplugin)
  - [EsBundler](#esbundler)
  - [FSInline](#fsinline)
  - [FSInlineAnalyzer](#fsinlineanalyzer)
- - [Console](#console)
+ - [CompileJS](#compilejs)
  - [Derived](#derived)
  - [Effect](#effect)
  - [EnvSignal](#envsignal)
@@ -52,119 +51,41 @@ npm i vivth
  - [FileSafe](#filesafe)
  - [ListDerived](#listderived)
  - [ListSignal](#listsignal)
- - [LitExp](#litexp)
  - [Paths](#paths)
  - [QChannel](#qchannel)
  - [SafeExit](#safeexit)
  - [Setup](#setup)
  - [Signal](#signal)
  - [WorkerMainThread](#workermainthread)
- - [Base64URL](#base64url)
+ - [Console](#console)
  - [Base64URLFromFile](#base64urlfromfile)
  - [EventNameSpace](#eventnamespace)
- - [CreateImmutable](#createimmutable)
- - [EventCheck](#eventcheck)
- - [EventObject](#eventobject)
- - [GetRuntime](#getruntime)
- - [IsAsync](#isasync)
- - [LazyFactory](#lazyfactory)
- - [Timeout](#timeout)
- - [Try](#try)
- - [TryAsync](#tryasync)
- - [TrySync](#trysync)
- - [TsToMjs](#tstomjs)
  - [JSautoDOC](#jsautodoc)
  - [AnyButUndefined](#anybutundefined)
  - [ExtnameType](#extnametype)
  - [IsListSignal](#islistsignal)
+ - [LitExp](#litexp)
  - [ListArg](#listarg)
  - [LitExpKeyType](#litexpkeytype)
  - [MutationType](#mutationtype)
  - [QCBFIFOReturn](#qcbfiforeturn)
  - [QCBReturn](#qcbreturn)
  - [Runtime](#runtime)
+ - [EventCheck](#eventcheck)
+ - [EventObject](#eventobject)
+ - [IsAsync](#isasync)
+ - [GetRuntime](#getruntime)
+ - [LazyFactory](#lazyfactory)
+ - [Timeout](#timeout)
+ - [Try](#try)
+ - [TryAsync](#tryasync)
+ - [TrySync](#trysync)
+ - [TsToMjs](#tstomjs)
+ - [Base64URL](#base64url)
+ - [CreateImmutable](#createimmutable)
  - [WorkerResult](#workerresult)
  - [WorkerThread](#workerthread)
  - [ToBundledJSPlugin](#tobundledjsplugin)
-
-<h2 id="compilejs">CompileJS</h2>
-
-
-#### reference:`CompileJS`
-- function to compile `.ts`|`.mts`|`.mjs` file, into a single executable;  
-- also generate js representation;  
-- uses [pkg](https://www.npmjs.com/package/pkg), [bun](https://bun.com/docs/bundler/executables), and [deno](https://docs.deno.com/runtime/reference/cli/compile/) compiler under the hood;  
->- they are used only as packaging agent, and doesn't necessarily supports their advanced feature, such as, assets bundling(use [FSInline](#fsinline) instead);  
->- `WorkerThread` will be converted to inline using `FSInline` too;  
- 
-!!!WARNING!!!  
-!!!WARNING!!!  
-!!!WARNING!!!  
- 
-- This function does not obfuscate and will not prevent decompilation. Do not embed environment variables or sensitive information inside `options.entryPoint`;  
-- It is designed for quick binarization, allowing execution on machines without `Node.js`, `Bun`, or `Deno` installed;  
-- The resulting binary will contain `FSInline` and `WorkerMainThread` target paths Buffers, which are loaded into memory at runtime. If your logic depends on the file system, use `node:fs` or `node:fs/promises` APIs and ship external files alongside the binary (not compiled);  
- 
-!!!WARNING!!!  
-!!!WARNING!!!  
-!!!WARNING!!!
-
-```js
-/**
- * @param {Object} options  
- * @param {string} options.entryPoint  
- * - need to be manually prefixed;  
- * @param {BufferEncoding} [options.encoding]  
- * - write and read encoding for the sources;  
- * - default: `utf-8`;  
- * @param {boolean} options.minifyFirst  
- * - minify the bundle before compilation;  
- * @param {string} options.outDir  
- * - need manual prefix;  
- * @param {'pkg'|'bun'|'deno'} [options.compiler]  
- * - default: no comilation, just bundling;  
- * - `bun` and `pkg` is checked, if there's bug on `deno`, please report on github for issues;  
- * @param {Record<string, string>} [options.compilerArguments]  
- * - `key` are to used as `--keyName`;  
- * - value are the following value of the key;  
- * - no need to add the output/outdir, as it use the `options.outDir`;  
- * @return {ReturnType<TryAsync<{compileResult:Promise<any>,  
- * commandCalled: string;  
- * compiledBinFile: string;  
- * bundledJSFile:string  
- * }>>}  
- */
-```
- - <i>example</i>:
-```js 
- import { join } from 'node:path';  
-  
- import { CompileJS, Paths } from 'vivth';  
-  
- const [[resultPkg, errorPkg], [resultBun, errorBun]] = await Promise.all([  
- 	CompileJS({  
- 		entryPoint: join(Paths.root, '/dev'),  
- 		minifyFirst: true,  
- 		outDir: join(Paths.root, '/dev-pkg'),  
- 		compiler: 'pkg',  
- 		compilerArguments: {  
- 			target: ['node18-win-x64'],  
- 		}  
- 	}),  
- 	CompileJS({  
- 		entryPoint: join(Paths.root, '/dev'),  
- 		minifyFirst: true,  
- 		outDir: join(Paths.root, '/dev-pkg'),  
- 		compiler: 'bun',  
- 		compilerArguments: {  
- 			target: ['bun-win-x64'],  
- 		}  
- 	}),  
- ])
- 
-```
-
-*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 <h2 id="createesplugin">CreateESPlugin</h2>
 
@@ -327,86 +248,84 @@ npm i vivth
 
 *) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
-<h2 id="console">Console</h2>
+<h2 id="compilejs">CompileJS</h2>
 
 
-#### reference:`Console`
-- class with static methods to print to standard console with bare minimum ANSI styles;
-
-
-#### reference:`Console.log`
-
-
-```js
-/**
- * @param {any} data 	 
- * @returns {void} 	 
- */
-```
- - <i>example</i>:
-```js  
- import { Console } from 'vivth'; 	 
- 	 
- Console.log({ 	 
- 	hello: 'world!!', 	 
- });
+#### reference:`CompileJS`
+- function to compile `.ts`|`.mts`|`.mjs` file, into a single executable;  
+- also generate js representation;  
+- uses [pkg](https://www.npmjs.com/package/pkg), [bun](https://bun.com/docs/bundler/executables), and [deno](https://docs.deno.com/runtime/reference/cli/compile/) compiler under the hood;  
+>- they are used only as packaging agent, and doesn't necessarily supports their advanced feature, such as, assets bundling(use [FSInline](#fsinline) instead);  
+>- `WorkerThread` will be converted to inline using `FSInline` too;  
  
-```
-
-#### reference:`Console.info`
-
-
-```js
-/**
- * @param {any} data 	 
- * @returns {void} 	 
- */
-```
- - <i>example</i>:
-```js  
- import { Console } from 'vivth'; 	 
- 	 
- Console.info({ 	 
- 	hello: 'world!!', 	 
- });
+!!!WARNING!!!  
+!!!WARNING!!!  
+!!!WARNING!!!  
  
-```
-
-#### reference:`Console.warn`
-
-
-```js
-/**
- * @param {any} data 	 
- * @returns {void} 	 
- */
-```
- - <i>example</i>:
-```js  
- import { Console } from 'vivth'; 	 
- 	 
- Console.warn({ 	 
- 	hello: 'world!!', 	 
- });
+- This function does not obfuscate and will not prevent decompilation. Do not embed environment variables or sensitive information inside `options.entryPoint`;  
+- It is designed for quick binarization, allowing execution on machines without `Node.js`, `Bun`, or `Deno` installed;  
+- The resulting binary will contain `FSInline` and `WorkerMainThread` target paths Buffers, which are loaded into memory at runtime. If your logic depends on the file system, use `node:fs` or `node:fs/promises` APIs and ship external files alongside the binary (not compiled);  
  
-```
-
-#### reference:`Console.error`
-
+!!!WARNING!!!  
+!!!WARNING!!!  
+!!!WARNING!!!
 
 ```js
 /**
- * @param {any} data 	 
- * @returns {void} 	 
+ * @param {Object} options  
+ * @param {string} options.entryPoint  
+ * - need to be manually prefixed;  
+ * @param {BufferEncoding} [options.encoding]  
+ * - write and read encoding for the sources;  
+ * - default: `utf-8`;  
+ * @param {boolean} options.minifyFirst  
+ * - minify the bundle before compilation;  
+ * @param {string} options.outDir  
+ * - need manual prefix;  
+ * @param {'pkg'|'bun'|'deno'} [options.compiler]  
+ * - default: no comilation, just bundling;  
+ * - `bun` and `pkg` is checked, if there's bug on `deno`, please report on github for issues;  
+ * @param {Record<string, string>} [options.compilerArguments]  
+ * - `key` are to used as `--keyName`;  
+ * - value are the following value of the key;  
+ * - no need to add the output/outdir, as it use the `options.outDir`;  
+ * @param {ReturnType<CreateESPlugin>[]} [options.esBundlerPlugins]  
+ * - plugins for `EsBundler`;  
+ * @return {ReturnType<TryAsync<{compileResult:Promise<any>,  
+ * commandCalled: string;  
+ * compiledBinFile: string;  
+ * bundledJSFile:string  
+ * }>>}  
  */
 ```
  - <i>example</i>:
-```js  
- import { Console } from 'vivth'; 	 
- 	 
- Console.error({ 	 
- 	hello: 'world!!', 	 
- });
+```js 
+ import { join } from 'node:path';  
+  
+ import { CompileJS, Paths } from 'vivth';  
+  
+ const [[resultPkg, errorPkg], [resultBun, errorBun]] = await Promise.all([  
+ 	CompileJS({  
+ 		entryPoint: join(Paths.root, '/dev'),  
+ 		minifyFirst: true,  
+ 		outDir: join(Paths.root, '/dev-pkg'),  
+ 		compiler: 'pkg',  
+ 		compilerArguments: {  
+ 			target: ['node18-win-x64'],  
+ 		},  
+ 		esBundlerPlugins: [],  
+ 	}),  
+ 	CompileJS({  
+ 		entryPoint: join(Paths.root, '/dev'),  
+ 		minifyFirst: true,  
+ 		outDir: join(Paths.root, '/dev-pkg'),  
+ 		compiler: 'bun',  
+ 		compilerArguments: {  
+ 			target: ['bun-win-x64'],  
+ 		},  
+ 		esBundlerPlugins: [],  
+ 	}),  
+ ])
  
 ```
 
@@ -1297,213 +1216,6 @@ npm i vivth
 
 *) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
-<h2 id="litexp">LitExp</h2>
-
-
-#### reference:`LitExp`
-- class helper to created opionated regex helper;  
-- named capture uses `es6+` feature, you might need to add polyfill to target extremely old browser;  
-- class name refer to `Literal Expression`;  
-- please be patient when using this class;  
->- destructuring is meant for extensive typehelper;  
->- and destructuring can lead to unhandled error here and there;  
->- therefore error as value is introduced to help to prevent error on runtime;
-
-```js
-/**
- * @template {LitExpKeyType} KEYS
- */
-```
-
-#### reference:`LitExp.prepare`
-- constructor helper; 	 
-- under the hood it is an abstraction of `RegExp`, with more template literal touch; 	 
->- you can apply inline `RegExp` features on the string template literal(as constructor RegExp arg0); 	 
->>- by doing so you are opting in to make: 	 
->>>- your regex detection more robust; but 	 
->>>- `litExp_instance.make.string` to be `unusable`; 	 
->>- also mind the needs of escape for special characters;
-
-```js
-/**
- * @template {LitExpKeyType} KEYS 	 
- * @param {KEYS} keysAndDefaultValuePair 	 
- * - keys and whether to override regex detection; 	 
- * >- example: 	 
- * ```js 	 
- *  myKey: /myCustomCapture/ // all flags will be stripped; 	 
- * ``` 	 
- * - default value === `false` is "[\\s\\S]
- *?", as in whiteSpace and nonWhiteSpace 0 to more occurence; 	 
- * @returns {ReturnType<typeof TrySync<(templateStringArray:TemplateStringsArray, 	 
- * ...values:(keyof KEYS)[] 	 
- * )=>LitExp<KEYS>>>} 	 
- * - placement of `key` will determine the named capture group will be placed in the template literal; 	 
- * - it is recomended to not end template literal with any of the `key`s as the regex detection might failed to detects the boundary of the end of matched string of that capture group; 	 
- */
-```
- - <i>example</i>:
-```js  
- import { LitExp } from 'vivth'; 	 
- 	 
- (()=>{ 	 
- 	const [liteal, errorPrep] = LitExp.prepare({ 	 
- 		myKey: /myCustomCapture/, // is placed on (?<myKey>myCustomCapture) 	 
- 		// use false to place "[\\s\\S]*?" instead; 	 
- 		...keyCaptureLogicPair 	 
- 	}) 	 
- 	if (errorPrep) { 	 
- 		console.error(error); 	 
- 		return; 	 
- 	} 	 
- 	 const litExp_instance = liteal`templateLiteral:${'myKey'};` 	 
- 	// recommended to end the template literal with any string but `key`; 	 
- })()
- 
-```
-
-#### reference:`LitExp_instance.make`
-- instance methods for generating things;
-
-
-#### reference:`LitExp_instance.make.string`
-- to make string based on the template literal;
-
-```js
-/**
- * @param {Partial<ReturnType<LitExp<KEYS>["evaluate"]["execGroups"]>>[0]["result"]} overrides 		 
- * @returns {string} 		 
- */
-```
- - <i>example</i>:
-```js 	 
- import { LitExp } from 'vivth'; 		 
- 		 
- const [literal, errorPreparing] = LitExp.prepare({ 		 
- 	myKey: false, 		 
- 	...keyCaptureLogicPair 		 
- }) 		 
- 		 
- // asuming no error 		 
- litExp_instance = `templateLiteral:${'myKey'};`; 		 
- const [result, error] = litExp_instance.make.string({ 		 
- 	myKey: 'actualvalue', 		 
- }); 		 
- 		 
- console.log(result); // "templateLiteral:actualvalue;"
- 
-```
-
-#### reference:`LitExp_instance.evaluate`
-- methods collections to evaluate string with `Literal Expression`;
-
-
-#### reference:`LitExp_instance.evaluate.execGroups`
-- to exec and grouped based on `key`;
-
-```js
-/**
- * @param {string} string 		 
- * @param {Object} options 		 
- * @param {ConstructorParameters<typeof RegExp>[1]} options.flags 		 
- * @param {boolean} options.whiteSpaceSensitive 		 
- * - true: leave any whitespace as is to be used as regex detection; 		 
- * - false: convert all whitespace to `\s+`; 		 
- * @param {boolean} options.absoluteLeadAndFollowing 		 
- * - false: standard capture; 		 
- * - true: add `^` and `<h2 id="litexp">LitExp</h2>
-
- to capture definition: 		 
- * >- meaning string will have to match starting and end of line from capture definition; 		 
- * @returns {ReturnType<typeof TrySync<{ 		 
- * result:{ whole:string, named: Record<keyof KEYS, string>}, 		 
- * regexp:RegExp}>> 		 
- * } 		 
- */
-```
- - <i>example</i>:
-```js 	 
- import { LitExp } from 'vivth'; 		 
- 		 
- const [literal, errorPreparing] = LitExp.prepare({ 		 
- 	myKey: false, 		 
- 	...keyCaptureLogicPair 		 
- }) 		 
- 		 
- // asuming no eror 		 
- const litExp_instance = literal`templateLiteral:${'myKey'};` 		 
- 		 
- const [{ 		 
- 		result:{ // asuming there's no error 		 
- 			named: { myKey }, 		 
- 			whole, 		 
- 		}, 		 
- 		regex, // for reference 		 
- 	}, error] = litExp_instance.evaluate.execGroups( 		 
- 	`templateLiteral:Something;`, 		 
- 	{ ...options } 		 
- ) 		 
- 		 
- console.log(whole); // "templateLiteral:Something;" 		 
- console.log(myKey); // "Something"
- 
-```
-
-#### reference:`LitExp_instance.evaluate.matchedAllAndGrouped`
-- to match all and grouped based on `key`;
-
-```js
-/**
- * @param {Parameters<LitExp<KEYS>["evaluate"]["execGroups"]>[0]} string 		 
- * @param {Omit<Parameters<LitExp<KEYS>["evaluate"]["execGroups"]>[1], 'absoluteLeadAndFollowing'>} options 		 
- * @returns {ReturnType<typeof TrySync<{result:{whole:string[], named:Array<Record<keyof KEYS, string>>}, 		 
- * regexp: RegExp}>> 		 
- * } 		 
- */
-```
- - <i>example</i>:
-```js 	 
- import { LitExp, Console } from 'vivth'; 		 
- 		 
- const [literal, errorPreparing] = LitExp.prepare({ 		 
- 	myKey: false, 		 
- 	...keyCaptureLogicPair 		 
- }) 		 
- 		 
- // asuming no error; 		 
- litExp_instance = literal`templateLiteral:${'myKey'};` 		 
- 		 
- const [resultOfMatchedAllAndGrouped, error] = litExp_instance.evaluate.matchedAllAndGrouped( 		 
- 	`templateLiteral:Something; 		 
- 	templateLiteral:SomethingElse;`, 		 
- 	{ ...options } 		 
- ) 		 
- (()=>{ 		 
- 	if (error) { 		 
- 		Console.error(error); 		 
- 		return; 		 
- 	} 		 
- 	const { 		 
- 		result: { 		 
- 				whole: [whole0, whole1], 		 
- 				named: [ 		 
- 					{ myKey: myKeyExec0, }, 		 
- 					{ myKey: myKeyExec1, }, 		 
- 				], 		 
- 			}, 		 
- 		regexp 		 
- 	} = resultOfMatchedAllAndGrouped; 		 
- 		 
- 	console.log(whole0); // "templateLiteral:Something;" 		 
- 	console.log(whole1); // "templateLiteral:SomethingElse;" 		 
- 	console.log(myKeyExec0); // "Something" 		 
- 	console.log(myKeyExec1); // "SomethingElse" 		 
- })()
- 
-```
-
-*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
-
 <h2 id="paths">Paths</h2>
 
 
@@ -2245,34 +1957,86 @@ npm i vivth
 
 *) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
-<h2 id="base64url">Base64URL</h2>
+<h2 id="console">Console</h2>
 
 
-#### reference:`Base64URL`
-- create inline base64 url;  
-- usage:  
->- can be extremely usefull to display file on desktop app webview, without exposing http server;
+#### reference:`Console`
+- class with static methods to print to standard console with bare minimum ANSI styles;
+
+
+#### reference:`Console.log`
+
 
 ```js
 /**
- * @param {string} fileString  
- * @param {string} mimeType  
- * @param {(string:string)=>string} btoaFunction  
- * - check your js runtime `btoa`;  
- * - node compatible:  
- * ```js  
- * (str, prevBufferEncoding) =>  
- * 	Buffer.from(str, prevBufferEncoding).toString('base64')  
- * ```  
- * @returns {Base64URLString}  
+ * @param {any} data 	 
+ * @returns {void} 	 
  */
 ```
  - <i>example</i>:
-```js 
- import { Base64URL } from 'vivth'  
- import fileString from './fileString.mjs';  
-  
- Base64URL(fileString, 'application/javascript', btoa);
+```js  
+ import { Console } from 'vivth'; 	 
+ 	 
+ Console.log({ 	 
+ 	hello: 'world!!', 	 
+ });
+ 
+```
+
+#### reference:`Console.info`
+
+
+```js
+/**
+ * @param {any} data 	 
+ * @returns {void} 	 
+ */
+```
+ - <i>example</i>:
+```js  
+ import { Console } from 'vivth'; 	 
+ 	 
+ Console.info({ 	 
+ 	hello: 'world!!', 	 
+ });
+ 
+```
+
+#### reference:`Console.warn`
+
+
+```js
+/**
+ * @param {any} data 	 
+ * @returns {void} 	 
+ */
+```
+ - <i>example</i>:
+```js  
+ import { Console } from 'vivth'; 	 
+ 	 
+ Console.warn({ 	 
+ 	hello: 'world!!', 	 
+ });
+ 
+```
+
+#### reference:`Console.error`
+
+
+```js
+/**
+ * @param {any} data 	 
+ * @returns {void} 	 
+ */
+```
+ - <i>example</i>:
+```js  
+ import { Console } from 'vivth'; 	 
+ 	 
+ Console.error({ 	 
+ 	hello: 'world!!', 	 
+ });
  
 ```
 
@@ -2319,41 +2083,375 @@ npm i vivth
 
 *) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
-<h2 id="createimmutable">CreateImmutable</h2>
+<h2 id="jsautodoc">JSautoDOC</h2>
 
 
-#### reference:`CreateImmutable`
-- function for create immutable object;  
-- usefull for binding immutable object to global for shared object:  
->- e.g. to window object in browser;
+#### reference:`JSautoDOC`
+- class for auto documenting mjs package/project, using jsdoc;  
+- this autodocumenter uses [chokidar](https://npmjs.com/package/chokidar) under the hood;  
+- this class also is used to generate this `README.md`;  
+- behaviours:  
+>1) add `"at"noautodoc` on self closing jsdoc comment to opt out from generating documentation on said file;  
+>>- auto export must follows the following rules, and there's no way to override;  
+>2) export all named exported 'const'|'function'|'async function'|'class', alphanumeric name, started with Capital letter, same name with fileName on `options.pahts.file`;  
+>3) declare typedef of existing typedef with alphanumeric name, started with Capital letter, same name with fileName, and have no valid export like on point <sup>1</sup> on `options.pahts.file`;  
+>4) create `README.md` based on, `options.paths.dir` and `README.src.md`;  
+>5) extract `"at"description` jsdoc:  
+>>- on static/prop that have depths, all of children should have `"at"static`/`"at"instance` `nameOfImmediateParent`, same block but before `"at"description` comment line;  
+>>- `"at"description` are treated as plain `markdown`;  
+>>- first `"at"${string}` after `"at"description` until `"at"example` will be treated as `javascript` comment block on the `markdown`;  
+>>- `"at"example` are treated as `javascript` block on the `markdown` file, and should be placed last on the same comment block;  
+>>- you can always look at `vivth/src` files to check how the source, and the `README.md` and `index.mjs` documentation/generation results;
+
+
+#### reference:`new JSautoDOC`
+
 
 ```js
 /**
- * @template {Object} PARENT  
- * @template {Object} OBJECT  
- * @param {string} keyName  
- * @param {PARENT} parent  
- * @param {(this:PARENT)=>OBJECT} object  
- * @param {Object} [options]  
- * @param {boolean} [options.lazy]  
- * @return {OBJECT}  
+ * @param {Object} [options] 	 
+ * @param {Object} [options.paths] 	 
+ * @param {string} [options.paths.file] 	 
+ * - entry point; 	 
+ * @param {string} [options.paths.readMe] 	 
+ * - readme target; 	 
+ * @param {string} [options.paths.dir] 	 
+ * - source directory; 	 
+ * @param {string} [options.copyright] 	 
+ * @param {string} [options.tableOfContentTitle] 	 
+ * @param {import('chokidar').ChokidarOptions} [options.option] 	 
+ * - ChokidarOptions; 	 
  */
 ```
  - <i>example</i>:
-```js 
- import { CreateImmutable } from 'vivth';  
+```js  
+ import { JSautoDOC } from 'vivth'; 	 
+ 	 
+  new JSautoDOC({ 	 
+ 	paths: { dir: 'src', file: 'index.mjs', readMe: 'README.md' }, 	 
+ 	copyright: 'this library is made and distributed under MIT license;', 	 
+ 	tableOfContentTitle: 'list of exported API and typehelpers', 	 
+ }); 	 
   
- const mappedObject = new Map();  
-  
- CreateImmutable(window, 'mySharedObject', {  
- 	setMap(name_, value) => {  
- 		mappedObject.set(name_, value)  
- 	},  
- 	getMap(name_) => mappedObject.get(name_),  
- })
+```
+
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+<h2 id="anybutundefined">AnyButUndefined</h2>
+
+- jsdoc types:
+
+```js
+/**
+ * - type helper for ID or objects;
+ * @typedef {{}|null|number|string|boolean|symbol|bigint|function} AnyButUndefined
+ */
+```
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+<h2 id="extnametype">ExtnameType</h2>
+
+- jsdoc types:
+
+```js
+/**
+ * - jsRuntime extention naming convention;
+ * @typedef {`.${string}`} ExtnameType
+ */
+```
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+<h2 id="islistsignal">IsListSignal</h2>
+
+- jsdoc types:
+
+```js
+/**
+ * - `EnvSignal.get` argument whether signal need to be a list or not;
+ * @typedef {boolean} IsListSignal
+ */
+```
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+<h2 id="litexp">LitExp</h2>
+
+
+#### reference:`LitExp`
+- class helper to created opionated regex helper;  
+- named capture uses `es6+` feature, you might need to add polyfill to target extremely old browser;  
+- class name refer to `Literal Expression`;  
+- please be patient when using this class;  
+>- destructuring is meant for extensive typehelper;  
+>- and destructuring can lead to unhandled error here and there;  
+>- therefore error as value is introduced to help to prevent error on runtime;
+
+```js
+/**
+ * @template {LitExpKeyType} KEYS
+ */
+```
+
+#### reference:`LitExp.prepare`
+- constructor helper; 	 
+- under the hood it is an abstraction of `RegExp`, with more template literal touch; 	 
+>- you can apply inline `RegExp` features on the string template literal(as constructor RegExp arg0); 	 
+>>- by doing so you are opting in to make: 	 
+>>>- your regex detection more robust; but 	 
+>>>- `litExp_instance.make.string` to be `unusable`; 	 
+>>- also mind the needs of escape for special characters;
+
+```js
+/**
+ * @template {LitExpKeyType} KEYS 	 
+ * @param {KEYS} keysAndDefaultValuePair 	 
+ * - keys and whether to override regex detection; 	 
+ * >- example: 	 
+ * ```js 	 
+ *  myKey: /myCustomCapture/ // all flags will be stripped; 	 
+ * ``` 	 
+ * - default value === `false` is "[\\s\\S]
+ *?", as in whiteSpace and nonWhiteSpace 0 to more occurence; 	 
+ * @returns {ReturnType<typeof TrySync<(templateStringArray:TemplateStringsArray, 	 
+ * ...values:(keyof KEYS)[] 	 
+ * )=>LitExp<KEYS>>>} 	 
+ * - placement of `key` will determine the named capture group will be placed in the template literal; 	 
+ * - it is recomended to not end template literal with any of the `key`s as the regex detection might failed to detects the boundary of the end of matched string of that capture group; 	 
+ */
+```
+ - <i>example</i>:
+```js  
+ import { LitExp } from 'vivth'; 	 
+ 	 
+ (()=>{ 	 
+ 	const [liteal, errorPrep] = LitExp.prepare({ 	 
+ 		myKey: /myCustomCapture/, // is placed on (?<myKey>myCustomCapture) 	 
+ 		// use false to place "[\\s\\S]*?" instead; 	 
+ 		...keyCaptureLogicPair 	 
+ 	}) 	 
+ 	if (errorPrep) { 	 
+ 		console.error(error); 	 
+ 		return; 	 
+ 	} 	 
+ 	 const litExp_instance = liteal`templateLiteral:${'myKey'};` 	 
+ 	// recommended to end the template literal with any string but `key`; 	 
+ })()
  
 ```
 
+#### reference:`LitExp_instance.make`
+- instance methods for generating things;
+
+
+#### reference:`LitExp_instance.make.string`
+- to make string based on the template literal;
+
+```js
+/**
+ * @param {Partial<ReturnType<LitExp<KEYS>["evaluate"]["execGroups"]>>[0]["result"]} overrides 		 
+ * @returns {string} 		 
+ */
+```
+ - <i>example</i>:
+```js 	 
+ import { LitExp } from 'vivth'; 		 
+ 		 
+ const [literal, errorPreparing] = LitExp.prepare({ 		 
+ 	myKey: false, 		 
+ 	...keyCaptureLogicPair 		 
+ }) 		 
+ 		 
+ // asuming no error 		 
+ litExp_instance = `templateLiteral:${'myKey'};`; 		 
+ const [result, error] = litExp_instance.make.string({ 		 
+ 	myKey: 'actualvalue', 		 
+ }); 		 
+ 		 
+ console.log(result); // "templateLiteral:actualvalue;"
+ 
+```
+
+#### reference:`LitExp_instance.evaluate`
+- methods collections to evaluate string with `Literal Expression`;
+
+
+#### reference:`LitExp_instance.evaluate.execGroups`
+- to exec and grouped based on `key`;
+
+```js
+/**
+ * @param {string} string 		 
+ * @param {Object} options 		 
+ * @param {ConstructorParameters<typeof RegExp>[1]} options.flags 		 
+ * @param {boolean} options.whiteSpaceSensitive 		 
+ * - true: leave any whitespace as is to be used as regex detection; 		 
+ * - false: convert all whitespace to `\s+`; 		 
+ * @param {boolean} options.absoluteLeadAndFollowing 		 
+ * - false: standard capture; 		 
+ * - true: add `^` and `<h2 id="litexp">LitExp</h2>
+
+ to capture definition: 		 
+ * >- meaning string will have to match starting and end of line from capture definition; 		 
+ * @returns {ReturnType<typeof TrySync<{ 		 
+ * result:{ whole:string, named: Record<keyof KEYS, string>}, 		 
+ * regexp:RegExp}>> 		 
+ * } 		 
+ */
+```
+ - <i>example</i>:
+```js 	 
+ import { LitExp } from 'vivth'; 		 
+ 		 
+ const [literal, errorPreparing] = LitExp.prepare({ 		 
+ 	myKey: false, 		 
+ 	...keyCaptureLogicPair 		 
+ }) 		 
+ 		 
+ // asuming no eror 		 
+ const litExp_instance = literal`templateLiteral:${'myKey'};` 		 
+ 		 
+ const [{ 		 
+ 		result:{ // asuming there's no error 		 
+ 			named: { myKey }, 		 
+ 			whole, 		 
+ 		}, 		 
+ 		regex, // for reference 		 
+ 	}, error] = litExp_instance.evaluate.execGroups( 		 
+ 	`templateLiteral:Something;`, 		 
+ 	{ ...options } 		 
+ ) 		 
+ 		 
+ console.log(whole); // "templateLiteral:Something;" 		 
+ console.log(myKey); // "Something"
+ 
+```
+
+#### reference:`LitExp_instance.evaluate.matchedAllAndGrouped`
+- to match all and grouped based on `key`;
+
+```js
+/**
+ * @param {Parameters<LitExp<KEYS>["evaluate"]["execGroups"]>[0]} string 		 
+ * @param {Omit<Parameters<LitExp<KEYS>["evaluate"]["execGroups"]>[1], 'absoluteLeadAndFollowing'>} options 		 
+ * @returns {ReturnType<typeof TrySync<{result:{whole:string[], named:Array<Record<keyof KEYS, string>>}, 		 
+ * regexp: RegExp}>> 		 
+ * } 		 
+ */
+```
+ - <i>example</i>:
+```js 	 
+ import { LitExp, Console } from 'vivth'; 		 
+ 		 
+ const [literal, errorPreparing] = LitExp.prepare({ 		 
+ 	myKey: false, 		 
+ 	...keyCaptureLogicPair 		 
+ }) 		 
+ 		 
+ // asuming no error; 		 
+ litExp_instance = literal`templateLiteral:${'myKey'};` 		 
+ 		 
+ const [resultOfMatchedAllAndGrouped, error] = litExp_instance.evaluate.matchedAllAndGrouped( 		 
+ 	`templateLiteral:Something; 		 
+ 	templateLiteral:SomethingElse;`, 		 
+ 	{ ...options } 		 
+ ) 		 
+ (()=>{ 		 
+ 	if (error) { 		 
+ 		Console.error(error); 		 
+ 		return; 		 
+ 	} 		 
+ 	const { 		 
+ 		result: { 		 
+ 				whole: [whole0, whole1], 		 
+ 				named: [ 		 
+ 					{ myKey: myKeyExec0, }, 		 
+ 					{ myKey: myKeyExec1, }, 		 
+ 				], 		 
+ 			}, 		 
+ 		regexp 		 
+ 	} = resultOfMatchedAllAndGrouped; 		 
+ 		 
+ 	console.log(whole0); // "templateLiteral:Something;" 		 
+ 	console.log(whole1); // "templateLiteral:SomethingElse;" 		 
+ 	console.log(myKeyExec0); // "Something" 		 
+ 	console.log(myKeyExec1); // "SomethingElse" 		 
+ })()
+ 
+```
+
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+<h2 id="listarg">ListArg</h2>
+
+- jsdoc types:
+
+```js
+/**
+ * - ListSignal argument type;
+ * @typedef {Record<string, string>} ListArg
+ */
+```
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+<h2 id="litexpkeytype">LitExpKeyType</h2>
+
+- jsdoc types:
+
+```js
+/**
+ * @typedef {Record<string, RegExp|false>} LitExpKeyType
+ */
+```
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+<h2 id="mutationtype">MutationType</h2>
+
+- jsdoc types:
+
+```js
+/**
+ * - `ListSignal` mutation type;
+ * @typedef {'push'|'unshift'|'splice'|'swap'|'modify'|'shift'|'remove'} MutationType
+ * - instance method: serves as helper to mutate, and notify for `effects`;
+ * > - `slice` uses `splice` in the background, you don't need to manually reindex when using it;
+ */
+```
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+<h2 id="qcbfiforeturn">QCBFIFOReturn</h2>
+
+- jsdoc types:
+
+```js
+/**
+ * - return type of Q callback fifo;
+ * @typedef {Omit<import("./src/types/QCBReturn.mjs").QCBReturn, "isLastOnQ">} QCBFIFOReturn
+ */
+```
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+<h2 id="qcbreturn">QCBReturn</h2>
+
+- jsdoc types:
+
+```js
+/**
+ * - return type of Q callback;
+ * @typedef {{resume:()=>void, isLastOnQ:()=>boolean}} QCBReturn
+ */
+```
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+<h2 id="runtime">Runtime</h2>
+
+- jsdoc types:
+
+```js
+/**
+ * @description
+ * - for popular runtimes check;
+ * @typedef {'node' | 'bun' | 'deno' | 'browser' | 'unknown'} Runtime
+ */
+```
 *) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 <h2 id="eventcheck">EventCheck</h2>
@@ -2410,27 +2508,6 @@ npm i vivth
 
 *) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
-<h2 id="getruntime">GetRuntime</h2>
-
-
-#### reference:`GetRuntime`
-- detects the current JavaScript runtime;
-
-```js
-/**
- * @type {()=>Runtime}  
- */
-```
- - <i>example</i>:
-```js 
- import { GetRuntime } form 'vivth';  
-  
- const runtime = GetRuntime();
- 
-```
-
-*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
-
 <h2 id="isasync">IsAsync</h2>
 
 
@@ -2456,6 +2533,27 @@ npm i vivth
   
  IsAsync(a); // false  
  IsAsync(b); // true
+ 
+```
+
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+<h2 id="getruntime">GetRuntime</h2>
+
+
+#### reference:`GetRuntime`
+- detects the current JavaScript runtime;
+
+```js
+/**
+ * @type {()=>Runtime}  
+ */
+```
+ - <i>example</i>:
+```js 
+ import { GetRuntime } form 'vivth';  
+  
+ const runtime = GetRuntime();
  
 ```
 
@@ -2686,168 +2784,74 @@ npm i vivth
 
 *) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
-<h2 id="jsautodoc">JSautoDOC</h2>
+<h2 id="base64url">Base64URL</h2>
 
 
-#### reference:`JSautoDOC`
-- class for auto documenting mjs package/project, using jsdoc;  
-- this autodocumenter uses [chokidar](https://npmjs.com/package/chokidar) under the hood;  
-- this class also is used to generate this `README.md`;  
-- behaviours:  
->1) add `"at"noautodoc` on self closing jsdoc comment to opt out from generating documentation on said file;  
->>- auto export must follows the following rules, and there's no way to override;  
->2) export all named exported 'const'|'function'|'async function'|'class', alphanumeric name, started with Capital letter, same name with fileName on `options.pahts.file`;  
->3) declare typedef of existing typedef with alphanumeric name, started with Capital letter, same name with fileName, and have no valid export like on point <sup>1</sup> on `options.pahts.file`;  
->4) create `README.md` based on, `options.paths.dir` and `README.src.md`;  
->5) extract `"at"description` jsdoc:  
->>- on static/prop that have depths, all of children should have `"at"static`/`"at"instance` `nameOfImmediateParent`, same block but before `"at"description` comment line;  
->>- `"at"description` are treated as plain `markdown`;  
->>- first `"at"${string}` after `"at"description` until `"at"example` will be treated as `javascript` comment block on the `markdown`;  
->>- `"at"example` are treated as `javascript` block on the `markdown` file, and should be placed last on the same comment block;  
->>- you can always look at `vivth/src` files to check how the source, and the `README.md` and `index.mjs` documentation/generation results;
-
-
-#### reference:`new JSautoDOC`
-
+#### reference:`Base64URL`
+- create inline base64 url;  
+- usage:  
+>- can be extremely usefull to display file on desktop app webview, without exposing http server;
 
 ```js
 /**
- * @param {Object} [options] 	 
- * @param {Object} [options.paths] 	 
- * @param {string} [options.paths.file] 	 
- * - entry point; 	 
- * @param {string} [options.paths.readMe] 	 
- * - readme target; 	 
- * @param {string} [options.paths.dir] 	 
- * - source directory; 	 
- * @param {string} [options.copyright] 	 
- * @param {string} [options.tableOfContentTitle] 	 
- * @param {import('chokidar').ChokidarOptions} [options.option] 	 
- * - ChokidarOptions; 	 
+ * @param {string} fileString  
+ * @param {string} mimeType  
+ * @param {(string:string)=>string} btoaFunction  
+ * - check your js runtime `btoa`;  
+ * - node compatible:  
+ * ```js  
+ * (str, prevBufferEncoding) =>  
+ * 	Buffer.from(str, prevBufferEncoding).toString('base64')  
+ * ```  
+ * @returns {Base64URLString}  
  */
 ```
  - <i>example</i>:
-```js  
- import { JSautoDOC } from 'vivth'; 	 
- 	 
-  new JSautoDOC({ 	 
- 	paths: { dir: 'src', file: 'index.mjs', readMe: 'README.md' }, 	 
- 	copyright: 'this library is made and distributed under MIT license;', 	 
- 	tableOfContentTitle: 'list of exported API and typehelpers', 	 
- }); 	 
+```js 
+ import { Base64URL } from 'vivth'  
+ import fileString from './fileString.mjs';  
   
+ Base64URL(fileString, 'application/javascript', btoa);
+ 
 ```
 
 *) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
-<h2 id="anybutundefined">AnyButUndefined</h2>
+<h2 id="createimmutable">CreateImmutable</h2>
 
-- jsdoc types:
 
-```js
-/**
- * - type helper for ID or objects;
- * @typedef {{}|null|number|string|boolean|symbol|bigint|function} AnyButUndefined
- */
-```
-*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
-
-<h2 id="extnametype">ExtnameType</h2>
-
-- jsdoc types:
+#### reference:`CreateImmutable`
+- function for create immutable object;  
+- usefull for binding immutable object to global for shared object:  
+>- e.g. to window object in browser;
 
 ```js
 /**
- * - jsRuntime extention naming convention;
- * @typedef {`.${string}`} ExtnameType
+ * @template {Object} PARENT  
+ * @template {Object} OBJECT  
+ * @param {string} keyName  
+ * @param {PARENT} parent  
+ * @param {(this:PARENT)=>OBJECT} object  
+ * @param {Object} [options]  
+ * @param {boolean} [options.lazy]  
+ * @return {OBJECT}  
  */
 ```
-*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
-
-<h2 id="islistsignal">IsListSignal</h2>
-
-- jsdoc types:
-
-```js
-/**
- * - `EnvSignal.get` argument whether signal need to be a list or not;
- * @typedef {boolean} IsListSignal
- */
+ - <i>example</i>:
+```js 
+ import { CreateImmutable } from 'vivth';  
+  
+ const mappedObject = new Map();  
+  
+ CreateImmutable(window, 'mySharedObject', {  
+ 	setMap(name_, value) => {  
+ 		mappedObject.set(name_, value)  
+ 	},  
+ 	getMap(name_) => mappedObject.get(name_),  
+ })
+ 
 ```
-*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
-<h2 id="listarg">ListArg</h2>
-
-- jsdoc types:
-
-```js
-/**
- * - ListSignal argument type;
- * @typedef {Record<string, string>} ListArg
- */
-```
-*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
-
-<h2 id="litexpkeytype">LitExpKeyType</h2>
-
-- jsdoc types:
-
-```js
-/**
- * @typedef {Record<string, RegExp|false>} LitExpKeyType
- */
-```
-*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
-
-<h2 id="mutationtype">MutationType</h2>
-
-- jsdoc types:
-
-```js
-/**
- * - `ListSignal` mutation type;
- * @typedef {'push'|'unshift'|'splice'|'swap'|'modify'|'shift'|'remove'} MutationType
- * - instance method: serves as helper to mutate, and notify for `effects`;
- * > - `slice` uses `splice` in the background, you don't need to manually reindex when using it;
- */
-```
-*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
-
-<h2 id="qcbfiforeturn">QCBFIFOReturn</h2>
-
-- jsdoc types:
-
-```js
-/**
- * - return type of Q callback fifo;
- * @typedef {Omit<import("./src/types/QCBReturn.mjs").QCBReturn, "isLastOnQ">} QCBFIFOReturn
- */
-```
-*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
-
-<h2 id="qcbreturn">QCBReturn</h2>
-
-- jsdoc types:
-
-```js
-/**
- * - return type of Q callback;
- * @typedef {{resume:()=>void, isLastOnQ:()=>boolean}} QCBReturn
- */
-```
-*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
-
-<h2 id="runtime">Runtime</h2>
-
-- jsdoc types:
-
-```js
-/**
- * @description
- * - for popular runtimes check;
- * @typedef {'node' | 'bun' | 'deno' | 'browser' | 'unknown'} Runtime
- */
-```
 *) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 <h2 id="workerresult">WorkerResult</h2>

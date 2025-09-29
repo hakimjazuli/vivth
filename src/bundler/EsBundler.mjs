@@ -71,7 +71,6 @@ export async function EsBundler(
 				contents: content,
 				loader,
 				resolveDir: root ?? Paths.root,
-				...esbuildOptions.banner,
 			},
 			bundle: true,
 			write: false,

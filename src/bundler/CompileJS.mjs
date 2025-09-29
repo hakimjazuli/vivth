@@ -1,6 +1,6 @@
 // @ts-check
 
-import { readFile, readdir } from 'node:fs/promises';
+import { readFile } from 'node:fs/promises';
 import { join, extname, basename, dirname } from 'node:path';
 import { platform } from 'node:os';
 
@@ -13,6 +13,7 @@ import { FSInlineAnalyzer } from './FSInlineAnalyzer.mjs';
 
 /**
  * @typedef {'win32' | 'linux' | 'darwin' | string} PlatformKey
+ * @typedef {import('./CreateESPlugin.mjs')["CreateESPlugin"]} CreateESPlugin
  */
 
 let binaryExtension = undefined;
@@ -97,6 +98,8 @@ const getBinaryExtension = () => {
  * - `key` are to used as `--keyName`;
  * - value are the following value of the key;
  * - no need to add the output/outdir, as it use the `options.outDir`;
+ * @param {ReturnType<CreateESPlugin>[]} [options.esBundlerPlugins]
+ * - plugins for `EsBundler`;
  * @return {ReturnType<TryAsync<{compileResult:Promise<any>,
  * commandCalled: string;
  * compiledBinFile: string;
@@ -115,7 +118,8 @@ const getBinaryExtension = () => {
  * 		compiler: 'pkg',
  * 		compilerArguments: {
  * 			target: ['node18-win-x64'],
- * 		}
+ * 		},
+ * 		esBundlerPlugins: [],
  * 	}),
  * 	CompileJS({
  * 		entryPoint: join(Paths.root, '/dev'),
@@ -124,7 +128,8 @@ const getBinaryExtension = () => {
  * 		compiler: 'bun',
  * 		compilerArguments: {
  * 			target: ['bun-win-x64'],
- * 		}
+ * 		},
+ * 		esBundlerPlugins: [],
  * 	}),
  * ])
  */
@@ -135,6 +140,7 @@ export async function CompileJS({
 	outDir,
 	compiler = undefined,
 	compilerArguments = undefined,
+	esBundlerPlugins = [],
 }) {
 	return await TryAsync(async () => {
 		/**
@@ -176,6 +182,7 @@ export async function CompileJS({
 			{
 				minify: minifyFirst,
 				format,
+				plugins: esBundlerPlugins,
 			}
 		);
 		if (errorPrep) {
