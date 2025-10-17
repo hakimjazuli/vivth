@@ -15,6 +15,19 @@ export class LitExp<KEYS extends import("../types/LitExpKeyType.mjs").LitExpKeyT
      */
     /**
      * @description
+     * - to escape special chars from string literal;
+     * - returned value can be used to create instance of RegExp;
+     * @param {string} string
+     * @returns {string}
+     * @example
+     * import { LitExp } from 'vivt';
+     *
+     * const escapedLiteral = LitExp.escape(`something[][;alerk325]`);
+     * new RegExp(escapedLiteral, 'g');
+     */
+    static escape: (string: string) => string;
+    /**
+     * @description
      * - constructor helper;
      * - under the hood it is an abstraction of `RegExp`, with more template literal touch;
      * >- you can apply inline `RegExp` features on the string template literal(as constructor RegExp arg0);
@@ -52,7 +65,7 @@ export class LitExp<KEYS extends import("../types/LitExpKeyType.mjs").LitExpKeyT
      * 	// recommended to end the template literal with any string but `key`;
      * })()
      */
-    static prepare: (keysAndDefaultValuePair: KEYS_1) => ReturnType<typeof TrySync<(templateStringArray: TemplateStringsArray, ...values: (keyof KEYS_1)[]) => LitExp<KEYS_1>>>;
+    static prepare<KEYS_1 extends import("../types/LitExpKeyType.mjs").LitExpKeyType>(keysAndDefaultValuePair: KEYS_1): ReturnType<typeof TrySync<(templateStringArray: TemplateStringsArray, ...values: (keyof KEYS_1)[]) => LitExp<KEYS_1>>>;
     /**
      * @template {LitExpKeyType} KEYS
      * @param {KEYS} instance_rules
@@ -61,14 +74,14 @@ export class LitExp<KEYS extends import("../types/LitExpKeyType.mjs").LitExpKeyT
      * @param {TemplateStringsArray} strings
      * @returns {ReturnType<typeof TrySync<string[]>>}
      */
-    static #processTemplate: (instance_rules: KEYS_1, intance_values: (keyof KEYS_1)[], valueHandler: (value: keyof KEYS_1, regex: RegExp | false) => ReturnType<typeof TrySync<string>>, strings: TemplateStringsArray) => ReturnType<typeof TrySync<string[]>>;
+    static #processTemplate<KEYS_1 extends import("../types/LitExpKeyType.mjs").LitExpKeyType>(instance_rules: KEYS_1, intance_values: (keyof KEYS_1)[], valueHandler: (value: keyof KEYS_1, regex: RegExp | false) => ReturnType<typeof TrySync<string>>, strings: TemplateStringsArray): ReturnType<typeof TrySync<string[]>>;
     /**
      * @template {LitExpKeyType} KEYS
      * @param {RegExp|false} regex
      * @param {keyof KEYS} value
      * @returns {ReturnType<typeof TrySync<string>>}
      */
-    static #namedChapture: (value: keyof KEYS_1, regex: RegExp | false) => ReturnType<typeof TrySync<string>>;
+    static #namedChapture<KEYS_1 extends import("../types/LitExpKeyType.mjs").LitExpKeyType>(value: keyof KEYS_1, regex: RegExp | false): ReturnType<typeof TrySync<string>>;
     /**
      * @private
      * @param {KEYS} keys
@@ -76,6 +89,11 @@ export class LitExp<KEYS extends import("../types/LitExpKeyType.mjs").LitExpKeyT
      * @param {...(keyof KEYS)} values
      */
     private constructor();
+    /**
+     * @typedef {ReturnType<LitExp<KEYS>["evaluate"]["execGroups"]>} ExecGroups
+     * @typedef {ExecGroups extends [infer First, ...any] ? First : undefined} FirstGroup
+     * @typedef {FirstGroup extends { result: any } ? Partial<FirstGroup["result"]> : undefined} Overrides
+     */
     /**
      * @description
      * - instance methods for generating things;
@@ -85,8 +103,8 @@ export class LitExp<KEYS extends import("../types/LitExpKeyType.mjs").LitExpKeyT
          * @instance make
          * @description
          * - to make string based on the template literal;
-         * @param {Partial<ReturnType<LitExp<KEYS>["evaluate"]["execGroups"]>>[0]["result"]} overrides
-         * @returns {string}
+         * @param {Partial<{ [K in keyof KEYS]?: string }>} overrides
+         * @returns {string|undefined}
          * @example
          * import { LitExp } from 'vivth';
          *
@@ -103,15 +121,15 @@ export class LitExp<KEYS extends import("../types/LitExpKeyType.mjs").LitExpKeyT
          *
          * console.log(result); // "templateLiteral:actualvalue;"
          */
-        string: (overrides: Partial<ReturnType<LitExp<KEYS>["evaluate"]["execGroups"]>>[0]["result"]) => string;
+        string: (overrides: Partial<{ [K in keyof KEYS]?: string; }>) => string | undefined;
     } & {
         "vivth:unwrapLazy;": () => {
             /**
              * @instance make
              * @description
              * - to make string based on the template literal;
-             * @param {Partial<ReturnType<LitExp<KEYS>["evaluate"]["execGroups"]>>[0]["result"]} overrides
-             * @returns {string}
+             * @param {Partial<{ [K in keyof KEYS]?: string }>} overrides
+             * @returns {string|undefined}
              * @example
              * import { LitExp } from 'vivth';
              *
@@ -128,7 +146,7 @@ export class LitExp<KEYS extends import("../types/LitExpKeyType.mjs").LitExpKeyT
              *
              * console.log(result); // "templateLiteral:actualvalue;"
              */
-            string: (overrides: Partial<ReturnType<LitExp<KEYS>["evaluate"]["execGroups"]>>[0]["result"]) => string;
+            string: (overrides: Partial<{ [K in keyof KEYS]?: string; }>) => string | undefined;
         };
     };
     /**
@@ -179,11 +197,11 @@ export class LitExp<KEYS extends import("../types/LitExpKeyType.mjs").LitExpKeyT
          * console.log(whole); // "templateLiteral:Something;"
          * console.log(myKey); // "Something"
          */
-        execGroups: (string: string, options: {
+        execGroups(string: string, options: {
             flags: ConstructorParameters<typeof RegExp>[1];
             whiteSpaceSensitive: boolean;
             absoluteLeadAndFollowing: boolean;
-        }) => ReturnType<typeof TrySync<{
+        }): ReturnType<typeof TrySync<{
             result: {
                 whole: string;
                 named: Record<keyof KEYS, string>;
@@ -196,8 +214,7 @@ export class LitExp<KEYS extends import("../types/LitExpKeyType.mjs").LitExpKeyT
          * - to match all and grouped based on `key`;
          * @param {Parameters<LitExp<KEYS>["evaluate"]["execGroups"]>[0]} string
          * @param {Omit<Parameters<LitExp<KEYS>["evaluate"]["execGroups"]>[1], 'absoluteLeadAndFollowing'>} options
-         * @returns {ReturnType<typeof TrySync<{result:{whole:string[], named:Array<Record<keyof KEYS, string>>},
-         * regexp: RegExp}>>
+         * @returns {ReturnType<typeof TrySync<import('../types/LitExpResultType.mjs').LitExpResultType<KEYS>>>
          * }
          * @example
          * import { LitExp, Console } from 'vivth';
@@ -221,29 +238,19 @@ export class LitExp<KEYS extends import("../types/LitExpKeyType.mjs").LitExpKeyT
          * 		return;
          * 	}
          * 	const {
-         * 		result: {
-         * 				whole: [whole0, whole1],
-         * 				named: [
-         * 					{ myKey: myKeyExec0, },
-         * 					{ myKey: myKeyExec1, },
-         * 				],
-         * 			},
+         * 		result: { whole, named },
          * 		regexp
          * 	} = resultOfMatchedAllAndGrouped;
          *
-         * 	console.log(whole0); // "templateLiteral:Something;"
-         * 	console.log(whole1); // "templateLiteral:SomethingElse;"
-         * 	console.log(myKeyExec0); // "Something"
-         * 	console.log(myKeyExec1); // "SomethingElse"
+         *	named.foreach(({myKey})=>{
+         *		// code
+         *	})
+         *	whole.foreach((capturedString)=>{
+         *		// code
+         *	})
          * })()
          */
-        matchedAllAndGrouped: (string: Parameters<LitExp<KEYS>["evaluate"]["execGroups"]>[0], options: Omit<Parameters<LitExp<KEYS>["evaluate"]["execGroups"]>[1], "absoluteLeadAndFollowing">) => ReturnType<typeof TrySync<{
-            result: {
-                whole: string[];
-                named: Array<Record<keyof KEYS, string>>;
-            };
-            regexp: RegExp;
-        }>>;
+        matchedAllAndGrouped: (string: Parameters<LitExp<KEYS>["evaluate"]["execGroups"]>[0], options: Omit<Parameters<LitExp<KEYS>["evaluate"]["execGroups"]>[1], "absoluteLeadAndFollowing">) => ReturnType<typeof TrySync<import("../types/LitExpResultType.mjs").LitExpResultType<KEYS>>>;
     } & {
         "vivth:unwrapLazy;": () => {
             /**
@@ -289,11 +296,11 @@ export class LitExp<KEYS extends import("../types/LitExpKeyType.mjs").LitExpKeyT
              * console.log(whole); // "templateLiteral:Something;"
              * console.log(myKey); // "Something"
              */
-            execGroups: (string: string, options: {
+            execGroups(string: string, options: {
                 flags: ConstructorParameters<typeof RegExp>[1];
                 whiteSpaceSensitive: boolean;
                 absoluteLeadAndFollowing: boolean;
-            }) => ReturnType<typeof TrySync<{
+            }): ReturnType<typeof TrySync<{
                 result: {
                     whole: string;
                     named: Record<keyof KEYS, string>;
@@ -306,8 +313,7 @@ export class LitExp<KEYS extends import("../types/LitExpKeyType.mjs").LitExpKeyT
              * - to match all and grouped based on `key`;
              * @param {Parameters<LitExp<KEYS>["evaluate"]["execGroups"]>[0]} string
              * @param {Omit<Parameters<LitExp<KEYS>["evaluate"]["execGroups"]>[1], 'absoluteLeadAndFollowing'>} options
-             * @returns {ReturnType<typeof TrySync<{result:{whole:string[], named:Array<Record<keyof KEYS, string>>},
-             * regexp: RegExp}>>
+             * @returns {ReturnType<typeof TrySync<import('../types/LitExpResultType.mjs').LitExpResultType<KEYS>>>
              * }
              * @example
              * import { LitExp, Console } from 'vivth';
@@ -331,29 +337,19 @@ export class LitExp<KEYS extends import("../types/LitExpKeyType.mjs").LitExpKeyT
              * 		return;
              * 	}
              * 	const {
-             * 		result: {
-             * 				whole: [whole0, whole1],
-             * 				named: [
-             * 					{ myKey: myKeyExec0, },
-             * 					{ myKey: myKeyExec1, },
-             * 				],
-             * 			},
+             * 		result: { whole, named },
              * 		regexp
              * 	} = resultOfMatchedAllAndGrouped;
              *
-             * 	console.log(whole0); // "templateLiteral:Something;"
-             * 	console.log(whole1); // "templateLiteral:SomethingElse;"
-             * 	console.log(myKeyExec0); // "Something"
-             * 	console.log(myKeyExec1); // "SomethingElse"
+             *	named.foreach(({myKey})=>{
+             *		// code
+             *	})
+             *	whole.foreach((capturedString)=>{
+             *		// code
+             *	})
              * })()
              */
-            matchedAllAndGrouped: (string: Parameters<LitExp<KEYS>["evaluate"]["execGroups"]>[0], options: Omit<Parameters<LitExp<KEYS>["evaluate"]["execGroups"]>[1], "absoluteLeadAndFollowing">) => ReturnType<typeof TrySync<{
-                result: {
-                    whole: string[];
-                    named: Array<Record<keyof KEYS, string>>;
-                };
-                regexp: RegExp;
-            }>>;
+            matchedAllAndGrouped: (string: Parameters<LitExp<KEYS>["evaluate"]["execGroups"]>[0], options: Omit<Parameters<LitExp<KEYS>["evaluate"]["execGroups"]>[1], "absoluteLeadAndFollowing">) => ReturnType<typeof TrySync<import("../types/LitExpResultType.mjs").LitExpResultType<KEYS>>>;
         };
     };
     #private;

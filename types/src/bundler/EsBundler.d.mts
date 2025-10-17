@@ -30,7 +30,7 @@ export function EsBundler({ content, extension, root, withBinHeader }: {
     content: string;
     root: string;
     extension: ".mts" | ".ts" | ".mjs";
-    withBinHeader?: boolean;
+    withBinHeader?: boolean | undefined;
 }, esbuildOptions?: Omit<Parameters<typeof build>[0], "entryPoints" | "bundle" | "write" | "sourcemap">): ReturnType<typeof TryAsync<string>>;
 import { build } from 'esbuild';
 import { TryAsync } from '../function/TryAsync.mjs';

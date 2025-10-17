@@ -30,14 +30,15 @@ import { TrySync } from './TrySync.mjs';
  * })
  */
 export function CreateImmutable(parent, keyName, object, { lazy = true } = {}) {
-	if (!parent || typeof parent !== 'object') {
-		Console.error({
+	if (parent === undefined || typeof parent !== 'object') {
+		const error = {
 			object,
 			parent,
 			keyName,
 			message: 'Invalid parent object provided to `CreateImmutable`;',
-		});
-		return;
+		};
+		Console.error(error);
+		throw Error(JSON.stringify(error));
 	}
 	let [, error] = TrySync(() => {
 		Object.defineProperty(parent, keyName, {
@@ -49,16 +50,20 @@ export function CreateImmutable(parent, keyName, object, { lazy = true } = {}) {
 	});
 	if (error) {
 		[, error] = TrySync(() => {
+			// @ts-expect-error
 			parent[keyName] = lazy ? LazyFactory(() => object.call(parent)) : object.call(parent);
 		});
 	}
 	if (error) {
-		Console.info({
+		const error = {
 			parent,
 			message: `"${keyName}" already defined on the "parent"`,
+			// @ts-expect-error
 			realValue: parent[keyName],
-		});
-		return;
+		};
+		Console.warn(error);
+		throw new Error(JSON.stringify(error));
 	}
+	// @ts-expect-error
 	return parent[keyName];
 }

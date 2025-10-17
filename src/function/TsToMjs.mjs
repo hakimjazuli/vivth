@@ -30,8 +30,11 @@ import { FileSafe } from '../class/FileSafe.mjs';
  * TsToMjs('./myFile.mts', { encoding: 'utf-8', overrideDir: './other/dir' });
  */
 export async function TsToMjs(path_, { overrideDir = undefined, encoding = 'utf-8' } = {}) {
+	if (Paths.root === undefined) {
+		return;
+	}
 	const rootPath = Paths.normalize(Paths.root);
-	if (!Paths.normalize(path_).startsWith(rootPath)) {
+	if (Paths.normalize(path_).startsWith(rootPath) === false) {
 		path_ = Paths.normalize(join(rootPath, path_));
 	}
 	const ext = extname(path_);
@@ -54,14 +57,14 @@ export async function TsToMjs(path_, { overrideDir = undefined, encoding = 'utf-
 			legalComments: 'inline',
 		});
 	});
-	if (transformError) {
+	if (transformError || result === undefined) {
 		Console.error(transformError);
 		return;
 	}
 	const outputDir = overrideDir ? join(rootPath, overrideDir) : dirname(path_);
 	const outputPath = join(outputDir, basename(path_).replace(ext, '.mjs'));
-	const [_, writeError] = await FileSafe.write(outputPath, result.code, { encoding });
-	if (!writeError) {
+	const [, writeError] = await FileSafe.write(outputPath, result.code, { encoding });
+	if (writeError === undefined) {
 		return;
 	}
 	Console.error(writeError);

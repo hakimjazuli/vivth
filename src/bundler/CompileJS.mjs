@@ -16,7 +16,10 @@ import { FSInlineAnalyzer } from './FSInlineAnalyzer.mjs';
  * @typedef {import('./CreateESPlugin.mjs')["CreateESPlugin"]} CreateESPlugin
  */
 
-let binaryExtension = undefined;
+/**
+ * @type {string|undefined}
+ */
+let binaryExtension;
 
 /**
  * @param {Record<string, string[]|string>} compilerOptions
@@ -27,7 +30,7 @@ const generateFlagsValue = (compilerOptions) => {
 	for (const flag in compilerOptions) {
 		const value = compilerOptions[flag];
 		options.push(`--${flag}`);
-		if (!Array.isArray(value)) {
+		if (Array.isArray(value) === false) {
 			if (value) {
 				options.push(value);
 			}
@@ -43,7 +46,7 @@ const generateFlagsValue = (compilerOptions) => {
  * @returns {string} extension including dot (e.g. '.exe', '')
  */
 const getBinaryExtension = () => {
-	if (!binaryExtension) {
+	if (binaryExtension === undefined) {
 		switch (platform()) {
 			case 'win32':
 				binaryExtension = '.exe';
@@ -100,10 +103,10 @@ const getBinaryExtension = () => {
  * - no need to add the output/outdir, as it use the `options.outDir`;
  * @param {ReturnType<CreateESPlugin>[]} [options.esBundlerPlugins]
  * - plugins for `EsBundler`;
- * @return {ReturnType<TryAsync<{compileResult:Promise<any>,
- * commandCalled: string;
- * compiledBinFile: string;
- * bundledJSFile:string
+ * @return {ReturnType<typeof TryAsync<{compileResult:Promise<any>|undefined,
+ * commandCalled: string|undefined;
+ * compiledBinFile: string|undefined;
+ * bundledJSFile:string|undefined
  * }>>}
  * @example
  * import { join } from 'node:path';
@@ -139,7 +142,7 @@ export async function CompileJS({
 	encoding = 'utf-8',
 	outDir,
 	compiler = undefined,
-	compilerArguments = undefined,
+	compilerArguments = {},
 	esBundlerPlugins = [],
 }) {
 	return await TryAsync(async () => {

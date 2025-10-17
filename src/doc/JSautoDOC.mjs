@@ -1,7 +1,7 @@
 // @ts-check
 
 import { extname, join } from 'node:path';
-import { readFile, stat } from 'node:fs/promises';
+import { readFile } from 'node:fs/promises';
 
 import chokidar from 'chokidar';
 import { EventSignal } from '../class/EventSignal.mjs';
@@ -15,6 +15,7 @@ import { TryAsync } from '../function/TryAsync.mjs';
 import { Console } from '../class/Console.mjs';
 import { TsToMjs } from '../function/TsToMjs.mjs';
 import { FileSafe } from '../class/FileSafe.mjs';
+import { correctBeforeParse } from './correctBeforeParse.mjs';
 
 /**
  * @typedef {import('fs').Stats} Stats
@@ -46,21 +47,24 @@ const acceptableExt = new Set(['.mjs', '.mts', '.ts']);
  * >>- first `"at"${string}` after `"at"description` until `"at"example` will be treated as `javascript` comment block on the `markdown`;
  * >>- `"at"example` are treated as `javascript` block on the `markdown` file, and should be placed last on the same comment block;
  * >>- you can always look at `vivth/src` files to check how the source, and the `README.md` and `index.mjs` documentation/generation results;
+ * >6) this types of arrow functions will be converted to regullar function, for concise type emition:
+ * >>- validly exported function;
+ * >>- static/instance method(s) with generic template;
  */
 export class JSautoDOC {
 	/**
-	 * @type {JSautoDOC}
+	 * @type {JSautoDOC|undefined}
 	 */
-	static #instance = undefined;
+	static #instance;
 	/**
 	 * @description
 	 * @param {Object} [options]
 	 * @param {Object} [options.paths]
-	 * @param {string} [options.paths.file]
+	 * @param {string} options.paths.file
 	 * - entry point;
-	 * @param {string} [options.paths.readMe]
+	 * @param {string} options.paths.readMe
 	 * - readme target;
-	 * @param {string} [options.paths.dir]
+	 * @param {string} options.paths.dir
 	 * - source directory;
 	 * @param {string} [options.copyright]
 	 * @param {string} [options.tableOfContentTitle]
@@ -90,19 +94,22 @@ export class JSautoDOC {
 		this.#paths = paths;
 		this.#copyright = copyright;
 		const rootPath = Paths.root;
+		if (rootPath === undefined) {
+			return;
+		}
 		const watchpath = join(rootPath, this.#paths.dir);
 		const watcher = chokidar.watch(watchpath, option);
 		const watcherReadme = chokidar.watch(join(rootPath, readmesrcname), option);
 		/**
-		 * @type {(eventName: 'add'|'change'|'unlink', path: string, stats?: import('fs').Stats) => void}
+		 * @type {(eventName: import('chokidar/handler.js').EventName, path: string, stats?: import('fs').Stats) => void}
 		 */
 		const listener = (eventName, path, stats) => {
 			const ext = extname(path);
 			if (
-				!acceptableExt.has(
+				acceptableExt.has(
 					// @ts-expect-error
 					ext
-				)
+				) === false
 			) {
 				return;
 			}
@@ -124,44 +131,47 @@ export class JSautoDOC {
 		};
 		watcher.on('all', listener);
 		watcherReadme.on('all', this.#readMeListener);
-		SafeExit.instance.addCallback(async () => {
-			watcher.close();
-			watcherReadme.close();
-			watcher.removeAllListeners();
-			watcherReadme.removeAllListeners();
-			watcher.removeListener('all', listener);
-			watcherReadme.removeAllListeners(this.#readMeListener);
-			watcherReadme.removeListener('all', this.#readMeListener);
-		});
+		if (SafeExit.instance) {
+			SafeExit.instance.addCallback(async () => {
+				watcher.close();
+				watcherReadme.close();
+				watcher.removeAllListeners();
+				watcherReadme.removeAllListeners();
+				watcher.removeListener('all', listener);
+				watcherReadme.removeAllListeners(this.#readMeListener);
+				watcherReadme.removeListener('all', this.#readMeListener);
+			});
+		}
 	}
 	/**
-	 * @type {string}
+	 * @type {string|undefined}
 	 */
-	#copyright = undefined;
+	#copyright;
 	/**
 	 * @type {{
-	 *   file?: string;
-	 *   readMe?: string;
-	 *   dir?: string;
-	 *	}}
+	 *   file: string;
+	 *   readMe: string;
+	 *   dir: string;
+	 *	}|undefined}
 	 */
 	#paths;
 	/**
-	 * @type {string}
+	 * @type {string|undefined}
 	 */
 	#tableOfContentTitle;
 	/**
-	 * @param {string} _eventName
+	 * @param {import('chokidar/handler.js').EventName} _eventName
 	 * @param {string} path_
-	 * @param {Stats} stats
-	 * @returns {Promise<void>}
+	 * @param {Stats|undefined} stats
+	 * @returns {void}
 	 */
-	#readMeListener = async (_eventName, path_, stats) => {
-		if (!stats.isFile()) {
+	#readMeListener = (_eventName, path_, stats) => {
+		if (stats && stats.isFile() === false) {
 			return;
 		}
-		const content = await readFile(path_, { encoding });
-		this.#readMESRCContent.value = content;
+		readFile(path_, { encoding }).then((content) => {
+			this.#readMESRCContent.value = content;
+		});
 	};
 	/**
 	 * @type {Signal<Set<string>>}
@@ -170,32 +180,37 @@ export class JSautoDOC {
 	/**
 	 * @type {Signal<string>}
 	 */
-	#readMESRCContent = LazyFactory(() => new Signal(undefined));
+	#readMESRCContent = LazyFactory(() => new Signal(''));
 	#generatedREADME_md = new Effect(async ({ subscribe, isLastCalled }) => {
 		const contentSRC = subscribe(this.#readMESRCContent).value;
 		const filepaths = subscribe(this.#filePaths).value;
-		if (!(await isLastCalled(100)) || !contentSRC || !filepaths) {
+		if ((await isLastCalled(100)) === false || !contentSRC || !filepaths) {
 			return;
 		}
-		const { readme, mjsFile } = await this.#generateFromSRC(contentSRC, filepaths);
-		if (!(await isLastCalled())) {
+		const res = await this.#generateFromSRC(contentSRC, filepaths);
+		if ((await isLastCalled()) === false || res === undefined) {
 			return;
 		}
-		const readmePath = join(Paths.root, this.#paths.readMe);
-		const mjsFilePath = join(Paths.root, this.#paths.file);
+		const { readme, mjsFile } = res;
+		const rootPath = Paths.root;
+		if (rootPath === undefined || this.#paths === undefined) {
+			return;
+		}
+		const readmePath = join(rootPath, this.#paths.readMe);
+		const mjsFilePath = join(rootPath, this.#paths.file);
 		const [[, errorWriteReadme], [, errorWriteMjsFile]] = await Promise.all([
 			FileSafe.write(readmePath, readme, { encoding }),
 			FileSafe.write(mjsFilePath, mjsFile, { encoding }),
 		]);
-		if (!errorWriteReadme) {
-			Console.info({ message: `successfully generate: '${readmePath}'` });
+		if (errorWriteReadme === undefined) {
+			Console.info({ vivthJSautoDOC: `successfully generate '${readmePath}'` });
 		} else {
-			Console.error({ message: `unable to generate: '${readmePath}';`, errorWriteReadme });
+			Console.error({ vivthJSautoDOC: `unable to generate '${readmePath}'`, errorWriteReadme });
 		}
-		if (!errorWriteMjsFile) {
-			Console.info({ message: `successfully generate: '${mjsFilePath}'` });
+		if (errorWriteMjsFile === undefined) {
+			Console.info({ vivthJSautoDOC: `successfully generate '${mjsFilePath}'` });
 		} else {
-			Console.error({ message: `unable to generate: '${mjsFilePath}';`, errorWriteMjsFile });
+			Console.error({ vivthJSautoDOC: `unable to generate '${mjsFilePath}'`, errorWriteMjsFile });
 		}
 	});
 	/**
@@ -216,9 +231,12 @@ export class JSautoDOC {
 	/**
 	 * @param {string} contentSRC
 	 * @param {Set<string>} filepaths
-	 * @returns {Promise<generatedFromSRC>}
+	 * @returns {Promise<generatedFromSRC|undefined>}
 	 */
 	#generateFromSRC = async (contentSRC, filepaths) => {
+		if (this.#tableOfContentTitle === undefined || this.#copyright === undefined) {
+			return;
+		}
 		const tableID = this.#tableOfContentTitle.replace(/\s+/g, '-').toLowerCase();
 		const tableOfContent = [];
 		const apiDocuments = [];
@@ -232,7 +250,12 @@ export class JSautoDOC {
 				path: { relative: relativePath },
 				baseName: { noExt },
 			} = (await this.#parsedFilesRef.get(path_)).value;
-			const hasNoAutoDoc = /\/\*\*[\s\*]*?@noautodoc[\s\*]*?\*\//.test(await content.string());
+			const trueContent = await content.string();
+			if (trueContent === undefined) {
+				return;
+			}
+
+			const hasNoAutoDoc = /\/\*\*[\s\*]*?@noautodoc[\s\*]*?\*\//.test(trueContent);
 			if (hasValidExportObject) {
 				mjsMain.push(
 					`export { ${noExt} } from '${
@@ -240,6 +263,9 @@ export class JSautoDOC {
 					}';`
 				);
 			}
+			/**
+			 * @type {string[]}
+			 */
 			const currentDescription = [];
 			const { readme, typedef } = documented;
 			const [typedefString, error] = await TryAsync(async () => {
@@ -249,9 +275,9 @@ export class JSautoDOC {
 				const result = await typedef();
 				return result;
 			});
-			if (!error && typedefString) {
+			if (error === undefined && typedefString) {
 				mjsTypes.push(typedefString.module);
-				if (!hasNoAutoDoc) {
+				if (hasNoAutoDoc === false) {
 					const nameVarID = noExt.toLowerCase();
 					tableOfContent.push(`[${noExt}](#${nameVarID})`);
 					apiDocuments.push(
@@ -261,7 +287,7 @@ export class JSautoDOC {
 					);
 				}
 			}
-			if (!hasNoAutoDoc && hasValidExportObject) {
+			if (hasNoAutoDoc === false && hasValidExportObject) {
 				readme.forEach((ref) => {
 					const {
 						// fullDescription,
@@ -325,19 +351,30 @@ export class JSautoDOC {
 	 */
 	#addHandler = (eventName, path__, _stats) => {
 		TryAsync(async () => {
-			const dispatch = await this.#parsedFilesRef.get(path__);
-			if (!(await stat(path__)).isFile()) {
+			if (
+				//
+				!_stats?.isFile()
+			) {
 				return;
 			}
-			dispatch.value = new parsedFile(path__, encoding);
-			await dispatch.value.parse();
-			dispatch.subscribers.notify();
-			this.#filePaths.subscribers.notify(async ({ signalInstance }) => {
-				Console.info({ [eventName]: path__ });
-				signalInstance.value.add(path__);
-			});
+			const res = await correctBeforeParse(path__, 'utf-8');
+			switch (res) {
+				case 'shouldProceedNextCheck':
+					const dispatch = await this.#parsedFilesRef.get(path__);
+					dispatch.value = new parsedFile(path__, _stats, encoding);
+					this.#filePaths.subscribers.notify(async ({ signalInstance }) => {
+						await dispatch.value.parse();
+						dispatch.subscribers.notify();
+						Console.info({ vivthJSautoDOC: `${eventName} '${path__}' to export and doc` });
+						signalInstance.value.add(path__);
+					});
+					break;
+				case 'waitForRewrite':
+				case 'doNotProcess':
+					break;
+			}
 		}).then(([, error]) => {
-			if (!error) {
+			if (error === undefined) {
 				return;
 			}
 			Console.error(error);
@@ -348,12 +385,12 @@ export class JSautoDOC {
 	 */
 	#removeHandler = (eventName, path__, _stats) => {
 		TryAsync(async () => {
-			if (!(await stat(path__)).isFile()) {
+			if (_stats?.isFile()) {
 				return true;
 			}
 			return false;
-		}).then(([res, error]) => {
-			if (res && !error) {
+		}).then(([, error]) => {
+			if (error === undefined) {
 				return;
 			}
 			this.#filePaths.subscribers.notify(async ({ signalInstance }) => {

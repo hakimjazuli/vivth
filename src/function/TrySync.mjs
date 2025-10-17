@@ -6,7 +6,8 @@
  * - usefull to flatten indentation for error handlings;
  * @template RESULT
  * @param {()=>RESULT} function_
- * @returns {[RESULT|undefined, Error|undefined]}
+ * @returns {[RESULT,undefined]|
+ * [undefined,Error]}
  * @example
  * import { readFileSync } from 'fs';
  * import { TrySync } from './yourModule.js';
@@ -20,6 +21,7 @@ export function TrySync(function_) {
 		const result = function_();
 		return [result, undefined];
 	} catch (error) {
+		// @ts-expect-error
 		return [undefined, error];
 	}
 }

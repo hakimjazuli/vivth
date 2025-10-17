@@ -6,11 +6,12 @@
  * this library is made and distributed under MIT license;
  */
 
+export { CompileJS } from './src/bundler/CompileJS.mjs';
 export { CreateESPlugin } from './src/bundler/CreateESPlugin.mjs';
 export { EsBundler } from './src/bundler/EsBundler.mjs';
 export { FSInline } from './src/bundler/FSInline.mjs';
 export { FSInlineAnalyzer } from './src/bundler/FSInlineAnalyzer.mjs';
-export { CompileJS } from './src/bundler/CompileJS.mjs';
+export { Console } from './src/class/Console.mjs';
 export { Derived } from './src/class/Derived.mjs';
 export { Effect } from './src/class/Effect.mjs';
 export { EnvSignal } from './src/class/EnvSignal.mjs';
@@ -18,29 +19,28 @@ export { EventSignal } from './src/class/EventSignal.mjs';
 export { FileSafe } from './src/class/FileSafe.mjs';
 export { ListDerived } from './src/class/ListDerived.mjs';
 export { ListSignal } from './src/class/ListSignal.mjs';
+export { LitExp } from './src/class/LitExp.mjs';
 export { Paths } from './src/class/Paths.mjs';
 export { QChannel } from './src/class/QChannel.mjs';
 export { SafeExit } from './src/class/SafeExit.mjs';
 export { Setup } from './src/class/Setup.mjs';
 export { Signal } from './src/class/Signal.mjs';
 export { WorkerMainThread } from './src/class/WorkerMainThread.mjs';
-export { Console } from './src/class/Console.mjs';
+export { Base64URL } from './src/common/Base64URL.mjs';
 export { Base64URLFromFile } from './src/common/Base64URLFromFile.mjs';
 export { EventNameSpace } from './src/common/EventNameSpace.mjs';
 export { JSautoDOC } from './src/doc/JSautoDOC.mjs';
-export { LitExp } from './src/class/LitExp.mjs';
+export { CreateImmutable } from './src/function/CreateImmutable.mjs';
 export { EventCheck } from './src/function/EventCheck.mjs';
 export { EventObject } from './src/function/EventObject.mjs';
-export { IsAsync } from './src/function/IsAsync.mjs';
 export { GetRuntime } from './src/function/GetRuntime.mjs';
+export { IsAsync } from './src/function/IsAsync.mjs';
 export { LazyFactory } from './src/function/LazyFactory.mjs';
 export { Timeout } from './src/function/Timeout.mjs';
 export { Try } from './src/function/Try.mjs';
 export { TryAsync } from './src/function/TryAsync.mjs';
 export { TrySync } from './src/function/TrySync.mjs';
 export { TsToMjs } from './src/function/TsToMjs.mjs';
-export { Base64URL } from './src/common/Base64URL.mjs';
-export { CreateImmutable } from './src/function/CreateImmutable.mjs';
 export { WorkerResult } from './src/class/WorkerResult.mjs';
 export { WorkerThread } from './src/class/WorkerThread.mjs';
 export { ToBundledJSPlugin } from './src/bundler/adds/ToBundledJSPlugin.mjs';
@@ -58,6 +58,10 @@ export { ToBundledJSPlugin } from './src/bundler/adds/ToBundledJSPlugin.mjs';
  */
 /**
  * @typedef {import('./src/types/LitExpKeyType.mjs').LitExpKeyType} LitExpKeyType
+ */
+/**
+ * @template {import('./src/types/LitExpKeyType.mjs').LitExpKeyType} KEYS
+ * @typedef {import('./src/types/LitExpResultType.mjs').LitExpResultType<KEYS>} LitExpResultType
  */
 /**
  * @typedef {import('./src/types/MutationType.mjs').MutationType} MutationType

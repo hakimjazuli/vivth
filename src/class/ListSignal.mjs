@@ -22,8 +22,10 @@ export class ListSignal extends Signal {
 	 * @param {unknown} value - The value to validate.
 	 * @returns {value is Array<Record<string, string>>} True if the first item is a valid string record or array is empty.
 	 */
-	static isValid = (value) => {
-		if (!Array.isArray(value)) return false;
+	static isValid(value) {
+		if (Array.isArray(value) === false) {
+			return false;
+		}
 		const first = value[0];
 		if (first === undefined) {
 			// allow empty array
@@ -37,7 +39,7 @@ export class ListSignal extends Signal {
 				([key, val]) => typeof key === 'string' && typeof val === 'string'
 			)
 		);
-	};
+	}
 	/**
 	 * @description
 	 * - usefull for `loops`;
@@ -57,6 +59,7 @@ export class ListSignal extends Signal {
 	 * @description
 	 * - reference to original inputed `value`;
 	 * @returns {LISTARG[]}
+	 * @override
 	 */
 	get value() {
 		return super.value;
@@ -66,6 +69,7 @@ export class ListSignal extends Signal {
 	 * - you cannot mannually set`value` `ListSignal_instance`;
 	 * @private
 	 * @type {LISTARG[]}
+	 * @override
 	 */
 	set value(_) {
 		Console.error('`List.value` `setter` are not available outside the class or instance');
@@ -158,7 +162,7 @@ export class ListSignal extends Signal {
 			 */
 			splice: (start, deleteCount, ...listArg) => {
 				const end = start + deleteCount - 1;
-				if (!this.#checkLength('splice', end)) {
+				if (this.#checkLength('splice', end) === false) {
 					return;
 				}
 				super.value.splice(start, deleteCount, ...listArg);
@@ -173,9 +177,13 @@ export class ListSignal extends Signal {
 			 * @returns {void}
 			 */
 			swap: (indexA, indexB) => {
-				if (!this.#checkLength('swap', indexA) || !this.#checkLength('swap', indexB)) {
+				if (
+					this.#checkLength('swap', indexA) === false ||
+					this.#checkLength('swap', indexB) === false
+				) {
 					return;
 				}
+				// @ts-expect-error
 				[super.value[indexA], super.value[indexB]] = [super.value[indexB], super.value[indexA]];
 				this.subscribers.notify();
 			},
@@ -188,15 +196,15 @@ export class ListSignal extends Signal {
 			 * @returns {void}
 			 */
 			modify: (index, listArg) => {
-				if (!this.#checkLength('modify', index)) {
+				if (this.#checkLength('modify', index) === false) {
 					return;
 				}
 				for (const key in listArg) {
 					const listArgKey = listArg[key];
-					if (!listArgKey) {
-						continue;
+					if (listArgKey) {
+						// @ts-expect-error
+						super.value[index][key] = listArgKey;
 					}
-					super.value[index][key] = listArgKey;
 				}
 				this.subscribers.notify();
 			},
@@ -208,7 +216,7 @@ export class ListSignal extends Signal {
 			 * @returns {void}
 			 */
 			remove: (index) => {
-				if (!this.#checkLength('remove', index)) {
+				if (this.#checkLength('remove', index) === false) {
 					return;
 				}
 				this.arrayMethods.splice(index, 1);

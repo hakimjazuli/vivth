@@ -1,5 +1,5 @@
 /**
- * @type {Set<Signal>}
+ * @type {Set<Signal<any>>}
  */
 export const setOFSignals: Set<Signal<any>>;
 /**
@@ -149,9 +149,9 @@ export class Signal<VALUE> {
     /**
      * @description
      * - value before change;
-     * @returns {VALUE}
+     * @returns {VALUE|undefined}
      */
-    get prev(): VALUE;
+    get prev(): VALUE | undefined;
     /**
      * @description
      * - assign new value then automatically notify all subscribers;

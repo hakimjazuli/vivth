@@ -12,9 +12,9 @@ import { Console } from './Console.mjs';
  */
 export class Paths {
 	/**
-	 * @type {Paths}
+	 * @type {Paths|undefined}
 	 */
-	static #instance = undefined;
+	static #instance;
 	/**
 	 * @description
 	 * @param {Object} options
@@ -51,19 +51,19 @@ export class Paths {
 		this.#root = root;
 	}
 	/**
-	 * @type {string}
+	 * @type {string|undefined}
 	 */
-	#root = undefined;
+	#root;
 	/**
 	 * @description
 	 * - reference for rootPath
 	 * - `Paths` needed to be instantiated via:
 	 * >- `Paths` constructor;
 	 * >- `Setup.paths` constructor;
-	 * @type {string}
+	 * @type {string|undefined}
 	 */
 	static get root() {
-		if (!Paths.#instance.#root) {
+		if (Paths.#instance === undefined) {
 			Console.error({
 				error: 'Paths.instance.#root is undefined',
 				solutions: 'instantiate `Paths` or instantiate `Setup`',
@@ -82,7 +82,9 @@ export class Paths {
 	 *
 	 * Paths.normalize('file:\\D:\\myFile.mjs'); //  "file://D://myFile.mjs"
 	 */
-	static normalize = (path_) => path_.replace(/\\/g, '/');
+	static normalize = (path_) => {
+		return path_.replace(/\\/g, '/');
+	};
 	/**
 	 * @description
 	 * - normalize path separator to forward slash `/`;
@@ -96,7 +98,7 @@ export class Paths {
 	 */
 	static normalizesForRoot = (path_) => {
 		let normalized = Paths.normalize(path_);
-		if (!normalized.startsWith('/')) {
+		if (normalized.startsWith('/') === false) {
 			normalized = `/${normalized}`;
 		}
 		// @ts-expect-error

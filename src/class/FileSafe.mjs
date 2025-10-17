@@ -109,7 +109,7 @@ export class FileSafe {
 	 * - also returning promise of result & error as value;
 	 * @param {Parameters<mkdir>[0]} outDir
 	 * - absolute path
-	 * @returns {ReturnType<typeof TryAsync<string>>}
+	 * @returns {ReturnType<typeof TryAsync<string|undefined>>}
 	 * @example
 	 * import { join } from 'node:path';
 	 * import { FileSafe, Paths } from 'vivth';

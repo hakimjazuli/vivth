@@ -6,18 +6,18 @@
  */
 export class Paths {
     /**
-     * @type {Paths}
+     * @type {Paths|undefined}
      */
-    static #instance: Paths;
+    static #instance: Paths | undefined;
     /**
      * @description
      * - reference for rootPath
      * - `Paths` needed to be instantiated via:
      * >- `Paths` constructor;
      * >- `Setup.paths` constructor;
-     * @type {string}
+     * @type {string|undefined}
      */
-    static get root(): string;
+    static get root(): string | undefined;
     /**
      * @description
      * - normalize path separator to forward slash `/`;

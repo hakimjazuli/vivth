@@ -25,7 +25,7 @@ export function ToBundledJSPlugin(includedInPath) {
 			const filePath = args.path;
 			const fileExt = extname(filePath);
 			/**
-			 * @type {'js'|'ts'}
+			 * @type {'js'|'ts'|undefined}
 			 */
 			let loader;
 			switch (fileExt) {
@@ -36,12 +36,11 @@ export function ToBundledJSPlugin(includedInPath) {
 				case '.mjs':
 				case '.cjs':
 				case '.js':
-				default:
 					loader = 'js';
 					break;
 			}
 			const originalContent = (await readFile(filePath)).toString('utf-8');
-			if (!loader) {
+			if (loader === undefined) {
 				return {
 					contents: originalContent,
 					loader,
@@ -61,7 +60,7 @@ export function ToBundledJSPlugin(includedInPath) {
 				`${realRef}${fileExt}`
 			);
 			const isExist = await exists(runtimeFile);
-			if (!isExist) {
+			if (isExist === false) {
 				return {
 					contents: originalContent,
 					loader,

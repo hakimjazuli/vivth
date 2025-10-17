@@ -3,13 +3,17 @@
  * @typedef {import('./WorkerResult.mjs').WorkerResult<POST>} WorkerResult
  */
 /**
- * @typedef {import('./WorkerThread.mjs').WorkerThread} WorkerThread
+ * @template RECEIVE
+ * @template POST
+ * @typedef {import('./WorkerThread.mjs').WorkerThread<RECEIVE, POST>} WorkerThread
+ */
+/**
  * @typedef {import('../common/lazie.mjs').unwrapLazy} unwrapLazy
  */
 /**
- * @template {WorkerThread} WT
+ * @template {WorkerThread<any, any>} WT
  */
-export class WorkerMainThread<WT extends WorkerThread> {
+export class WorkerMainThread<WT extends WorkerThread<any, any>> {
     /**
      * @type {boolean}
      */
@@ -38,21 +42,22 @@ export class WorkerMainThread<WT extends WorkerThread> {
         type?: "module";
     };
     /**
-     * @template {WorkerThread} WT
+     * @template {WorkerThread<any, any>} WT
      * @param {string} handler
      * @param {Omit<WorkerOptions|import('worker_threads').WorkerOptions, 'eval'|'type'>} [options]
      * @returns {WorkerMainThread<WT>}
      */
-    static newVivthWorker: (handler: string, options?: Omit<WorkerOptions | import("worker_threads").WorkerOptions, "eval" | "type">) => WorkerMainThread<WT_1>;
+    static newVivthWorker<WT_1 extends WorkerThread<any, any>>(handler: string, options?: Omit<WorkerOptions | import("worker_threads").WorkerOptions, "eval" | "type">): WorkerMainThread<WT_1>;
     /**
+     * @template {WorkerThread<any, any>} WT
      * @param {string} handler
      * @param { WorkerOptions
      * | import('worker_threads').WorkerOptions} options
-     * @param {WorkerMainThread} worker
+     * @param {WorkerMainThread<WT>} worker
      * @param {(any:any)=>void} listener
      * @returns {Promise<void>}
      */
-    static #workerFilehandler: (handler: string, options: WorkerOptions | import("worker_threads").WorkerOptions, worker: WorkerMainThread<any>, listener: (any: any) => void) => Promise<void>;
+    static #workerFilehandler<WT_1 extends WorkerThread<any, any>>(handler: string, options: WorkerOptions | import("worker_threads").WorkerOptions, worker: WorkerMainThread<WT_1>, listener: (any: any) => void): Promise<void>;
     /**
      * @param {Parameters<typeof WorkerMainThread<WT>["newVivthWorker"]>[0]} handler
      * @param {Parameters<typeof WorkerMainThread<WT>["newVivthWorker"]>[1]} [options]
@@ -73,6 +78,6 @@ export class WorkerMainThread<WT extends WorkerThread> {
     #private;
 }
 export type WorkerResult<POST> = import("./WorkerResult.mjs").WorkerResult<POST>;
-export type WorkerThread = import("./WorkerThread.mjs").WorkerThread<any, any>;
+export type WorkerThread<RECEIVE, POST> = import("./WorkerThread.mjs").WorkerThread<RECEIVE, POST>;
 export type unwrapLazy = "vivth:unwrapLazy;";
 import { Derived } from './Derived.mjs';

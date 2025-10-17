@@ -12,9 +12,9 @@ export class SafeExit {
     /**
      * @description
      * - only accessible after instantiation;
-     * @type {SafeExit}
+     * @type {SafeExit|undefined}
      */
-    static instance: SafeExit;
+    static instance: SafeExit | undefined;
     /**
      * @description
      * @param {Object} options
@@ -76,7 +76,7 @@ export class SafeExit {
     constructor({ eventNames, terminator, listener }: {
         eventNames: [string, ...string[]];
         terminator: () => void;
-        listener?: (eventName: string) => void;
+        listener?: ((eventName: string) => void) | undefined;
     });
     /**
      * @description

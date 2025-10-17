@@ -36,6 +36,9 @@ import { unwrapLazy } from '../common/lazie.mjs';
  * myInstance["vivth:unwrapLazy;"]() // forcefully call the callback;
  */
 export function LazyFactory(factory) {
+	/**
+	 * @type {FACTORY|undefined}
+	 */
 	let instance;
 	// @ts-expect-error
 	return new Proxy(
@@ -43,27 +46,30 @@ export function LazyFactory(factory) {
 		{
 			get(_, prop) {
 				if (prop === unwrapLazy) {
-					if (!instance) {
+					if (instance === undefined) {
 						instance = factory();
 					}
 					return () => instance;
 				}
-				if (!instance) {
+				if (instance === undefined) {
 					instance = factory();
 				}
+				// @ts-expect-error
 				return instance[prop];
 			},
 			set(_, prop, newValue) {
-				if (!instance) {
+				if (instance === undefined) {
 					instance = factory();
 				}
+				// @ts-expect-error
 				instance[prop] = newValue;
 				return true;
 			},
 			apply(_, thisArg, args) {
-				if (!instance) {
+				if (instance === undefined) {
 					instance = factory();
 				}
+				// @ts-expect-error
 				return Reflect.apply(instance, thisArg, args);
 			},
 		}

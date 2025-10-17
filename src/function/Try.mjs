@@ -19,7 +19,7 @@ import { TryAsync } from './TryAsync.mjs';
  * @param {RecordTryType} tryRecord
  * @returns {Promise<
  * 	[[keyof RecordTryType, RETURNTYPE], undefined]
- * 	| [[undefined, undefined], Error]
+ * 	| [[undefined, undefined], Error|undefined]
  * >}
  * @example
  * import { Try } from 'vivth';
@@ -53,6 +53,9 @@ import { TryAsync } from './TryAsync.mjs';
  * });
  */
 export async function Try(tryRecord) {
+	/**
+	 * @type {Error|undefined}
+	 */
 	let prevError = undefined;
 	for (const key in tryRecord) {
 		const callback = tryRecord[key];

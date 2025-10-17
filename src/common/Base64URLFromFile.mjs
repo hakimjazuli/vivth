@@ -11,7 +11,7 @@ import { lookup } from 'mime-types';
  * >- can be extremely usefull to display file on desktop app webview, without exposing http server;
  * >- when using `FSInline`, use [Base64URL](#base64url) instead;
  * @param {string} filePath
- * @returns {Promise<Base64URLString>}
+ * @returns {Promise<string>}
  * @example
  * import { join } from 'node:path'
  *

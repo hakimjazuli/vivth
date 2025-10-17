@@ -15,8 +15,10 @@ new safeExit({
 	terminator: () => process.exit(0),
 	listener: (eventName) => {
 		process.once(eventName, function () {
-			safeExit.instance.exiting.correction(true);
-			Console.log(`safe exit via "${eventName}"`);
+			if (safeExit.instance) {
+				safeExit.instance.exiting.correction(true);
+				Console.log(`safe exit via "${eventName}"`);
+			}
 		});
 	},
 });

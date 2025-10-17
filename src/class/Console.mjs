@@ -43,7 +43,9 @@ export class Console {
 	 * 	hello: 'world!!',
 	 * });
 	 */
-	static log = (data) => Console.#call('🟢', 'log', data);
+	static log = (data) => {
+		return Console.#call('🟢', 'log', data);
+	};
 	/**
 	 * @description
 	 * @param {any} data
@@ -55,7 +57,9 @@ export class Console {
 	 * 	hello: 'world!!',
 	 * });
 	 */
-	static info = (data) => Console.#call('🔵', 'info', data);
+	static info = (data) => {
+		return Console.#call('🔵', 'info', data);
+	};
 	/**
 	 * @description
 	 * @param {any} data
@@ -67,7 +71,9 @@ export class Console {
 	 * 	hello: 'world!!',
 	 * });
 	 */
-	static warn = (data) => Console.#call('🟠', 'warn', data);
+	static warn = (data) => {
+		return Console.#call('🟠', 'warn', data);
+	};
 	/**
 	 * @description
 	 * @param {any} data
@@ -79,5 +85,7 @@ export class Console {
 	 * 	hello: 'world!!',
 	 * });
 	 */
-	static error = (data) => Console.#call('🔴', 'error', data);
+	static error = (data) => {
+		return Console.#call('🔴', 'error', data);
+	};
 }

@@ -10,9 +10,9 @@ export class WorkerThread<RECEIVE, POST> {
      * @typedef {import('../types/QCBReturn.mjs').QCBReturn} QCBReturn
      */
     /**
-     * @type {Parameters<typeof WorkerThread["setup"]>[0]}
+     * @type {Parameters<typeof WorkerThread["setup"]>[0]|undefined}
      */
-    static #refs: Parameters<(typeof WorkerThread)["setup"]>[0];
+    static #refs: Parameters<(typeof WorkerThread)["setup"]>[0] | undefined;
     /**
      * @description
      * - need to be called and exported as new `WorkerThread` class reference;
@@ -40,7 +40,7 @@ export class WorkerThread<RECEIVE, POST> {
     /**
      * @description
      * - instantiate via created class from `setup` static method;
-     * @param {WorkerThread["handler"]} handler
+     * @param {WorkerThread<RECEIVE, POST>["handler"]} handler
      * @example
      * import { MyWorkerThread } from './MyWorkerThread.mjs';
      *
@@ -55,7 +55,7 @@ export class WorkerThread<RECEIVE, POST> {
      * 	return ev = ev \* 2;
      * });
      */
-    constructor(handler: (ev: any, isLastOnQ: () => boolean) => any);
+    constructor(handler: WorkerThread<RECEIVE, POST>["handler"]);
     /**
      * @description
      * - type helper;

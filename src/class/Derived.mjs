@@ -17,7 +17,7 @@ export class Derived extends Signal {
 	 * @description
 	 * - Derived used [Signal](#signal) and [Effect](#effect) under the hood;
 	 * @param {(effectInstanceOptions:Omit<Effect["options"] &
-	 * Derived["options"], unwrapLazy>) =>
+	 * Derived<VALUE>["options"], unwrapLazy>) =>
 	 * Promise<VALUE>} derivedFunction
 	 * @example
 	 * import { Signal, Derived } from  'vivth';
@@ -36,6 +36,7 @@ export class Derived extends Signal {
 	 * count.value++;
 	 */
 	constructor(derivedFunction) {
+		// @ts-expect-error
 		super(undefined);
 		const derived_instanceOptions = this.options;
 		new Effect(async (options) => {
@@ -89,7 +90,9 @@ export class Derived extends Signal {
 	 * @description
 	 * - the most recent value of the instance
 	 * - can be turn into reactive with Effect or Derived instantiation;
+	 * - initial value are always `undefined`, make sure to put a check before consuming(inside an `Effect`);
 	 * @returns {VALUE}
+	 * @override
 	 */
 	get value() {
 		return super.value;
@@ -100,6 +103,7 @@ export class Derived extends Signal {
 	 * - it's value should always be determined by it's own `derivedFunction`;
 	 * @private
 	 * @type {VALUE}
+	 * @override
 	 */
 	set value(newValue) {
 		Console.warn({

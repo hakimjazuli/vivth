@@ -23,6 +23,6 @@
  * 	getMap(name_) => mappedObject.get(name_),
  * })
  */
-export function CreateImmutable<PARENT extends unknown, OBJECT extends unknown>(parent: PARENT, keyName: string, object: (this: PARENT) => OBJECT, { lazy }?: {
-    lazy?: boolean;
+export function CreateImmutable<PARENT extends Object, OBJECT extends Object>(parent: PARENT, keyName: string, object: (this: PARENT) => OBJECT, { lazy }?: {
+    lazy?: boolean | undefined;
 }): OBJECT;

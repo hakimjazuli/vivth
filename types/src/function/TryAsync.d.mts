@@ -4,7 +4,7 @@
  * - usefull to flatten indentation for error handlings;
  * @template RESULT
  * @param {()=>Promise<RESULT>} asyncFunction_
- * @returns {Promise<[RESULT|undefined, Error|undefined]>}
+ * @returns {Promise<[RESULT,undefined]|[undefined,Error]>}
  * @example
  * import { TryAsync } from 'vivth';
  *
@@ -19,4 +19,4 @@
  * 	return await res.json();
  * })
  */
-export function TryAsync<RESULT>(asyncFunction_: () => Promise<RESULT>): Promise<[RESULT | undefined, Error | undefined]>;
+export function TryAsync<RESULT>(asyncFunction_: () => Promise<RESULT>): Promise<[RESULT, undefined] | [undefined, Error]>;

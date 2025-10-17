@@ -7,7 +7,6 @@ import { Signal } from './Signal.mjs';
 
 /**
  * @description
- * - non browser API;
  * - uses [Signal](#signal) and [Derived](#derived) under the hood;
  * @template VALUE
  */
@@ -19,16 +18,10 @@ export class EnvSignal {
 	 */
 	constructor(initialValue) {
 		this.#proxyConst = LazyFactory(() => new Signal(initialValue));
-		let isRun = false;
 		this.env = LazyFactory(
 			() =>
 				new Derived(async ({ subscribe }) => {
-					const derived = subscribe(this.#proxyConst).value;
-					if (!isRun) {
-						isRun = true;
-						return initialValue;
-					}
-					return derived;
+					return subscribe(this.#proxyConst).value;
 				})
 		);
 	}

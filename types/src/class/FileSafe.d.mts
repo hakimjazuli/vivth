@@ -73,14 +73,14 @@ export class FileSafe {
      * - also returning promise of result & error as value;
      * @param {Parameters<mkdir>[0]} outDir
      * - absolute path
-     * @returns {ReturnType<typeof TryAsync<string>>}
+     * @returns {ReturnType<typeof TryAsync<string|undefined>>}
      * @example
      * import { join } from 'node:path';
      * import { FileSafe, Paths } from 'vivth';
      *
      * const [str, errorMkDir] = await FileSafe.mkdir(join(Paths.root, '/some/path/example'));
      */
-    static mkdir: (outDir: Parameters<typeof mkdir>[0]) => ReturnType<typeof TryAsync<string>>;
+    static mkdir: (outDir: Parameters<typeof mkdir>[0]) => ReturnType<typeof TryAsync<string | undefined>>;
 }
 import { TryAsync } from '../function/TryAsync.mjs';
 import { writeFile } from 'node:fs/promises';

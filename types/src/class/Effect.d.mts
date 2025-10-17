@@ -71,9 +71,9 @@ export class Effect {
          * @instance options
          * @description
          * - normally it's passed as argument to constructor, however it is also accessible from `options` property;
-         * @template {Signal} SIGNAL
-         * @param {SIGNAL} signal
-         * @returns {SIGNAL}
+         * @template V
+         * @param {Signal<V>} signal
+         * @returns {Signal<V>}
          * @example
          * import { Effect } from 'vivth';
          *
@@ -82,7 +82,7 @@ export class Effect {
          * })
          * effect.options.subscribe(signalInstance);
          */
-        subscribe: <SIGNAL extends Signal<any>>(signal: SIGNAL) => SIGNAL;
+        subscribe: <V>(signal: Signal<V>) => Signal<V>;
         /**
          * @instance options
          * @description
@@ -127,9 +127,9 @@ export class Effect {
              * @instance options
              * @description
              * - normally it's passed as argument to constructor, however it is also accessible from `options` property;
-             * @template {Signal} SIGNAL
-             * @param {SIGNAL} signal
-             * @returns {SIGNAL}
+             * @template V
+             * @param {Signal<V>} signal
+             * @returns {Signal<V>}
              * @example
              * import { Effect } from 'vivth';
              *
@@ -138,7 +138,7 @@ export class Effect {
              * })
              * effect.options.subscribe(signalInstance);
              */
-            subscribe: <SIGNAL extends Signal<any>>(signal: SIGNAL) => SIGNAL;
+            subscribe: <V>(signal: Signal<V>) => Signal<V>;
             /**
              * @instance options
              * @description

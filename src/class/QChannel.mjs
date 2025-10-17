@@ -48,17 +48,18 @@ export class QChannel {
 	 * - ensures that each id has only one task running at a time.
 	 * - calls with the same id will wait for the previous call to finish.
 	 * @param {AnyButUndefined} id
-	 * @param {QChannel} instance
+	 * @param {QChannel<any>} instance
 	 * @returns {Promise<QCBReturn>} Resolves when it's safe to proceed for the given id, returning a cleanup function
 	 */
 	static #uniqueCB = async (id, instance) => {
 		const existing = QChannel.#uniquePromiser.get(id);
+		// @ts-expect-error
 		let resolveFn;
 		const nextPromise = new Promise((resolve) => {
 			resolveFn = resolve;
 		});
 		const context = {};
-		if (!existing) {
+		if (existing === undefined) {
 			QChannel.#uniquePromiser.set(id, [nextPromise, context]);
 			await Promise.resolve();
 		} else {
@@ -67,15 +68,17 @@ export class QChannel {
 			QChannel.#uniquePromiser.set(id, [nextPromise, context]);
 		}
 		const resume = () => {
+			// @ts-expect-error
 			resolveFn();
 			QChannel.#uniquePromiser.delete(id);
 		};
 		return {
 			resume,
 			isLastOnQ: () => {
-				if (!QChannel.#uniquePromiser.has(id)) {
+				if (QChannel.#uniquePromiser.has(id) === false) {
 					return false;
 				}
+				// @ts-expect-error
 				const [, lastContext] = QChannel.#uniquePromiser.get(id);
 				return instance.#shouldRun && lastContext === context;
 			},
@@ -140,13 +143,13 @@ export class QChannel {
 	/**
 	 * @type {boolean}
 	 */
-	#shouldRun_;
+	#shouldRun_ = true;
 	/**
 	 * @returns {boolean}
 	 */
 	get #shouldRun() {
 		const shoulRun = this.#shouldRun_;
-		if (!shoulRun) {
+		if (shoulRun === false) {
 			Console.warn({ qChannel_name: this.name, message: 'is closed' });
 		}
 		return shoulRun;
@@ -197,11 +200,15 @@ export class QChannel {
 	key = async (keyID) => {
 		const { resume } = await QChannel.#uniqueCB(this, this);
 		const mapped = this.#mapped;
-		if (!mapped.has(keyID)) {
+		if (mapped.has(keyID) === false) {
 			mapped.set(keyID, {});
 		}
 		resume();
-		return await QChannel.#uniqueCB(mapped.get(keyID), this);
+		return await QChannel.#uniqueCB(
+			// @ts-expect-error
+			mapped.get(keyID),
+			this
+		);
 	};
 	/**
 	 * @description

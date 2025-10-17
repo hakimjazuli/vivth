@@ -16,7 +16,11 @@ import { Signal } from './Signal.mjs';
  * @typedef {import('./WorkerResult.mjs').WorkerResult<POST>} WorkerResult
  */
 /**
- * @typedef {import('./WorkerThread.mjs').WorkerThread} WorkerThread
+ * @template RECEIVE
+ * @template POST
+ * @typedef {import('./WorkerThread.mjs').WorkerThread<RECEIVE, POST>} WorkerThread
+ */
+/**
  * @typedef {import('../common/lazie.mjs').unwrapLazy} unwrapLazy
  */
 
@@ -24,7 +28,7 @@ import { Signal } from './Signal.mjs';
  * @description
  * - class helper to create `Worker` instance;
  * - before any `Worker` functionaily to be used, you need to setup it with `WorkerThread.setup` and `WorkerMainThread.setup` before runing anytyhing;
- * @template {WorkerThread} WT
+ * @template {WorkerThread<any, any>} WT
  */
 export class WorkerMainThread {
 	/**
@@ -69,7 +73,7 @@ export class WorkerMainThread {
 	 * });
 	 */
 	static setup = ({ workerClass, pathValidator }) => {
-		if (!Paths.root) {
+		if (Paths.root === undefined) {
 			return;
 		}
 		if (WorkerMainThread.#isRegistered) {
@@ -98,7 +102,7 @@ export class WorkerMainThread {
 		type: 'module',
 	});
 	/**
-	 * @template {WorkerThread} WT
+	 * @template {WorkerThread<any, any>} WT
 	 * @description
 	 * - create Worker_instance;
 	 * @param {string} handler
@@ -109,9 +113,9 @@ export class WorkerMainThread {
 	 *
 	 * export const myDoubleWorker = WorkerMainThread.newVivthWorker('./doubleWorkerThread.mjs');
 	 */
-	static newVivthWorker = (handler, options = {}) => {
+	static newVivthWorker(handler, options = {}) {
 		return new WorkerMainThread(handler, options);
-	};
+	}
 	/**
 	 * @private
 	 * @param {Parameters<typeof WorkerMainThread<WT>["newVivthWorker"]>[0]} handler
@@ -123,7 +127,7 @@ export class WorkerMainThread {
 	 */
 	constructor(handler, options = {}) {
 		/**
-		 * @param {WT["RECEIVE"]} ev
+		 * @param {any} ev
 		 * @returns {void}
 		 */
 		const listener = (ev) => {
@@ -132,21 +136,26 @@ export class WorkerMainThread {
 		WorkerMainThread.#workerFilehandler(handler, options, this, listener);
 	}
 	/**
-	 * @type {import('./Signal.mjs').Signal<import('./WorkerResult.mjs').WorkerResult<WT["Post"]>|MessageEvent<import('./WorkerResult.mjs').WorkerResult<WT["Post"]>>>}
+	 * @type {import('./Signal.mjs').Signal<import('./WorkerResult.mjs').WorkerResult<WT["POST"]>|MessageEvent<import('./WorkerResult.mjs').WorkerResult<WT["POST"]>>>}
 	 */
+	// @ts-expect-error
 	#proxyReceiver = new Signal(undefined);
 	/**
+	 * @template {WorkerThread<any, any>} WT
 	 * @param {string} handler
 	 * @param { WorkerOptions
 	 * | import('worker_threads').WorkerOptions} options
-	 * @param {WorkerMainThread} worker
+	 * @param {WorkerMainThread<WT>} worker
 	 * @param {(any:any)=>void} listener
 	 * @returns {Promise<void>}
 	 */
-	static #workerFilehandler = async (handler, options, worker, listener) => {
+	static async #workerFilehandler(handler, options, worker, listener) {
 		let resolvedPath;
 		const pathValidator = WorkerMainThread.pathValidator;
 		const [resolvedPath_, error] = await TryAsync(async () => {
+			if (Paths.root === undefined) {
+				throw new Error('path root undefined');
+			}
 			return await pathValidator({
 				worker: handler,
 				root: Paths.root,
@@ -163,7 +172,10 @@ export class WorkerMainThread {
 		resolvedPath = resolvedPath_;
 		const runtime = GetRuntime();
 		const workerClass = WorkerMainThread.workerClass;
-		if (!workerClass) {
+		if (
+			//
+			!workerClass
+		) {
 			Console.error('invalid `Worker` inputed to `WorkerMainThread`;');
 			return;
 		}
@@ -173,11 +185,15 @@ export class WorkerMainThread {
 					throw new Error('not a browser');
 				}
 				let worker_;
-				worker_ = worker.#worker.value = new workerClass(resolvedPath, {
-					...options,
-					...WorkerMainThread.#options,
-				});
-				if (!('onmessage' in worker_)) {
+				worker_ = worker.#worker.value = new workerClass(
+					resolvedPath,
+					// @ts-expect-error
+					{
+						...options,
+						...WorkerMainThread.#options,
+					}
+				);
+				if ('onmessage' in worker_ === false) {
 					throw new Error('not a browser');
 				}
 				worker_.onmessage = listener;
@@ -188,10 +204,14 @@ export class WorkerMainThread {
 				}
 			},
 			nonBrowser: async () => {
-				const worker_ = (worker.#worker.value = new workerClass(resolvedPath, {
-					...options,
-					...WorkerMainThread.#options,
-				}));
+				const worker_ = (worker.#worker.value = new workerClass(
+					resolvedPath,
+					// @ts-expect-error
+					{
+						...options,
+						...WorkerMainThread.#options,
+					}
+				));
 				if ('addEventListener' in worker_) {
 					worker_.addEventListener('message', listener);
 					if (SafeExit.instance) {
@@ -218,16 +238,17 @@ export class WorkerMainThread {
 		if (SafeExit.instance) {
 			SafeExit.instance.addCallback(async () => {
 				if (worker.#worker.value) {
-					worker.#worker.value.postMessage(closeWorkerThreadEventObject);
+					worker.#worker.value.postMessage(closeWorkerThreadEventObject, []);
 				}
 				worker.terminate();
 			});
 		}
-	};
+	}
 	/**
 	 * lazyly generated because node version need to await
 	 * @type {Signal<Worker | import('worker_threads').Worker>}
 	 */
+	// @ts-expect-error
 	#worker = new Signal(undefined);
 	/**
 	 * @type {Signal<WT["RECEIVE"]>}
@@ -236,10 +257,10 @@ export class WorkerMainThread {
 	#handler = new Effect(async ({ subscribe }) => {
 		const postData = subscribe(this.#proxyPost).value;
 		const worker = subscribe(this.#worker).value;
-		if (!worker || postData === undefined) {
+		if (worker === undefined || postData === undefined) {
 			return;
 		}
-		worker.postMessage(postData);
+		worker.postMessage(postData, []);
 	});
 	/**
 	 * @description

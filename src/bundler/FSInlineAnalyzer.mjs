@@ -15,9 +15,10 @@ import { EsBundler } from './EsBundler.mjs';
  */
 const hydrateRegex = (str) => {
 	const match = str.match(/^\/(.*)\/([a-z]*)$/);
-	if (!match) throw new Error('Invalid regex string format');
-
-	const [, pattern, flags] = match;
+	if (match === null) {
+		throw new Error('Invalid regex string format');
+	}
+	const [, pattern = '', flags] = match;
 	return new RegExp(pattern, flags);
 };
 
@@ -70,6 +71,7 @@ export class FSInlineAnalyzer {
 			const templateFile = literalFile`${'FSInline'}${'method'}${'path'}${'closing'}`;
 			const templateWorker = literalWorker`${'ref'}${'method'}${'path'}${'closing'}`;
 			const templateDir = literalDir`${'FSInline'}${'method'}${'path'}${'methodClosing'}${'rule'}${'functionClosing'}`;
+
 			const [resultMatchingFile, errorMatchingFile] = templateFile.evaluate.matchedAllAndGrouped(
 				content,
 				{
@@ -95,15 +97,26 @@ export class FSInlineAnalyzer {
 			const {
 				result: { named: namedFile },
 			} = resultMatchingFile;
+			if (Paths.root === undefined) {
+				throw new Error('Path.root undefined');
+			}
 			for (let i = 0; i < namedFile.length; i++) {
-				const { path } = namedFile[i];
+				const res = namedFile[i];
+				if (res === undefined) {
+					continue;
+				}
+				const { path } = res;
 				FSInline.vivthFSInlinelists[path] = Buffer.from(await readFile(join(Paths.root, path)));
 			}
 			const {
 				result: { named: namedWorker },
 			} = resultMatchingWorker;
 			for (let i = 0; i < namedWorker.length; i++) {
-				const { path } = namedWorker[i];
+				const res = namedWorker[i];
+				if (res === undefined) {
+					continue;
+				}
+				const { path } = res;
 				const fullPath = join(Paths.root, path);
 				const content = await readFile(fullPath, { encoding: 'utf-8' });
 				const [contentBundled, errorBundled] = await EsBundler(
@@ -134,11 +147,19 @@ export class FSInlineAnalyzer {
 				result: { named: namedDir },
 			} = resultMatchingDir;
 			for (let i = 0; i < namedDir.length; i++) {
-				let { path, rule } = namedDir[i];
+				const res = namedDir[i];
+				if (res === undefined) {
+					continue;
+				}
+				let { path, rule } = res;
 				rule = rule.trim();
 				const results = await FSInlineAnalyzer.#dir(join(Paths.root, path), hydrateRegex(rule));
 				for (let j = 0; j < results.length; j++) {
-					const { path, buffer } = results[j];
+					const res = results[j];
+					if (res === undefined) {
+						continue;
+					}
+					const { path, buffer } = res;
 					if (path in FSInline.vivthFSInlinelists) {
 						continue;
 					}
@@ -169,6 +190,9 @@ export class FSInlineAnalyzer {
 		 * @returns {Promise<void>}
 		 */
 		const walk = async (current) => {
+			if (Paths.root === undefined) {
+				return;
+			}
 			const entries = await readdir(current, {
 				recursive: false,
 				withFileTypes: true,

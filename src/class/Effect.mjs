@@ -69,9 +69,9 @@ export class Effect {
 			 * @instance options
 			 * @description
 			 * - normally it's passed as argument to constructor, however it is also accessible from `options` property;
-			 * @template {Signal} SIGNAL
-			 * @param {SIGNAL} signal
-			 * @returns {SIGNAL}
+			 * @template V
+			 * @param {Signal<V>} signal
+			 * @returns {Signal<V>}
 			 * @example
 			 * import { Effect } from 'vivth';
 			 *
@@ -81,7 +81,7 @@ export class Effect {
 			 * effect.options.subscribe(signalInstance);
 			 */
 			subscribe: (signal) => {
-				if (!(signal instanceof Signal)) {
+				if (signal instanceof Signal === false) {
 					// @ts-expect-error
 					signal = signal[unwrapLazy]();
 				}
@@ -136,7 +136,7 @@ export class Effect {
 	/**
 	 * @type {Object}
 	 */
-	#current;
+	#current = {};
 	/**
 	 * @param {Omit<Effect["options"], typeof unwrapLazy>} effectInstance
 	 * @returns {Promise<void>}
@@ -158,7 +158,7 @@ export class Effect {
 		TryAsync(async () => {
 			await this.#effect(this.options[unwrapLazy]());
 		}).then(([, error]) => {
-			if (!error) {
+			if (error === undefined) {
 				return;
 			}
 			Console.error(error);

@@ -1,4 +1,4 @@
-// @ts-expect-error
+// @ts-check
 
 /**
  * @description

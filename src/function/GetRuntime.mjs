@@ -7,7 +7,7 @@
 /**
  * @type {Runtime|undefined}
  */
-let runtime = undefined;
+let runtime;
 
 /**
  * @description
@@ -19,7 +19,7 @@ let runtime = undefined;
  * const runtime = GetRuntime();
  */
 export function GetRuntime() {
-	if (!runtime) {
+	if (runtime === undefined) {
 		if (typeof Bun !== 'undefined') {
 			runtime = 'bun';
 		}
@@ -28,7 +28,12 @@ export function GetRuntime() {
 			runtime = 'deno';
 		} else if (typeof process !== 'undefined' && process.versions?.node) {
 			runtime = 'node';
-		} else if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+		} else if (
+			// @ts-expect-error
+			typeof window !== 'undefined' &&
+			// @ts-expect-error
+			typeof document !== 'undefined'
+		) {
 			runtime = 'browser';
 		} else {
 			runtime = 'unknown';

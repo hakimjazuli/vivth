@@ -37,10 +37,10 @@
  * - no need to add the output/outdir, as it use the `options.outDir`;
  * @param {ReturnType<CreateESPlugin>[]} [options.esBundlerPlugins]
  * - plugins for `EsBundler`;
- * @return {ReturnType<TryAsync<{compileResult:Promise<any>,
- * commandCalled: string;
- * compiledBinFile: string;
- * bundledJSFile:string
+ * @return {ReturnType<typeof TryAsync<{compileResult:Promise<any>|undefined,
+ * commandCalled: string|undefined;
+ * compiledBinFile: string|undefined;
+ * bundledJSFile:string|undefined
  * }>>}
  * @example
  * import { join } from 'node:path';
@@ -72,13 +72,18 @@
  */
 export function CompileJS({ entryPoint, minifyFirst, encoding, outDir, compiler, compilerArguments, esBundlerPlugins, }: {
     entryPoint: string;
-    encoding?: BufferEncoding;
+    encoding?: BufferEncoding | undefined;
     minifyFirst: boolean;
     outDir: string;
-    compiler?: "pkg" | "bun" | "deno";
-    compilerArguments?: Record<string, string>;
-    esBundlerPlugins?: ReturnType<CreateESPlugin>[];
-}): ReturnType<typeof TryAsync>;
+    compiler?: "pkg" | "bun" | "deno" | undefined;
+    compilerArguments?: Record<string, string> | undefined;
+    esBundlerPlugins?: import("esbuild").Plugin[] | undefined;
+}): ReturnType<typeof TryAsync<{
+    compileResult: Promise<any> | undefined;
+    commandCalled: string | undefined;
+    compiledBinFile: string | undefined;
+    bundledJSFile: string | undefined;
+}>>;
 export type PlatformKey = "win32" | "linux" | "darwin" | string;
 export type CreateESPlugin = typeof import("./CreateESPlugin.mjs")["CreateESPlugin"];
 import { TryAsync } from '../function/TryAsync.mjs';

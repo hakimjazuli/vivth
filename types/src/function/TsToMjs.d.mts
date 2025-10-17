@@ -18,6 +18,6 @@
  * TsToMjs('./myFile.mts', { encoding: 'utf-8', overrideDir: './other/dir' });
  */
 export function TsToMjs(path_: string, { overrideDir, encoding }?: {
-    overrideDir?: string;
-    encoding?: BufferEncoding;
+    overrideDir?: string | undefined;
+    encoding?: BufferEncoding | undefined;
 }): Promise<void>;

@@ -22,15 +22,16 @@ export class parsedFile {
      */
     /**
      * @param {string} path__
+     * @param {import('fs').Stats} _stats
      * @param {BufferEncoding} [encoding]
      */
-    constructor(path__: string, encoding?: BufferEncoding);
+    constructor(path__: string, _stats: import("fs").Stats, encoding?: BufferEncoding);
     parse: () => Promise<void>;
     documented: {
         typedef: () => Promise<{
             module: string;
             readme: string;
-        }>;
+        } | undefined>;
         /**
          * @type {Set<refType>}
          */
@@ -54,7 +55,7 @@ export class parsedFile {
             typedef: () => Promise<{
                 module: string;
                 readme: string;
-            }>;
+            } | undefined>;
             /**
              * @type {Set<refType>}
              */
@@ -153,11 +154,6 @@ export class parsedFile {
          */
         readonly noDot: string | undefined;
     };
-    /**
-     * @private
-     * @returns {Promise<Stats>}
-     */
-    private stats;
     get timeStamp(): {
         /**
          * @returns {Promise<number>}
@@ -206,8 +202,9 @@ export class parsedFile {
         };
     };
     /**
-     * @returns {[Promise<any>, undefined]|[undefined, Error]}
+     * @returns {ReturnType<typeof TryAsync<any>>}
      */
-    get importAsModuleJS(): [Promise<any>, undefined] | [undefined, Error];
+    importAsModuleJS: () => ReturnType<typeof TryAsync<any>>;
     #private;
 }
+import { TryAsync } from '../function/TryAsync.mjs';

@@ -12,11 +12,11 @@
  * (str, prevBufferEncoding) =>
  * 	Buffer.from(str, prevBufferEncoding).toString('base64')
  * ```
- * @returns {Base64URLString}
+ * @returns {string}
  * @example
  * import { Base64URL } from 'vivth'
  * import fileString from './fileString.mjs';
  *
  * Base64URL(fileString, 'application/javascript', btoa);
  */
-export function Base64URL(fileString: string, mimeType: string, btoaFunction: (string: string) => string): Base64URLString;
+export function Base64URL(fileString: string, mimeType: string, btoaFunction: (string: string) => string): string;

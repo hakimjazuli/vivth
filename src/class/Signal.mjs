@@ -7,7 +7,7 @@ import { Console } from './Console.mjs';
 import { Effect, setOfEffects } from './Effect.mjs';
 
 /**
- * @type {Set<Signal>}
+ * @type {Set<Signal<any>>}
  */
 export const setOFSignals = new Set();
 
@@ -64,7 +64,7 @@ export class Signal {
 		 * });
 		 */
 		notify: (callback = undefined) => {
-			if (!callback) {
+			if (callback === undefined) {
 				Signal.#notify(this.subscribers.setOf);
 				return;
 			}
@@ -86,7 +86,7 @@ export class Signal {
 		const [, error] = TrySync(() => {
 			const effects = setOfSubscribers;
 			effects.forEach((effect) => {
-				if (!setOfEffects.has(effect)) {
+				if (setOfEffects.has(effect) === false) {
 					effects.delete(effect);
 					return;
 				}
@@ -96,7 +96,7 @@ export class Signal {
 				effect.run();
 			});
 		});
-		if (!error) {
+		if (error === undefined) {
 			return;
 		}
 		Console.error(error);
@@ -135,19 +135,20 @@ export class Signal {
 		 */
 		ref: () => {
 			this.remove.allSubscribers();
+			// @ts-expect-error
 			this.#value = null;
 			setOFSignals.delete(this);
 		},
 	}));
 
 	/**
-	 * @type {VALUE}
+	 * @type {VALUE|undefined}
 	 */
-	#prev = undefined;
+	#prev;
 	/**
 	 * @description
 	 * - value before change;
-	 * @returns {VALUE}
+	 * @returns {VALUE|undefined}
 	 */
 	get prev() {
 		return this.#prev;

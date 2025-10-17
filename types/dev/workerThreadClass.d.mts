@@ -4,7 +4,7 @@
  */
 export const workerThreadClass: {
     new (handler: (ev: any, isLastOnQ: () => boolean) => any): WorkerThread<any, any>;
-    #refs: Parameters<(typeof WorkerThread)["setup"]>[0];
+    #refs: Parameters<(typeof WorkerThread)["setup"]>[0] | undefined;
     setup<RECEIVE, POST>(refs: {
         parentPort: typeof import("worker_threads")["parentPort"];
     }): typeof WorkerThread<RECEIVE, POST>;

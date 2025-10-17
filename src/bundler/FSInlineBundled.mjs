@@ -12,7 +12,11 @@ export class FSInline {
 	 */
 	static vivthFSInlineFile = async (filePathFromProject) => {
 		filePathFromProject = Paths.normalizesForRoot(filePathFromProject);
-		return Buffer.from(FSInline.vivthFSInlinelists[filePathFromProject]);
+		const bufferStored = FSInline.vivthFSInlinelists[filePathFromProject];
+		if (bufferStored === undefined) {
+			return Buffer.from([]);
+		}
+		return Buffer.from(bufferStored);
 	};
 	/**
 	 * @param {string} dirPathFromProject

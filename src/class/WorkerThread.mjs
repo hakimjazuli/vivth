@@ -20,9 +20,9 @@ export class WorkerThread {
 	 * @typedef {import('../types/QCBReturn.mjs').QCBReturn} QCBReturn
 	 */
 	/**
-	 * @type {Parameters<typeof WorkerThread["setup"]>[0]}
+	 * @type {Parameters<typeof WorkerThread["setup"]>[0]|undefined}
 	 */
-	static #refs = undefined;
+	static #refs;
 	/**
 	 * @description
 	 * - need to be called and exported as new `WorkerThread` class reference;
@@ -57,7 +57,7 @@ export class WorkerThread {
 	/**
 	 * @description
 	 * - instantiate via created class from `setup` static method;
-	 * @param {WorkerThread["handler"]} handler
+	 * @param {WorkerThread<RECEIVE, POST>["handler"]} handler
 	 * @example
 	 * import { MyWorkerThread } from './MyWorkerThread.mjs';
 	 *
@@ -81,30 +81,41 @@ export class WorkerThread {
 				 * @param {MessageEvent<RECEIVE>|RECEIVE} ev
 				 * @returns {Promise<void>}
 				 */
+				// @ts-expect-error
 				self.onmessage = async function (ev) {
 					const [, error] = await TryAsync(async () => {
 						ev = ev instanceof MessageEvent ? ev.data : ev;
 						if (WorkerThread.#isCloseWorkerEvent(ev)) {
 							this_.#qChannel.close();
+							// @ts-expect-error
 							self.onmessage = null;
 							return;
 						}
 						const [data, error] = await this_.#qChannel.callback(this, async ({ isLastOnQ }) => {
+							// @ts-expect-error
 							return await handler(ev, isLastOnQ);
 						});
 						if (error) {
 							throw error;
 						}
+						// @ts-expect-error
 						self.postMessage(new WorkerResult(data, undefined));
 					});
-					if (!error) {
+					if (error === undefined) {
 						return;
 					}
+					// @ts-expect-error
 					self.postMessage(new WorkerResult(undefined, error?.message ?? 'Unknown error'));
 				};
 			},
 			parentPost: async () => {
+				if (WorkerThread.#refs === undefined) {
+					return;
+				}
 				const { parentPort } = WorkerThread.#refs;
+				if (parentPort === null) {
+					return;
+				}
 				/**
 				 * @param {MessageEvent<RECEIVE>|RECEIVE} ev
 				 * @returns {Promise<void>}
@@ -117,7 +128,8 @@ export class WorkerThread {
 							parentPort.off('message', listener);
 							return;
 						}
-						const [data, error] = await this_.#qChannel.callback(this, async ({ isLastOnQ }) => {
+						const [data, error] = await this_.#qChannel.callback(this_, async ({ isLastOnQ }) => {
+							// @ts-expect-error
 							return await handler(ev, isLastOnQ);
 						});
 						if (error) {
@@ -125,7 +137,7 @@ export class WorkerThread {
 						}
 						parentPort.postMessage(new WorkerResult(data, undefined));
 					});
-					if (!error) {
+					if (error === undefined) {
 						return;
 					}
 					parentPort.postMessage(new WorkerResult(undefined, error?.message ?? 'Unknown error'));
@@ -133,7 +145,7 @@ export class WorkerThread {
 				parentPort.on('message', listener);
 			},
 		}).then(([, error]) => {
-			if (!error) {
+			if (error === undefined) {
 				return;
 			}
 			Console.error(error);
@@ -150,11 +162,13 @@ export class WorkerThread {
 	 * - helper type, hold no actual value;
 	 * @type {RECEIVE}
 	 */
+	// @ts-expect-error
 	RECEIVE;
 	/**
 	 * @description
 	 * - helper type, hold no actual value;
 	 * @type {POST}
 	 */
+	// @ts-expect-error
 	POST;
 }

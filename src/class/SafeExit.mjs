@@ -22,9 +22,9 @@ export class SafeExit {
 	/**
 	 * @description
 	 * - only accessible after instantiation;
-	 * @type {SafeExit}
+	 * @type {SafeExit|undefined}
 	 */
-	static instance = undefined;
+	static instance;
 	/**
 	 * @description
 	 * @param {Object} options
@@ -84,7 +84,7 @@ export class SafeExit {
 	 * });
 	 */
 	constructor({ eventNames, terminator, listener = undefined }) {
-		if (SafeExit.instance) {
+		if (SafeExit.instance instanceof SafeExit) {
 			return SafeExit.instance;
 		}
 		SafeExit.instance = this;
@@ -117,8 +117,14 @@ export class SafeExit {
 	 * @type {(eventName:string)=>void}
 	 */
 	#listener = (eventName) => {
+		if (SafeExit.instance === undefined) {
+			return;
+		}
 		SafeExit.instance.exiting.env.value;
 		process.once(eventName, function () {
+			if (SafeExit.instance === undefined) {
+				return;
+			}
 			Console.log(`safe exit via "${eventName}"`);
 			SafeExit.instance.exiting.correction(true);
 		});
@@ -141,9 +147,12 @@ export class SafeExit {
 	/**
 	 * @type {()=>void}
 	 */
-	#exit;
+	#exit = () => {};
 	#autoCleanUp = new Effect(async ({ subscribe }) => {
-		if (!subscribe(this.exiting.env).value) {
+		if (
+			//
+			!subscribe(this.exiting.env).value
+		) {
 			return;
 		}
 		setOFSignals.forEach((signal) => {
@@ -156,13 +165,13 @@ export class SafeExit {
 			const [, error] = await TryAsync(async () => {
 				await cleanup();
 			});
-			if (!error) {
+			if (error === undefined) {
 				continue;
 			}
 			Console.warn(error);
 		}
 		const [, errorExitting] = TrySync(this.#exit);
-		if (!errorExitting) {
+		if (errorExitting === undefined) {
 			return;
 		}
 		Console.error(errorExitting);

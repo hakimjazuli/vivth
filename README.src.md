@@ -31,8 +31,12 @@ npm i vivth
 
 ## versions:
 
-- `1.0.0+:b`:
+- `1.0.0+:beta`:
+
   > - beta release;
   > - checking edge cases;
   > - stable API, the exposed API access are highly unlikely to changes, only the underlying code
   >   might changes for improving performance;
+
+- `1.3.x:beta`:
+  > - type should now fully fixed, even with strict ts check;

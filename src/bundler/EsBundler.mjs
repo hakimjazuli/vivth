@@ -41,7 +41,9 @@ export async function EsBundler(
 	esbuildOptions = {}
 ) {
 	return await TryAsync(async () => {
-		/** @type {Parameters<build>[0]['stdin']['loader']} */
+		/**
+		 * @type {import('esbuild').StdinOptions["loader"]}
+		 */
 		let loader;
 		switch (extension) {
 			case '.mts':
@@ -84,7 +86,7 @@ export async function EsBundler(
 			Console.warn(result.warnings.map((w) => w.text).join('\n'));
 		}
 		const resString = result.outputFiles?.[0]?.text;
-		if (!resString) {
+		if (resString === undefined) {
 			return '';
 		}
 		return resString;

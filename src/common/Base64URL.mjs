@@ -14,7 +14,7 @@
  * (str, prevBufferEncoding) =>
  * 	Buffer.from(str, prevBufferEncoding).toString('base64')
  * ```
- * @returns {Base64URLString}
+ * @returns {string}
  * @example
  * import { Base64URL } from 'vivth'
  * import fileString from './fileString.mjs';
@@ -28,4 +28,4 @@ export function Base64URL(fileString, mimeType, btoaFunction) {
 		binary += String.fromCharCode(byte);
 	}
 	return `data:${mimeType.toString()};base64,${btoaFunction(binary)}`;
-}
+};

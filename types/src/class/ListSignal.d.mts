@@ -16,7 +16,7 @@ export class ListSignal<LISTARG extends import("../types/ListArg.mjs").ListArg> 
      * @param {unknown} value - The value to validate.
      * @returns {value is Array<Record<string, string>>} True if the first item is a valid string record or array is empty.
      */
-    static isValid: (value: unknown) => value is Array<Record<string, string>>;
+    static isValid(value: unknown): value is Array<Record<string, string>>;
     /**
      * @description
      * - usefull for `loops`;

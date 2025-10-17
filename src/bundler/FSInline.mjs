@@ -26,6 +26,9 @@ export class FSInline {
 	 */
 	static vivthFSInlineFile = async (filePathFromProject) => {
 		filePathFromProject = Paths.normalizesForRoot(filePathFromProject);
+		if (Paths.root === undefined) {
+			return Buffer.from([]);
+		}
 		const fullAbsolutePath = join(Paths.root, filePathFromProject);
 		return Buffer.from(await readFile(fullAbsolutePath));
 	};

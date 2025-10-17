@@ -10,8 +10,10 @@
 		"typescript": "^5.9.2"
 	},
 	"dependencies": {
+		"@types/mime-types": "^3.0.1",
 		"chokidar": "^4.0.3",
 		"esbuild": "^0.25.9",
+		"i": "^0.3.7",
 		"mime-types": "^3.0.1",
 		"pkg": "^5.8.1"
 	},

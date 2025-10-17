@@ -14,7 +14,7 @@
  * @param {RecordTryType} tryRecord
  * @returns {Promise<
  * 	[[keyof RecordTryType, RETURNTYPE], undefined]
- * 	| [[undefined, undefined], Error]
+ * 	| [[undefined, undefined], Error|undefined]
  * >}
  * @example
  * import { Try } from 'vivth';
@@ -49,4 +49,4 @@
  */
 export function Try<KEY extends string, RETURNTYPE, RecordTryType extends Record<KEY, (err: {
     prevError: undefined | Error;
-}) => Promise<RETURNTYPE>>>(tryRecord: RecordTryType): Promise<[[keyof RecordTryType, RETURNTYPE], undefined] | [[undefined, undefined], Error]>;
+}) => Promise<RETURNTYPE>>>(tryRecord: RecordTryType): Promise<[[keyof RecordTryType, RETURNTYPE], undefined] | [[undefined, undefined], Error | undefined]>;

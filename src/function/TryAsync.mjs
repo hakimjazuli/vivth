@@ -6,7 +6,7 @@
  * - usefull to flatten indentation for error handlings;
  * @template RESULT
  * @param {()=>Promise<RESULT>} asyncFunction_
- * @returns {Promise<[RESULT|undefined, Error|undefined]>}
+ * @returns {Promise<[RESULT,undefined]|[undefined,Error]>}
  * @example
  * import { TryAsync } from 'vivth';
  *
@@ -26,6 +26,7 @@ export async function TryAsync(asyncFunction_) {
 		const result = await asyncFunction_();
 		return [result, undefined];
 	} catch (error) {
+		// @ts-expect-error
 		return [undefined, error];
 	}
 }

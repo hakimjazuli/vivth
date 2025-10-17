@@ -1,6 +1,5 @@
 /**
  * @description
- * - non browser API;
  * - uses [Signal](#signal) and [Derived](#derived) under the hood;
  * @template VALUE
  */

@@ -15,21 +15,24 @@
  * >>- first `"at"${string}` after `"at"description` until `"at"example` will be treated as `javascript` comment block on the `markdown`;
  * >>- `"at"example` are treated as `javascript` block on the `markdown` file, and should be placed last on the same comment block;
  * >>- you can always look at `vivth/src` files to check how the source, and the `README.md` and `index.mjs` documentation/generation results;
+ * >6) this types of arrow functions will be converted to regullar function, for concise type emition:
+ * >>- validly exported function;
+ * >>- static/instance method(s) with generic template;
  */
 export class JSautoDOC {
     /**
-     * @type {JSautoDOC}
+     * @type {JSautoDOC|undefined}
      */
-    static #instance: JSautoDOC;
+    static #instance: JSautoDOC | undefined;
     /**
      * @description
      * @param {Object} [options]
      * @param {Object} [options.paths]
-     * @param {string} [options.paths.file]
+     * @param {string} options.paths.file
      * - entry point;
-     * @param {string} [options.paths.readMe]
+     * @param {string} options.paths.readMe
      * - readme target;
-     * @param {string} [options.paths.dir]
+     * @param {string} options.paths.dir
      * - source directory;
      * @param {string} [options.copyright]
      * @param {string} [options.tableOfContentTitle]
@@ -47,13 +50,31 @@ export class JSautoDOC {
      */
     constructor({ paths, tableOfContentTitle, copyright, option, }?: {
         paths?: {
-            file?: string;
-            readMe?: string;
-            dir?: string;
-        };
-        copyright?: string;
-        tableOfContentTitle?: string;
-        option?: import("chokidar").ChokidarOptions;
+            file: string;
+            readMe: string;
+            dir: string;
+        } | undefined;
+        copyright?: string | undefined;
+        tableOfContentTitle?: string | undefined;
+        option?: Partial<{
+            persistent: boolean;
+            ignoreInitial: boolean;
+            followSymlinks: boolean;
+            cwd?: string;
+            usePolling: boolean;
+            interval: number;
+            binaryInterval: number;
+            alwaysStat?: boolean;
+            depth?: number;
+            ignorePermissionErrors: boolean;
+            atomic: boolean | number;
+        } & {
+            ignored: import("chokidar").Matcher | import("chokidar").Matcher[];
+            awaitWriteFinish: boolean | Partial<{
+                stabilityThreshold: number;
+                pollInterval: number;
+            }>;
+        }> | undefined;
     });
     #private;
 }
