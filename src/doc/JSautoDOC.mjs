@@ -50,6 +50,7 @@ const acceptableExt = new Set(['.mjs', '.mts', '.ts']);
  * >6) this types of arrow functions will be converted to regullar function, for concise type emition:
  * >>- validly exported function;
  * >>- static/instance method(s) with generic template;
+ * >7) transpile `.ts` and `.mts` to `.mjs` same name and directory;
  */
 export class JSautoDOC {
 	/**
@@ -114,6 +115,7 @@ export class JSautoDOC {
 				return;
 			}
 			if (ext !== '.mjs') {
+				// no need to be awaited
 				TsToMjs(path, {
 					encoding,
 				});

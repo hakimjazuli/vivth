@@ -18,6 +18,7 @@
  * >6) this types of arrow functions will be converted to regullar function, for concise type emition:
  * >>- validly exported function;
  * >>- static/instance method(s) with generic template;
+ * >7) transpile `.ts` and `.mts` to `.mjs` same name and directory;
  */
 export class JSautoDOC {
     /**

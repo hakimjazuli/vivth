@@ -2367,7 +2367,8 @@ npm i vivth
 >>- you can always look at `vivth/src` files to check how the source, and the `README.md` and `index.mjs` documentation/generation results;  
 >6) this types of arrow functions will be converted to regullar function, for concise type emition:  
 >>- validly exported function;  
->>- static/instance method(s) with generic template;
+>>- static/instance method(s) with generic template;  
+>7) transpile `.ts` and `.mts` to `.mjs` same name and directory;
 
 
 #### reference:`new JSautoDOC`
