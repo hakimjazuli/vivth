@@ -75,7 +75,7 @@ export function CompileJS({ entryPoint, minifyFirst, encoding, outDir, compiler,
     encoding?: BufferEncoding | undefined;
     minifyFirst: boolean;
     outDir: string;
-    compiler?: "pkg" | "bun" | "deno" | undefined;
+    compiler?: "bun" | "deno" | "pkg" | undefined;
     compilerArguments?: Record<string, string> | undefined;
     esBundlerPlugins?: import("esbuild").Plugin[] | undefined;
 }): ReturnType<typeof TryAsync<{

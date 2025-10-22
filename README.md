@@ -1881,9 +1881,32 @@ npm i vivth
 ```js  
  import { SafeExit } from 'vivth'; 	 
  	 
- SafeExit.instance.addCallback(()=>{ 	 
+ const exitCallback () => { 	 
  	// code 	 
- })
+ } 	 
+ SafeExit.instance.addCallback(exitCallback);
+ 
+```
+
+#### reference:`SafeExit_instance.removeCallback`
+- optional exit event removal; 	 
+- the callbacks will be removed from registered via `addCallback` exiting;
+
+```js
+/**
+ * @param {()=>(Promise<void>)} cb 	 
+ */
+```
+ - <i>example</i>:
+```js  
+ import { SafeExit } from 'vivth'; 	 
+ 	 
+ const exitCallback () => { 	 
+ 	// code 	 
+ } 	 
+ SafeExit.instance.addCallback(exitCallback); 	 
+ 	 
+ SafeExit.instance.removeCallback(exitCallback);
  
 ```
 

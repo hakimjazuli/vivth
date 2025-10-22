@@ -137,12 +137,31 @@ export class SafeExit {
 	 * @example
 	 * import { SafeExit } from 'vivth';
 	 *
-	 * SafeExit.instance.addCallback(()=>{
+	 * const exitCallback () => {
 	 * 	// code
-	 * })
+	 * }
+	 * SafeExit.instance.addCallback(exitCallback);
 	 */
 	addCallback = (cb) => {
 		safeCleanUpCBs.add(cb);
+	};
+	/**
+	 * @description
+	 * - optional exit event removal;
+	 * - the callbacks will be removed from registered via `addCallback` exiting;
+	 * @param {()=>(Promise<void>)} cb
+	 * @example
+	 * import { SafeExit } from 'vivth';
+	 *
+	 * const exitCallback () => {
+	 * 	// code
+	 * }
+	 * SafeExit.instance.addCallback(exitCallback);
+	 *
+	 * SafeExit.instance.removeCallback(exitCallback);
+	 */
+	removeCallback = (cb) => {
+		safeCleanUpCBs.delete(cb);
 	};
 	/**
 	 * @type {()=>void}
