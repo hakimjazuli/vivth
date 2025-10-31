@@ -7,6 +7,7 @@
  * >- destructuring is meant for extensive typehelper;
  * >- and destructuring can lead to unhandled error here and there;
  * >- therefore error as value is introduced to help to prevent error on runtime;
+ * - made primarily for generating string file, that are purely managed programatically;
  * @template {LitExpKeyType} KEYS
  */
 export class LitExp<KEYS extends import("../types/LitExpKeyType.mjs").LitExpKeyType> {

@@ -10,6 +10,9 @@ npm i vivth
 
 - `vivth` are intended to be a collections of usefull `primitives`, and not to be directly used as
   underlying framework;
+- `vivth` are leaning to `esm(.mjs)+jsdoc` first;
+  > - some functionality "might need" work around if you are using other than `esm+jsdoc`;
+  > - `CompileJS`, `ESBundler` expose `format` option for some leeway for `commonJS`;
 - completely `JSruntime` agnostic:
   > - instead of `vivth` trying to guess, all runtime specific API should be provided by dev;
 - contains helpers to help you write data driven javascript program, including:
@@ -40,3 +43,5 @@ npm i vivth
 
 - `1.3.x:beta`:
   > - type should now fully fixed, even with strict ts check;
+- `1.3.3+:beta`:
+  > - added class `Dev` for testing and `Dev`/`preBundled` only code block;

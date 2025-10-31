@@ -2,7 +2,6 @@
 
 import { LazyFactory } from '../function/LazyFactory.mjs';
 import { TryAsync } from '../function/TryAsync.mjs';
-import { TrySync } from '../function/TrySync.mjs';
 import { Console } from './Console.mjs';
 
 /**
@@ -34,9 +33,9 @@ export class QChannel {
 	 * import { QChannel } from 'vivth';
 	 *
 	 * const myMappedQref = (window['myMappedQref'] = new Map());
-	 * export const MyQClass = QChannel.makeQClass(myMappedQref);
+	 * export const MyQClass = QChannel.setup(myMappedQref);
 	 */
-	static makeQClass = (uniqueMap) => {
+	static setup = (uniqueMap) => {
 		QChannel.#uniquePromiser = uniqueMap;
 		return QChannel;
 	};
@@ -215,7 +214,7 @@ export class QChannel {
 	 * - `callbackBlock` with error as value:
 	 * - caveat:
 	 * >- no need to manually call resume();
-	 * >- slightly less performant than `callback`;
+	 * >- slightly less performant than `key`;
 	 * @template RESULT
 	 * @param {DEFINEDANY} keyID
 	 * @param {(options:Omit<QCBReturn,
@@ -224,7 +223,7 @@ export class QChannel {
 	 * @returns {ReturnType<typeof TryAsync<RESULT>>}
 	 * @example
 	 * const q = new QChannel('channel name');
-	 * const [result, error] = await q.callback(keyID, async ({ isLastOnQ }) = > {
+	 * const [result, error] = await q.callback(keyID, async ({ isLastOnQ }) => {
 	 * 	// if (!isLastOnQ()) { // imperative debounce if needed
 	 * 	// 	return;
 	 * 	// }

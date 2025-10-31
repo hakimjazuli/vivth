@@ -40,7 +40,7 @@ export class ListSignal<LISTARG extends import("../types/ListArg.mjs").ListArg> 
          * @instance arrayMethods
          * @description
          * - reference to structuredClone elements of `value`;
-         * - calling doesn't notify
+         * - calling doesn't notify for changes;
          * @returns {Array<LISTARG>}
          */
         readonly structuredClone: Array<LISTARG>;
@@ -146,7 +146,7 @@ export class ListSignal<LISTARG extends import("../types/ListArg.mjs").ListArg> 
              * @instance arrayMethods
              * @description
              * - reference to structuredClone elements of `value`;
-             * - calling doesn't notify
+             * - calling doesn't notify for changes;
              * @returns {Array<LISTARG>}
              */
             readonly structuredClone: Array<LISTARG>;

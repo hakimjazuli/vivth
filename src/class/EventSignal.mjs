@@ -135,17 +135,20 @@ export class EventSignal {
 		 * @description
 		 * - remove subscriber from the named `EventSignal_instance`;
 		 * @param {string} name
-		 * @param {import('./Effect.mjs').Effect} effect
+		 * @param {import('./Effect.mjs').Effect} effectInstance
 		 * @returns {void}
 		 * @example
 		 * import { EventSignal } from 'vivth';
 		 *
 		 * EventSignal.remove.subscriber('yourEventSignalName', myEffectInstance);
 		 */
-		subscriber: (name, effect) => {
-			effect.options.removeEffect();
+		subscriber: (name, effectInstance) => {
+			/**
+			 * this part is not needed, as the effect might need to react to other signals
+			// effectInstance.options.removeEffect();
+			 */
 			EventSignal.get(name).then(({ remove }) => {
-				remove.subscriber(effect);
+				remove.subscriber(effectInstance);
 			});
 		},
 		/**
@@ -186,7 +189,7 @@ export class EventSignal {
 		 * @instance remove
 		 * @description
 		 * - remove subscriber from the `EventSignal_instance`;
-		 * @param {import('./Effect.mjs').Effect} effect
+		 * @param {import('./Effect.mjs').Effect} effectInstance
 		 * @returns {void}
 		 * @example
 		 * import { EventSignal, Effect, Console } from 'vivth';
@@ -200,10 +203,13 @@ export class EventSignal {
 		 * myEventSignal.dispatch.value = 'hey';
 		 * eventSignal_instance.remove.subscriber(myEffectInstance);
 		 */
-		subscriber: (effect) => {
-			effect.options.removeEffect();
-			this.dispatch.remove.subscriber(effect);
-			this.listen.remove.subscriber(effect);
+		subscriber: (effectInstance) => {
+			/**
+			 * this part is not needed, as the effect might need to react to other signals
+			// effectInstance.options.removeEffect();
+			 */
+			this.dispatch.remove.subscriber(effectInstance);
+			this.listen.remove.subscriber(effectInstance);
 		},
 		/**
 		 * @instance remove

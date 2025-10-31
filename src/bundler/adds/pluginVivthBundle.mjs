@@ -2,4 +2,6 @@
 
 import { ToBundledJSPlugin } from './ToBundledJSPlugin.mjs';
 
-export const pluginVivthBundle = ToBundledJSPlugin('/vivth/src/');
+const path = '/vivth/src/';
+
+export const pluginVivthBundle = ToBundledJSPlugin(path);

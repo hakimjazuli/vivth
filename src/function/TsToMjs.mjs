@@ -12,9 +12,9 @@ import { FileSafe } from '../class/FileSafe.mjs';
 
 /**
  * @description
- * - turn `.mts`||`.ts` file into `.mjs`, no bundling, just translation;
+ * - turn `.mts`||`.ts` file into `.mjs`, no bundling, just traspilation;
  * - on certain circumstance where `.mjs` result needed to be typed, you need to manually add `jsdoc`;
- * >- uses `"at"preserve` to register `jsdoc` inline;
+ * >- uses `"at"preserve` to register `jsdoc`;
  * @param {string} path_
  * - path from `Paths.root`;
  * @param {Object} [options]
@@ -27,7 +27,7 @@ import { FileSafe } from '../class/FileSafe.mjs';
  * @example
  * import { TsToMjs } from 'vivth';
  *
- * TsToMjs('./myFile.mts', { encoding: 'utf-8', overrideDir: './other/dir' });
+ * await TsToMjs('./myFile.mts', { encoding: 'utf-8', overrideDir: './other/dir' });
  */
 export async function TsToMjs(path_, { overrideDir = undefined, encoding = 'utf-8' } = {}) {
 	if (Paths.root === undefined) {

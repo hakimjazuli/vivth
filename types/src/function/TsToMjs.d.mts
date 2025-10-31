@@ -1,8 +1,8 @@
 /**
  * @description
- * - turn `.mts`||`.ts` file into `.mjs`, no bundling, just translation;
+ * - turn `.mts`||`.ts` file into `.mjs`, no bundling, just traspilation;
  * - on certain circumstance where `.mjs` result needed to be typed, you need to manually add `jsdoc`;
- * >- uses `"at"preserve` to register `jsdoc` inline;
+ * >- uses `"at"preserve` to register `jsdoc`;
  * @param {string} path_
  * - path from `Paths.root`;
  * @param {Object} [options]
@@ -15,7 +15,7 @@
  * @example
  * import { TsToMjs } from 'vivth';
  *
- * TsToMjs('./myFile.mts', { encoding: 'utf-8', overrideDir: './other/dir' });
+ * await TsToMjs('./myFile.mts', { encoding: 'utf-8', overrideDir: './other/dir' });
  */
 export function TsToMjs(path_: string, { overrideDir, encoding }?: {
     overrideDir?: string | undefined;

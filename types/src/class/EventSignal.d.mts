@@ -44,14 +44,14 @@ export class EventSignal<ISLIST extends boolean> {
          * @description
          * - remove subscriber from the named `EventSignal_instance`;
          * @param {string} name
-         * @param {import('./Effect.mjs').Effect} effect
+         * @param {import('./Effect.mjs').Effect} effectInstance
          * @returns {void}
          * @example
          * import { EventSignal } from 'vivth';
          *
          * EventSignal.remove.subscriber('yourEventSignalName', myEffectInstance);
          */
-        subscriber: (name: string, effect: import("./Effect.mjs").Effect) => void;
+        subscriber: (name: string, effectInstance: import("./Effect.mjs").Effect) => void;
         /**
          * @static remove
          * @description
@@ -83,14 +83,14 @@ export class EventSignal<ISLIST extends boolean> {
              * @description
              * - remove subscriber from the named `EventSignal_instance`;
              * @param {string} name
-             * @param {import('./Effect.mjs').Effect} effect
+             * @param {import('./Effect.mjs').Effect} effectInstance
              * @returns {void}
              * @example
              * import { EventSignal } from 'vivth';
              *
              * EventSignal.remove.subscriber('yourEventSignalName', myEffectInstance);
              */
-            subscriber: (name: string, effect: import("./Effect.mjs").Effect) => void;
+            subscriber: (name: string, effectInstance: import("./Effect.mjs").Effect) => void;
             /**
              * @static remove
              * @description
@@ -170,7 +170,7 @@ export class EventSignal<ISLIST extends boolean> {
          * @instance remove
          * @description
          * - remove subscriber from the `EventSignal_instance`;
-         * @param {import('./Effect.mjs').Effect} effect
+         * @param {import('./Effect.mjs').Effect} effectInstance
          * @returns {void}
          * @example
          * import { EventSignal, Effect, Console } from 'vivth';
@@ -184,7 +184,7 @@ export class EventSignal<ISLIST extends boolean> {
          * myEventSignal.dispatch.value = 'hey';
          * eventSignal_instance.remove.subscriber(myEffectInstance);
          */
-        subscriber: (effect: import("./Effect.mjs").Effect) => void;
+        subscriber: (effectInstance: import("./Effect.mjs").Effect) => void;
         /**
          * @instance remove
          * @description
@@ -227,7 +227,7 @@ export class EventSignal<ISLIST extends boolean> {
              * @instance remove
              * @description
              * - remove subscriber from the `EventSignal_instance`;
-             * @param {import('./Effect.mjs').Effect} effect
+             * @param {import('./Effect.mjs').Effect} effectInstance
              * @returns {void}
              * @example
              * import { EventSignal, Effect, Console } from 'vivth';
@@ -241,7 +241,7 @@ export class EventSignal<ISLIST extends boolean> {
              * myEventSignal.dispatch.value = 'hey';
              * eventSignal_instance.remove.subscriber(myEffectInstance);
              */
-            subscriber: (effect: import("./Effect.mjs").Effect) => void;
+            subscriber: (effectInstance: import("./Effect.mjs").Effect) => void;
             /**
              * @instance remove
              * @description

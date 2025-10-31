@@ -42,7 +42,7 @@ export class SafeExit {
      * 		SafeExit.instance.exiting.correction(true);
      * 		Console.log(`safe exit via "${eventName}"`);
      * 	});
-     * };
+     * }
      * ```
      * - example Deno:
      * ```js
@@ -65,11 +65,11 @@ export class SafeExit {
      * 	// optional deno example
      * 	listener : (eventName) => {
      * 		const sig = Deno.signal(eventName);
-     * 			for await (const _ of sig) {
-     * 				exiting.correction(true);
-     * 				sig.dispose();
-     * 				Console.log(`safe exit via "${eventName}"`);
-     * 			}
+     * 		for await (const _ of sig) {
+     * 			exiting.correction(true);
+     * 			sig.dispose();
+     * 			Console.log(`safe exit via "${eventName}"`);
+     * 		}
      * 	}
      * });
      */
@@ -111,7 +111,7 @@ export class SafeExit {
      * 	// code
      * }
      * SafeExit.instance.addCallback(exitCallback);
-     *
+     * // somewhere else
      * SafeExit.instance.removeCallback(exitCallback);
      */
     removeCallback: (cb: () => (Promise<void>)) => void;

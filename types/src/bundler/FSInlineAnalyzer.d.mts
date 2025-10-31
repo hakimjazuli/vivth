@@ -1,6 +1,7 @@
 /**
  * @description
  * - collections of static method to analyze content for `FSInline`;
+ * - mostly used internally;
  */
 export class FSInlineAnalyzer {
     /**

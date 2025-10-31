@@ -114,7 +114,10 @@ export class Signal {
 		 * @returns {void}
 		 */
 		subscriber: (effectInstance) => {
-			effectInstance.options.removeEffect();
+			/**
+			 * this part is not needed, as the effect might need to react to other signals
+			// effectInstance.options.removeEffect();
+			 */
 			this.subscribers.setOf.delete(effectInstance);
 		},
 		/**

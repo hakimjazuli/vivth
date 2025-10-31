@@ -57,10 +57,6 @@ export class Paths {
      * ```js
      * Deno.env.get("INIT_CWD") ?? Deno.cwd()
      * ```
-     * - pkg:
-     * ```js
-     * __dirname
-     * ```
      * - other: you need to check your JSRuntime for the rootPath reference;
      * @example
      * import { Paths } from 'vivth';

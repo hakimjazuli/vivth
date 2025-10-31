@@ -85,7 +85,7 @@ export class ListSignal extends Signal {
 			 * @instance arrayMethods
 			 * @description
 			 * - reference to structuredClone elements of `value`;
-			 * - calling doesn't notify
+			 * - calling doesn't notify for changes;
 			 * @returns {Array<LISTARG>}
 			 */
 			get structuredClone() {

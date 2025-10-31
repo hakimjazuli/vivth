@@ -33,7 +33,7 @@ import { unwrapLazy } from '../common/lazie.mjs';
  * const a = myInstance; // not yet initiated;
  * const b = a.myProp // imediately initiated;
  * // OR
- * myInstance["vivth:unwrapLazy;"]() // forcefully call the callback;
+ * myInstance["vivth:unwrapLazy;"]() // forcefully call factory generator;
  */
 export function LazyFactory(factory) {
 	/**

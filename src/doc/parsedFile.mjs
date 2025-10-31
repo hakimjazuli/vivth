@@ -322,7 +322,7 @@ export class parsedFile {
 		const fullDescTrue_0 = fullDescTrue[0] ?? '';
 		const description = fullDescTrue_0
 			.replace('*', '')
-			.replace(/(?<!\\)\*\s/g, '\n')
+			.replace(/\s*(?<!\\)\*\s/g, '\n')
 			.trim();
 		fullDescTrue.shift();
 		let example;

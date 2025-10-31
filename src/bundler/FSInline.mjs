@@ -7,8 +7,11 @@ import { Paths } from '../class/Paths.mjs';
 
 /**
  * @description
- * - class helper to inline file;
+ * - class helper to inline files;
+ * >- as `type: "buffer"`;
  * - use only if you are planning to use [CompileJS](#compilejs);
+ * >- the class static methods don't obfuscate target file;
+ * >- don't embed any sensitive content using this methods of this class;
  */
 export class FSInline {
 	/**
@@ -19,6 +22,9 @@ export class FSInline {
 	 * @param {string} filePathFromProject
 	 * - doesn't require prefix;
 	 * @returns {Promise<Buffer<ArrayBuffer>>}
+	 * - dev: returns `ArrayBuffer`;
+	 * - bundled: embed the `ArrayBuffer` of file, which then returned;
+	 * >- `Dev` will be cleaned up;
 	 * @example
 	 * import { FSInline } from 'vivth';
 	 *
@@ -35,6 +41,7 @@ export class FSInline {
 	/**
 	 * @description
 	 * - declare entrypoint of file inlining, include all files on `dir` and `subdir` that match the `fileRule`;
+	 * - consider this as inline assets embed/bundler;
 	 * @param {string} dirPathFromProject
 	 * - doesn't require prefix;
 	 * @param {RegExp} fileRule

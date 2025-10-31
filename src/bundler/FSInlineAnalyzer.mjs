@@ -8,6 +8,7 @@ import { LitExp } from '../class/LitExp.mjs';
 import { TryAsync } from '../function/TryAsync.mjs';
 import { FSInline } from './FSInline.mjs';
 import { EsBundler } from './EsBundler.mjs';
+import { removeVivthDevCodeBlock } from './adds/ToBundledJSPlugin.mjs';
 
 /**
  * @param {string} str
@@ -25,6 +26,7 @@ const hydrateRegex = (str) => {
 /**
  * @description
  * - collections of static method to analyze content for `FSInline`;
+ * - mostly used internally;
  */
 export class FSInlineAnalyzer {
 	/**
@@ -45,25 +47,26 @@ export class FSInlineAnalyzer {
 	 */
 	static finalContent = async (content, format) => {
 		return await TryAsync(async () => {
+			content = removeVivthDevCodeBlock(content);
 			const [literalFile, errorPrepareFile] = LitExp.prepare({
-				FSInline: /\w*/,
+				FSInline: /[\w][\w\d]*/,
 				method: /\.vivthFSInlineFile\s*?\(\s*?['"]/,
 				path: false,
-				closing: /['"]\s*?\)(?:;|)/,
+				closing: /['"]\s*?\)/,
 			});
 			const [literalWorker, errorPreparWorker] = LitExp.prepare({
-				ref: /\w*/,
+				ref: /[\w][\w\d]*/,
 				method: /\.newVivthWorker\s*?\(\s*?['"]/,
 				path: false,
-				closing: /['"]/,
+				closing: /['"]\s*\)/,
 			});
 			const [literalDir, errorPrepareDir] = LitExp.prepare({
-				FSInline: /\w*/,
+				FSInline: /[\w][\w\d]*/,
 				method: /\.vivthFSInlineDir\s*?\(\s*?['"]/,
 				path: false,
-				methodClosing: /['"]\s*?,/,
+				methodClosing: /['"]\s*?,\s*/,
 				rule: false,
-				functionClosing: /\)(?:;|)/,
+				functionClosing: /\s*?\)/,
 			});
 			if (errorPrepareFile || errorPrepareDir || errorPreparWorker) {
 				throw { errorPrepareFile, errorPrepareDir, errorPreparWorker };
@@ -71,7 +74,6 @@ export class FSInlineAnalyzer {
 			const templateFile = literalFile`${'FSInline'}${'method'}${'path'}${'closing'}`;
 			const templateWorker = literalWorker`${'ref'}${'method'}${'path'}${'closing'}`;
 			const templateDir = literalDir`${'FSInline'}${'method'}${'path'}${'methodClosing'}${'rule'}${'functionClosing'}`;
-
 			const [resultMatchingFile, errorMatchingFile] = templateFile.evaluate.matchedAllAndGrouped(
 				content,
 				{
@@ -94,54 +96,24 @@ export class FSInlineAnalyzer {
 			if (errorMatchingFile || errorMatchingDir || errorMatchingWorker) {
 				throw { errorMatchingFile, errorMatchingDir, errorMatchingWorker };
 			}
-			const {
-				result: { named: namedFile },
-			} = resultMatchingFile;
 			if (Paths.root === undefined) {
 				throw new Error('Path.root undefined');
 			}
+			const {
+				result: { named: namedFile },
+			} = resultMatchingFile;
 			for (let i = 0; i < namedFile.length; i++) {
 				const res = namedFile[i];
 				if (res === undefined) {
 					continue;
 				}
 				const { path } = res;
-				FSInline.vivthFSInlinelists[path] = Buffer.from(await readFile(join(Paths.root, path)));
-			}
-			const {
-				result: { named: namedWorker },
-			} = resultMatchingWorker;
-			for (let i = 0; i < namedWorker.length; i++) {
-				const res = namedWorker[i];
-				if (res === undefined) {
+				if ('path' in FSInline.vivthFSInlinelists) {
 					continue;
 				}
-				const { path } = res;
-				const fullPath = join(Paths.root, path);
-				const content = await readFile(fullPath, { encoding: 'utf-8' });
-				const [contentBundled, errorBundled] = await EsBundler(
-					{
-						content,
-						// @ts-expect-error
-						extension: extname(path),
-						root: dirname(fullPath),
-					},
-					{
-						minify: true,
-						format,
-					}
+				FSInline.vivthFSInlinelists[path] = Buffer.from(
+					removeVivthDevCodeBlock(await readFile(join(Paths.root, path), { encoding: 'utf-8' }))
 				);
-				if (errorBundled) {
-					continue;
-				}
-				const [trueContent, errorFinal] = await FSInlineAnalyzer.finalContent(
-					contentBundled,
-					format
-				);
-				if (errorFinal) {
-					continue;
-				}
-				FSInline.vivthFSInlinelists[path] = Buffer.from(trueContent);
 			}
 			const {
 				result: { named: namedDir },
@@ -165,6 +137,41 @@ export class FSInlineAnalyzer {
 					}
 					FSInline.vivthFSInlinelists[path] = buffer;
 				}
+			}
+			const {
+				result: { named: namedWorker },
+			} = resultMatchingWorker;
+			for (let i = 0; i < namedWorker.length; i++) {
+				const res = namedWorker[i];
+				if (res === undefined) {
+					continue;
+				}
+				const { path } = res;
+				const fullPath = join(Paths.root, path);
+				const content = removeVivthDevCodeBlock(await readFile(fullPath, { encoding: 'utf-8' }));
+				const [contentBundled, errorBundled] = await EsBundler(
+					{
+						content,
+						// @ts-expect-error
+						extension: extname(fullPath),
+						root: dirname(fullPath),
+					},
+					{
+						minify: true,
+						format,
+					}
+				);
+				if (errorBundled) {
+					continue;
+				}
+				const [trueContent, errorFinal] = await FSInlineAnalyzer.finalContent(
+					contentBundled,
+					format
+				);
+				if (errorFinal) {
+					continue;
+				}
+				FSInline.vivthFSInlinelists[path] = Buffer.from(trueContent);
 			}
 			return content.replace(
 				/static\s*vivthFSInlinelists(?:;|)/,
@@ -208,7 +215,9 @@ export class FSInlineAnalyzer {
 				if (entry.isFile() && ruleForFileFullPath.test(fullPath)) {
 					result.push({
 						path: relativePath,
-						buffer: Buffer.from(await readFile(fullPath)),
+						buffer: Buffer.from(
+							removeVivthDevCodeBlock(await readFile(fullPath, { encoding: 'utf-8' }))
+						),
 					});
 				}
 			}

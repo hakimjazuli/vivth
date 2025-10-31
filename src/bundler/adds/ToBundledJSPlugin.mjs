@@ -3,15 +3,34 @@
 import { basename, extname } from 'node:path';
 import { readFile, exists } from 'node:fs/promises';
 import { CreateESPlugin } from '../CreateESPlugin.mjs';
+import { GetNamedImportAlias } from '../../function/GetNamedImportAlias.mjs';
+
+/**
+ * @param {string} originalContent_
+ * @returns {string}
+ */
+export const removeVivthDevCodeBlock = (originalContent_) => {
+	const alias = GetNamedImportAlias(originalContent_, 'Dev', 'vivth');
+	if (!alias) {
+		return originalContent_;
+	}
+	const regex = new RegExp(
+		`(\\s*${alias}.vivthDevCodeBlock\\s*\\([\\s\\S]*?,\\s*['"]vivthDevCodeBlock['"]\\s*\\)(?:\\;|,|))`,
+		'g'
+	);
+	return originalContent_.replace(regex, '');
+};
 
 /**
  * @description
  * - generate `esbuild.Plugin` for changing dev time file into runtime file;
- * - on using esbuild with this plugin, it will replace any module that have similiar file name but ended with Bundled(before extname);
+ * - on using esbuild with this plugin, it will:
+ * >- replace any module that have similiar file name but ended with Bundled(before extname);
  * >- works on `.mts`|`.ts`|`.mjs`|`.cjs`|`.js`;
- * >- `anyFileName.mjs` -> seek for and use `anyFileNameBundled.mjs`, if not found use `anyFileName.mjs`;
+ * >- `${fileName}.mjs` -> seek for and use `${fileName}Bundled.mjs`, if not found use `${fileName}.mjs`;
+ * >- removes `Dev.vivthDevCodeBlock` code block;
  * @param {string} includedInPath
- * - is generalized, you can freely uses forward or backward slash;
+ * - is generalized path, you can freely uses forward or backward slash;
  * @returns {ReturnType<CreateESPlugin>}
  * @example
  * import { ToBundledJSPlugin } from 'vivth';
@@ -39,38 +58,31 @@ export function ToBundledJSPlugin(includedInPath) {
 					loader = 'js';
 					break;
 			}
-			const originalContent = (await readFile(filePath)).toString('utf-8');
-			if (loader === undefined) {
-				return {
-					contents: originalContent,
-					loader,
-				};
-			}
-			if (filePath.endsWith(`Bundled${fileExt}`)) {
-				return {
-					contents: originalContent,
-					loader,
-				};
+			/**
+			 * @type {ReturnType<Parameters<import('esbuild').PluginBuild["onLoad"]>[1]>}
+			 */
+			const ret = { loader };
+			if (loader === undefined || filePath.endsWith(`Bundled${fileExt}`)) {
+				const originalContent = (await readFile(filePath)).toString('utf-8');
+				ret.contents = removeVivthDevCodeBlock(originalContent);
+				return ret;
 			}
 			const originalBaseName = basename(filePath);
 			const originalFileName = originalBaseName.replace(fileExt, '');
 			const realRef = `${originalFileName}Bundled`;
-			const runtimeFile = filePath.replace(
+			const bundledFile = filePath.replace(
 				new RegExp(`${originalBaseName}\$`.replace('.', '\\.'), ''),
 				`${realRef}${fileExt}`
 			);
-			const isExist = await exists(runtimeFile);
+			const isExist = await exists(bundledFile);
 			if (isExist === false) {
-				return {
-					contents: originalContent,
-					loader,
-				};
+				const originalContent = (await readFile(filePath)).toString('utf-8');
+				ret.contents = removeVivthDevCodeBlock(originalContent);
+				return ret;
 			}
-			const contents = (await readFile(runtimeFile)).toString('utf-8');
-			return {
-				contents,
-				loader,
-			};
+			const originalContent = (await readFile(bundledFile)).toString('utf-8');
+			ret.contents = removeVivthDevCodeBlock(originalContent);
+			return ret;
 		});
 	});
 }

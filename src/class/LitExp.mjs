@@ -12,6 +12,7 @@ import { TrySync } from '../function/TrySync.mjs';
  * >- destructuring is meant for extensive typehelper;
  * >- and destructuring can lead to unhandled error here and there;
  * >- therefore error as value is introduced to help to prevent error on runtime;
+ * - made primarily for generating string file, that are purely managed programatically;
  * @template {LitExpKeyType} KEYS
  */
 export class LitExp {
@@ -32,7 +33,7 @@ export class LitExp {
 	 * new RegExp(escapedLiteral, 'g');
 	 */
 	static escape = (string) => {
-		return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+		return string.replace(/[.*+?^${}()|[\]\\\]]/g, '\\$&');
 	};
 	/**
 	 * @description
@@ -131,7 +132,7 @@ export class LitExp {
 					throw new Error('string undefined');
 				}
 				if (i + 1 == stringsLength && string === '') {
-					result.push('(?:\\s+?|$)');
+					result.push('(?:\\s+?|;|,|$|)');
 				} else {
 					result.push(LitExp.escape(string));
 				}

@@ -6,6 +6,7 @@
  * this library is made and distributed under MIT license;
  */
 
+export { ToBundledJSPlugin } from './src/bundler/adds/ToBundledJSPlugin.mjs';
 export { CompileJS } from './src/bundler/CompileJS.mjs';
 export { CreateESPlugin } from './src/bundler/CreateESPlugin.mjs';
 export { EsBundler } from './src/bundler/EsBundler.mjs';
@@ -26,13 +27,18 @@ export { SafeExit } from './src/class/SafeExit.mjs';
 export { Setup } from './src/class/Setup.mjs';
 export { Signal } from './src/class/Signal.mjs';
 export { WorkerMainThread } from './src/class/WorkerMainThread.mjs';
+export { WorkerResult } from './src/class/WorkerResult.mjs';
+export { WorkerThread } from './src/class/WorkerThread.mjs';
 export { Base64URL } from './src/common/Base64URL.mjs';
 export { Base64URLFromFile } from './src/common/Base64URLFromFile.mjs';
+export { Dev } from './src/common/Dev.mjs';
 export { EventNameSpace } from './src/common/EventNameSpace.mjs';
+export { Trace } from './src/common/Trace.mjs';
 export { JSautoDOC } from './src/doc/JSautoDOC.mjs';
 export { CreateImmutable } from './src/function/CreateImmutable.mjs';
 export { EventCheck } from './src/function/EventCheck.mjs';
 export { EventObject } from './src/function/EventObject.mjs';
+export { GetNamedImportAlias } from './src/function/GetNamedImportAlias.mjs';
 export { GetRuntime } from './src/function/GetRuntime.mjs';
 export { IsAsync } from './src/function/IsAsync.mjs';
 export { LazyFactory } from './src/function/LazyFactory.mjs';
@@ -41,11 +47,11 @@ export { Try } from './src/function/Try.mjs';
 export { TryAsync } from './src/function/TryAsync.mjs';
 export { TrySync } from './src/function/TrySync.mjs';
 export { TsToMjs } from './src/function/TsToMjs.mjs';
-export { WorkerResult } from './src/class/WorkerResult.mjs';
-export { WorkerThread } from './src/class/WorkerThread.mjs';
-export { ToBundledJSPlugin } from './src/bundler/adds/ToBundledJSPlugin.mjs';
 /**
  * @typedef {import('./src/types/AnyButUndefined.mjs').AnyButUndefined} AnyButUndefined
+ */
+/**
+ * @typedef {import('./src/types/DevTestCB.mjs').DevTestCB} DevTestCB
  */
 /**
  * @typedef {import('./src/types/ExtnameType.mjs').ExtnameType} ExtnameType
@@ -74,4 +80,7 @@ export { ToBundledJSPlugin } from './src/bundler/adds/ToBundledJSPlugin.mjs';
  */
 /**
  * @typedef {import('./src/types/Runtime.mjs').Runtime} Runtime
+ */
+/**
+ * @typedef {import('./src/types/VivthDevCodeBlockStringType.mjs').VivthDevCodeBlockStringType} VivthDevCodeBlockStringType
  */

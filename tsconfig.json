@@ -32,5 +32,10 @@
 		"noUnusedParameters": false,
 		"noPropertyAccessFromIndexSignature": false
 	},
-	"include": ["./index.mjs", "./src", "./dev"]
+	"include": [
+		//
+		"./index.mjs",
+		// "./dev",
+		"./src"
+	]
 }

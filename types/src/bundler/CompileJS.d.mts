@@ -1,9 +1,9 @@
 /**
  * @description
  * - function to compile `.ts`|`.mts`|`.mjs` file, into a single executable;
- * - also generate js representation;
+ * - also generate js representation of the `bundled` version of the target;
  * - uses [pkg](https://www.npmjs.com/package/pkg), [bun](https://bun.com/docs/bundler/executables), and [deno](https://docs.deno.com/runtime/reference/cli/compile/) compiler under the hood;
- * >- they are used only as packaging agent, and doesn't necessarily supports their advanced feature, such as, assets bundling(use [FSInline](#fsinline) instead);
+ * >- they are used only as packaging/compiler agent, and doesn't necessarily supports their advanced feature, such as, assets bundling(use [`FSInline`](#fsinline) instead);
  * >- `WorkerThread` will be converted to inline using `FSInline` too;
  *
  * !!!WARNING!!!
@@ -22,8 +22,12 @@
  * @param {string} options.entryPoint
  * - need to be manually prefixed;
  * @param {BufferEncoding} [options.encoding]
- * - write and read encoding for the sources;
+ * - read and write encoding for the sources;
  * - default: `utf-8`;
+ * @param {(entryPointContent:string)=>string} [options.preprocessEntryPoint]
+ * - to modify entry point before bundling;
+ * - `entryPointContent` is the original string of the entry point;
+ * - returned value then passed to `ESBundler`;
  * @param {boolean} options.minifyFirst
  * - minify the bundle before compilation;
  * @param {string} options.outDir
@@ -44,38 +48,62 @@
  * }>>}
  * @example
  * import { join } from 'node:path';
+ * import { CompileJS, Console, Paths, Setup } from 'vivth';
  *
- * import { CompileJS, Paths } from 'vivth';
+ * const { paths, safeExit } = Setup;
+ * new paths({
+ * 	root: process?.env?.INIT_CWD ?? process?.cwd(),
+ * });
+ * new safeExit({
+ * 	eventNames: ['SIGINT', 'SIGTERM'],
+ * 	terminator: () => process.exit(0), // OR on deno () => Deno.exit\* (0),
+ * 	listener: (eventName) => {
+ * 		process.once(eventName, function () {
+ * 			if (!safeExit.instance) {
+ * 				return;
+ * 			}
+ * 			safeExit.instance.exiting.correction(true);
+ * 			Console.log(`safe exit via "${eventName}"`);
+ * 		});
+ * 	},
+ * });
+ * const pathRoot = Paths.root;
+ * if (pathRoot) {
+ * 	const [[, error], [, errorbun]] = await Promise.all([
+ * 		CompileJS({
+ * 			entryPoint: join(pathRoot, '/dev/myEntryPoint.mjs'),
+ * 			minifyFirst: true,
+ * 			outDir: join(pathRoot, '/dev-pkg/'),
+ * 			compiler: 'pkg',
+ * 			compilerArguments: {
+ * 				target: 'node18-win-x64',
+ * 			},
+ * 			encoding: 'utf-8',
+ * 		}),
+ * 		await CompileJS({
+ * 			entryPoint: join(pathRoot, '/dev/myEntryPoint.mjs'),
+ * 			minifyFirst: true,
+ * 			outDir: join(pathRoot, '/dev-bun/'),
+ * 			compiler: 'bun',
+ * 			compilerArguments: {
+ * 				target: 'bun-win-x64',
+ * 			},
+ * 			encoding: 'utf-8',
+ * 		}),
+ * 	]);
+ * 	if (error || errorbun) {
+ * 		Console.error({ error, errorbun });
+ * 	}
+ * }
  *
- * const [[resultPkg, errorPkg], [resultBun, errorBun]] = await Promise.all([
- * 	CompileJS({
- * 		entryPoint: join(Paths.root, '/dev'),
- * 		minifyFirst: true,
- * 		outDir: join(Paths.root, '/dev-pkg'),
- * 		compiler: 'pkg',
- * 		compilerArguments: {
- * 			target: ['node18-win-x64'],
- * 		},
- * 		esBundlerPlugins: [],
- * 	}),
- * 	CompileJS({
- * 		entryPoint: join(Paths.root, '/dev'),
- * 		minifyFirst: true,
- * 		outDir: join(Paths.root, '/dev-pkg'),
- * 		compiler: 'bun',
- * 		compilerArguments: {
- * 			target: ['bun-win-x64'],
- * 		},
- * 		esBundlerPlugins: [],
- * 	}),
- * ])
  */
-export function CompileJS({ entryPoint, minifyFirst, encoding, outDir, compiler, compilerArguments, esBundlerPlugins, }: {
+export function CompileJS({ entryPoint, minifyFirst, encoding, outDir, preprocessEntryPoint, compiler, compilerArguments, esBundlerPlugins, }: {
     entryPoint: string;
     encoding?: BufferEncoding | undefined;
+    preprocessEntryPoint?: ((entryPointContent: string) => string) | undefined;
     minifyFirst: boolean;
     outDir: string;
-    compiler?: "bun" | "deno" | "pkg" | undefined;
+    compiler?: "pkg" | "bun" | "deno" | undefined;
     compilerArguments?: Record<string, string> | undefined;
     esBundlerPlugins?: import("esbuild").Plugin[] | undefined;
 }): ReturnType<typeof TryAsync<{

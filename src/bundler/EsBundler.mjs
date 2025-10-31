@@ -17,7 +17,7 @@ import { externals } from './adds/externals.mjs';
  * - the code can also uses composites from the result from multiple readFiles;
  * @param {string} options.root
  * - use dirname of said fileString path;
- * @param {'.mts'|'.ts'|'.mjs'} options.extension
+ * @param {'.mts'|'.ts'|'.mjs'|'.cjs'} options.extension
  * @param {boolean} [options.withBinHeader]
  * @param {Omit<Parameters<build>[0],
  * 'entryPoints'|'bundle'|'write'|'sourcemap'>
@@ -51,6 +51,7 @@ export async function EsBundler(
 				loader = 'ts';
 				break;
 			case '.mjs':
+			case '.cjs':
 				loader = 'js';
 				break;
 			default:
