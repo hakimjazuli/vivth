@@ -5,6 +5,7 @@ import { readFile } from 'node:fs/promises';
 
 import prettier from 'prettier';
 import chokidar from 'chokidar';
+
 import { EventSignal } from '../class/EventSignal.mjs';
 import { parsedFile } from './parsedFile.mjs';
 import { SafeExit } from '../class/SafeExit.mjs';

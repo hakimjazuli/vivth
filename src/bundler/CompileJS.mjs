@@ -114,16 +114,18 @@ const getBinaryExtension = () => {
  * bundledJSFile:string|undefined
  * }>>}
  * @example
+ * import process from 'node:process';
  * import { join } from 'node:path';
+ *
  * import { CompileJS, Console, Paths, Setup } from 'vivth';
  *
  * const { paths, safeExit } = Setup;
  * new paths({
- * 	root: process?.env?.INIT_CWD ?? process?.cwd(),
+ * 	root: process.env.INIT_CWD ?? process.cwd(),
  * });
  * new safeExit({
  * 	eventNames: ['SIGINT', 'SIGTERM'],
- * 	terminator: () => process.exit(0), // OR on deno () => Deno.exit\* (0),
+ * 	terminator: () => process.exit(0),
  * 	listener: (eventName) => {
  * 		process.once(eventName, function () {
  * 			if (!safeExit.instance) {

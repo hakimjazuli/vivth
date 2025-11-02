@@ -1,9 +1,11 @@
 // @ts-check
 
 import { basename, extname } from 'node:path';
-import { readFile, exists } from 'node:fs/promises';
+import { readFile } from 'node:fs/promises';
+
 import { CreateESPlugin } from '../CreateESPlugin.mjs';
 import { GetNamedImportAlias } from '../../function/GetNamedImportAlias.mjs';
+import { FileSafe } from '../../class/FileSafe.mjs';
 
 /**
  * @param {string} originalContent_
@@ -74,8 +76,8 @@ export function ToBundledJSPlugin(includedInPath) {
 				new RegExp(`${originalBaseName}\$`.replace('.', '\\.'), ''),
 				`${realRef}${fileExt}`
 			);
-			const isExist = await exists(bundledFile);
-			if (isExist === false) {
+			const [, error] = await FileSafe.exist(bundledFile);
+			if (error) {
 				const originalContent = (await readFile(filePath)).toString('utf-8');
 				ret.contents = removeVivthDevCodeBlock(originalContent);
 				return ret;

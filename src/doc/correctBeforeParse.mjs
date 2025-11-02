@@ -1,9 +1,9 @@
 // @ts-check
 
+import { readFile, writeFile } from 'node:fs/promises';
 import { basename } from 'node:path';
 
 import { TryAsync } from '../function/TryAsync.mjs';
-import { readFile, writeFile } from 'node:fs/promises';
 import { Console } from '../class/Console.mjs';
 import { Timeout } from '../function/Timeout.mjs';
 import { LitExp } from '../class/LitExp.mjs';

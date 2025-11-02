@@ -5,6 +5,27 @@
 export class FileSafe {
     /**
      * @description
+     * - method to safely detects whether filePaths exist;
+     * - uses fs/promises access under the hood;
+     * - also returning promise of result & error as value;
+     * @param {string} filePath
+     * @returns {ReturnType<typeof TryAsync<true>>}
+     * @example
+     * import { join } from 'node:path';
+     * import { FileSafe, Paths } from 'vivth';
+     *
+     * const [, error] = await FileSafe.write(
+     * 	join(Paths.root, '/some/path.mjs'),
+     * );
+     * if (!error) {
+     * 	// file exists
+     * } else {
+     * 	// file not exists
+     * }
+     */
+    static exist: (filePath: string) => ReturnType<typeof TryAsync<true>>;
+    /**
+     * @description
      * - method to create file safely by recursively mkdir the dirname of the outFile;
      * - also returning promise of result & error as value;
      * @param {Parameters<writeFile>[0]} outFile

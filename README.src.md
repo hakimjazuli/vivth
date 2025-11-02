@@ -31,6 +31,11 @@ npm i vivth
   >   > - abstracted via `esbuild`;
   > - opionated `compiler`;
   >   > - abstracted via `pkg`, `deno`, and `bun`;
+- when using runtime that doesn't provide specific common modules golbally(like `Deno`), dev should
+  import it statically from `node:module_name`, example:
+  ```js
+  import process from 'node:process';
+  ```
 
 ## versions:
 

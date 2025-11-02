@@ -1,7 +1,5 @@
 // @ts-check
 
-import { relative } from 'node:path';
-
 import { Console } from './Console.mjs';
 
 /**
@@ -25,11 +23,8 @@ export class Paths {
 	 * ```
 	 * - node/bun compatible:
 	 * ```js
-	 * process?.env?.INIT_CWD ?? process?.cwd()
-	 * ```
-	 * - deno: need for `deno run --allow-env --allow-read your_script.ts`:
-	 * ```js
-	 * Deno.env.get("INIT_CWD") ?? Deno.cwd()
+	 * import process from 'node:process';
+	 * process.env.INIT_CWD ?? process.cwd()
 	 * ```
 	 * - other: you need to check your JSRuntime for the rootPath reference;
 	 * @example

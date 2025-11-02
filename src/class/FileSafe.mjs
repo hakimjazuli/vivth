@@ -1,6 +1,8 @@
 // @ts-check
-import { writeFile, mkdir, copyFile, rename, rm } from 'node:fs/promises';
+
+import { writeFile, mkdir, copyFile, rename, rm, access } from 'node:fs/promises';
 import { dirname } from 'node:path';
+import { constants } from 'node:fs';
 
 import { TryAsync } from '../function/TryAsync.mjs';
 
@@ -9,6 +11,33 @@ import { TryAsync } from '../function/TryAsync.mjs';
  * - collection of static methods of file access with added safety to mkdir before proceeding;
  */
 export class FileSafe {
+	/**
+	 * @description
+	 * - method to safely detects whether filePaths exist;
+	 * - uses fs/promises access under the hood;
+	 * - also returning promise of result & error as value;
+	 * @param {string} filePath
+	 * @returns {ReturnType<typeof TryAsync<true>>}
+	 * @example
+	 * import { join } from 'node:path';
+	 * import { FileSafe, Paths } from 'vivth';
+	 *
+	 * const [, error] = await FileSafe.write(
+	 * 	join(Paths.root, '/some/path.mjs'),
+	 * );
+	 * if (!error) {
+	 * 	// file exists
+	 * } else {
+	 * 	// file not exists
+	 * }
+	 */
+	static exist = async (filePath) => {
+		// @ts-expect-error
+		return await TryAsync(async () => {
+			await access(filePath, constants.F_OK);
+			return true;
+		});
+	};
 	/**
 	 * @description
 	 * - method to create file safely by recursively mkdir the dirname of the outFile;

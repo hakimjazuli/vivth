@@ -13,15 +13,12 @@ export class Setup {
      * 	// eventNames are blank by default, you need to manually name them all;
      * 	// 'exit' will be omited, as it might cause async callbacks failed to execute;
      * 	eventNames: ['SIGINT', 'SIGTERM', ...eventNames],
-     * 	terminator = () => process.exit(0), // OR on deno () => Deno.exit(0),
-     * 	// optional deno example
-     * 	listener = (eventName) => {
-     * 		const sig = Deno.signal(eventName);
-     * 			for await (const _ of sig) {
-     * 				exiting.correction(true);
-     * 				sig.dispose();
+     * 	terminator : () => process.exit(0),
+     * 	listener : (eventName) => {
+     * 			process.once(eventName, function () {
+     * 				SafeExit.instance?.exiting.correction(true);
      * 				Console.log(`safe exit via "${eventName}"`);
-     * 			}
+     * 			});
      * 	}
      * });
      */

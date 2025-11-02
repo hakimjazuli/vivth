@@ -26,13 +26,9 @@ export class SafeExit {
      *  ['SIGINT', 'SIGTERM']
      * ```
      * @param {()=>void} options.terminator
-     * - standard node/bun:
+     * - standard, process must be imported statically from 'node:process':
      * ```js
      * () => process.exit(0),
-     * ```
-     * - Deno:
-     * ```js
-     * () => Deno.exit(0),
      * ```
      * @param {(eventName:string)=>void} [options.listener]
      * - default value
@@ -44,32 +40,19 @@ export class SafeExit {
      * 	});
      * }
      * ```
-     * - example Deno:
-     * ```js
-     * (eventName) => {
-     * 	const sig = Deno.signal(eventName);
-     * 		for await (const _ of sig) {
-     * 			exiting.correction(true);
-     * 			sig.dispose();
-     * 			Console.log(`safe exit via "${eventName}"`);
-     * 		}
-     * }
-     * ```
      * - if your exit callback doesn't uses `process` global object you need to input on the SafeExit instantiation
      * @example
+     * import process from 'node:process';
      * import { SafeExit, Console } from 'vivth';
      *
      * new SafeExit({
      * 	eventNames: ['SIGINT', 'SIGTERM', ...eventNames],
-     * 	terminator : () => process.exit(0), // OR on deno () => Deno.exit(0),
-     * 	// optional deno example
+     * 	terminator : () => process.exit(0),
      * 	listener : (eventName) => {
-     * 		const sig = Deno.signal(eventName);
-     * 		for await (const _ of sig) {
-     * 			exiting.correction(true);
-     * 			sig.dispose();
-     * 			Console.log(`safe exit via "${eventName}"`);
-     * 		}
+     * 			process.once(eventName, function () {
+     * 				SafeExit.instance?.exiting.correction(true);
+     * 				Console.log(`safe exit via "${eventName}"`);
+     * 			});
      * 	}
      * });
      */

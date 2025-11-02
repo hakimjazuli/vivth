@@ -31,6 +31,11 @@ npm i vivth
   >   > - abstracted via `esbuild`;
   > - opionated `compiler`;
   >   > - abstracted via `pkg`, `deno`, and `bun`;
+- when using runtime that doesn't provide specific common modules golbally(like `Deno`), dev should
+  import it statically from `node:module_name`, example:
+  ```js
+  import process from "node:process";
+  ```
 
 ## versions:
 
@@ -189,16 +194,18 @@ export const myBundledPlugin = ToBundledJSPlugin("/myProjectName/src/");
 - <i>example</i>:
 
 ```js
+import process from "node:process";
 import { join } from "node:path";
+
 import { CompileJS, Console, Paths, Setup } from "vivth";
 
 const { paths, safeExit } = Setup;
 new paths({
-  root: process?.env?.INIT_CWD ?? process?.cwd(),
+  root: process.env.INIT_CWD ?? process.cwd(),
 });
 new safeExit({
   eventNames: ["SIGINT", "SIGTERM"],
-  terminator: () => process.exit(0), // OR on deno () => Deno.exit* (0),
+  terminator: () => process.exit(0),
   listener: (eventName) => {
     process.once(eventName, function () {
       if (!safeExit.instance) {
@@ -1074,6 +1081,33 @@ eventSignal_instance.remove.ref();
 
 - collection of static methods of file access with added safety to mkdir before proceeding;
 
+#### reference:`FileSafe.exist`
+
+- method to safely detects whether filePaths exist;
+- uses fs/promises access under the hood;
+- also returning promise of result & error as value;
+
+```js
+/**
+ * @param {string} filePath
+ * @returns {ReturnType<typeof TryAsync<true>>}
+ */
+```
+
+- <i>example</i>:
+
+```js
+import { join } from "node:path";
+import { FileSafe, Paths } from "vivth";
+
+const [, error] = await FileSafe.write(join(Paths.root, "/some/path.mjs"));
+if (!error) {
+  // file exists
+} else {
+  // file not exists
+}
+```
+
 #### reference:`FileSafe.write`
 
 - method to create file safely by recursively mkdir the dirname of the outFile;
@@ -1703,11 +1737,8 @@ const [resultOfMatchedAllAndGrouped, error] =
  * ```
  * - node/bun compatible:
  * ```js
- * process?.env?.INIT_CWD ?? process?.cwd()
- * ```
- * - deno: need for `deno run --allow-env --allow-read your_script.ts`:
- * ```js
- * Deno.env.get("INIT_CWD") ?? Deno.cwd()
+ * import process from 'node:process';
+ * process.env.INIT_CWD ?? process.cwd()
  * ```
  * - other: you need to check your JSRuntime for the rootPath reference;
  */
@@ -1970,13 +2001,9 @@ const [result, error] = await q.callback(keyID, async ({ isLastOnQ }) => {
  *  ['SIGINT', 'SIGTERM']
  * ```
  * @param {()=>void} options.terminator
- * - standard node/bun:
+ * - standard, process must be imported statically from 'node:process':
  * ```js
  * () => process.exit(0),
- * ```
- * - Deno:
- * ```js
- * () => Deno.exit(0),
  * ```
  * @param {(eventName:string)=>void} [options.listener]
  * - default value
@@ -1988,17 +2015,6 @@ const [result, error] = await q.callback(keyID, async ({ isLastOnQ }) => {
  * 	});
  * }
  * ```
- * - example Deno:
- * ```js
- * (eventName) => {
- * 	const sig = Deno.signal(eventName);
- * 		for await (const _ of sig) {
- * 			exiting.correction(true);
- * 			sig.dispose();
- * 			Console.log(`safe exit via "${eventName}"`);
- * 		}
- * }
- * ```
  * - if your exit callback doesn't uses `process` global object you need to input on the SafeExit instantiation
  */
 ````
@@ -2006,22 +2022,19 @@ const [result, error] = await q.callback(keyID, async ({ isLastOnQ }) => {
 - <i>example</i>:
 
 ```js
- import { SafeExit, Console } from 'vivth';
+import process from "node:process";
+import { SafeExit, Console } from "vivth";
 
- new SafeExit({
- 	eventNames: ['SIGINT', 'SIGTERM', ...eventNames],
- 	terminator : () => process.exit(0), // OR on deno () => Deno.exit(0),
- 	// optional deno example
- 	listener : (eventName) => {
- 		const sig = Deno.signal(eventName);
- 		for await (const _ of sig) {
- 			exiting.correction(true);
- 			sig.dispose();
- 			Console.log(`safe exit via "${eventName}"`);
- 		}
- 	}
- });
-
+new SafeExit({
+  eventNames: ["SIGINT", "SIGTERM", ...eventNames],
+  terminator: () => process.exit(0),
+  listener: (eventName) => {
+    process.once(eventName, function () {
+      SafeExit.instance?.exiting.correction(true);
+      Console.log(`safe exit via "${eventName}"`);
+    });
+  },
+});
 ```
 
 #### reference:`SafeExit_instance.exiting`
@@ -2098,24 +2111,20 @@ const [result, error] = await q.callback(keyID, async ({ isLastOnQ }) => {
 - <i>example</i>:
 
 ```js
- import { Setup, Console } from 'vivth';
+import { Setup, Console } from "vivth";
 
- new Setup.safeExit({
- 	// eventNames are blank by default, you need to manually name them all;
- 	// 'exit' will be omited, as it might cause async callbacks failed to execute;
- 	eventNames: ['SIGINT', 'SIGTERM', ...eventNames],
- 	terminator = () => process.exit(0), // OR on deno () => Deno.exit(0),
- 	// optional deno example
- 	listener = (eventName) => {
- 		const sig = Deno.signal(eventName);
- 			for await (const _ of sig) {
- 				exiting.correction(true);
- 				sig.dispose();
- 				Console.log(`safe exit via "${eventName}"`);
- 			}
- 	}
- });
-
+new Setup.safeExit({
+  // eventNames are blank by default, you need to manually name them all;
+  // 'exit' will be omited, as it might cause async callbacks failed to execute;
+  eventNames: ["SIGINT", "SIGTERM", ...eventNames],
+  terminator: () => process.exit(0),
+  listener: (eventName) => {
+    process.once(eventName, function () {
+      SafeExit.instance?.exiting.correction(true);
+      Console.log(`safe exit via "${eventName}"`);
+    });
+  },
+});
 ```
 
 #### reference:`Setup.paths`
