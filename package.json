@@ -36,8 +36,8 @@
 	},
 	"homepage": "https://github.com/hakimjazuli/vivth#readme",
 	"scripts": {
-		"dev-wo": "concurrently 'bun ./dev/index.mjs' 'bun tsc --watch'",
-		"dev": "concurrently 'bun --watch ./dev/index.mjs' 'bun tsc --watch'"
+		"dev-wo": "concurrently 'bun ./dev/auto-doc.mjs' 'bun tsc --watch'",
+		"dev": "concurrently 'bun --watch ./dev/auto-doc.mjs' 'bun tsc --watch'"
 	},
 	"sideEffects": false
 }
