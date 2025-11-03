@@ -1144,7 +1144,7 @@ const [, errorWrite] = await FileSafe.write(
 /**
  * @param {Parameters<typeof copyFile>[0]} sourceFile
  * @param {Parameters<typeof copyFile>[1]} destinationFile
- * @param {Parameters<typeof copyFile>[2]} mode
+ * @param {Parameters<typeof copyFile>[2]} [mode]
  * @returns {ReturnType<typeof TryAsync<void>>}
  */
 ```

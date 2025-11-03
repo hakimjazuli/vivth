@@ -49,7 +49,7 @@ export class FileSafe {
      * - also returning promise of result & error as value;
      * @param {Parameters<typeof copyFile>[0]} sourceFile
      * @param {Parameters<typeof copyFile>[1]} destinationFile
-     * @param {Parameters<typeof copyFile>[2]} mode
+     * @param {Parameters<typeof copyFile>[2]} [mode]
      * @returns {ReturnType<typeof TryAsync<void>>}
      * @example
      * import { join } from 'node:path';
@@ -61,7 +61,7 @@ export class FileSafe {
      * 	{ encoding: 'utf-8' }
      * );
      */
-    static copy: (sourceFile: Parameters<typeof copyFile>[0], destinationFile: Parameters<typeof copyFile>[1], mode: Parameters<typeof copyFile>[2]) => ReturnType<typeof TryAsync<void>>;
+    static copy: (sourceFile: Parameters<typeof copyFile>[0], destinationFile: Parameters<typeof copyFile>[1], mode?: Parameters<typeof copyFile>[2]) => ReturnType<typeof TryAsync<void>>;
     /**
      * @description
      * - method to rename file/dir safely by recursively mkdir the dirname of the dest;
