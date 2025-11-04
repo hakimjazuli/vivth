@@ -1,7 +1,5 @@
 // @ts-check
 
-import { Console } from '../class/Console.mjs';
-
 /**
  * @description
  * - regex helper for:

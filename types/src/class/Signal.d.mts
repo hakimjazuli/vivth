@@ -9,9 +9,9 @@ export const setOFSignals: Set<Signal<any>>;
  */
 export class Signal<VALUE> {
     /**
-     * @param {Set<Effect>} setOfSubscribers
+     * @param {Signal<any>} signalInstance
      */
-    static #notify: (setOfSubscribers: Set<Effect>) => void;
+    static #notify: (signalInstance: Signal<any>) => void;
     /**
      * @description
      * - create a `Signal`;

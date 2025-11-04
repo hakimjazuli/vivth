@@ -27,7 +27,7 @@ export class EventSignal {
 	/**
 	 * @type {QChannel<string>}
 	 */
-	static #qChannelEventSignal = new QChannel('EventSignal');
+	static #qChannelEventSignal = LazyFactory(() => new QChannel('EventSignal'));
 	/**
 	 * @description
 	 * - the constructor it self is set to `private`;
@@ -114,6 +114,7 @@ export class EventSignal {
 	 */
 	listen = LazyFactory(() => {
 		const dispatch = this.dispatch;
+		// @ts-expect-error
 		const _ = dispatch.value;
 		if (this.#isList) {
 			return new ListDerived(async ({ subscribe }) => {

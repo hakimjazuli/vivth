@@ -73,11 +73,13 @@ npm i vivth
 - [SafeExit](#safeexit)
 - [Setup](#setup)
 - [Signal](#signal)
+- [WalkThrough](#walkthrough)
 - [WorkerMainThread](#workermainthread)
 - [WorkerResult](#workerresult)
 - [WorkerThread](#workerthread)
 - [Base64URL](#base64url)
 - [Base64URLFromFile](#base64urlfromfile)
+- [CreateStringID](#createstringid)
 - [Dev](#dev)
 - [EventNameSpace](#eventnamespace)
 - [Trace](#trace)
@@ -666,12 +668,13 @@ const effect = new Effect(async ({ isLastCalled }) => {
 
 #### reference:`Effect_instance.options.subscribe`
 
+- subscribe to `Signal_instance`;
 - normally it's passed as argument to constructor, however it is also accessible from `options` property;
 
 ```js
 /**
  * @template V
- * @param {Signal<V>} signal
+ * @param {Signal<V>} signalInstance
  * @returns {Signal<V>}
  */
 ```
@@ -706,6 +709,33 @@ const effect = new Effect(async () => {
   // code
 });
 effect.options.removeEffect();
+```
+
+#### reference:`Effect_instance.removeSignal`
+
+- remove inputed signal from this `Effect_instance`;
+- if effect signal has no other `Signal_instance` to listen to, it will then completely rendered non reactive;
+- normally it's passed as argument to constructor, however it is also accessible from `options` property;
+
+```js
+/**
+ * @param {Signal<any>} signalInstance
+ * @returns {void}
+ */
+```
+
+- <i>example</i>:
+
+```js
+import { Effect, Signal } from "vivth";
+
+const count = new Signal(0);
+const effect = new Effect(async ({ subscribe }) => {
+  console.log(subscribe(count).value); // will subscribe  count changes;
+});
+count.value++; // will increase the count and trigger effect;
+effect.options.removeSignal(count);
+count.value++; // will increase the count but will no longer trigger effect;
 ```
 
 #### reference:`new Effect`
@@ -1871,7 +1901,7 @@ resume();
 /**
  * @template RESULT
  * @param {()=>Promise<RESULT>} asyncCallback
- * @returns {Promise<[RESULT|undefined, Error|undefined]>}
+ * @returns {ReturnType<typeof TryAsync<RESULT>>}
  */
 ```
 
@@ -2347,6 +2377,108 @@ count.value = 9;
 
 \*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
+<h2 id="walkthrough">WalkThrough</h2>
+
+#### reference:`WalkThrough`
+
+- collection of static `methods` to walktrhough things, instead of regular looping;
+- usefull to iterator that might be modified during iteration;
+- mostlikely to be less performant, but with better result clarity;
+
+#### reference:`WalkThrough.set`
+
+- method helper to WalkThrough `Set`;
+
+```js
+/**
+ * @template VAL
+ * @param {Set<VAL>} setInstance
+ * @param {(value:VAL)=>void} callback
+ * @returns {void}
+ */
+```
+
+- <i>example</i>:
+
+```js
+import { WalkThrough } from "vivth";
+
+WalkThrough.set(setOfSomething, (value) => {
+  // code
+});
+```
+
+#### reference:`WalkThrough.map`
+
+- method helper to WalkThrough `Map`;
+
+```js
+/**
+ * @template KEY, VAL
+ * @param {Map<KEY, VAL>} mapInstance
+ * @param {(res:[key: KEY, value: VAL]) => void} callback
+ * @returns {void}
+ */
+```
+
+- <i>example</i>:
+
+```js
+import { WalkThrough } from "vivth";
+
+WalkThrough.map(mapOfSomething, ([key, value]) => {
+  // code
+});
+```
+
+#### reference:`WalkThrough.array`
+
+- method helper to WalkThrough `Array`;
+
+```js
+/**
+ * @template VAL
+ * @param {VAL[]} arrayInstance
+ * @param {(res:[value: VAL, index: number]) => void} callback
+ * @returns {void}
+ */
+```
+
+- <i>example</i>:
+
+```js
+import { WalkThrough } from "vivth";
+
+WalkThrough.array(arrayOfSomething, ([value, index]) => {
+  // code
+});
+```
+
+#### reference:`WalkThrough.generator`
+
+- method helper to WalkThrough `Generator`;
+
+```js
+/**
+ * @template T
+ * @param {Generator<T, any, any>} generatorInstance
+ * @param {(value: T) => void} callback
+ * @returns {void}
+ */
+```
+
+- <i>example</i>:
+
+```js
+import { WalkThrough } from "vivth";
+
+WalkThrough.generator(generatorOfSomething, (value) => {
+  // code
+});
+```
+
+\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
 <h2 id="workermainthread">WorkerMainThread</h2>
 
 #### reference:`WorkerMainThread`
@@ -2677,6 +2809,37 @@ import { join } from "node:path";
 import { Base64URLFromFile, Paths } from "vivth";
 
 await Base64URLFromFile(join(Paths.root, "/path/to/file"));
+```
+
+\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+<h2 id="createstringid">CreateStringID</h2>
+
+#### reference:`CreateStringID`
+
+- function helper to generate absolute unique ID;
+- the asynchrounous nature is to prevent race condition that might resulting same Id being generated;
+  > - queued using QChannel;
+
+```js
+/**
+ * @param {string} [prefix]
+ * @returns {ReturnType<typeof TryAsync<string>>}
+ */
+```
+
+- <i>example</i>:
+
+```js
+import { CreateStringID } from "vivth";
+
+(async () => {
+  const [myUniqueID, errorCreatingUniqueID] = await CreateStringID("myPrefix");
+  if (errorCreatingUniqueID) {
+    return;
+  }
+  Console.log(myUniqueID); // `myPrefix${Date.now()}`
+})();
 ```
 
 \*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
@@ -3134,13 +3297,13 @@ test();
 import { Try } from "vivth";
 
 const [[key, result], error] = await Try({
-  someRuntime: async (prevError) => {
+  someRuntime: async ({ prevError }) => {
     // asuming on this one doesn't naturally throw error,
     // yet you need to continue to next key,
     // instead of returning,
     // you should throw new Error(something);
   },
-  browser: async (prevError) => {
+  browser: async ({ prevError }) => {
     return location?.origin;
     // if no error, stop other key function from running;
     // key = 'browser'
@@ -3149,7 +3312,7 @@ const [[key, result], error] = await Try({
     // if error;
     // run nodeOrBun;
   },
-  nodeOrBun: async (prevError) => {
+  nodeOrBun: async ({ prevError }) => {
     return process?.env?.INIT_CWD ?? process?.cwd();
     // if no error;
     // key = 'nodeOrBun'

@@ -1,7 +1,7 @@
 /**
- * @type {Set<Effect>}
+ * @type {Map<Effect, Set<Signal<any>>>}
  */
-export const setOfEffects: Set<Effect>;
+export const mapOfEffects: Map<Effect, Set<Signal<any>>>;
 /**
  * @description
  * - a class for creating effect;
@@ -70,9 +70,10 @@ export class Effect {
         /**
          * @instance options
          * @description
+         * - subscribe to `Signal_instance`;
          * - normally it's passed as argument to constructor, however it is also accessible from `options` property;
          * @template V
-         * @param {Signal<V>} signal
+         * @param {Signal<V>} signalInstance
          * @returns {Signal<V>}
          * @example
          * import { Effect } from 'vivth';
@@ -82,7 +83,7 @@ export class Effect {
          * })
          * effect.options.subscribe(signalInstance);
          */
-        subscribe: <V>(signal: Signal<V>) => Signal<V>;
+        subscribe: <V>(signalInstance: Signal<V>) => Signal<V>;
         /**
          * @instance options
          * @description
@@ -97,6 +98,25 @@ export class Effect {
          * effect.options.removeEffect();
          */
         removeEffect: () => void;
+        /**
+         * @description
+         * - remove inputed signal from this `Effect_instance`;
+         * - if effect signal has no other `Signal_instance` to listen to, it will then completely rendered non reactive;
+         * - normally it's passed as argument to constructor, however it is also accessible from `options` property;
+         * @param {Signal<any>} signalInstance
+         * @returns {void}
+         * @example
+         * import { Effect, Signal } from 'vivth';
+         *
+         * const count = new Signal(0);
+         * const effect = new Effect(async ({ subscribe }) => {
+         * 	console.log(subscribe(count).value); // will subscribe  count changes;
+         * })
+         * count.value++; // will increase the count and trigger effect;
+         * effect.options.removeSignal(count);
+         * count.value++; // will increase the count but will no longer trigger effect;
+         */
+        removeSignal: (signalInstance: Signal<any>) => void;
     } & {
         "vivth:unwrapLazy;": () => {
             /**
@@ -126,9 +146,10 @@ export class Effect {
             /**
              * @instance options
              * @description
+             * - subscribe to `Signal_instance`;
              * - normally it's passed as argument to constructor, however it is also accessible from `options` property;
              * @template V
-             * @param {Signal<V>} signal
+             * @param {Signal<V>} signalInstance
              * @returns {Signal<V>}
              * @example
              * import { Effect } from 'vivth';
@@ -138,7 +159,7 @@ export class Effect {
              * })
              * effect.options.subscribe(signalInstance);
              */
-            subscribe: <V>(signal: Signal<V>) => Signal<V>;
+            subscribe: <V>(signalInstance: Signal<V>) => Signal<V>;
             /**
              * @instance options
              * @description
@@ -153,6 +174,25 @@ export class Effect {
              * effect.options.removeEffect();
              */
             removeEffect: () => void;
+            /**
+             * @description
+             * - remove inputed signal from this `Effect_instance`;
+             * - if effect signal has no other `Signal_instance` to listen to, it will then completely rendered non reactive;
+             * - normally it's passed as argument to constructor, however it is also accessible from `options` property;
+             * @param {Signal<any>} signalInstance
+             * @returns {void}
+             * @example
+             * import { Effect, Signal } from 'vivth';
+             *
+             * const count = new Signal(0);
+             * const effect = new Effect(async ({ subscribe }) => {
+             * 	console.log(subscribe(count).value); // will subscribe  count changes;
+             * })
+             * count.value++; // will increase the count and trigger effect;
+             * effect.options.removeSignal(count);
+             * count.value++; // will increase the count but will no longer trigger effect;
+             */
+            removeSignal: (signalInstance: Signal<any>) => void;
         };
     };
     /**

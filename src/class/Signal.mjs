@@ -1,10 +1,11 @@
 // @ts-check
 
+import { WalkThrough } from './WalkThrough.mjs';
 import { LazyFactory } from '../function/LazyFactory.mjs';
 import { TryAsync } from '../function/TryAsync.mjs';
 import { TrySync } from '../function/TrySync.mjs';
 import { Console } from './Console.mjs';
-import { Effect, setOfEffects } from './Effect.mjs';
+import { Effect, mapOfEffects } from './Effect.mjs';
 
 /**
  * @type {Set<Signal<any>>}
@@ -65,7 +66,7 @@ export class Signal {
 		 */
 		notify: (callback = undefined) => {
 			if (callback === undefined) {
-				Signal.#notify(this.subscribers.setOf);
+				Signal.#notify(this);
 				return;
 			}
 			TryAsync(async () => {
@@ -75,25 +76,27 @@ export class Signal {
 					Console.error({ message: 'unable to run callback', callback, error });
 					return;
 				}
-				Signal.#notify(this.subscribers.setOf);
+				Signal.#notify(this);
 			});
 		},
 	}));
 	/**
-	 * @param {Set<Effect>} setOfSubscribers
+	 * @param {Signal<any>} signalInstance
 	 */
-	static #notify = (setOfSubscribers) => {
+	static #notify = (signalInstance) => {
 		const [, error] = TrySync(() => {
-			const effects = setOfSubscribers;
-			effects.forEach((effect) => {
-				if (setOfEffects.has(effect) === false) {
-					effects.delete(effect);
+			WalkThrough.set(signalInstance.subscribers.setOf, (effectInstance) => {
+				if (
+					//
+					!mapOfEffects.has(effectInstance)
+				) {
+					effectInstance.options.removeSignal(signalInstance);
 					return;
 				}
 				/**
-				 * effect.run is already TryAsync
+				 * effect.run is already wrapped with TryAsync
 				 */
-				effect.run();
+				effectInstance.run();
 			});
 		});
 		if (error === undefined) {
@@ -118,7 +121,7 @@ export class Signal {
 			 * this part is not needed, as the effect might need to react to other signals
 			// effectInstance.options.removeEffect();
 			 */
-			this.subscribers.setOf.delete(effectInstance);
+			effectInstance.options.removeSignal(this);
 		},
 		/**
 		 * @instance remove
@@ -127,8 +130,9 @@ export class Signal {
 		 * @type {()=>void}
 		 */
 		allSubscribers: () => {
-			const $ = this.subscribers.setOf;
-			$.forEach(this.remove.subscriber);
+			WalkThrough.set(this.subscribers.setOf, (effectInstance) => {
+				this.remove.subscriber(effectInstance);
+			});
 		},
 		/**
 		 * @instance remove

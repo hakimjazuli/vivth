@@ -114,7 +114,7 @@ export class QChannel {
 			 * - blocks execution for subsequent calls until the current one finishes.
 			 * @template RESULT
 			 * @param {()=>Promise<RESULT>} asyncCallback
-			 * @returns {Promise<[RESULT|undefined, Error|undefined]>}
+			 * @returns {ReturnType<typeof TryAsync<RESULT>>}
 			 * @example
 			 * const [result, error] = await QChannel.fifo.callback(async () = > {
 			 * 	// code

@@ -20,13 +20,13 @@
  * import { Try } from 'vivth';
  *
  * const [[key, result], error] = await Try({
- * 	someRuntime: async ( prevError ) => {
+ * 	someRuntime: async ({ prevError }) => {
  * 		// asuming on this one doesn't naturally throw error,
  * 		// yet you need to continue to next key,
  * 		// instead of returning,
  * 		// you should throw new Error(something);
  * 	},
- * 	browser: async ( prevError ) => {
+ * 	browser: async ({ prevError }) => {
  * 		return location?.origin;
  * 		// if no error, stop other key function from running;
  * 		// key = 'browser'
@@ -35,7 +35,7 @@
  * 		// if error;
  * 		// run nodeOrBun;
  * 	},
- * 	nodeOrBun: async ( prevError ) => {
+ * 	nodeOrBun: async ({ prevError }) => {
  * 		return process?.env?.INIT_CWD ?? process?.cwd();
  * 		// if no error;
  * 		// key = 'nodeOrBun'

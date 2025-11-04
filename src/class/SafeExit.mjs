@@ -2,8 +2,9 @@
 
 import { TryAsync } from '../function/TryAsync.mjs';
 import { TrySync } from '../function/TrySync.mjs';
+import { WalkThrough } from './WalkThrough.mjs';
 import { Console } from './Console.mjs';
-import { Effect, setOfEffects } from './Effect.mjs';
+import { Effect, mapOfEffects } from './Effect.mjs';
 import { EnvSignal } from './EnvSignal.mjs';
 import { setOFSignals } from './Signal.mjs';
 
@@ -150,6 +151,7 @@ export class SafeExit {
 	 * @type {()=>void}
 	 */
 	#exit = () => {};
+	// @ts-expect-error
 	#autoCleanUp = new Effect(async ({ subscribe }) => {
 		if (
 			//
@@ -157,10 +159,10 @@ export class SafeExit {
 		) {
 			return;
 		}
-		setOFSignals.forEach((signal) => {
+		WalkThrough.set(setOFSignals, (signal) => {
 			signal.remove.ref();
 		});
-		setOfEffects.forEach((effect) => {
+		WalkThrough.map(mapOfEffects, ([effect, _]) => {
 			effect.options.removeEffect();
 		});
 		for await (const cleanup of safeCleanUpCBs) {

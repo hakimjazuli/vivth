@@ -186,6 +186,7 @@ export class JSautoDOC {
 	 * @type {Signal<string>}
 	 */
 	#readMESRCContent = LazyFactory(() => new Signal(''));
+	// @ts-expect-error
 	#generatedREADME_md = new Effect(async ({ subscribe, isLastCalled }) => {
 		const contentSRC = subscribe(this.#readMESRCContent).value;
 		const filepaths = subscribe(this.#filePaths).value;

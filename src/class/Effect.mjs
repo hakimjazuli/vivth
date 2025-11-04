@@ -1,6 +1,7 @@
 // @ts-check
 
 import { unwrapLazy } from '../common/lazie.mjs';
+import { WalkThrough } from './WalkThrough.mjs';
 import { LazyFactory } from '../function/LazyFactory.mjs';
 import { Timeout } from '../function/Timeout.mjs';
 import { TryAsync } from '../function/TryAsync.mjs';
@@ -8,9 +9,9 @@ import { Console } from './Console.mjs';
 import { Signal } from './Signal.mjs';
 
 /**
- * @type {Set<Effect>}
+ * @type {Map<Effect, Set<Signal<any>>>}
  */
-export const setOfEffects = new Set();
+export const mapOfEffects = new Map();
 
 /**
  * @description
@@ -68,9 +69,10 @@ export class Effect {
 			/**
 			 * @instance options
 			 * @description
+			 * - subscribe to `Signal_instance`;
 			 * - normally it's passed as argument to constructor, however it is also accessible from `options` property;
 			 * @template V
-			 * @param {Signal<V>} signal
+			 * @param {Signal<V>} signalInstance
 			 * @returns {Signal<V>}
 			 * @example
 			 * import { Effect } from 'vivth';
@@ -80,13 +82,13 @@ export class Effect {
 			 * })
 			 * effect.options.subscribe(signalInstance);
 			 */
-			subscribe: (signal) => {
-				if (signal instanceof Signal === false) {
+			subscribe: (signalInstance) => {
+				if (signalInstance instanceof Signal === false) {
 					// @ts-expect-error
-					signal = signal[unwrapLazy]();
+					signalInstance = signalInstance[unwrapLazy]();
 				}
-				signal.subscribers.setOf.add(this_);
-				return signal;
+				signalInstance.subscribers.setOf.add(this_);
+				return signalInstance;
 			},
 			/**
 			 * @instance options
@@ -102,7 +104,44 @@ export class Effect {
 			 * effect.options.removeEffect();
 			 */
 			removeEffect: () => {
-				setOfEffects.delete(this);
+				const setOfSignal = mapOfEffects.get(this);
+				if (!setOfSignal) {
+					return;
+				}
+				WalkThrough.set(setOfSignal, (signalInstance) => {
+					this.options.removeSignal(signalInstance);
+				});
+				mapOfEffects.delete(this);
+			},
+			/**
+			 * @description
+			 * - remove inputed signal from this `Effect_instance`;
+			 * - if effect signal has no other `Signal_instance` to listen to, it will then completely rendered non reactive;
+			 * - normally it's passed as argument to constructor, however it is also accessible from `options` property;
+			 * @param {Signal<any>} signalInstance
+			 * @returns {void}
+			 * @example
+			 * import { Effect, Signal } from 'vivth';
+			 *
+			 * const count = new Signal(0);
+			 * const effect = new Effect(async ({ subscribe }) => {
+			 * 	console.log(subscribe(count).value); // will subscribe  count changes;
+			 * })
+			 * count.value++; // will increase the count and trigger effect;
+			 * effect.options.removeSignal(count);
+			 * count.value++; // will increase the count but will no longer trigger effect;
+			 */
+			removeSignal: (signalInstance) => {
+				signalInstance.subscribers.setOf.delete(this);
+				const setOfSignal = mapOfEffects.get(this);
+				if (!setOfSignal) {
+					return;
+				}
+				setOfSignal.delete(signalInstance);
+				if (setOfSignal.size) {
+					return;
+				}
+				mapOfEffects.delete(this);
 			},
 		};
 	});
@@ -130,7 +169,7 @@ export class Effect {
 	 */
 	constructor(effect) {
 		this.#effect = effect;
-		setOfEffects.add(this);
+		mapOfEffects.set(this, new Set());
 		this.run();
 	}
 	/**
@@ -156,6 +195,13 @@ export class Effect {
 	 */
 	run = () => {
 		TryAsync(async () => {
+			if (
+				//
+				!mapOfEffects.has(this)
+			) {
+				this.options.removeEffect();
+				return;
+			}
 			await this.#effect(this.options[unwrapLazy]());
 		}).then(([, error]) => {
 			if (error === undefined) {

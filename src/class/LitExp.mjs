@@ -210,11 +210,6 @@ export class LitExp {
 		});
 	};
 	/**
-	 * @typedef {ReturnType<LitExp<KEYS>["evaluate"]["execGroups"]>} ExecGroups
-	 * @typedef {ExecGroups extends [infer First, ...any] ? First : undefined} FirstGroup
-	 * @typedef {FirstGroup extends { result: any } ? Partial<FirstGroup["result"]> : undefined} Overrides
-	 */
-	/**
 	 * @description
 	 * - instance methods for generating things;
 	 */

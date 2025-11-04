@@ -56,13 +56,13 @@ export class QChannel<DEFINEDANY extends import("../types/AnyButUndefined.mjs").
          * - blocks execution for subsequent calls until the current one finishes.
          * @template RESULT
          * @param {()=>Promise<RESULT>} asyncCallback
-         * @returns {Promise<[RESULT|undefined, Error|undefined]>}
+         * @returns {ReturnType<typeof TryAsync<RESULT>>}
          * @example
          * const [result, error] = await QChannel.fifo.callback(async () = > {
          * 	// code
          * })
          */
-        callback: <RESULT>(asyncCallback: () => Promise<RESULT>) => Promise<[RESULT | undefined, Error | undefined]>;
+        callback: <RESULT>(asyncCallback: () => Promise<RESULT>) => ReturnType<typeof TryAsync<RESULT>>;
     } & {
         "vivth:unwrapLazy;": () => {
             /**
@@ -82,13 +82,13 @@ export class QChannel<DEFINEDANY extends import("../types/AnyButUndefined.mjs").
              * - blocks execution for subsequent calls until the current one finishes.
              * @template RESULT
              * @param {()=>Promise<RESULT>} asyncCallback
-             * @returns {Promise<[RESULT|undefined, Error|undefined]>}
+             * @returns {ReturnType<typeof TryAsync<RESULT>>}
              * @example
              * const [result, error] = await QChannel.fifo.callback(async () = > {
              * 	// code
              * })
              */
-            callback: <RESULT>(asyncCallback: () => Promise<RESULT>) => Promise<[RESULT | undefined, Error | undefined]>;
+            callback: <RESULT>(asyncCallback: () => Promise<RESULT>) => ReturnType<typeof TryAsync<RESULT>>;
         };
     };
     /**
