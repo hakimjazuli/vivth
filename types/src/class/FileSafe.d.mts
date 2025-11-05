@@ -14,7 +14,7 @@ export class FileSafe {
      * import { join } from 'node:path';
      * import { FileSafe, Paths } from 'vivth';
      *
-     * const [, error] = await FileSafe.write(
+     * const [, error] = await FileSafe.exist(
      * 	join(Paths.root, '/some/path.mjs'),
      * );
      * if (!error) {
