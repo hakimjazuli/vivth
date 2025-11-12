@@ -11,7 +11,7 @@ export class Signal<VALUE> {
     /**
      * @param {Signal<any>} signalInstance
      */
-    static #notify: (signalInstance: Signal<any>) => void;
+    static "__#private@#notify": (signalInstance: Signal<any>) => void;
     /**
      * @description
      * - create a `Signal`;

@@ -3,7 +3,7 @@ export class parsedFile {
      * @param {string} exportName
      * @returns {boolean}
      */
-    static #isExportNameValid: (exportName: string) => boolean;
+    static "__#private@#isExportNameValid": (exportName: string) => boolean;
     /**
      * @param {string} content
      * @returns { RegExpExecArray[] }

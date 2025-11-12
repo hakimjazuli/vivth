@@ -3,7 +3,7 @@
  * - class with static methods to print to standard console with bare minimum ANSI styles;
  */
 export class Console {
-    static #ansi: {
+    static "__#private@#ansi": {
         reset: string;
         bold: string;
         colors: {
@@ -19,7 +19,7 @@ export class Console {
      * @param {any} data
      * @returns {void}
      */
-    static #call: (prefix: string, mode: "log" | "info" | "error" | "warn", data: any) => void;
+    static "__#private@#call": (prefix: string, mode: "log" | "info" | "error" | "warn", data: any) => void;
     /**
      * @description
      * @param {any} data

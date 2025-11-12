@@ -36,6 +36,7 @@ export { CreateStringID } from './src/common/CreateStringID.mjs';
 export { Dev } from './src/common/Dev.mjs';
 export { EventNameSpace } from './src/common/EventNameSpace.mjs';
 export { Trace } from './src/common/Trace.mjs';
+export { TracePath } from './src/common/TracePath.mjs';
 export { JSautoDOC } from './src/doc/JSautoDOC.mjs';
 export { CreateImmutable } from './src/function/CreateImmutable.mjs';
 export { EventCheck } from './src/function/EventCheck.mjs';

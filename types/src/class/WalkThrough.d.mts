@@ -10,7 +10,7 @@ export class WalkThrough {
      * @param {(...any:any[])=>void} callback
      * @returns {void}
      */
-    static #handler: (iterator: Iterator<any, any, any>, callback: (...any: any[]) => void) => void;
+    static "__#private@#handler": (iterator: Iterator<any, any, any>, callback: (...any: any[]) => void) => void;
     /**
      * @description
      * - method helper to WalkThrough `Set`;

@@ -8,7 +8,7 @@ export class Paths {
     /**
      * @type {Paths|undefined}
      */
-    static #instance: Paths | undefined;
+    static "__#private@#instance": Paths | undefined;
     /**
      * @description
      * - reference for rootPath

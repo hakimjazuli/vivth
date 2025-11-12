@@ -25,7 +25,7 @@ export class QChannel<DEFINEDANY extends import("../types/AnyButUndefined.mjs").
     /**
      * @type {Map<AnyButUndefined, [Promise<any>, {}]>}
      */
-    static #uniquePromiser: Map<import("../types/AnyButUndefined.mjs").AnyButUndefined, [Promise<any>, {}]>;
+    static "__#private@#uniquePromiser": Map<import("../types/AnyButUndefined.mjs").AnyButUndefined, [Promise<any>, {}]>;
     /**
      * - ensures that each id has only one task running at a time.
      * - calls with the same id will wait for the previous call to finish.
@@ -33,7 +33,7 @@ export class QChannel<DEFINEDANY extends import("../types/AnyButUndefined.mjs").
      * @param {QChannel<any>} instance
      * @returns {Promise<QCBReturn>} Resolves when it's safe to proceed for the given id, returning a cleanup function
      */
-    static #uniqueCB: (id: import("../types/AnyButUndefined.mjs").AnyButUndefined, instance: QChannel<any>) => Promise<import("../types/QCBReturn.mjs").QCBReturn>;
+    static "__#private@#uniqueCB": (id: import("../types/AnyButUndefined.mjs").AnyButUndefined, instance: QChannel<any>) => Promise<import("../types/QCBReturn.mjs").QCBReturn>;
     /**
      * @description
      * - first in first out handler

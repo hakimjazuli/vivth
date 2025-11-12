@@ -23,12 +23,12 @@ export class Dev {
     /**
      * @type {Signal<Map<string,Awaited<ReturnType<typeof TryAsync<boolean>>>>>}
      */
-    static #notifications: Signal<Map<string, Awaited<ReturnType<typeof TryAsync<boolean>>>>>;
+    static "__#private@#notifications": Signal<Map<string, Awaited<ReturnType<typeof TryAsync<boolean>>>>>;
     /**
      * @type {DevTestCB}
      */
-    static #test: DevTestCB;
-    static #effectForCheck: Effect & {
+    static "__#private@#test": DevTestCB;
+    static "__#private@#effectForCheck": Effect & {
         "vivth:unwrapLazy;": () => Effect;
     };
     /**

@@ -25,7 +25,7 @@ export class JSautoDOC {
     /**
      * @type {JSautoDOC|undefined}
      */
-    static #instance: JSautoDOC | undefined;
+    static "__#private@#instance": JSautoDOC | undefined;
     /**
      * @description
      * @param {Object} [options]

@@ -75,14 +75,14 @@ export class LitExp<KEYS extends import("../types/LitExpKeyType.mjs").LitExpKeyT
      * @param {TemplateStringsArray} strings
      * @returns {ReturnType<typeof TrySync<string[]>>}
      */
-    static #processTemplate<KEYS_1 extends import("../types/LitExpKeyType.mjs").LitExpKeyType>(instance_rules: KEYS_1, intance_values: (keyof KEYS_1)[], valueHandler: (value: keyof KEYS_1, regex: RegExp | false) => ReturnType<typeof TrySync<string>>, strings: TemplateStringsArray): ReturnType<typeof TrySync<string[]>>;
+    static "__#private@#processTemplate"<KEYS_1 extends import("../types/LitExpKeyType.mjs").LitExpKeyType>(instance_rules: KEYS_1, intance_values: (keyof KEYS_1)[], valueHandler: (value: keyof KEYS_1, regex: RegExp | false) => ReturnType<typeof TrySync<string>>, strings: TemplateStringsArray): ReturnType<typeof TrySync<string[]>>;
     /**
      * @template {LitExpKeyType} KEYS
      * @param {RegExp|false} regex
      * @param {keyof KEYS} value
      * @returns {ReturnType<typeof TrySync<string>>}
      */
-    static #namedChapture<KEYS_1 extends import("../types/LitExpKeyType.mjs").LitExpKeyType>(value: keyof KEYS_1, regex: RegExp | false): ReturnType<typeof TrySync<string>>;
+    static "__#private@#namedChapture"<KEYS_1 extends import("../types/LitExpKeyType.mjs").LitExpKeyType>(value: keyof KEYS_1, regex: RegExp | false): ReturnType<typeof TrySync<string>>;
     /**
      * @private
      * @param {KEYS} keys

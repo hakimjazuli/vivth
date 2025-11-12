@@ -83,6 +83,7 @@ npm i vivth
 - [Dev](#dev)
 - [EventNameSpace](#eventnamespace)
 - [Trace](#trace)
+- [TracePath](#tracepath)
 - [JSautoDOC](#jsautodoc)
 - [CreateImmutable](#createimmutable)
 - [EventCheck](#eventcheck)
@@ -2926,7 +2927,7 @@ Dev.vivthDevCodeBlock(async ({ test }) => {
 
 #### reference:`Trace`
 
-- returns position of stack trace as string, formatted as `fileName:lineNumber:columnNumber`;
+- returns position of stack trace as string, formatted like `fileName:lineNumber:columnNumber`;
 - extremely usefull for:
   > - jumping positions to code line;
   > - creating dynamic string id;
@@ -2944,6 +2945,40 @@ Dev.vivthDevCodeBlock(async ({ test }) => {
 import { Trace, Console } from "vivth";
 
 Console.log(Trace(3)); // "D://test.mjs:3:13"
+```
+
+\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+<h2 id="tracepath">TracePath</h2>
+
+#### reference:`TracePath`
+
+- get stack trace path that matched with truthy filterCallback;
+- returns position of stack trace as string, formatted like `fileName:lineNumber:columnNumber`;
+- extremely usefull for:
+  > - jumping positions to code line;
+  > - creating dynamic string id;
+
+```js
+/**
+ * @param {(stackString:string)=>boolean} filterCallback
+ * - stackString path are normalized to use forward slash;
+ * - if return true, `TracePath` will return the current stackString;
+ * - if return false, continue to check the stacks;
+ * @returns {string|undefined}
+ */
+```
+
+- <i>example</i>:
+
+```js
+import { TracePath, Console } from "vivth";
+
+Console.log(
+  TracePath((stackString) => {
+    return stackString.includes("test.mjs");
+  }),
+); // "D://test.mjs:4:2"
 ```
 
 \*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>

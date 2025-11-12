@@ -12,7 +12,7 @@ export class WorkerThread<RECEIVE, POST> {
     /**
      * @type {Parameters<typeof WorkerThread["setup"]>[0]|undefined}
      */
-    static #refs: Parameters<(typeof WorkerThread)["setup"]>[0] | undefined;
+    static "__#private@#refs": Parameters<(typeof WorkerThread)["setup"]>[0] | undefined;
     /**
      * @description
      * - need to be called and exported as new `WorkerThread` class reference;
@@ -36,7 +36,7 @@ export class WorkerThread<RECEIVE, POST> {
     /**
      * @param {any} ev
      */
-    static #isCloseWorkerEvent: (ev: any) => boolean;
+    static "__#private@#isCloseWorkerEvent": (ev: any) => boolean;
     /**
      * @description
      * - instantiate via created class from `setup` static method;

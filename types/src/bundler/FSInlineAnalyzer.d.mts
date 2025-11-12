@@ -29,7 +29,7 @@ export class FSInlineAnalyzer {
      * @param {RegExp} ruleForFileFullPath
      * @returns {Promise<_dirReturn>}
      */
-    static #dir: (dirName: string, ruleForFileFullPath: RegExp) => Promise<{
+    static "__#private@#dir": (dirName: string, ruleForFileFullPath: RegExp) => Promise<{
         path: string;
         buffer: Buffer<ArrayBuffer>;
     }[]>;

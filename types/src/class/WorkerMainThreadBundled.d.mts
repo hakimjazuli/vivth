@@ -17,7 +17,7 @@ export class WorkerMainThread<WT extends WorkerThread<any, any>> {
     /**
      * @type {boolean}
      */
-    static #isRegistered: boolean;
+    static "__#private@#isRegistered": boolean;
     /**
      * @param {Object} param0
      * @param {typeof WorkerMainThread["workerClass"]} param0.workerClass
@@ -38,7 +38,7 @@ export class WorkerMainThread<WT extends WorkerThread<any, any>> {
         worker: string;
         root: string;
     }) => Promise<string>;
-    static #options: import("worker_threads").WorkerOptions & {
+    static "__#private@#options": import("worker_threads").WorkerOptions & {
         type?: "module";
     };
     /**
@@ -57,7 +57,7 @@ export class WorkerMainThread<WT extends WorkerThread<any, any>> {
      * @param {(any:any)=>void} listener
      * @returns {Promise<void>}
      */
-    static #workerFilehandler<WT_1 extends WorkerThread<any, any>>(handler: string, options: WorkerOptions | import("worker_threads").WorkerOptions, worker: WorkerMainThread<WT_1>, listener: (any: any) => void): Promise<void>;
+    static "__#private@#workerFilehandler"<WT_1 extends WorkerThread<any, any>>(handler: string, options: WorkerOptions | import("worker_threads").WorkerOptions, worker: WorkerMainThread<WT_1>, listener: (any: any) => void): Promise<void>;
     /**
      * @param {Parameters<typeof WorkerMainThread<WT>["newVivthWorker"]>[0]} handler
      * @param {Parameters<typeof WorkerMainThread<WT>["newVivthWorker"]>[1]} [options]

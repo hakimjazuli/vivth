@@ -18,7 +18,7 @@ export class EventSignal<ISLIST extends boolean> {
     /**
      * @type {QChannel<string>}
      */
-    static #qChannelEventSignal: QChannel<string>;
+    static "__#private@#qChannelEventSignal": QChannel<string>;
     /**
      * @description
      * - the constructor it self is set to `private`;

@@ -1,6 +1,6 @@
 /**
  * @description
- * - returns position of stack trace as string, formatted as `fileName:lineNumber:columnNumber`;
+ * - returns position of stack trace as string, formatted like `fileName:lineNumber:columnNumber`;
  * - extremely usefull for:
  * >- jumping positions to code line;
  * >- creating dynamic string id;
