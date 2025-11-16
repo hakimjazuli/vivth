@@ -11,13 +11,12 @@
 		"vivth": "link:vivth"
 	},
 	"dependencies": {
-		"prettier": "^3.6.2",
 		"@types/mime-types": "^3.0.1",
 		"chokidar": "^4.0.3",
 		"esbuild": "^0.25.12",
-		"i": "^0.3.7",
 		"mime-types": "^3.0.1",
-		"pkg": "^5.8.1"
+		"pkg": "^5.8.1",
+		"prettier": "^3.6.2"
 	},
 	"peerDependencies": {},
 	"repository": {
@@ -26,6 +25,8 @@
 	},
 	"keywords": [
 		"simple",
+		"primitive",
+		"runtime agnostic",
 		"signal",
 		"data driven"
 	],
