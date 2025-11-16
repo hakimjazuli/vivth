@@ -4,15 +4,15 @@
  * - usefull to flatten your source code;
  * @template {new (...args: any[]) => any} CLASSREF
  * @param {CLASSREF} classReference
- * @returns {(...args: ConstructorParameters<CLASSREF>) =>
- * [InstanceType<CLASSREF>, undefined]|
+ * @param {ConstructorParameters<CLASSREF>} params
+ * @returns {[InstanceType<CLASSREF>, undefined]|
  * [undefined, Error]}
  * @example
  * import { TryNew } from 'vivth';
  *
- * const [instance, error] = TryNew(ClassReference)(...classConstructorParameters)
+ * const [instance, error] = TryNew(ClassReference, ...classConstructorParameters)
  * if(!error) {
- *  // do something with instance
+ *   // do something with instance safely;
  * }
  */
-export function TryNew<CLASSREF extends new (...args: any[]) => any>(classReference: CLASSREF): (...args: ConstructorParameters<CLASSREF>) => [InstanceType<CLASSREF>, undefined] | [undefined, Error];
+export function TryNew<CLASSREF extends new (...args: any[]) => any>(classReference: CLASSREF, ...params: ConstructorParameters<CLASSREF>): [InstanceType<CLASSREF>, undefined] | [undefined, Error];

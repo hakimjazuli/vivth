@@ -3410,7 +3410,8 @@ let [res, error] = await TryAsync(async () => {
 /**
  * @template {(...param:any[])=>Promise<any>} UNSAFEASYNCCALLBACK
  * @param {UNSAFEASYNCCALLBACK} unsafeAsyncCallback
- * @returns {(...param:Parameters<UNSAFEASYNCCALLBACK>)=> Promise<
+ * @param {Parameters<UNSAFEASYNCCALLBACK>} params
+ * @returns {Promise<
  * [Awaited<ReturnType<UNSAFEASYNCCALLBACK>>,undefined]|
  * [undefined,Error]>}
  */
@@ -3422,11 +3423,12 @@ let [res, error] = await TryAsync(async () => {
 import { TryAsyncCall } from "vivth";
 
 (async () => {
-  const [result, error] = await TryAsyncCall(unsafeAsyncCallback)(
+  const [result, error] = await TryAsyncCall(
+    unsafeAsyncCallback,
     ...unsafeAsyncCallbackParameters,
   );
   if (!error) {
-    // do something with result
+    // do something with result safely;
   }
 })();
 ```
@@ -3444,9 +3446,9 @@ import { TryAsyncCall } from "vivth";
 /**
  * @template {(...param:any[])=>any} UNSAFECALLBACK
  * @param {UNSAFECALLBACK} unsafeCallback
- * @returns {(...param:Parameters<UNSAFECALLBACK>)=>
- * [ReturnType<UNSAFECALLBACK>,undefined]|
- * [undefined,Error]}
+ * @param {Parameters<UNSAFECALLBACK>} params
+ * @returns {[ReturnType<UNSAFECALLBACK>,undefined]|
+ * [undefined, Error]}
  */
 ```
 
@@ -3455,9 +3457,9 @@ import { TryAsyncCall } from "vivth";
 ```js
 import { TryCall } from "vivth";
 
-const [result, error] = TryCall(unsafeCallback)(...unsafeCallbackParameters);
+const [result, error] = TryCall(unsafeCallback, ...unsafeCallbackParameters);
 if (!error) {
-  // do something with result
+  // do something with result safely;
 }
 ```
 
@@ -3474,8 +3476,8 @@ if (!error) {
 /**
  * @template {new (...args: any[]) => any} CLASSREF
  * @param {CLASSREF} classReference
- * @returns {(...args: ConstructorParameters<CLASSREF>) =>
- * [InstanceType<CLASSREF>, undefined]|
+ * @param {ConstructorParameters<CLASSREF>} params
+ * @returns {[InstanceType<CLASSREF>, undefined]|
  * [undefined, Error]}
  */
 ```
@@ -3485,9 +3487,9 @@ if (!error) {
 ```js
 import { TryNew } from "vivth";
 
-const [instance, error] = TryNew(ClassReference)(...classConstructorParameters);
+const [instance, error] = TryNew(ClassReference, ...classConstructorParameters);
 if (!error) {
-  // do something with instance
+  // do something with instance safely;
 }
 ```
 

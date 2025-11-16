@@ -4,15 +4,15 @@
  * - usefull to flatten your source code;
  * @template {(...param:any[])=>any} UNSAFECALLBACK
  * @param {UNSAFECALLBACK} unsafeCallback
- * @returns {(...param:Parameters<UNSAFECALLBACK>)=>
- * [ReturnType<UNSAFECALLBACK>,undefined]|
- * [undefined,Error]}
+ * @param {Parameters<UNSAFECALLBACK>} params
+ * @returns {[ReturnType<UNSAFECALLBACK>,undefined]|
+ * [undefined, Error]}
  * @example
  * import { TryCall } from 'vivth';
  *
- * const [result, error] = TryCall(unsafeCallback)(...unsafeCallbackParameters);
+ * const [result, error] = TryCall(unsafeCallback, ...unsafeCallbackParameters);
  * if (!error) {
- *  // do something with result
+ *   // do something with result safely;
  * }
  */
-export function TryCall<UNSAFECALLBACK extends (...param: any[]) => any>(unsafeCallback: UNSAFECALLBACK): (...param: Parameters<UNSAFECALLBACK>) => [ReturnType<UNSAFECALLBACK>, undefined] | [undefined, Error];
+export function TryCall<UNSAFECALLBACK extends (...param: any[]) => any>(unsafeCallback: UNSAFECALLBACK, ...params: Parameters<UNSAFECALLBACK>): [ReturnType<UNSAFECALLBACK>, undefined] | [undefined, Error];
