@@ -17,9 +17,9 @@
  * 	| [[undefined, undefined], Error|undefined]
  * >}
  * @example
- * import { Try } from 'vivth';
+ * import { Tries } from 'vivth';
  *
- * const [[key, result], error] = await Try({
+ * const [[key, result], error] = await Tries({
  * 	someRuntime: async ({ prevError }) => {
  * 		// asuming on this one doesn't naturally throw error,
  * 		// yet you need to continue to next key,
@@ -47,6 +47,6 @@
  * 	},
  * });
  */
-export function Try<KEY extends string, RETURNTYPE, RecordTryType extends Record<KEY, (err: {
+export function Tries<KEY extends string, RETURNTYPE, RecordTryType extends Record<KEY, (err: {
     prevError: undefined | Error;
 }) => Promise<RETURNTYPE>>>(tryRecord: RecordTryType): Promise<[[keyof RecordTryType, RETURNTYPE], undefined] | [[undefined, undefined], Error | undefined]>;

@@ -93,8 +93,11 @@ npm i vivth
 - [IsAsync](#isasync)
 - [LazyFactory](#lazyfactory)
 - [Timeout](#timeout)
-- [Try](#try)
+- [Tries](#tries)
 - [TryAsync](#tryasync)
+- [TryAsyncCall](#tryasynccall)
+- [TryCall](#trycall)
+- [TryNew](#trynew)
 - [TrySync](#trysync)
 - [TsToMjs](#tstomjs)
 - [AnyButUndefined](#anybutundefined)
@@ -3300,9 +3303,9 @@ test();
 
 \*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
-<h2 id="try">Try</h2>
+<h2 id="tries">Tries</h2>
 
-#### reference:`Try`
+#### reference:`Tries`
 
 - function for error as value for chained operations;
 - utility function to brute force which key is able to run;
@@ -3329,9 +3332,9 @@ test();
 - <i>example</i>:
 
 ```js
-import { Try } from "vivth";
+import { Tries } from "vivth";
 
-const [[key, result], error] = await Try({
+const [[key, result], error] = await Tries({
   someRuntime: async ({ prevError }) => {
     // asuming on this one doesn't naturally throw error,
     // yet you need to continue to next key,
@@ -3392,6 +3395,100 @@ let [res, error] = await TryAsync(async () => {
   }
   return await res.json();
 });
+```
+
+\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+<h2 id="tryasynccall">TryAsyncCall</h2>
+
+#### reference:`TryAsyncCall`
+
+- function helper to turn unsafe callback into safe one without tryCatch block;
+- usefull to flatten your source code;
+
+```js
+/**
+ * @template {(...param:any[])=>Promise<any>} UNSAFEASYNCCALLBACK
+ * @param {UNSAFEASYNCCALLBACK} unsafeAsyncCallback
+ * @returns {(...param:Parameters<UNSAFEASYNCCALLBACK>)=> Promise<
+ * [Awaited<ReturnType<UNSAFEASYNCCALLBACK>>,undefined]|
+ * [undefined,Error]>}
+ */
+```
+
+- <i>example</i>:
+
+```js
+import { TryAsyncCall } from "vivth";
+
+(async () => {
+  const [result, error] = await TryAsyncCall(unsafeAsyncCallback)(
+    ...unsafeAsyncCallbackParameters,
+  );
+  if (!error) {
+    // do something with result
+  }
+})();
+```
+
+\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+<h2 id="trycall">TryCall</h2>
+
+#### reference:`TryCall`
+
+- function helper to turn unsafe callback into safe one without tryCatch block;
+- usefull to flatten your source code;
+
+```js
+/**
+ * @template {(...param:any[])=>any} UNSAFECALLBACK
+ * @param {UNSAFECALLBACK} unsafeCallback
+ * @returns {(...param:Parameters<UNSAFECALLBACK>)=>
+ * [ReturnType<UNSAFECALLBACK>,undefined]|
+ * [undefined,Error]}
+ */
+```
+
+- <i>example</i>:
+
+```js
+import { TryCall } from "vivth";
+
+const [result, error] = TryCall(unsafeCallback)(...unsafeCallbackParameters);
+if (!error) {
+  // do something with result
+}
+```
+
+\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+<h2 id="trynew">TryNew</h2>
+
+#### reference:`TryNew`
+
+- function helper to turn unsafe constructor call of classReference into safe one without tryCatch block;
+- usefull to flatten your source code;
+
+```js
+/**
+ * @template {new (...args: any[]) => any} CLASSREF
+ * @param {CLASSREF} classReference
+ * @returns {(...args: ConstructorParameters<CLASSREF>) =>
+ * [InstanceType<CLASSREF>, undefined]|
+ * [undefined, Error]}
+ */
+```
+
+- <i>example</i>:
+
+```js
+import { TryNew } from "vivth";
+
+const [instance, error] = TryNew(ClassReference)(...classConstructorParameters);
+if (!error) {
+  // do something with instance
+}
 ```
 
 \*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>

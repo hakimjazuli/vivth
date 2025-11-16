@@ -46,8 +46,11 @@ export { GetRuntime } from './src/function/GetRuntime.mjs';
 export { IsAsync } from './src/function/IsAsync.mjs';
 export { LazyFactory } from './src/function/LazyFactory.mjs';
 export { Timeout } from './src/function/Timeout.mjs';
-export { Try } from './src/function/Try.mjs';
+export { Tries } from './src/function/Tries.mjs';
 export { TryAsync } from './src/function/TryAsync.mjs';
+export { TryAsyncCall } from './src/function/TryAsyncCall.mjs';
+export { TryCall } from './src/function/TryCall.mjs';
+export { TryNew } from './src/function/TryNew.mjs';
 export { TrySync } from './src/function/TrySync.mjs';
 export { TsToMjs } from './src/function/TsToMjs.mjs';
 /**

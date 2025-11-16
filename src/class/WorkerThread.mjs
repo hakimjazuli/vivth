@@ -2,7 +2,7 @@
 
 import { closeWorkerThreadEventObject } from '../common/eventObjects.mjs';
 import { EventCheck } from '../function/EventCheck.mjs';
-import { Try } from '../function/Try.mjs';
+import { Tries } from '../function/Tries.mjs';
 import { TryAsync } from '../function/TryAsync.mjs';
 import { Console } from './Console.mjs';
 import { QChannel } from './QChannel.mjs';
@@ -75,7 +75,7 @@ export class WorkerThread {
 	constructor(handler) {
 		this.handler = handler;
 		const this_ = this;
-		Try({
+		Tries({
 			post: async () => {
 				/**
 				 * @param {MessageEvent<RECEIVE>|RECEIVE} ev

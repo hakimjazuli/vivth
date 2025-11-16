@@ -2,7 +2,7 @@
 
 import { closeWorkerThreadEventObject } from '../common/eventObjects.mjs';
 import { GetRuntime } from '../function/GetRuntime.mjs';
-import { Try } from '../function/Try.mjs';
+import { Tries } from '../function/Tries.mjs';
 import { TryAsync } from '../function/TryAsync.mjs';
 import { Console } from './Console.mjs';
 import { Derived } from './Derived.mjs';
@@ -179,7 +179,7 @@ export class WorkerMainThread {
 			Console.error('invalid `Worker` inputed to `WorkerMainThread`;');
 			return;
 		}
-		const [, errorCreatingWorker] = await Try({
+		const [, errorCreatingWorker] = await Tries({
 			browser: async () => {
 				if (runtime !== 'browser') {
 					throw new Error('not a browser');

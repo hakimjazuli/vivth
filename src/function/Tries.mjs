@@ -21,9 +21,9 @@ import { TryAsync } from './TryAsync.mjs';
  * 	| [[undefined, undefined], Error|undefined]
  * >}
  * @example
- * import { Try } from 'vivth';
+ * import { Tries } from 'vivth';
  *
- * const [[key, result], error] = await Try({
+ * const [[key, result], error] = await Tries({
  * 	someRuntime: async ({ prevError }) => {
  * 		// asuming on this one doesn't naturally throw error,
  * 		// yet you need to continue to next key,
@@ -51,7 +51,7 @@ import { TryAsync } from './TryAsync.mjs';
  * 	},
  * });
  */
-export async function Try(tryRecord) {
+export async function Tries(tryRecord) {
 	/**
 	 * @type {Error|undefined}
 	 */
