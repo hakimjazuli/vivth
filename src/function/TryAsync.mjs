@@ -1,5 +1,7 @@
 // @ts-check
 
+import { resolveErrorArray } from './resolveErrorArray.mjs';
+
 /**
  * @description
  * - function for error as value for asynchronous operation;
@@ -26,7 +28,6 @@ export async function TryAsync(asyncFunction_) {
 		const result = await asyncFunction_();
 		return [result, undefined];
 	} catch (error) {
-		// @ts-expect-error
-		return [undefined, error];
+		return resolveErrorArray(error);
 	}
 }

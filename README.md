@@ -95,8 +95,6 @@ npm i vivth
 - [Timeout](#timeout)
 - [Tries](#tries)
 - [TryAsync](#tryasync)
-- [TryAsyncCall](#tryasynccall)
-- [TryCall](#trycall)
 - [TryNew](#trynew)
 - [TrySync](#trysync)
 - [TsToMjs](#tstomjs)
@@ -3399,72 +3397,6 @@ let [res, error] = await TryAsync(async () => {
 
 \*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
-<h2 id="tryasynccall">TryAsyncCall</h2>
-
-#### reference:`TryAsyncCall`
-
-- function helper to turn unsafe callback into safe one without tryCatch block;
-- usefull to flatten your source code;
-
-```js
-/**
- * @template {(...param:any[])=>Promise<any>} UNSAFEASYNCCALLBACK
- * @param {UNSAFEASYNCCALLBACK} unsafeAsyncCallback
- * @param {Parameters<UNSAFEASYNCCALLBACK>} params
- * @returns {Promise<
- * [Awaited<ReturnType<UNSAFEASYNCCALLBACK>>,undefined]|
- * [undefined,Error]>}
- */
-```
-
-- <i>example</i>:
-
-```js
-import { TryAsyncCall } from "vivth";
-
-(async () => {
-  const [result, error] = await TryAsyncCall(
-    unsafeAsyncCallback,
-    ...unsafeAsyncCallbackParameters,
-  );
-  if (!error) {
-    // do something with result safely;
-  }
-})();
-```
-
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
-
-<h2 id="trycall">TryCall</h2>
-
-#### reference:`TryCall`
-
-- function helper to turn unsafe callback into safe one without tryCatch block;
-- usefull to flatten your source code;
-
-```js
-/**
- * @template {(...param:any[])=>any} UNSAFECALLBACK
- * @param {UNSAFECALLBACK} unsafeCallback
- * @param {Parameters<UNSAFECALLBACK>} params
- * @returns {[ReturnType<UNSAFECALLBACK>,undefined]|
- * [undefined, Error]}
- */
-```
-
-- <i>example</i>:
-
-```js
-import { TryCall } from "vivth";
-
-const [result, error] = TryCall(unsafeCallback, ...unsafeCallbackParameters);
-if (!error) {
-  // do something with result safely;
-}
-```
-
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
-
 <h2 id="trynew">TryNew</h2>
 
 #### reference:`TryNew`
@@ -3514,7 +3446,7 @@ if (!error) {
 - <i>example</i>:
 
 ```js
-import { readFileSync } from "fs";
+import { readFileSync } from "node:fs";
 import { TrySync } from "./yourModule.js";
 
 const [data, error] = TrySync(() => {

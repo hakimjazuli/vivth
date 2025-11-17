@@ -1,5 +1,7 @@
 // @ts-check
 
+import { resolveErrorArray } from './resolveErrorArray.mjs';
+
 /**
  * @description
  * - function for error as value for synchronous operation;
@@ -9,7 +11,7 @@
  * @returns {[RESULT,undefined]|
  * [undefined,Error]}
  * @example
- * import { readFileSync } from 'fs';
+ * import { readFileSync } from 'node:fs';
  * import { TrySync } from './yourModule.js';
  *
  * const [data, error] = TrySync(() => {
@@ -21,7 +23,6 @@ export function TrySync(function_) {
 		const result = function_();
 		return [result, undefined];
 	} catch (error) {
-		// @ts-expect-error
-		return [undefined, error];
+		return resolveErrorArray(error);
 	}
 }

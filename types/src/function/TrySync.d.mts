@@ -7,7 +7,7 @@
  * @returns {[RESULT,undefined]|
  * [undefined,Error]}
  * @example
- * import { readFileSync } from 'fs';
+ * import { readFileSync } from 'node:fs';
  * import { TrySync } from './yourModule.js';
  *
  * const [data, error] = TrySync(() => {

@@ -1,5 +1,7 @@
 // @ts-check
 
+import { resolveErrorArray } from './resolveErrorArray.mjs';
+
 /**
  * @description
  * - function helper to turn unsafe constructor call of classReference into safe one without tryCatch block;
@@ -20,8 +22,7 @@
 export function TryNew(classReference, ...params) {
 	try {
 		return [new classReference(...params), undefined];
-	} catch (err) {
-		// @ts-expect-error
-		return [undefined, err];
+	} catch (error) {
+		return resolveErrorArray(error);
 	}
 }
