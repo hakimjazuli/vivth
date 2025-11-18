@@ -45,6 +45,7 @@ export { GetNamedImportAlias } from './src/function/GetNamedImportAlias.mjs';
 export { GetRuntime } from './src/function/GetRuntime.mjs';
 export { IsAsync } from './src/function/IsAsync.mjs';
 export { LazyFactory } from './src/function/LazyFactory.mjs';
+export { TemplateLiteral } from './src/function/TemplateLiteral.mjs';
 export { Timeout } from './src/function/Timeout.mjs';
 export { Tries } from './src/function/Tries.mjs';
 export { TryAsync } from './src/function/TryAsync.mjs';
@@ -84,6 +85,11 @@ export { TsToMjs } from './src/function/TsToMjs.mjs';
  */
 /**
  * @typedef {import('./src/types/Runtime.mjs').Runtime} Runtime
+ */
+/**
+ * @template {any} INPUTTYPE
+ * @template {boolean} ISASYNC
+ * @typedef {import('./src/types/TemplateLiteralType.mjs').TemplateLiteralType<INPUTTYPE,ISASYNC>} TemplateLiteralType
  */
 /**
  * @typedef {import('./src/types/VivthDevCodeBlockStringType.mjs').VivthDevCodeBlockStringType} VivthDevCodeBlockStringType

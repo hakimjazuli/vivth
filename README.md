@@ -92,6 +92,7 @@ npm i vivth
 - [GetRuntime](#getruntime)
 - [IsAsync](#isasync)
 - [LazyFactory](#lazyfactory)
+- [TemplateLiteral](#templateliteral)
 - [Timeout](#timeout)
 - [Tries](#tries)
 - [TryAsync](#tryasync)
@@ -109,6 +110,7 @@ npm i vivth
 - [QCBFIFOReturn](#qcbfiforeturn)
 - [QCBReturn](#qcbreturn)
 - [Runtime](#runtime)
+- [TemplateLiteralType](#templateliteraltype)
 - [VivthDevCodeBlockStringType](#vivthdevcodeblockstringtype)
 
 <h2 id="tobundledjsplugin">ToBundledJSPlugin</h2>
@@ -3272,6 +3274,43 @@ myInstance["vivth:unwrapLazy;"](); // forcefully call factory generator;
 
 \*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
+<h2 id="templateliteral">TemplateLiteral</h2>
+
+#### reference:`TemplateLiteral`
+
+- function helper to create template literal with VALUEhandler to handle each values;
+
+```js
+/**
+ * @template {(input:any)=>string|Promise<string>} VALUEHANDLER
+ * @param {VALUEHANDLER} valueHandler
+ * @param {(result:string)=>string} [postProcess]
+ * @returns {(strings:TemplateStringsArray,
+ * ...values:(Parameters<VALUEHANDLER>[0])[])=>
+ * ReturnType<VALUEHANDLER>}
+ */
+```
+
+- <i>example</i>:
+
+```js
+ import { TemplateLiteral } form 'vivth';
+
+ export const html = TemplateLiteral(
+  (val) => val,
+  // optional
+  (res)=> {
+    window.body.innerHTML = res
+  }
+ );
+
+ html`<div>${`<button>innerButton</button>`}</div>`;
+ // this will set innerHTML of body to '<div><button>innerButton</button></div>'
+
+```
+
+\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
 <h2 id="timeout">Timeout</h2>
 
 #### reference:`Timeout`
@@ -3636,6 +3675,29 @@ await TsToMjs("./myFile.mts", {
 /**
  * - for popular runtimes check;
  * @typedef {'node' | 'bun' | 'deno' | 'browser' | 'unknown'} Runtime
+ */
+```
+
+\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+<h2 id="templateliteraltype">TemplateLiteralType</h2>
+
+- jsdoc types:
+
+```js
+/**
+ * @description
+ * - helper to create custom template literal function;
+ * @template {any} INPUTTYPE
+ * - custom input;
+ * @template {boolean} ISASYNC
+ * - wheter async or not;
+ * @callback TemplateLiteralType
+ * @param {TemplateStringsArray} string
+ * @param {...INPUTTYPE} values
+ * @returns {ISASYNC extends true ? Promise<string>:
+ * string
+ * }
  */
 ```
 
