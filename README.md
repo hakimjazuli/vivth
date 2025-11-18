@@ -110,7 +110,6 @@ npm i vivth
 - [QCBFIFOReturn](#qcbfiforeturn)
 - [QCBReturn](#qcbreturn)
 - [Runtime](#runtime)
-- [TemplateLiteralType](#templateliteraltype)
 - [VivthDevCodeBlockStringType](#vivthdevcodeblockstringtype)
 
 <h2 id="tobundledjsplugin">ToBundledJSPlugin</h2>
@@ -3675,29 +3674,6 @@ await TsToMjs("./myFile.mts", {
 /**
  * - for popular runtimes check;
  * @typedef {'node' | 'bun' | 'deno' | 'browser' | 'unknown'} Runtime
- */
-```
-
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
-
-<h2 id="templateliteraltype">TemplateLiteralType</h2>
-
-- jsdoc types:
-
-```js
-/**
- * @description
- * - helper to create custom template literal function;
- * @template {any} INPUTTYPE
- * - custom input;
- * @template {boolean} ISASYNC
- * - wheter async or not;
- * @callback TemplateLiteralType
- * @param {TemplateStringsArray} string
- * @param {...INPUTTYPE} values
- * @returns {ISASYNC extends true ? Promise<string>:
- * string
- * }
  */
 ```
 

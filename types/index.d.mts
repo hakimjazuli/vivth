@@ -55,5 +55,4 @@ export type MutationType = import("./src/types/MutationType.mjs").MutationType;
 export type QCBFIFOReturn = import("./src/types/QCBFIFOReturn.mjs").QCBFIFOReturn;
 export type QCBReturn = import("./src/types/QCBReturn.mjs").QCBReturn;
 export type Runtime = import("./src/types/Runtime.mjs").Runtime;
-export type TemplateLiteralType<INPUTTYPE extends unknown, ISASYNC extends boolean> = import("./src/types/TemplateLiteralType.mjs").TemplateLiteralType<INPUTTYPE, ISASYNC>;
 export type VivthDevCodeBlockStringType = import("./src/types/VivthDevCodeBlockStringType.mjs").VivthDevCodeBlockStringType;

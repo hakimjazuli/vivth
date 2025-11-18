@@ -87,10 +87,5 @@ export { TsToMjs } from './src/function/TsToMjs.mjs';
  * @typedef {import('./src/types/Runtime.mjs').Runtime} Runtime
  */
 /**
- * @template {any} INPUTTYPE
- * @template {boolean} ISASYNC
- * @typedef {import('./src/types/TemplateLiteralType.mjs').TemplateLiteralType<INPUTTYPE,ISASYNC>} TemplateLiteralType
- */
-/**
  * @typedef {import('./src/types/VivthDevCodeBlockStringType.mjs').VivthDevCodeBlockStringType} VivthDevCodeBlockStringType
  */
