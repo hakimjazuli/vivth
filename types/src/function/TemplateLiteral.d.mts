@@ -13,9 +13,7 @@
  * export const html = TemplateLiteral(
  *  (val) => val,
  *  // optional
- *  (res)=> {
- *    window.body.innerHTML = res
- *  }
+ *  (res) => return window.body.innerHTML = res
  * );
  *
  * html`<div>${`<button>innerButton</button>`}</div>`;
