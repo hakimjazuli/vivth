@@ -132,7 +132,7 @@ export class LitExp {
 					throw new Error('string undefined');
 				}
 				if (i + 1 == stringsLength && string === '') {
-					result.push('(?:\\s+?|;|,|$|)');
+					result.push('(?:\\s+?|;|,|$|\/\/)');
 				} else {
 					result.push(LitExp.escape(string));
 				}
