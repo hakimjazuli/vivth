@@ -51,20 +51,21 @@ export class WorkerMainThread {
 		WorkerMainThread.pathValidator = pathValidator;
 	};
 	/**
-	 * @type {typeof Worker|typeof import('worker_threads').Worker}
+	 * @type {typeof Worker|typeof import('node:worker_threads').Worker}
 	 */
 	static workerClass;
 	/**
 	 * @type {(paths:{worker: string, root:string})=>Promise<string>}
 	 */
 	static pathValidator;
-	static #options = /** @type {import('worker_threads').WorkerOptions & { type?: 'module' }} */ ({
-		type: 'module',
-	});
+	static #options =
+		/** @type {import('node:worker_threads').WorkerOptions & { type?: 'module' }} */ ({
+			type: 'module',
+		});
 	/**
 	 * @template {WorkerThread<any, any>} WT
 	 * @param {string} handler
-	 * @param {Omit<WorkerOptions|import('worker_threads').WorkerOptions, 'eval'|'type'>} [options]
+	 * @param {Omit<WorkerOptions|import('node:worker_threads').WorkerOptions, 'eval'|'type'>} [options]
 	 * @returns {WorkerMainThread<WT>}
 	 */
 	static newVivthWorker(handler, options = {}) {
@@ -93,7 +94,7 @@ export class WorkerMainThread {
 	 * @template {WorkerThread<any, any>} WT
 	 * @param {string} handler
 	 * @param { WorkerOptions
-	 * | import('worker_threads').WorkerOptions} options
+	 * | import('node:worker_threads').WorkerOptions} options
 	 * @param {WorkerMainThread<WT>} worker
 	 * @param {(any:any)=>void} listener
 	 * @returns {Promise<void>}
@@ -179,7 +180,7 @@ export class WorkerMainThread {
 	}
 	/**
 	 * lazyly generated because node version need to await
-	 * @type {Signal<Worker | import('worker_threads').Worker>}
+	 * @type {Signal<Worker | import('node:worker_threads').Worker>}
 	 */
 	// @ts-expect-error
 	#worker = new Signal(undefined);

@@ -28,9 +28,9 @@ export class WorkerMainThread<WT extends WorkerThread<any, any>> {
         pathValidator: (typeof WorkerMainThread)["pathValidator"];
     }) => void;
     /**
-     * @type {typeof Worker|typeof import('worker_threads').Worker}
+     * @type {typeof Worker|typeof import('node:worker_threads').Worker}
      */
-    static workerClass: typeof Worker | typeof import("worker_threads").Worker;
+    static workerClass: typeof Worker | typeof import("node:worker_threads").Worker;
     /**
      * @type {(paths:{worker: string, root:string})=>Promise<string>}
      */
@@ -38,26 +38,26 @@ export class WorkerMainThread<WT extends WorkerThread<any, any>> {
         worker: string;
         root: string;
     }) => Promise<string>;
-    static "__#private@#options": import("worker_threads").WorkerOptions & {
+    static "__#private@#options": import("node:worker_threads").WorkerOptions & {
         type?: "module";
     };
     /**
      * @template {WorkerThread<any, any>} WT
      * @param {string} handler
-     * @param {Omit<WorkerOptions|import('worker_threads').WorkerOptions, 'eval'|'type'>} [options]
+     * @param {Omit<WorkerOptions|import('node:worker_threads').WorkerOptions, 'eval'|'type'>} [options]
      * @returns {WorkerMainThread<WT>}
      */
-    static newVivthWorker<WT_1 extends WorkerThread<any, any>>(handler: string, options?: Omit<WorkerOptions | import("worker_threads").WorkerOptions, "eval" | "type">): WorkerMainThread<WT_1>;
+    static newVivthWorker<WT_1 extends WorkerThread<any, any>>(handler: string, options?: Omit<WorkerOptions | import("node:worker_threads").WorkerOptions, "eval" | "type">): WorkerMainThread<WT_1>;
     /**
      * @template {WorkerThread<any, any>} WT
      * @param {string} handler
      * @param { WorkerOptions
-     * | import('worker_threads').WorkerOptions} options
+     * | import('node:worker_threads').WorkerOptions} options
      * @param {WorkerMainThread<WT>} worker
      * @param {(any:any)=>void} listener
      * @returns {Promise<void>}
      */
-    static "__#private@#workerFilehandler"<WT_1 extends WorkerThread<any, any>>(handler: string, options: WorkerOptions | import("worker_threads").WorkerOptions, worker: WorkerMainThread<WT_1>, listener: (any: any) => void): Promise<void>;
+    static "__#private@#workerFilehandler"<WT_1 extends WorkerThread<any, any>>(handler: string, options: WorkerOptions | import("node:worker_threads").WorkerOptions, worker: WorkerMainThread<WT_1>, listener: (any: any) => void): Promise<void>;
     /**
      * @param {Parameters<typeof WorkerMainThread<WT>["newVivthWorker"]>[0]} handler
      * @param {Parameters<typeof WorkerMainThread<WT>["newVivthWorker"]>[1]} [options]

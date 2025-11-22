@@ -28,7 +28,7 @@ export class WorkerThread {
 	 * - need to be called and exported as new `WorkerThread` class reference;
 	 * @template RECEIVE
 	 * @template POST
-	 * @param {{parentPort:import('worker_threads')["parentPort"]}} refs
+	 * @param {{parentPort:import('node:worker_threads')["parentPort"]}} refs
 	 * -example:
 	 * ```js
 	 * import { parentPort } from 'node:worker_threads';
@@ -61,7 +61,7 @@ export class WorkerThread {
 	 * @example
 	 * import { MyWorkerThread } from './MyWorkerThread.mjs';
 	 *
-	 * const doubleWorker = new MyWorkerThread((ev, isLastOnQ) => {
+	 * const handler = async (ev, isLastOnQ) => {
 	 * 	// if(!isLastOnQ()) {
 	 * 	// 	return null; // can be used for imperative debouncing;
 	 * 	// }
@@ -70,7 +70,8 @@ export class WorkerThread {
 	 * 	// 	return;
 	 * 	// }
 	 * 	return ev = ev \* 2;
-	 * });
+	 * }
+	 * new MyWorkerThread(handler);
 	 */
 	constructor(handler) {
 		this.handler = handler;
@@ -154,7 +155,7 @@ export class WorkerThread {
 	/**
 	 * @description
 	 * - type helper;
-	 * @type {(ev: RECEIVE, isLastOnQ:QCBReturn["isLastOnQ"]) => POST}
+	 * @type {(ev: RECEIVE, isLastOnQ:QCBReturn["isLastOnQ"]) => Promise<POST>}
 	 */
 	handler;
 	/**

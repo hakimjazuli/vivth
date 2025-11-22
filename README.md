@@ -2548,7 +2548,7 @@ WorkerMainThread.setup({
 
 ```js
 /**
- * @type {typeof Worker|typeof import('worker_threads').Worker}
+ * @type {typeof Worker|typeof import('node:worker_threads').Worker}
  */
 ```
 
@@ -2570,7 +2570,7 @@ WorkerMainThread.setup({
 ```js
 /**
  * @param {string} handler
- * @param {Omit<WorkerOptions|import('worker_threads').WorkerOptions, 'eval'|'type'>} [options]
+ * @param {Omit<WorkerOptions|import('node:worker_threads').WorkerOptions, 'eval'|'type'>} [options]
  * @returns {WorkerMainThread<WT>}
  */
 ```
@@ -2695,7 +2695,7 @@ myDoubleWorker.postMessage(90);
 /**
  * @template RECEIVE
  * @template POST
- * @param {{parentPort:import('worker_threads')["parentPort"]}} refs
+ * @param {{parentPort:import('node:worker_threads')["parentPort"]}} refs
  * -example:
  * ```js
  * import { parentPort } from 'node:worker_threads';
@@ -2728,7 +2728,7 @@ export const MyWorkerThreadRef = WorkerThread.setup({ parentPort });
 ```js
 import { MyWorkerThread } from "./MyWorkerThread.mjs";
 
-const doubleWorker = new MyWorkerThread((ev, isLastOnQ) => {
+const handler = async (ev, isLastOnQ) => {
   // if(!isLastOnQ()) {
   // 	return null; // can be used for imperative debouncing;
   // }
@@ -2737,7 +2737,8 @@ const doubleWorker = new MyWorkerThread((ev, isLastOnQ) => {
   // 	return;
   // }
   return (ev = ev * 2);
-});
+};
+new MyWorkerThread(handler);
 ```
 
 #### reference:`WorkerThread_instance.handler`
@@ -2746,7 +2747,7 @@ const doubleWorker = new MyWorkerThread((ev, isLastOnQ) => {
 
 ```js
 /**
- * @type {(ev: RECEIVE, isLastOnQ:QCBReturn["isLastOnQ"]) => POST}
+ * @type {(ev: RECEIVE, isLastOnQ:QCBReturn["isLastOnQ"]) => Promise<POST>}
  */
 ```
 
