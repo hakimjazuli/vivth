@@ -64,9 +64,10 @@ export class WorkerMainThread<WT extends WorkerThread<any, any>> {
      */
     constructor(handler: Parameters<(typeof WorkerMainThread<WT>)["newVivthWorker"]>[0], options?: Parameters<(typeof WorkerMainThread<WT>)["newVivthWorker"]>[1]);
     /**
-     * @type {()=>void}
+     * @param {boolean} [terminateAllReactivity]
+     * @return {void}
      */
-    terminate: () => void;
+    terminate: (terminateAllReactivity?: boolean) => void;
     /**
      * @type {Derived<WorkerResult<WT["POST"]>>}
      */

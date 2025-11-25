@@ -174,7 +174,7 @@ export class WorkerMainThread {
 				if (worker.#worker.value) {
 					worker.#worker.value.postMessage(closeWorkerThreadEventObject, []);
 				}
-				worker.terminate();
+				worker.terminate(true);
 			});
 		}
 	}
@@ -197,13 +197,17 @@ export class WorkerMainThread {
 		worker.postMessage(postData, []);
 	});
 	/**
-	 * @type {()=>void}
+	 * @param {boolean} [terminateAllReactivity]
+	 * @return {void}
 	 */
-	terminate = () => {
+	terminate = (terminateAllReactivity = false) => {
 		/**
 		 * this is more for browser, as most of this are automatically cleaned with `SafeExit`;
 		 */
 		this.#worker.value?.terminate();
+		if (!terminateAllReactivity) {
+			return;
+		}
 		this.#worker.remove.ref();
 		this.#handler.options.removeEffect();
 		this.#proxyPost.remove.ref();
