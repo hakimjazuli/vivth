@@ -1,6 +1,6 @@
 {
 	"name": "vivth",
-	"version": "1.4.6",
+	"version": "1.4.7",
 	"description": "library primitives",
 	"main": "index.mjs",
 	"types": "./types/index.d.mts",
