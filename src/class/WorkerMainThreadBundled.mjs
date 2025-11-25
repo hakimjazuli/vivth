@@ -174,7 +174,7 @@ export class WorkerMainThread {
 				if (worker.#worker.value) {
 					worker.#worker.value.postMessage(closeWorkerThreadEventObject, []);
 				}
-				worker.terminate(true);
+				await worker.terminate(true);
 			});
 		}
 	}
@@ -197,14 +197,14 @@ export class WorkerMainThread {
 		worker.postMessage(postData, []);
 	});
 	/**
-	 * @param {boolean} [terminateAllReactivity]
-	 * @return {void}
+	 * @param {boolean} terminateAllReactivity
+	 * @return {Promise<void>}
 	 */
-	terminate = (terminateAllReactivity = false) => {
+	terminate = async (terminateAllReactivity) => {
 		/**
 		 * this is more for browser, as most of this are automatically cleaned with `SafeExit`;
 		 */
-		this.#worker.value?.terminate();
+		await this.#worker.value?.terminate();
 		if (!terminateAllReactivity) {
 			return;
 		}
