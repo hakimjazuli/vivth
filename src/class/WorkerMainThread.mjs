@@ -241,7 +241,7 @@ export class WorkerMainThread {
 				if (worker.#worker.value) {
 					worker.#worker.value.postMessage(closeWorkerThreadEventObject, []);
 				}
-				await worker.terminate(true);
+				worker.terminate();
 			});
 		}
 	}
@@ -266,19 +266,13 @@ export class WorkerMainThread {
 	/**
 	 * @description
 	 * - terminate all signals that are used on this instance;
-	 * @param {boolean} terminateAllReactivity
-	 * - false: only terminate `Worker` instance;
-	 * - true: also terminate `Signal`s and `Effect`s;
-	 * @return {Promise<void>}
+	 * @return {void}
 	 */
-	terminate = async (terminateAllReactivity) => {
+	terminate = () => {
 		/**
 		 * this is more for browser, as most of this are automatically cleaned with `SafeExit`;
 		 */
-		await this.#worker.value?.terminate();
-		if (!terminateAllReactivity) {
-			return;
-		}
+		this.#worker.value?.terminate();
 		this.#worker.remove.ref();
 		this.#handler.options.removeEffect();
 		this.#proxyPost.remove.ref();
