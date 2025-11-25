@@ -2594,7 +2594,7 @@ export const myDoubleWorker = WorkerMainThread.newVivthWorker(
  * @param {boolean} terminateAllReactivity
  * - false: only terminate `Worker` instance;
  * - true: also terminate `Signal`s and `Effect`s;
- * @return {void}
+ * @return {Promise<void>}
  */
 ```
 

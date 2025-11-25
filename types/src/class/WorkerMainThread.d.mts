@@ -121,9 +121,9 @@ export class WorkerMainThread<WT extends WorkerThread<any, any>> {
      * @param {boolean} terminateAllReactivity
      * - false: only terminate `Worker` instance;
      * - true: also terminate `Signal`s and `Effect`s;
-     * @return {void}
+     * @return {Promise<void>}
      */
-    terminate: (terminateAllReactivity: boolean) => void;
+    terminate: (terminateAllReactivity: boolean) => Promise<void>;
     /**
      * @description
      * - result signal of the processed message;
