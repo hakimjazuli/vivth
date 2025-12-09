@@ -269,6 +269,7 @@ export class WorkerMainThread {
 	 * @return {void}
 	 */
 	terminate = () => {
+		this.postMessage(closeWorkerThreadEventObject);
 		/**
 		 * this is more for browser, as most of this are automatically cleaned with `SafeExit`;
 		 */
