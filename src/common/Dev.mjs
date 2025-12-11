@@ -129,6 +129,14 @@ export class Dev {
 	 * }, 'vivthDevCodeBlock');
 	 */
 	static vivthDevCodeBlock = async (callback, _closing) => {
+		if (
+			/**
+			 * just in case Bundler doesn't properly clearup `vivthDevCodeBlock`
+			 */
+			!Dev.isDev
+		) {
+			return;
+		}
 		await callback({ test: Dev.#test });
 	};
 }

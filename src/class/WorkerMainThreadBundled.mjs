@@ -100,9 +100,8 @@ export class WorkerMainThread {
 	 * @returns {Promise<void>}
 	 */
 	static async #workerFilehandler(handler, options, worker, listener) {
-		let resolvedPath;
 		WorkerMainThread.#options.eval = true;
-		resolvedPath = (await FSInline.vivthFSInlineFile(handler)).toString('utf-8');
+		const resolvedPath = (await FSInline.vivthFSInlineFile(handler)).toString('utf-8');
 		const runtime = GetRuntime();
 		const workerClass = WorkerMainThread.workerClass;
 		if (
@@ -117,16 +116,15 @@ export class WorkerMainThread {
 				if (runtime !== 'browser') {
 					throw new Error('not a browser');
 				}
-				let worker_;
 				const inlineURL = Base64URL(handler, 'application/javascript', btoa);
-				worker_ = worker.#worker.value = new workerClass(
+				const worker_ = (worker.#worker.value = new workerClass(
 					inlineURL,
 					// @ts-expect-error
 					{
 						...options,
 						...WorkerMainThread.#options,
 					}
-				);
+				));
 				if ('onmessage' in worker_ === false) {
 					throw new Error('not a browser');
 				}
@@ -138,18 +136,19 @@ export class WorkerMainThread {
 				}
 			},
 			nonBrowser: async () => {
-				const worker_ = (worker.#worker.value = new workerClass(
-					resolvedPath,
-					// @ts-expect-error
-					{
-						...options,
-						...WorkerMainThread.#options,
-					}
-				));
+				if (workerClass !== (await import('node:worker_threads')).Worker) {
+					throw "Worker are not impored from 'node:worker_threads'";
+				}
+				const worker_ = (worker.#worker.value = new workerClass(resolvedPath, {
+					...options,
+					...WorkerMainThread.#options,
+				}));
 				if ('addEventListener' in worker_) {
+					// @ts-expect-error
 					worker_.addEventListener('message', listener);
 					if (SafeExit.instance) {
 						SafeExit.instance.addCallback(async () => {
+							// @ts-expect-error
 							worker_.removeEventListener('message', listener);
 						});
 					}
@@ -169,14 +168,12 @@ export class WorkerMainThread {
 			Console.error(errorCreatingWorker);
 			return;
 		}
-		if (SafeExit.instance) {
-			SafeExit.instance.addCallback(async () => {
-				if (worker.#worker.value) {
-					worker.#worker.value.postMessage(closeWorkerThreadEventObject, []);
-				}
-				await worker.terminate();
-			});
+		if (!SafeExit.instance) {
+			return;
 		}
+		SafeExit.instance.addCallback(async () => {
+			worker.terminate();
+		});
 	}
 	/**
 	 * lazyly generated because node version need to await
@@ -200,6 +197,7 @@ export class WorkerMainThread {
 	 * @return {void}
 	 */
 	terminate = () => {
+		this.postMessage(closeWorkerThreadEventObject);
 		/**
 		 * this is more for browser, as most of this are automatically cleaned with `SafeExit`;
 		 */
