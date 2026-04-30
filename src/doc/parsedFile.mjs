@@ -9,6 +9,7 @@ import { LazyFactory } from '../function/LazyFactory.mjs';
 import { TrySync } from '../function/TrySync.mjs';
 import { Console } from '../class/Console.mjs';
 import { TryAsync } from '../function/TryAsync.mjs';
+import { Preferrence } from '../common/Preferrence.mjs';
 
 export class parsedFile {
 	/**
@@ -27,13 +28,13 @@ export class parsedFile {
 	 * @param {import('fs').Stats} _stats
 	 * @param {BufferEncoding} [encoding]
 	 */
-	constructor(path__, _stats, encoding = 'utf-8') {
-		if (Paths.root === undefined) {
-			return;
-		}
+	constructor(path__, _stats, encoding = Preferrence.encoding) {
 		this.#stats = _stats;
 		const root = Paths.root.replace(/\\/g, '/');
-		if (Paths.normalize(path__).startsWith(root)) {
+		if (
+			/**  */
+			Paths.normalize(path__).startsWith(root)
+		) {
 			this.#fullPath = path__;
 		} else {
 			this.#fullPath = join(root, path__);
@@ -43,12 +44,19 @@ export class parsedFile {
 	}
 	parse = async () => {
 		const { details, error, exportName } = await this.content.parsed();
-		if (error || exportName === undefined) {
+		if (
+			/**  */
+			error ||
+			exportName === undefined
+		) {
 			return;
 		}
 		for (let i = 0; i < details.length; i++) {
 			const detail = details[i];
-			if (detail === undefined) {
+			if (
+				/**  */
+				detail === undefined
+			) {
 				continue;
 			}
 			const [
@@ -62,6 +70,8 @@ export class parsedFile {
 				namedVar,
 			] = detail;
 			if (
+				/**  */
+
 				instanceOrStaticDef === undefined ||
 				fullDescription === undefined ||
 				isExport === undefined ||
@@ -78,9 +88,12 @@ export class parsedFile {
 				isExport,
 				typeOfVar,
 				getterOrSetter,
-				namedVar
+				namedVar,
 			);
-			if (interpreted === undefined) {
+			if (
+				/**  */
+				interpreted === undefined
+			) {
 				return;
 			}
 			this.documented.readme.add(interpreted);
@@ -90,15 +103,24 @@ export class parsedFile {
 		return {
 			typedef: async () => {
 				const relativePath = this.path.relative;
-				if (relativePath === '') {
+				if (
+					/**  */
+					relativePath === ''
+				) {
 					return;
 				}
 				const baseName = this.baseName.noExt.split('.')[0];
-				if (baseName === undefined) {
+				if (
+					/**  */
+					baseName === undefined
+				) {
 					return;
 				}
 				const content = await this.content.string();
-				if (content === undefined) {
+				if (
+					/**  */
+					content === undefined
+				) {
 					return;
 				}
 				const typedef = this.#parseTypedef(baseName, relativePath, content);
@@ -116,7 +138,10 @@ export class parsedFile {
 	 */
 	static #isExportNameValid = (exportName) => {
 		const firstLetter = exportName.split('')[0];
-		if (firstLetter === undefined) {
+		if (
+			/**  */
+			firstLetter === undefined
+		) {
 			return false;
 		}
 		return firstLetter.toUpperCase() === firstLetter;
@@ -133,52 +158,76 @@ export class parsedFile {
 	 */
 	#parseTypedef = (exportName, relativePath, content) => {
 		const rootPath = Paths.root;
-		if (rootPath === undefined || parsedFile.#isExportNameValid(exportName) === false) {
+		if (
+			/**  */
+			parsedFile.#isExportNameValid(exportName) === false
+		) {
 			return undefined;
 		}
-		if (this.parsedType === undefined) {
+		if (
+			/**  */
+			this.parsedType === undefined
+		) {
 			const baseNameNoExt = this.baseName.noExt;
 			const relativeDir = this.dirName.relative;
 			const contents = content.matchAll(/(\/\*\*[\s\S]*?\*\/)/gm).toArray();
 			const readme = contents
 				.map(([, val]) => {
-					if (val === undefined) {
+					if (
+						/**  */
+						val === undefined
+					) {
 						return;
 					}
-					if (/import\(['"][\s\S]*['"]\)/g.test(val) === false) {
+					if (
+						/**  */
+						/import\(['"][\s\S]*['"]\)/g.test(val) === false
+					) {
 						return val;
 					}
 					const res = /import\(['"]([\s\S]*)['"]\)/g.exec(val);
-					if (res === null) {
+					if (
+						/**  */
+						res === null
+					) {
 						return;
 					}
 					const [, importDec] = res;
-					if (importDec === undefined) {
+					if (
+						/**  */
+						importDec === undefined
+					) {
 						return;
 					}
 					const correctedPath = Paths.normalize(normalize(join(relativeDir, importDec)));
 					const rep = val.replace(
 						importDec,
-						correctedPath.startsWith('.') ? correctedPath : `./${correctedPath}`
+						correctedPath.startsWith('.') ? correctedPath : `./${correctedPath}`,
 					);
 					return rep;
 				})
 				.join('\n');
 			const [res0] = contents.filter(([_, captured]) => {
-				if (captured === undefined) {
+				if (
+					/**  */
+					captured === undefined
+				) {
 					return false;
 				}
 				return new RegExp(
 					`(?:@typedef|@callback)[\\s\\S]*?${baseNameNoExt}\\s?[\\s\\S]*?`,
-					''
+					'',
 				).test(captured);
 			});
-			if (res0 === undefined) {
+			if (
+				/**  */
+				res0 === undefined
+			) {
 				return undefined;
 			}
 			const [res] = res0;
 			if (
-				//
+				/**  */
 				!res.length
 			) {
 				return undefined;
@@ -193,14 +242,14 @@ export class parsedFile {
 			this.parsedType = {
 				module: `/**-templates-
  * @typedef {import('./${relativePath}').${exportName}${
-					templates.length
-						? `<${templates
-								.map(({ name }) => {
-									return name;
-								})
-								.join(',')}>`
-						: ''
-				}} ${exportName}
+		templates.length
+			? `<${templates
+					.map(({ name }) => {
+						return name;
+					})
+					.join(',')}>`
+			: ''
+ }} ${exportName}
  */`
 					.replace(/\\/g, '/')
 					.replace(
@@ -210,18 +259,22 @@ export class parsedFile {
 									templates
 										.map(({ comment, type }) => {
 											const [, matched] = type?.match(/import\(['"]([\s\S]*)['"]\)/) ?? [];
-											if (matched && comment) {
+											if (
+												/**  */
+												matched &&
+												comment
+											) {
 												comment = comment.replace(
 													matched,
 													`.${Paths.normalizesForRoot(
-														relative(rootPath, resolve(dirname(this.#fullPath), matched))
-													)}`
+														relative(rootPath, resolve(dirname(this.#fullPath), matched)),
+													)}`,
 												);
 											}
 											return comment;
 										})
 										.join('\n')
-							: ''
+							: '',
 					),
 				readme,
 			};
@@ -245,20 +298,23 @@ export class parsedFile {
 		isExport_,
 		typeOfVar,
 		getterOrSetter,
-		namedVar
+		namedVar,
 	) => {
 		const type = instanceOrStaticDef.includes('@instance')
 			? 'instance'
 			: instanceOrStaticDef.includes('@static')
-			? 'static'
-			: instanceOrStaticDef.includes('@helper')
-			? 'helper'
-			: '';
+				? 'static'
+				: instanceOrStaticDef.includes('@helper')
+					? 'helper'
+					: '';
 		const parentSrc = instanceOrStaticDef
 			.matchAll(/(?:@instance|@static|@helper)\s+(\w+)/gm)
 			.toArray();
 		let parent = '';
-		if (parentSrc) {
+		if (
+			/**  */
+			parentSrc
+		) {
 			TrySync(() => {
 				const parentSrc_0 = parentSrc[0] ?? [, ''];
 				parent = parentSrc_0[1];
@@ -266,7 +322,10 @@ export class parsedFile {
 		}
 		const isExport = isExport_ === 'export';
 		let reference = isExport ? exportName : '';
-		if (parent) {
+		if (
+			/**  */
+			parent
+		) {
 			reference = `${parent}.${namedVar}`;
 		}
 		switch (type) {
@@ -283,20 +342,29 @@ export class parsedFile {
 				reference = isExport
 					? `${exportName}`
 					: typeOfVar === 'static'
-					? `${exportName}.${namedVar}`
-					: typeOfVar === ''
-					? `${exportName}_instance.${namedVar}`
-					: '';
+						? `${exportName}.${namedVar}`
+						: typeOfVar === ''
+							? `${exportName}_instance.${namedVar}`
+							: '';
 				break;
 		}
-		if (getterOrSetter !== '') {
+		if (
+			/**  */
+			getterOrSetter !== ''
+		) {
 			reference = `${reference}:${getterOrSetter}ter`;
 		}
 		fullDescription = fullDescription.trim();
-		if (namedVar.startsWith('#')) {
+		if (
+			/**  */
+			namedVar.startsWith('#')
+		) {
 			reference = '';
 		}
-		if (namedVar === 'constructor') {
+		if (
+			/**  */
+			namedVar === 'constructor'
+		) {
 			reference = `new ${exportName}`;
 		}
 		const parsedFullDescription = this.#parseFullDesc(fullDescription);
@@ -331,7 +399,10 @@ export class parsedFile {
  * @${fullDescTrue.join('@').replace(/(?<!\\)\*/g, '\n *')}
  */\n\`\`\``;
 		const [example_] = jsPreview.matchAll(/@example([\s\S]*)\*\//gm).toArray();
-		if (example_ === undefined) {
+		if (
+			/**  */
+			example_ === undefined
+		) {
 			return {
 				description,
 				jsPreview: fullDescTrue.length ? jsPreview : '',
@@ -350,7 +421,7 @@ export class parsedFile {
 						.replace(/\`\`\`js[\s]*\`\`\`/gm, '')
 						.replace(/\*[\*\s]*\*\//g, '*/')}${
 						example ? `\n - <i>example</i>:\n\`\`\`js${example}\n\`\`\``.replace(/\\\*/g, '*') : ''
-				  }`
+					}`
 				: '',
 		};
 	};
@@ -368,13 +439,20 @@ export class parsedFile {
 	#parse = async () => {
 		const fullpath = this.#fullPath;
 		const content = await this.content.string();
-		if (content === undefined) {
-			const error = { fullpath, message: 'invalid file content' };
-			Console.error(error);
-			return { exportName: undefined, details: undefined, error };
+		if (
+			/**  */
+			content === undefined
+		) {
+			const errorParse = { fullpath, message: 'invalid file content' };
+			Console.error({ errorParse });
+			return { exportName: undefined, details: undefined, error: errorParse };
 		}
 		const supposedName = this.baseName.noExt.split('.')[0];
-		if (supposedName === undefined || this.#getTopExport(supposedName, content) === false) {
+		if (
+			/**  */
+			supposedName === undefined ||
+			this.#getTopExport(supposedName, content) === false
+		) {
 			return {
 				details: undefined,
 				exportName: undefined,
@@ -395,12 +473,15 @@ export class parsedFile {
 	 * @returns {boolean}
 	 */
 	#getTopExport = (name, content) => {
-		if (parsedFile.#isExportNameValid(name) === false) {
+		if (
+			/**  */
+			parsedFile.#isExportNameValid(name) === false
+		) {
 			return false;
 		}
 		const regex = new RegExp(
 			`export\\s*(?:(?:async\\s*|)function|const|class|\\{)\\s*${name}`,
-			'g'
+			'g',
 		);
 		return regex.test(content);
 	};
@@ -511,7 +592,6 @@ export class parsedFile {
 	/**
 	 * @type {Stats}
 	 */
-	// @ts-expect-error
 	#stats;
 	get timeStamp() {
 		const this_ = this;
@@ -541,25 +621,34 @@ export class parsedFile {
 			 * @return {Promise<string|undefined>}
 			 */
 			string: async () => {
-				if ((await this_.isFile()) === false) {
+				if (
+					/**  */
+					(await this_.isFile()) === false
+				) {
 					return undefined;
 				}
 				const [raw, error] = await TryAsync(async () => {
 					return (await readFile(this_.#fullPath)).toString(this.#encoding);
 				});
-				if (error === undefined) {
+				if (
+					/**  */
+					error === undefined
+				) {
 					this_.#rawContent = raw;
 					return this_.#rawContent;
 				}
 				Console.error({
 					error,
 					fullPath: this_.#fullPath,
-					message2: 'failed to read fullPath',
+					message: 'failed to read fullPath',
 				});
 				return undefined;
 			},
 			parsed: async () => {
-				if (this_.#parsed === undefined) {
+				if (
+					/**  */
+					this_.#parsed === undefined
+				) {
 					this_.#parsed = await this_.#parse();
 				}
 				return this_.#parsed;
@@ -574,13 +663,19 @@ export class parsedFile {
 		let [importedModule, error] = await TryAsync(async () => {
 			return await import(`file://${realTimePath}`);
 		});
-		if (error === undefined) {
+		if (
+			/**  */
+			error === undefined
+		) {
 			return [importedModule, undefined];
 		}
 		[importedModule, error] = await TryAsync(async () => {
 			return await import(realTimePath);
 		});
-		if (error === undefined) {
+		if (
+			/**  */
+			error === undefined
+		) {
 			return [importedModule, undefined];
 		}
 		Console.error({ error, timeStamp: Date.now() });

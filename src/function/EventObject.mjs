@@ -9,13 +9,9 @@ import { EventNameSpace } from '../common/EventNameSpace.mjs';
  * @param {NAME} name
  * @returns {{[EventNameSpace]: NAME}}
  * @example
- * import { EventCheck } from 'vivth';
- * import { incomingMessage } from './some/where.mjs';
+ * import { EventObject } from 'vivth';
  *
- * const eventObjectPayload = EventObject('worker:exit');
- * // assuming `incomingMessage`, also created using EventObject('worker:exit');
- * // or manually {[EventNameSpace]:'worker:exit'};
- * // which either will result true;
+ * export const eventObjectPayload = EventObject('worker:exit');
  */
 export function EventObject(name) {
 	return { [EventNameSpace]: name };

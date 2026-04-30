@@ -35,7 +35,7 @@ export class WalkThrough {
 	 */
 	static set(setInstance, callback) {
 		WalkThrough.#handler(setInstance.values(), callback);
-	};
+	}
 	/**
 	 * @description
 	 * - method helper to WalkThrough `Map`;
@@ -52,7 +52,7 @@ export class WalkThrough {
 	 */
 	static map(mapInstance, callback) {
 		WalkThrough.#handler(mapInstance.entries(), callback);
-	};
+	}
 	/**
 	 * @description
 	 * - method helper to WalkThrough `Array`;
@@ -69,22 +69,5 @@ export class WalkThrough {
 	 */
 	static array(arrayInstance, callback) {
 		WalkThrough.#handler(arrayInstance.values(), callback);
-	};
-	/**
-	 * @description
-	 * - method helper to WalkThrough `Generator`;
-	 * @template T
-	 * @param {Generator<T, any, any>} generatorInstance
-	 * @param {(value: T) => void} callback
-	 * @returns {void}
-	 * @example
-	 * import { WalkThrough } from 'vivth';
-	 *
-	 * WalkThrough.generator(generatorOfSomething, (value) => {
-	 * 	// code
-	 * })
-	 */
-	static generator(generatorInstance, callback) {
-		WalkThrough.#handler(generatorInstance, callback);
-	};
+	}
 }

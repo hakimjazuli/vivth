@@ -1,0 +1,99 @@
+export const vivthJSautoDOC: "vivth.JSautoDOC";
+/**
+ * @description
+ * - class for auto documenting mjs package/project, using jsdoc;
+ * - this autodocumenter uses [chokidar](https://npmjs.com/package/chokidar) under the hood;
+ * - this class also is used to generate this `README.md`;
+ * - behaviours:
+ * >- auto export must follows the following rules;
+ * >1) add `"at"noautodoc` on self closing jsdoc comment to opt out from generating documentation on said file;
+ * >2) will (generate) export all named exported 'const'|'function'|'async function'|'class', alphanumeric name, started with Capital letter, same name with fileName on `options.paths.file`;
+ * >3) will (generate) declare typedef of existing typedef with alphanumeric name, started with Capital letter, same name with fileName, and have no valid export like on point <sup>1</sup> on `options.paths.file`;
+ * >4) will (generate) create `README.md` based on, `options.paths.dir` and `README.src.md`;
+ * >5) extract `"at"description` jsdoc:
+ * >>- on static/prop that have depths, all of children should have `"at"static`/`"at"instance` `nameOfImmediateParent`, same block but before `"at"description` comment line;
+ * >>- `"at"description` are treated as plain `markdown`;
+ * >>- first `"at"${string}` after `"at"description` until `"at"example` will be treated as `javascript` comment block on the `markdown`;
+ * >>- `"at"example` are treated as `javascript` block on the `markdown` file, and should be placed last on the same comment block;
+ * >>- you can always look at `vivth/src` files to check how the source, and the `README.md` and `index.mjs` documentation/generation results;
+ * >6) this types of arrow functions will be converted to regullar function, for concise type emition, includes:
+ * >>- validly exported function;
+ * >>- static/instance method with generic template;
+ * >7) transpile `.ts` and `.mts` to `.mjs` with same name and directory;
+ * >>- use `"at"preserve` to preserve tsdoc comment section;
+ * >8) integrated with assembly script to wasm compiler on the doc;
+ * >>- see [AssemblyScript](#assemblyscript);
+ */
+export class JSautoDOC {
+    /**
+     * @type {JSautoDOC|undefined}
+     */
+    static "__#private@#instance": JSautoDOC | undefined;
+    /**
+     * @description
+     * @param {Object} options
+     * @param {Object} [options.paths]
+     * @param {string} options.paths.file
+     * - entry point;
+     * @param {string} options.paths.readMe
+     * - readme target;
+     * @param {string} options.paths.dir
+     * - source directory;
+     * @param {string} [options.copyright]
+     * @param {string} [options.tableOfContentTitle]
+     * @param {number} [options.maxDebounceForGeneratingDocAndExport]
+     * - default `10_000`;
+     * @param {import('chokidar').ChokidarOptions} [options.chokidarOptions]
+     * - ChokidarOptions;
+     * @param {import('../typehints/AutoDocASOptions.mjs').AutoDocASOptions} [options.assemblyScriptOptions]
+     * - abstracted details to handle `.as.ts` file;
+     * @param {(arg0:{documentedFilePathsStructuredClone:Set<string>})=>Promise<void>} [options.onLastGeneratedCallback]
+     * - callback to be run on finishing generating document AND exports;
+     * - only handle that marked as `isLastCalled`;
+     * @example
+     * import { JSautoDOC } from 'vivth';
+     *
+     * new JSautoDOC({
+     * 	paths: { dir: 'src', file: 'index.mjs', readMe: 'README.md' },
+     * 	copyright: 'this library is made and distributed under MIT license;',
+     * 	tableOfContentTitle: 'list of exported API and typehelpers',
+     * 	// assemblyScriptOptions: {},
+     * 	// onLastGeneratedCallback: async (options) => {
+     * 	// 	Console.log(options);
+     * 	// },
+     * });
+     *
+     */
+    constructor({ paths, tableOfContentTitle, copyright, maxDebounceForGeneratingDocAndExport, chokidarOptions, assemblyScriptOptions, onLastGeneratedCallback, }: {
+        paths?: {
+            file: string;
+            readMe: string;
+            dir: string;
+        } | undefined;
+        copyright?: string | undefined;
+        tableOfContentTitle?: string | undefined;
+        maxDebounceForGeneratingDocAndExport?: number | undefined;
+        chokidarOptions?: Partial<{
+            persistent: boolean;
+            ignoreInitial: boolean;
+            followSymlinks: boolean;
+            cwd?: string;
+            usePolling: boolean;
+            interval: number;
+            binaryInterval: number;
+            alwaysStat?: boolean;
+            depth?: number;
+            ignorePermissionErrors: boolean;
+            atomic: boolean | number;
+        } & {
+            ignored: import("chokidar").Matcher | import("chokidar").Matcher[];
+            awaitWriteFinish: boolean | Partial<import("chokidar").AWF>;
+        }> | undefined;
+        assemblyScriptOptions?: import("../typehints/AutoDocASOptions.mjs").AutoDocASOptions | undefined;
+        onLastGeneratedCallback?: ((arg0: {
+            documentedFilePathsStructuredClone: Set<string>;
+        }) => Promise<void>) | undefined;
+    });
+    #private;
+}
+export type Stats = import("fs").Stats;

@@ -1,6 +1,6 @@
 // @ts-check
 
-import { TryAsync } from './TryAsync.mjs';
+import { ForInAsync } from './ForInAsync.mjs';
 
 /**
  * @description
@@ -18,12 +18,12 @@ import { TryAsync } from './TryAsync.mjs';
  * @param {RecordTryType} tryRecord
  * @returns {Promise<
  * 	[[keyof RecordTryType, RETURNTYPE], undefined]
- * 	| [[undefined, undefined], Error|undefined]
+ * 	| [[undefined, undefined], Set<Error>]
  * >}
  * @example
  * import { Tries } from 'vivth';
  *
- * const [[key, result], error] = await Tries({
+ * const [[key, result], setOfError] = await Tries({
  * 	someRuntime: async ({ prevError }) => {
  * 		// asuming on this one doesn't naturally throw error,
  * 		// yet you need to continue to next key,
@@ -53,19 +53,28 @@ import { TryAsync } from './TryAsync.mjs';
  */
 export async function Tries(tryRecord) {
 	/**
-	 * @type {Error|undefined}
+	 * @type {undefined|keyof RecordTryType}
 	 */
-	let prevError = undefined;
-	for (const key in tryRecord) {
-		const callback = tryRecord[key];
-		const [result, error] = await TryAsync(async () => {
-			return await callback({ prevError });
-		});
-		if (error) {
-			prevError = error;
-			continue;
-		}
+	let key;
+	/**
+	 * @type {undefined|RETURNTYPE}
+	 */
+	let result;
+	const [, setOfError] = await ForInAsync(
+		tryRecord,
+		async (key_, callback, { prevError, breakEarly }) => {
+			const result_ = await callback({ prevError });
+			breakEarly(); // when not error, it will break after return;
+			key = key_;
+			result = result_;
+		},
+	);
+	if (
+		/**  */
+		key
+	) {
+		// @ts-expect-error
 		return [[key, result], undefined];
 	}
-	return [[undefined, undefined], prevError];
+	return [[undefined, undefined], setOfError];
 }

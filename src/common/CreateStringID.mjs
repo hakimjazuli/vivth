@@ -13,21 +13,22 @@ const qchannel = LazyFactory(() => new QChannel('CreateStringID'));
  * - the asynchrounous nature is to prevent race condition that might resulting same Id being generated;
  * >- queued using QChannel;
  * @param {string} [prefix]
+ * @param {string} [suffix]
  * @returns {ReturnType<typeof TryAsync<string>>}
  * @example
  * import { CreateStringID } from 'vivth';
  *
  * (async () => {
- * 	const [myUniqueID, errorCreatingUniqueID] = await CreateStringID('myPrefix');
+ * 	const [myUniqueID, errorCreatingUniqueID] = await CreateStringID('myPrefix', 'mySuffix');
  * 	if(errorCreatingUniqueID) {
  * 		return;
  * 	}
- * 	Console.log(myUniqueID); // `myPrefix${Date.now()}`
+ * 	Console.log(myUniqueID); // `myPrefix${Date.now()}mySuffix`
  * })()
  */
-export async function CreateStringID(prefix = '') {
+export async function CreateStringID(prefix = '', suffix = '') {
 	return await qchannel.callback('newStringID', async () => {
 		await Timeout(1);
-		return `${prefix}${Date.now()}`;
+		return `${prefix}${Date.now()}${suffix}`;
 	});
 }

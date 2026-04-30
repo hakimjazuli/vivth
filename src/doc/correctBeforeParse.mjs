@@ -7,6 +7,7 @@ import { TryAsync } from '../function/TryAsync.mjs';
 import { Console } from '../class/Console.mjs';
 import { Timeout } from '../function/Timeout.mjs';
 import { LitExp } from '../class/LitExp.mjs';
+import { Preferrence } from '../common/Preferrence.mjs';
 
 /**
  * @typedef {'shouldProceedNextCheck'|'waitForRewrite'|'doNotProcess'} RetType
@@ -17,33 +18,46 @@ import { LitExp } from '../class/LitExp.mjs';
  * @param {BufferEncoding} [encoding]
  * @returns {Promise<RetType>}
  */
-export const correctBeforeParse = async (path, encoding = 'utf-8') => {
+export const correctBeforeParse = async (path, encoding = Preferrence.encoding) => {
 	const validExportName = basename(path).split('.')[0] ?? '';
 	const firstLetter = validExportName[0];
 	const isStartWithCapital = firstLetter?.toUpperCase() === firstLetter;
-	if (validExportName === '' || isStartWithCapital === false) {
+	if (
+		/**  */
+		validExportName === '' ||
+		isStartWithCapital === false
+	) {
 		return 'doNotProcess';
 	}
-	const content = (await readFile(path, { encoding: 'utf-8' })).toString();
+	const content = (await readFile(path, { encoding })).toString();
 	const [resFunctionCheck, errorFunctionCheck] = await checkIsFunction(
 		content,
 		validExportName,
 		path,
-		encoding
+		encoding,
 	);
-	if (errorFunctionCheck) {
+	if (
+		/**  */
+		errorFunctionCheck
+	) {
 		return 'doNotProcess';
 	}
-	if (resFunctionCheck === 'waitForRewrite') {
+	if (
+		/**  */
+		resFunctionCheck === 'waitForRewrite'
+	) {
 		return 'waitForRewrite';
 	}
 	const [resClassCheck, errorClassCheck] = await checkIsClass(
 		content,
 		validExportName,
 		path,
-		encoding
+		encoding,
 	);
-	if (errorClassCheck) {
+	if (
+		/**  */
+		errorClassCheck
+	) {
 		return 'doNotProcess';
 	}
 	return resClassCheck;
@@ -59,11 +73,15 @@ const checkIsFunction = async (content, validExportName, path, encoding) => {
 	return await TryAsync(async () => {
 		const regexConst = new RegExp(
 			`export\\s+const\\s+${validExportName}\\s+\\=\\s*?(?:async|)\\s*?\\(([\\s\\S]*?)\\)\\s*?\=\>`,
-			'g'
+			'g',
 		);
 		const matches = content.matchAll(regexConst).toArray()[0];
 		const useConst = regexConst.test(content);
-		if (useConst && matches) {
+		if (
+			/**  */
+			useConst &&
+			matches
+		) {
 			const [fullString, parameters] = matches;
 			const declaratorReplaceMent = `export function ${validExportName}(${parameters})`;
 			const newContent = content.replace(fullString, declaratorReplaceMent);
@@ -91,7 +109,10 @@ const checkIsClass = async (content, validExportName, path, encoding) => {
 		 */
 		async () => {
 			const isAClassRegex = new RegExp(`export\\s+class\\s+${validExportName}`, 'g');
-			if (isAClassRegex.test(content) === false) {
+			if (
+				/**  */
+				isAClassRegex.test(content) === false
+			) {
 				return 'shouldProceedNextCheck';
 			}
 			let rewrite = false;
@@ -105,17 +126,23 @@ const checkIsClass = async (content, validExportName, path, encoding) => {
 					const check = new RegExp(
 						`(?<opening>${LitExp.escape(val).replace(
 							/\s+/g,
-							`\\\s*`
+							`\\\s*`,
 						)}\\\s*?(?:static\\\s+|))(?<funcname>(?:\#|)[a-zA-Z0-9]*)\\\s*?\\\=\\\s*?(?<async_>async\\\s*?|)\\\((?<parameters>[\\\s\\\S]*?)\\\)\\\s*?=>`,
-						'g'
+						'g',
 					);
 					const [checkContent] = content.matchAll(check).toArray();
-					if (checkContent === undefined) {
+					if (
+						/**  */
+						checkContent === undefined
+					) {
 						return;
 					}
 					const fullCaptured = checkContent[0];
 					const grouped = checkContent.groups;
-					if (grouped === undefined) {
+					if (
+						/**  */
+						grouped === undefined
+					) {
 						return;
 					}
 					const { opening, funcname, async_, parameters } = grouped;
@@ -125,7 +152,10 @@ const checkIsClass = async (content, validExportName, path, encoding) => {
 					}${funcname}(${parameters})`;
 					content = content.replace(fullCaptured, modifiedFuncDeclaration);
 				});
-			if (rewrite) {
+			if (
+				/**  */
+				rewrite
+			) {
 				await Timeout(100); // to wait for pretify on autoSave;
 				await writeFile(path, content, { encoding });
 				Console.info({
@@ -134,6 +164,6 @@ const checkIsClass = async (content, validExportName, path, encoding) => {
 				return 'waitForRewrite';
 			}
 			return 'shouldProceedNextCheck';
-		}
+		},
 	);
 };

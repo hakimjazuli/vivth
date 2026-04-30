@@ -45,20 +45,32 @@ export function LazyFactory(factory) {
 		{},
 		{
 			get(_, prop) {
-				if (prop === unwrapLazy) {
-					if (instance === undefined) {
+				if (
+					/**  */
+					prop === unwrapLazy
+				) {
+					if (
+						/**  */
+						instance === undefined
+					) {
 						instance = factory();
 					}
 					return () => instance;
 				}
-				if (instance === undefined) {
+				if (
+					/**  */
+					instance === undefined
+				) {
 					instance = factory();
 				}
 				// @ts-expect-error
 				return instance[prop];
 			},
 			set(_, prop, newValue) {
-				if (instance === undefined) {
+				if (
+					/**  */
+					instance === undefined
+				) {
 					instance = factory();
 				}
 				// @ts-expect-error
@@ -66,12 +78,15 @@ export function LazyFactory(factory) {
 				return true;
 			},
 			apply(_, thisArg, args) {
-				if (instance === undefined) {
+				if (
+					/**  */
+					instance === undefined
+				) {
 					instance = factory();
 				}
 				// @ts-expect-error
 				return Reflect.apply(instance, thisArg, args);
 			},
-		}
+		},
 	);
 }

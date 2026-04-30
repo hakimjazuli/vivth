@@ -18,11 +18,12 @@ import { resolveErrorArray } from './resolveErrorArray.mjs';
  *
  * [res, error] = await TryAsync(async () => {
  * 	if(!res.ok) {
- * 		throw new Error(404);
+ * 		throw 404;
  * 	}
  * 	return await res.json();
  * })
  */
+
 export async function TryAsync(asyncFunction_) {
 	try {
 		const result = await asyncFunction_();

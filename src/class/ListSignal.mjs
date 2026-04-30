@@ -2,16 +2,17 @@
 
 import { LazyFactory } from '../function/LazyFactory.mjs';
 import { Console } from './Console.mjs';
+import { DataLog } from './DataLog.mjs';
 import { Signal } from './Signal.mjs';
 
 /**
- * @typedef {import('../types/ListArg.mjs').ListArg} ListArg
- * @typedef {import('../types/MutationType.mjs').MutationType} MutationType
+ * @typedef {import('../typehints/ListArg.mjs').ListArg} ListArg
+ * @typedef {import('../typehints/MutationType.mjs').MutationType} MutationType
  */
 /**
  * @description
  * - class to create list that satisfy `Array<Record<string, string>>`.
- * @template {import('../types/ListArg.mjs').ListArg} LISTARG
+ * @template {import('../typehints/ListArg.mjs').ListArg} LISTARG
  * @extends {Signal<LISTARG[]>}
  */
 export class ListSignal extends Signal {
@@ -23,11 +24,17 @@ export class ListSignal extends Signal {
 	 * @returns {value is Array<Record<string, string>>} True if the first item is a valid string record or array is empty.
 	 */
 	static isValid(value) {
-		if (Array.isArray(value) === false) {
+		if (
+			/**  */
+			Array.isArray(value) === false
+		) {
 			return false;
 		}
 		const first = value[0];
-		if (first === undefined) {
+		if (
+			/**  */
+			first === undefined
+		) {
 			// allow empty array
 			return true;
 		}
@@ -36,7 +43,7 @@ export class ListSignal extends Signal {
 			typeof first === 'object' &&
 			!Array.isArray(first) &&
 			Object.entries(first).every(
-				([key, val]) => typeof key === 'string' && typeof val === 'string'
+				([key, val]) => typeof key === 'string' && typeof val === 'string',
 			)
 		);
 	}
@@ -44,6 +51,8 @@ export class ListSignal extends Signal {
 	 * @description
 	 * - usefull for `loops`;
 	 * @param {LISTARG[]} [value]
+	 * @param {ConstructorParameters<typeof Signal<LISTARG[]>>[1]} [performanceChangesReport]
+	 * - the argument passed are `structuredClone` of the array;
 	 * @example
 	 * import { ListSignal } from 'vivth';
 	 *
@@ -52,9 +61,14 @@ export class ListSignal extends Signal {
 	 *      {key1: "test2",},
 	 * ]);
 	 */
-	constructor(value = []) {
+	constructor(value = [], performanceChangesReport = undefined) {
 		super(value);
+		this.#performanceChangesReport = performanceChangesReport;
 	}
+	/**
+	 * @type {ConstructorParameters<typeof Signal<LISTARG[]>>[1]}
+	 */
+	#performanceChangesReport;
 	/**
 	 * @description
 	 * - reference to original inputed `value`;
@@ -76,6 +90,29 @@ export class ListSignal extends Signal {
 	}
 	/**
 	 * @description
+	 * - structuredClone of prev
+	 * @override
+	 * @type {LISTARG[]|undefined}
+	 */
+	get prev() {
+		return structuredClone(super.prev);
+	}
+	/**
+	 * @type {()=>void}
+	 */
+	#notifyWithPerformanceChangesReport = () => {
+		this.subscribers.notify(async () => {
+			if (
+				/**  */
+				!this.#performanceChangesReport
+			) {
+				return;
+			}
+			this.#performanceChangesReport(new DataLog(this.arrayMethods.structuredClone));
+		});
+	};
+	/**
+	 * @description
 	 * - methods collection that mimics `Array` API;
 	 * - calling this methods will notify subscribers for changes, except for some;
 	 */
@@ -84,9 +121,25 @@ export class ListSignal extends Signal {
 			/**
 			 * @instance arrayMethods
 			 * @description
-			 * - reference to structuredClone elements of `value`;
+			 * - reference to `structuredClone` elements of `value`;
 			 * - calling doesn't notify for changes;
 			 * @returns {Array<LISTARG>}
+			 * - use this getter instead of subscribing the `ListSignal` value;
+			 * >- as to not accidentally mutate the source value;
+			 * @example
+			 * import { ListSignal, Derived } from 'vivth';
+			 *
+			 * const myListSignal = new ListSignal([
+			 * 	{ key:'a', group:0 },
+			 * 	{ key:'b', group:1 },
+			 * 	{ key:'c', group:0 },
+			 * ]);
+			 *
+			 * const myFilteredListSignal = new Derived(async ({ subscribe }) => {
+			 * 	return subscribe(myListSignal).structuredClone.filter((val)=>{
+			 * 		// return specific val
+			 * 	})
+			 * })
 			 */
 			get structuredClone() {
 				return structuredClone(super.value);
@@ -100,7 +153,7 @@ export class ListSignal extends Signal {
 			 */
 			push: (...listArg) => {
 				super.value.push(...listArg);
-				this.subscribers.notify();
+				this.#notifyWithPerformanceChangesReport();
 			},
 			/**
 			 * @instance arrayMethods
@@ -110,7 +163,7 @@ export class ListSignal extends Signal {
 			 */
 			shift: () => {
 				super.value.shift();
-				this.subscribers.notify();
+				this.#notifyWithPerformanceChangesReport();
 			},
 			/**
 			 * @instance arrayMethods
@@ -121,7 +174,7 @@ export class ListSignal extends Signal {
 			 */
 			unshift: (...listArg) => {
 				super.value.unshift(...listArg);
-				this.subscribers.notify();
+				this.#notifyWithPerformanceChangesReport();
 			},
 			/**
 			 * @instance arrayMethods
@@ -162,11 +215,14 @@ export class ListSignal extends Signal {
 			 */
 			splice: (start, deleteCount, ...listArg) => {
 				const end = start + deleteCount - 1;
-				if (this.#checkLength('splice', end) === false) {
+				if (
+					/**  */
+					this.#checkLength('splice', end) === false
+				) {
 					return;
 				}
 				super.value.splice(start, deleteCount, ...listArg);
-				this.subscribers.notify();
+				this.#notifyWithPerformanceChangesReport();
 			},
 			/**
 			 * @instance arrayMethods
@@ -185,7 +241,7 @@ export class ListSignal extends Signal {
 				}
 				// @ts-expect-error
 				[super.value[indexA], super.value[indexB]] = [super.value[indexB], super.value[indexA]];
-				this.subscribers.notify();
+				this.#notifyWithPerformanceChangesReport();
 			},
 			/**
 			 * @instance arrayMethods
@@ -196,17 +252,23 @@ export class ListSignal extends Signal {
 			 * @returns {void}
 			 */
 			modify: (index, listArg) => {
-				if (this.#checkLength('modify', index) === false) {
+				if (
+					/**  */
+					this.#checkLength('modify', index) === false
+				) {
 					return;
 				}
 				for (const key in listArg) {
 					const listArgKey = listArg[key];
-					if (listArgKey) {
+					if (
+						/**  */
+						listArgKey
+					) {
 						// @ts-expect-error
 						super.value[index][key] = listArgKey;
 					}
 				}
-				this.subscribers.notify();
+				this.#notifyWithPerformanceChangesReport();
 			},
 			/**
 			 * @instance arrayMethods
@@ -216,7 +278,10 @@ export class ListSignal extends Signal {
 			 * @returns {void}
 			 */
 			remove: (index) => {
-				if (this.#checkLength('remove', index) === false) {
+				if (
+					/**  */
+					this.#checkLength('remove', index) === false
+				) {
 					return;
 				}
 				this.arrayMethods.splice(index, 1);
@@ -225,21 +290,21 @@ export class ListSignal extends Signal {
 			 * @instance arrayMethods
 			 * @description
 			 * - reverses the elements in an `List` in place.
-			 * @returns {void}
+			 * @type {()=>void}
 			 */
 			reverse: () => {
 				super.value.reverse();
-				this.subscribers.notify();
+				this.#notifyWithPerformanceChangesReport();
 			},
 			/**
 			 * @instance arrayMethods
 			 * @description
 			 * - removes the last element;
-			 * @returns {void}
+			 * @type {()=>void}
 			 */
 			pop: () => {
 				super.value.pop();
-				this.subscribers.notify();
+				this.#notifyWithPerformanceChangesReport();
 			},
 		};
 	});
@@ -250,7 +315,10 @@ export class ListSignal extends Signal {
 	 */
 	#checkLength = (mode, end) => {
 		const dataLength = super.value.length;
-		if (end >= dataLength) {
+		if (
+			/**  */
+			end >= dataLength
+		) {
 			Console.error({
 				mode,
 				end,

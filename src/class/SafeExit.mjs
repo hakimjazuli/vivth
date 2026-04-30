@@ -1,5 +1,7 @@
 // @ts-check
 
+import process from 'node:process';
+
 import { TryAsync } from '../function/TryAsync.mjs';
 import { TrySync } from '../function/TrySync.mjs';
 import { WalkThrough } from './WalkThrough.mjs';
@@ -7,6 +9,8 @@ import { Console } from './Console.mjs';
 import { Effect, mapOfEffects } from './Effect.mjs';
 import { EnvSignal } from './EnvSignal.mjs';
 import { setOFSignals } from './Signal.mjs';
+import { ForOfSync } from '../function/ForOfSync.mjs';
+import { ForOfAsync } from '../function/ForOfAsync.mjs';
 
 /**
  * @type {Set<()=>Promise<void>>}
@@ -41,17 +45,6 @@ export class SafeExit {
 	 * ```js
 	 * () => process.exit(0),
 	 * ```
-	 * @param {(eventName:string)=>void} [options.listener]
-	 * - default value
-	 * ```js
-	 * (eventName) => {
-	 * 	process.once(eventName, function () {
-	 * 		SafeExit.instance.exiting.correction(true);
-	 * 		Console.log(`safe exit via "${eventName}"`);
-	 * 	});
-	 * }
-	 * ```
-	 * - if your exit callback doesn't uses `process` global object you need to input on the SafeExit instantiation
 	 * @example
 	 * import process from 'node:process';
 	 * import { SafeExit, Console } from 'vivth';
@@ -59,23 +52,17 @@ export class SafeExit {
 	 * new SafeExit({
 	 * 	eventNames: ['SIGINT', 'SIGTERM', ...eventNames],
 	 * 	terminator : () => process.exit(0),
-	 * 	listener : (eventName) => {
-	 * 			process.once(eventName, function () {
-	 * 				SafeExit.instance?.exiting.correction(true);
-	 * 				Console.log(`safe exit via "${eventName}"`);
-	 * 			});
-	 * 	}
 	 * });
 	 */
-	constructor({ eventNames, terminator, listener = undefined }) {
-		if (SafeExit.instance instanceof SafeExit) {
+	constructor({ eventNames, terminator }) {
+		if (
+			/**  */
+			SafeExit.instance instanceof SafeExit
+		) {
 			return SafeExit.instance;
 		}
 		SafeExit.instance = this;
 		this.#exit = terminator;
-		if (listener) {
-			this.#listener = listener;
-		}
 		this.#register(eventNames);
 	}
 	/**
@@ -90,27 +77,27 @@ export class SafeExit {
 	 * @returns {void}
 	 */
 	#register = (eventNames) => {
-		eventNames.forEach((eventName) => {
-			if (eventName.toLowerCase() === 'exit') {
+		SafeExit.instance?.exiting.env.value;
+		ForOfSync(eventNames, (eventName) => {
+			if (
+				/**  */
+				eventName.toLowerCase() === 'exit'
+			) {
 				return;
 			}
 			this.#listener(eventName);
 		});
 	};
+	static triggerExit = () => {
+		SafeExit.instance?.exiting.correction(true);
+	};
 	/**
 	 * @type {(eventName:string)=>void}
 	 */
 	#listener = (eventName) => {
-		if (SafeExit.instance === undefined) {
-			return;
-		}
-		SafeExit.instance.exiting.env.value;
 		process.once(eventName, function () {
-			if (SafeExit.instance === undefined) {
-				return;
-			}
-			Console.log(`safe exit via "${eventName}"`);
-			SafeExit.instance.exiting.correction(true);
+			Console.log({ 'vivth.SafeExit': `safe exit via "${eventName}"` });
+			SafeExit.triggerExit();
 		});
 	};
 	/**
@@ -121,7 +108,7 @@ export class SafeExit {
 	 * @example
 	 * import { SafeExit } from 'vivth';
 	 *
-	 * const exitCallback () => {
+	 * const exitCallback = async () => {
 	 * 	// code
 	 * }
 	 * SafeExit.instance.addCallback(exitCallback);
@@ -154,30 +141,36 @@ export class SafeExit {
 	// @ts-expect-error
 	#autoCleanUp = new Effect(async ({ subscribe }) => {
 		if (
-			//
+			/**  */
 			!subscribe(this.exiting.env).value
 		) {
 			return;
 		}
+		await ForOfAsync(safeCleanUpCBs, async (cleanup) => {
+			const [, error] = await TryAsync(async () => {
+				await cleanup();
+			});
+			if (
+				/**  */
+				error === undefined
+			) {
+				return;
+			}
+			Console.warn(error);
+		});
 		WalkThrough.set(setOFSignals, (signal) => {
 			signal.remove.ref();
 		});
 		WalkThrough.map(mapOfEffects, ([effect, _]) => {
 			effect.options.removeEffect();
 		});
-		for await (const cleanup of safeCleanUpCBs) {
-			const [, error] = await TryAsync(async () => {
-				await cleanup();
-			});
-			if (error === undefined) {
-				continue;
-			}
-			Console.warn(error);
-		}
 		const [, errorExitting] = TrySync(this.#exit);
-		if (errorExitting === undefined) {
+		if (
+			/**  */
+			errorExitting === undefined
+		) {
 			return;
 		}
-		Console.error(errorExitting);
-	});
+		Console.error({ errorExitting });
+	}, 10);
 }

@@ -9,7 +9,7 @@ import { lookup } from 'mime-types';
  * - create inline base64 url;
  * - usage:
  * >- can be extremely usefull to display file on desktop app webview, without exposing http server;
- * >- when using `FSInline`, use [Base64URL](#base64url) instead;
+ * >- when using `FSasar`, use [Base64URL](#base64url) instead;
  * @param {string} filePath
  * @returns {Promise<string>}
  * @example

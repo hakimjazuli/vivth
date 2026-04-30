@@ -23,7 +23,12 @@ export class Console {
 	 */
 	static #call = (prefix, mode, data) => {
 		const fn = console[mode];
-		if (typeof fn !== 'function') return;
+		if (
+			/**  */
+			typeof fn !== 'function'
+		) {
+			return;
+		}
 
 		const color = Console.#ansi.colors[mode] || '';
 		const styledPrefix = `${color}${Console.#ansi.bold}${prefix} ${mode.toUpperCase()}:${

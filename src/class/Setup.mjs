@@ -4,6 +4,8 @@ import { SafeExit } from './SafeExit.mjs';
 import { Paths } from './Paths.mjs';
 import { WorkerMainThread } from './WorkerMainThread.mjs';
 import { WorkerThread } from './WorkerThread.mjs';
+import { EnvMode } from '../common/EnvMode.mjs';
+import { Preferrence } from '../common/Preferrence.mjs';
 
 /**
  * @description
@@ -21,12 +23,6 @@ export class Setup {
 	 * 	// 'exit' will be omited, as it might cause async callbacks failed to execute;
 	 * 	eventNames: ['SIGINT', 'SIGTERM', ...eventNames],
 	 * 	terminator : () => process.exit(0),
-	 * 	listener : (eventName) => {
-	 * 			process.once(eventName, function () {
-	 * 				SafeExit.instance?.exiting.correction(true);
-	 * 				Console.log(`safe exit via "${eventName}"`);
-	 * 			});
-	 * 	}
 	 * });
 	 */
 	static safeExit = SafeExit;
@@ -72,4 +68,25 @@ export class Setup {
 	 * // you need to call this method;
 	 */
 	static workerThread = WorkerThread.setup;
+	/**
+	 * @description
+	 * - setup envMode into `developement`('default') or `production`;
+	 * @example
+	 * import { Setup } from 'vivth';
+	 *
+	 * Setup.enforceEnvMode('prod');
+	 *
+	 * // default behaviour, technically only need to be call for reactive functionality;
+	 * Setup.enforceEnvMode('dev');
+	 */
+	static enforceEnvMode = EnvMode.enforce;
+	/**
+	 * @description
+	 * - setup `vivth `preffered encoding;
+	 * @example
+	 * import { Setup } from 'vivth';
+	 *
+	 * Setup.preferrence('prod');
+	 */
+	static preferrence = Preferrence.setup;
 }

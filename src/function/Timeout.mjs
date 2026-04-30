@@ -17,7 +17,7 @@
  * test();
  */
 export function Timeout(timeMS) {
-	return new Promise((resolve) => {
-		setTimeout(resolve, timeMS);
-	});
+	const { promise, resolve } = Promise.withResolvers();
+	setTimeout(resolve, timeMS);
+	return promise;
 }

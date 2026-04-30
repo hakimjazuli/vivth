@@ -1,7 +1,7 @@
 // @ts-check
 
 /**
- * @typedef {import("../types/Runtime.mjs").Runtime} Runtime
+ * @typedef {import("../typehints/Runtime.mjs").Runtime} Runtime
  */
 
 /**
@@ -19,19 +19,30 @@ let runtime;
  * const runtime = GetRuntime();
  */
 export function GetRuntime() {
-	if (runtime === undefined) {
-		if (typeof Bun !== 'undefined') {
+	if (
+		/**  */
+		runtime === undefined
+	) {
+		if (
+			/**  */
+			typeof Bun !== 'undefined'
+		) {
 			runtime = 'bun';
-		}
-		// @ts-expect-error
-		else if (typeof Deno !== 'undefined') {
+		} else if (
+			/**  */
+			// @ts-expect-error
+			typeof Deno !== 'undefined'
+		) {
 			runtime = 'deno';
-		} else if (typeof process !== 'undefined' && process.versions?.node) {
+		} else if (
+			/**  */
+			typeof process !== 'undefined' &&
+			process.versions?.node
+		) {
 			runtime = 'node';
 		} else if (
-			// @ts-expect-error
+			/**  */
 			typeof window !== 'undefined' &&
-			// @ts-expect-error
 			typeof document !== 'undefined'
 		) {
 			runtime = 'browser';

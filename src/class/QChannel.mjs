@@ -19,9 +19,9 @@ export class QChannel {
 		this.open();
 	}
 	/**
-	 * @typedef {import('../types/AnyButUndefined.mjs').AnyButUndefined} AnyButUndefined
-	 * @typedef {import('../types/QCBReturn.mjs').QCBReturn} QCBReturn
-	 * @typedef {import('../types/QCBFIFOReturn.mjs').QCBFIFOReturn} QCBFIFOReturn
+	 * @typedef {import('../typehints/AnyButUndefined.mjs').AnyButUndefined} AnyButUndefined
+	 * @typedef {import('../typehints/QCBReturn.mjs').QCBReturn} QCBReturn
+	 * @typedef {import('../typehints/QCBFIFOReturn.mjs').QCBFIFOReturn} QCBFIFOReturn
 	 */
 	/**
 	 * @description
@@ -52,33 +52,34 @@ export class QChannel {
 	 */
 	static #uniqueCB = async (id, instance) => {
 		const existing = QChannel.#uniquePromiser.get(id);
-		// @ts-expect-error
-		let resolveFn;
-		const nextPromise = new Promise((resolve) => {
-			resolveFn = resolve;
-		});
+		const { promise, resolve } = Promise.withResolvers();
 		const context = {};
-		if (existing === undefined) {
-			QChannel.#uniquePromiser.set(id, [nextPromise, context]);
+		if (
+			/**  */
+			existing === undefined
+		) {
+			QChannel.#uniquePromiser.set(id, [promise, context]);
 			await Promise.resolve();
 		} else {
 			const [prevPromise] = existing;
 			await prevPromise;
-			QChannel.#uniquePromiser.set(id, [nextPromise, context]);
+			QChannel.#uniquePromiser.set(id, [promise, context]);
 		}
 		const resume = () => {
-			// @ts-expect-error
-			resolveFn();
+			resolve();
 			QChannel.#uniquePromiser.delete(id);
 		};
 		return {
 			resume,
 			isLastOnQ: () => {
-				if (QChannel.#uniquePromiser.has(id) === false) {
+				const res = QChannel.#uniquePromiser.get(id);
+				if (
+					/**  */
+					!res
+				) {
 					return false;
 				}
-				// @ts-expect-error
-				const [, lastContext] = QChannel.#uniquePromiser.get(id);
+				const [, lastContext] = res;
 				return instance.#shouldRun && lastContext === context;
 			},
 		};
@@ -105,7 +106,7 @@ export class QChannel {
 					/**
 					 * uses locally declared object to make it unique from other QChannel instances;
 					 */
-					qfifo
+					qfifo,
 				);
 			},
 			/**
@@ -124,7 +125,7 @@ export class QChannel {
 				/**
 				 * @type {()=>Promise<RESULT>}
 				 */
-				asyncCallback
+				asyncCallback,
 			) => {
 				return await TryAsync(async () => {
 					const { resume } = await this.fifo.key();
@@ -148,7 +149,10 @@ export class QChannel {
 	 */
 	get #shouldRun() {
 		const shoulRun = this.#shouldRun_;
-		if (shoulRun === false) {
+		if (
+			/**  */
+			shoulRun === false
+		) {
 			Console.warn({ qChannel_name: this.name, message: 'is closed' });
 		}
 		return shoulRun;
@@ -157,7 +161,7 @@ export class QChannel {
 	 * @description
 	 * - disable queue;
 	 * - when `closed`, `isLastOnQ` will allways return `false`;
-	 * @returns {void}
+	 * @type {()=>void}
 	 */
 	close = () => {
 		this.#shouldRun_ = false;
@@ -167,7 +171,7 @@ export class QChannel {
 	 * @description
 	 * - enable queue;
 	 * - when `opened`, `isLastOnQ` will evaluate whether calls are actually the last of queue;
-	 * @returns {void}
+	 * @type {()=>void}
 	 */
 	open = () => {
 		this.#shouldRun_ = true;
@@ -199,14 +203,17 @@ export class QChannel {
 	key = async (keyID) => {
 		const { resume } = await QChannel.#uniqueCB(this, this);
 		const mapped = this.#mapped;
-		if (mapped.has(keyID) === false) {
+		if (
+			/**  */
+			mapped.has(keyID) === false
+		) {
 			mapped.set(keyID, {});
 		}
 		resume();
 		return await QChannel.#uniqueCB(
 			// @ts-expect-error
 			mapped.get(keyID),
-			this
+			this,
 		);
 	};
 	/**
@@ -228,14 +235,21 @@ export class QChannel {
 	 * 	// 	return;
 	 * 	// }
 	 * 	// code
+	 * 	// return result
 	 * })
 	 */
 	async callback(keyID, asyncCallback) {
-		return await TryAsync(async () => {
+		/**
+		 * @type {undefined|(()=>void)}
+		 */
+		let resume_;
+		const res = await TryAsync(async () => {
 			const { resume, isLastOnQ } = await this.key(keyID);
+			resume_ = resume;
 			const result = await asyncCallback({ isLastOnQ });
-			resume();
 			return result;
 		});
+		resume_?.();
+		return res;
 	}
 }

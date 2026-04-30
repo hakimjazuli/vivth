@@ -6,6 +6,8 @@
 npm i vivth
 ```
 
+---
+
 ## vivth
 
 - `vivth` are intended to be a collections of usefull `primitives`, and not to be directly used as
@@ -32,10 +34,12 @@ npm i vivth
   > - opionated `compiler`;
   >   > - abstracted via `pkg`, `deno`, and `bun`;
 - when using runtime that doesn't provide specific common modules golbally(like `Deno`), dev should
-  import it statically from `node:module_name`, example:
+  import it statically from `node:${module_name}`, example:
   ```js
   import process from 'node:process';
   ```
+
+---
 
 ## versions:
 
@@ -50,3 +54,9 @@ npm i vivth
   > - type should now fully fixed, even with strict ts check;
 - `1.3.3+:beta`:
   > - added class `Dev` for testing and `Dev`/`preBundled` only code block;
+- `1.5.x:rc`:
+  > - move code stripping to [BundledV](#bundledv);
+  > - [EnvMode](#envmode) are now independent from whether it's bundled or not, and need to be
+  >   separately declared;
+  > - add mechanism for `Effect` callback to run periodically when under heavy calls;
+  > - move all logic for `FSInline` to [FSasar](#fsasar)

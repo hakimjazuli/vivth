@@ -1,7 +1,5 @@
 // @ts-check
 
-import { Console } from './Console.mjs';
-
 /**
  * @description
  * - class helpers to define pathReference;
@@ -31,11 +29,15 @@ export class Paths {
 	 * import { Paths } from 'vivth';
 	 *
 	 * new Paths({
-	 * 	root: location.origin,
+	 * 	// root: location.origin,
+	 * 	// root: process.env.INIT_CWD ?? process.cwd(),
 	 * })
 	 */
 	constructor({ root }) {
-		if (Paths.#instance) {
+		if (
+			/**  */
+			Paths.#instance
+		) {
 			return Paths.#instance;
 		}
 		Paths.#instance = this;
@@ -47,19 +49,24 @@ export class Paths {
 	#root;
 	/**
 	 * @description
+	 * - MIGHT THROW AN ERROR;
+	 * >- most `vivth` modules uses this value, so you need to instantiate Paths by all means before using them;
 	 * - reference for rootPath
 	 * - `Paths` needed to be instantiated via:
 	 * >- `Paths` constructor;
 	 * >- `Setup.paths` constructor;
-	 * @type {string|undefined}
+	 * @type {string}
 	 */
 	static get root() {
-		if (Paths.#instance === undefined) {
-			Console.error({
+		if (
+			/**  */
+			Paths.#instance === undefined ||
+			!Paths.#instance.#root
+		) {
+			throw {
 				error: 'Paths.instance.#root is undefined',
 				solutions: 'instantiate `Paths` or instantiate `Setup`',
-			});
-			return undefined;
+			};
 		}
 		return Paths.#instance.#root;
 	}
@@ -89,7 +96,10 @@ export class Paths {
 	 */
 	static normalizesForRoot = (path_) => {
 		let normalized = Paths.normalize(path_);
-		if (normalized.startsWith('/') === false) {
+		if (
+			/**  */
+			normalized.startsWith('/') === false
+		) {
 			normalized = `/${normalized}`;
 		}
 		// @ts-expect-error

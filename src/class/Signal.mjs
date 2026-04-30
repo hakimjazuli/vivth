@@ -6,6 +6,7 @@ import { TryAsync } from '../function/TryAsync.mjs';
 import { TrySync } from '../function/TrySync.mjs';
 import { Console } from './Console.mjs';
 import { Effect, mapOfEffects } from './Effect.mjs';
+import { DataLog } from './DataLog.mjs';
 
 /**
  * @type {Set<Signal<any>>}
@@ -22,15 +23,23 @@ export class Signal {
 	 * @description
 	 * - create a `Signal`;
 	 * @param {VALUE} value
+	 * @param {(data:DataLog<VALUE>)=>void} [performanceChangesReport]
+	 * - callback independent from effect;
+	 * >- it will always be called when there's value change;
 	 * @example
 	 * import { Signal, Effect } from  'vivth';
 	 *
 	 * const count = new Signal(0);
 	 */
-	constructor(value) {
+	constructor(value, performanceChangesReport = undefined) {
 		this.#value = value;
+		this.#performanceChangesReport = performanceChangesReport;
 		setOFSignals.add(this);
 	}
+	/**
+	 * @type {ConstructorParameters<typeof Signal<VALUE>>[1]}
+	 */
+	#performanceChangesReport;
 	/**
 	 * @description
 	 * - subsrcibers reference of this instance;
@@ -65,14 +74,26 @@ export class Signal {
 		 * });
 		 */
 		notify: (callback = undefined) => {
-			if (callback === undefined) {
+			if (
+				/**  */
+				this.#performanceChangesReport
+			) {
+				this.#performanceChangesReport(new DataLog(this.#value));
+			}
+			if (
+				/**  */
+				callback === undefined
+			) {
 				Signal.#notify(this);
 				return;
 			}
 			TryAsync(async () => {
 				await callback({ signalInstance: this });
 			}).then(([, error]) => {
-				if (error) {
+				if (
+					/**  */
+					error
+				) {
 					Console.error({ message: 'unable to run callback', callback, error });
 					return;
 				}
@@ -87,7 +108,7 @@ export class Signal {
 		const [, error] = TrySync(() => {
 			WalkThrough.set(signalInstance.subscribers.setOf, (effectInstance) => {
 				if (
-					//
+					/**  */
 					!mapOfEffects.has(effectInstance)
 				) {
 					effectInstance.options.removeSignal(signalInstance);
@@ -99,7 +120,10 @@ export class Signal {
 				effectInstance.run();
 			});
 		});
-		if (error === undefined) {
+		if (
+			/**  */
+			error === undefined
+		) {
 			return;
 		}
 		Console.error(error);
@@ -147,7 +171,6 @@ export class Signal {
 			setOFSignals.delete(this);
 		},
 	}));
-
 	/**
 	 * @type {VALUE|undefined}
 	 */
@@ -177,7 +200,7 @@ export class Signal {
 	 * new Effect(async ({ subscribe }) =>{
 	 * 	const countValue = subscribe(count).value; // reactive
 	 * })
-	 * const oneMoreThanCount = new Derived(async ({ subscribe }) =>{
+	 * const oneMoreThanCount = new Derived(async function({ subscribe }){
 	 * 	return subscribe(count).value + 1; // reactive
 	 * })
 	 */
@@ -197,7 +220,10 @@ export class Signal {
 	 * count.value = 9;
 	 */
 	set value(newValue) {
-		if (this.#value === newValue) {
+		if (
+			/**  */
+			this.#value === newValue
+		) {
 			return;
 		}
 		this.#prev = this.#value;

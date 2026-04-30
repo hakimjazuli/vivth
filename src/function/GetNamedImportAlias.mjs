@@ -24,10 +24,14 @@
 export function GetNamedImportAlias(content, moduleName, packageName) {
 	const checkIfImportingFromVivthRegex = new RegExp(
 		`(import\\s+{\\s*[\\s\\S]*(?<imported>${moduleName})\\s+as\\s+(?<alias>[a-zA-Z0-9]+)[\\s\\S]*\\s*}\\s+from\\s+['"]${packageName}['"])|(import\\s+{\\s*[\\s\\S]*(?<imported>${moduleName})[\\s\\S]*\\s*}\\s+from\\s+['"]${packageName}['"])`,
-		'g'
+		'g',
 	);
 	const matched = checkIfImportingFromVivthRegex.exec(content);
-	if (!matched || !matched.groups) {
+	if (
+		/**  */
+		!matched ||
+		!matched.groups
+	) {
 		return;
 	}
 	const { imported, alias } = matched.groups;

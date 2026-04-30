@@ -1,5 +1,7 @@
 // @ts-check
 
+import { ForOfSync } from '../function/ForOfSync.mjs';
+
 /**
  * @description
  * - create inline base64 url;
@@ -18,6 +20,7 @@
  * @returns {string}
  * @example
  * import { Base64URL } from 'vivth'
+ *
  * import fileString from './fileString.mjs';
  *
  * // example for browser;
@@ -26,8 +29,8 @@
 export function Base64URL(fileString, mimeType, btoaFunction) {
 	const utf8 = new TextEncoder().encode(fileString);
 	let binary = '';
-	for (let byte of utf8) {
+	ForOfSync(utf8, (byte) => {
 		binary += String.fromCharCode(byte);
-	}
+	});
 	return `data:${mimeType.toString()};base64,${btoaFunction(binary)}`;
 }

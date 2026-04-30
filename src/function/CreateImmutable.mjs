@@ -30,7 +30,11 @@ import { TrySync } from './TrySync.mjs';
  * })
  */
 export function CreateImmutable(parent, keyName, object, { lazy = true } = {}) {
-	if (parent === undefined || typeof parent !== 'object') {
+	if (
+		/**  */
+		parent === undefined ||
+		typeof parent !== 'object'
+	) {
 		const error = {
 			object,
 			parent,
@@ -48,13 +52,19 @@ export function CreateImmutable(parent, keyName, object, { lazy = true } = {}) {
 			enumerable: false,
 		});
 	});
-	if (error) {
+	if (
+		/**  */
+		error
+	) {
 		[, error] = TrySync(() => {
 			// @ts-expect-error
 			parent[keyName] = lazy ? LazyFactory(() => object.call(parent)) : object.call(parent);
 		});
 	}
-	if (error) {
+	if (
+		/**  */
+		error
+	) {
 		const error = {
 			parent,
 			message: `"${keyName}" already defined on the "parent"`,
@@ -62,7 +72,7 @@ export function CreateImmutable(parent, keyName, object, { lazy = true } = {}) {
 			realValue: parent[keyName],
 		};
 		Console.warn(error);
-		throw new Error(JSON.stringify(error));
+		throw JSON.stringify(error);
 	}
 	// @ts-expect-error
 	return parent[keyName];

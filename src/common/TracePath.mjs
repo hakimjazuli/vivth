@@ -26,17 +26,34 @@ import { Paths } from '../class/Paths.mjs';
 export function TracePath(filterCallback) {
 	const err = new Error();
 	const stacks = err.stack?.split('\n');
-	if (!stacks || !stacks.length) {
+	if (
+		/**  */
+		!stacks ||
+		!stacks.length
+	) {
 		return;
 	}
 	for (let i = 0; i < stacks.length; i++) {
 		const stack = stacks[i];
-		if (!stack) {
+		if (
+			/**  */
+			!stack
+		) {
 			return;
 		}
 		const check = stack.match(/([A-Z]:[^ ]*[0-9]|\/[^ )]+:\d+:\d+)/m);
-		const match = Paths.normalize(check?.[1] ?? stack.trim());
-		if (!filterCallback(match)) {
+		if (
+			/**  */
+			!check ||
+			!check[1]
+		) {
+			continue;
+		}
+		const match = Paths.normalize(check[1]);
+		if (
+			/**  */
+			!filterCallback(match)
+		) {
 			continue;
 		}
 		return match;

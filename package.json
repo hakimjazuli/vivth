@@ -3,20 +3,27 @@
 	"version": "1.4.10",
 	"description": "library primitives",
 	"main": "index.mjs",
-	"types": "./types/index.d.mts",
+	"types": "./generated/types/index.d.mts",
 	"devDependencies": {
 		"@types/bun": "latest",
 		"concurrently": "^9.2.1",
 		"typescript": "^5.9.3",
 		"vivth": "link:vivth"
 	},
+	"exports": {
+		".": "./index.mjs"
+	},
 	"dependencies": {
+		"@assemblyscript/loader": "^0.28.9",
+		"@electron/asar": "^4.0.1",
 		"@types/mime-types": "^3.0.1",
-		"chokidar": "^4.0.3",
-		"esbuild": "^0.25.12",
-		"mime-types": "^3.0.1",
+		"assemblyscript": "^0.28.9",
+		"chokidar": "^5.0.0",
+		"esbuild": "^0.28.0",
+		"mime-types": "^3.0.2",
 		"pkg": "^5.8.1",
-		"prettier": "^3.6.2"
+		"prettier": "^3.7.4",
+		"sass": "^1.99.0"
 	},
 	"peerDependencies": {},
 	"repository": {
@@ -37,8 +44,8 @@
 	},
 	"homepage": "https://github.com/hakimjazuli/vivth#readme",
 	"scripts": {
-		"dev-wo": "concurrently 'bun ./dev/auto-doc.mjs' 'bun tsc --watch'",
-		"dev": "concurrently 'bun --watch ./dev/auto-doc.mjs' 'bun tsc --watch'"
+		"dev": "concurrently 'bun ./dev/auto-doc.mjs' 'bun tsc --watch'",
+		"dev-w": "concurrently 'bun --watch ./dev/auto-doc.mjs' 'bun tsc --watch'"
 	},
 	"sideEffects": false
 }

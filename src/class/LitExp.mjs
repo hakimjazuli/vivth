@@ -17,7 +17,7 @@ import { TrySync } from '../function/TrySync.mjs';
  */
 export class LitExp {
 	/**
-	 * @typedef {import("../types/LitExpKeyType.mjs").LitExpKeyType} LitExpKeyType
+	 * @typedef {import("../typehints/LitExpKeyType.mjs").LitExpKeyType} LitExpKeyType
 	 */
 
 	/**
@@ -77,9 +77,19 @@ export class LitExp {
 	static prepare(keysAndDefaultValuePair) {
 		return TrySync(() => {
 			for (const key in keysAndDefaultValuePair) {
+				if (
+					/**  */
+					!Object.hasOwn(keysAndDefaultValuePair, key) ||
+					keysAndDefaultValuePair[key] === undefined
+				) {
+					continue;
+				}
 				const regex = keysAndDefaultValuePair[key];
 				const capture = !regex ? `[\\s\\S]*?` : regex.source;
-				if (capture.match(/\(\<\w+\>[\s\S]*?\)/g)) {
+				if (
+					/**  */
+					capture.match(/\(\<\w+\>[\s\S]*?\)/g)
+				) {
 					throw Error('trying to add named capture');
 				}
 			}
@@ -128,21 +138,39 @@ export class LitExp {
 			const stringsLength = strings.length;
 			for (let i = 0; i < stringsLength; i++) {
 				const string = strings[i];
-				if (string === undefined) {
-					throw new Error('string undefined');
+				if (
+					/**  */
+					string === undefined
+				) {
+					throw 'string undefined';
 				}
-				if (i + 1 == stringsLength && string === '') {
-					result.push('(?:\\s+?|;|,|$|\/\/)');
+				if (
+					/**  */
+					i + 1 == stringsLength &&
+					string === ''
+				) {
+					result.push('(?:\\s+?|;|,|$|\/\/|\())');
 				} else {
 					result.push(LitExp.escape(string));
 				}
-				if (i < values.length) {
+				if (
+					/**  */
+					i < values.length
+				) {
 					const value = values[i];
-					if (value === undefined || instance_rules[value] === undefined) {
+					if (
+						/**  */
+						value === undefined ||
+						instance_rules[value] === undefined
+					) {
 						continue;
 					}
 					const [valueHandled, errorValue] = valueHandler(value, instance_rules[value]);
-					if (errorValue || valueHandled === '') {
+					if (
+						/**  */
+						errorValue ||
+						valueHandled === ''
+					) {
 						throw errorValue;
 					}
 					result.push(valueHandled);
@@ -159,26 +187,35 @@ export class LitExp {
 	#regExp = ({ flags, whiteSpaceSensitive, absoluteLeadAndFollowing }) => {
 		return TrySync(() => {
 			let regExpStringCache;
-			if (this.#regExpStringCache === undefined) {
+			if (
+				/** */
+				this.#regExpStringCache === undefined
+			) {
 				const [regExpStringCache, error] = LitExp.#processTemplate(
 					this.#keyRules,
 					this.#values,
 					LitExp.#namedChapture,
-					this.#templateStringArray
+					this.#templateStringArray,
 				);
-				if (error) {
+				if (
+					/** */
+					error
+				) {
 					throw error;
 				}
 				this.#regExpStringCache = regExpStringCache.join('');
 			}
-			if (whiteSpaceSensitive) {
+			if (
+				/** */
+				whiteSpaceSensitive
+			) {
 				regExpStringCache = this.#regExpStringCache;
 			} else {
 				regExpStringCache = this.#regExpStringCache.replace(/\s+/g, `\\s+`);
 			}
 			return new RegExp(
 				absoluteLeadAndFollowing ? `\^${regExpStringCache}\$` : regExpStringCache,
-				flags
+				flags,
 			);
 		});
 	};
@@ -189,19 +226,29 @@ export class LitExp {
 	#regexToMatchAll = ({ flags, whiteSpaceSensitive }) => {
 		return TrySync(() => {
 			let regExpToMatchStringCache;
-			if (this.#regExpToMatchStringCache === undefined) {
+			if (
+				/** */
+				this.#regExpToMatchStringCache === undefined
+			) {
 				const [regExpToMatchStringCache, error] = LitExp.#processTemplate(
 					this.#keyRules,
 					this.#values,
 					LitExp.#namedChapture,
-					this.#templateStringArray
+					this.#templateStringArray,
 				);
-				if (error || regExpToMatchStringCache === undefined) {
+				if (
+					/** */
+					error ||
+					regExpToMatchStringCache === undefined
+				) {
 					throw error;
 				}
 				this.#regExpToMatchStringCache = regExpToMatchStringCache.join('');
 			}
-			if (whiteSpaceSensitive) {
+			if (
+				/** */
+				whiteSpaceSensitive
+			) {
 				regExpToMatchStringCache = this.#regExpToMatchStringCache;
 			} else {
 				regExpToMatchStringCache = this.#regExpToMatchStringCache.replace(/\s+/g, `\\s+`);
@@ -249,9 +296,12 @@ export class LitExp {
 								return overrides[key];
 							});
 						},
-						this_.#templateStringArray
+						this_.#templateStringArray,
 					);
-					if (error) {
+					if (
+						/** */
+						error
+					) {
 						throw error;
 					}
 					return res.join('');
@@ -333,24 +383,31 @@ export class LitExp {
 				// @ts-expect-error
 				return TrySync(() => {
 					const [regexp, error] = this_.#regExp(options);
-					if (error) {
+					if (
+						/** */
+						error
+					) {
 						throw error;
 					}
 					const execResult = regexp.exec(string);
-					if (execResult === null) {
+					if (
+						/** */
+						execResult === null
+					) {
 						return undefined;
 					}
 					const whole = execResult[1];
 					const named = execResult?.groups;
 					const result = { named, whole };
-					if (named === undefined) {
-						throw new Error(
-							JSON.stringify({
-								regexpSource: regexp.source,
-								message: 'no match is found',
-								sugestion: 'make sure all `keys` values will capture any scenario',
-							})
-						);
+					if (
+						/** */
+						named === undefined
+					) {
+						throw JSON.stringify({
+							regexpSource: regexp.source,
+							message: 'no match is found',
+							sugestion: 'make sure all `keys` values will capture any scenario',
+						});
 					}
 					return { result, regexp };
 				});
@@ -361,7 +418,7 @@ export class LitExp {
 			 * - to match all and grouped based on `key`;
 			 * @param {Parameters<LitExp<KEYS>["evaluate"]["execGroups"]>[0]} string
 			 * @param {Omit<Parameters<LitExp<KEYS>["evaluate"]["execGroups"]>[1], 'absoluteLeadAndFollowing'>} options
-			 * @returns {ReturnType<typeof TrySync<import('../types/LitExpResultType.mjs').LitExpResultType<KEYS>>>
+			 * @returns {ReturnType<typeof TrySync<import('../typehints/LitExpResultType.mjs').LitExpResultType<KEYS>>>
 			 * }
 			 * @example
 			 * import { LitExp, Console } from 'vivth';
@@ -400,7 +457,10 @@ export class LitExp {
 			matchedAllAndGrouped: (string, options) => {
 				return TrySync(() => {
 					const [regexp, error] = this.#regexToMatchAll(options);
-					if (error) {
+					if (
+						/**  */
+						error
+					) {
 						throw error;
 					}
 					/**
@@ -417,14 +477,15 @@ export class LitExp {
 					const result = { named, whole };
 					const matchedAll = string.matchAll(regexp);
 					for (const match of matchedAll) {
-						if (match.groups === undefined) {
-							throw new Error(
-								JSON.stringify({
-									regexpSource: regexp.source,
-									message: 'no match is found',
-									sugestion: 'make sure all `keys` values will capture any scenario',
-								})
-							);
+						if (
+							/**  */
+							match.groups === undefined
+						) {
+							throw JSON.stringify({
+								regexpSource: regexp.source,
+								message: 'no match is found',
+								sugestion: 'make sure all `keys` values will capture any scenario',
+							});
 						}
 						whole.push(match[1] ?? '');
 						// @ts-expect-error

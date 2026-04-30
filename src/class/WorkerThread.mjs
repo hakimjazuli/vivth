@@ -1,4 +1,5 @@
 // @ts-check
+/// <reference lib='dom' />
 
 import { closeWorkerThreadEventObject } from '../common/eventObjects.mjs';
 import { EventCheck } from '../function/EventCheck.mjs';
@@ -17,7 +18,7 @@ import { WorkerResult } from './WorkerResult.mjs';
  */
 export class WorkerThread {
 	/**
-	 * @typedef {import('../types/QCBReturn.mjs').QCBReturn} QCBReturn
+	 * @typedef {import('../typehints/QCBReturn.mjs').QCBReturn} QCBReturn
 	 */
 	/**
 	 * @type {Parameters<typeof WorkerThread["setup"]>[0]|undefined}
@@ -47,7 +48,7 @@ export class WorkerThread {
 	/**
 	 * @returns {QChannel<WorkerThread>}
 	 */
-	#qChannel = new QChannel('`WorkerThread` individuals');
+	#qChannel = new QChannel('WorkerThread');
 	/**
 	 * @param {any} ev
 	 */
@@ -82,13 +83,14 @@ export class WorkerThread {
 				 * @param {MessageEvent<RECEIVE>|RECEIVE} ev
 				 * @returns {Promise<void>}
 				 */
-				// @ts-expect-error
 				self.onmessage = async function (ev) {
 					const [, error] = await TryAsync(async () => {
 						ev = ev instanceof MessageEvent ? ev.data : ev;
-						if (WorkerThread.#isCloseWorkerEvent(ev)) {
+						if (
+							/**  */
+							WorkerThread.#isCloseWorkerEvent(ev)
+						) {
 							this_.#qChannel.close();
-							// @ts-expect-error
 							self.onmessage = null;
 							return;
 						}
@@ -96,25 +98,35 @@ export class WorkerThread {
 							// @ts-expect-error
 							return await handler(ev, isLastOnQ);
 						});
-						if (error) {
+						if (
+							/**  */
+							error
+						) {
 							throw error;
 						}
-						// @ts-expect-error
 						self.postMessage(new WorkerResult(data, undefined));
 					});
-					if (error === undefined) {
+					if (
+						/**  */
+						error === undefined
+					) {
 						return;
 					}
-					// @ts-expect-error
 					self.postMessage(new WorkerResult(undefined, error?.message ?? 'Unknown error'));
 				};
 			},
 			parentPost: async () => {
-				if (WorkerThread.#refs === undefined) {
+				if (
+					/**  */
+					WorkerThread.#refs === undefined
+				) {
 					return;
 				}
 				const { parentPort } = WorkerThread.#refs;
-				if (parentPort === null) {
+				if (
+					/**  */
+					parentPort === null
+				) {
 					return;
 				}
 				/**
@@ -124,7 +136,10 @@ export class WorkerThread {
 				const listener = async function (ev) {
 					const [, error] = await TryAsync(async () => {
 						ev = ev instanceof MessageEvent ? ev.data : ev;
-						if (WorkerThread.#isCloseWorkerEvent(ev)) {
+						if (
+							/**  */
+							WorkerThread.#isCloseWorkerEvent(ev)
+						) {
 							this_.#qChannel.close();
 							parentPort.off('message', listener);
 							return;
@@ -133,23 +148,33 @@ export class WorkerThread {
 							// @ts-expect-error
 							return await handler(ev, isLastOnQ);
 						});
-						if (error) {
+						if (
+							/**  */
+							error
+						) {
 							throw error;
 						}
 						parentPort.postMessage(new WorkerResult(data, undefined));
 					});
-					if (error === undefined) {
+					if (
+						/**  */
+						error === undefined
+					) {
 						return;
 					}
 					parentPort.postMessage(new WorkerResult(undefined, error?.message ?? 'Unknown error'));
 				};
 				parentPort.on('message', listener);
 			},
-		}).then(([, error]) => {
-			if (error === undefined) {
+		}).then(([, errorMakingWorkerThread]) => {
+			if (
+				/**  */
+				errorMakingWorkerThread === undefined ||
+				!errorMakingWorkerThread.size
+			) {
 				return;
 			}
-			Console.error(error);
+			Console.error({ errorMakingWorkerThread });
 		});
 	}
 	/**

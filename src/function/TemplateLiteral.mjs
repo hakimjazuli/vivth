@@ -4,18 +4,18 @@ import { IsAsync } from './IsAsync.mjs';
 
 /**
  * @description
- * - function helper to create template literal with VALUEhandler to handle each values;
- * @template {(input:any)=>string|Promise<string>} VALUEHANDLER
- * @param {VALUEHANDLER} valueHandler
- * @param {(result:string)=>string} [postProcess]
+ * - function helper to create template literal with valueHandler to handle each values;
+ * @template {any} INPUTTYPE
+ * @param {import('../typehints/TemplateLiteralValueHandler.mjs').TemplateLiteralValueHandler<INPUTTYPE>} valueHandler
+ * @param {(result:string)=>(string|Promise<string>)} [postProcess]
  * @returns {(strings:TemplateStringsArray,
- * ...values:(Parameters<VALUEHANDLER>[0])[])=>
- * ReturnType<VALUEHANDLER>}
+ * ...values:(INPUTTYPE)[])=>
+ * ReturnType<Parameters<typeof TemplateLiteral>[0]>}
  * @example
  * import { TemplateLiteral } form 'vivth';
  *
  * export const html = TemplateLiteral(
- *  (val) => val,
+ *  ({ ...datas }) => `my string`,
  *  // optional
  *  (res) => return window.body.innerHTML = res
  * );
@@ -24,42 +24,79 @@ import { IsAsync } from './IsAsync.mjs';
  * // this will set innerHTML of body to '<div><button>innerButton</button></div>'
  */
 export function TemplateLiteral(valueHandler, postProcess = undefined) {
-	if (IsAsync(valueHandler)) {
-		// @ts-expect-error
-		return async (strings, ...values) => {
+	if (
+		/**  */
+		IsAsync(valueHandler)
+	) {
+		return async (templateStringsArray, ...valuesArrays) => {
 			const result = [];
-			for (let i = 0; i < strings.length; i++) {
-				result.push(strings[i]);
-				if (i < values.length) {
-					const value = values[i];
-					if (value === undefined) {
+			const inputLength = templateStringsArray.length;
+			for (let index = 0; index < templateStringsArray.length; index++) {
+				result.push(templateStringsArray[index]);
+				if (
+					/**  */
+					index < valuesArrays.length
+				) {
+					const currentValue = valuesArrays[index];
+					if (
+						/**  */
+						currentValue === undefined
+					) {
 						continue;
 					}
-					result.push(await valueHandler(value));
+					result.push(
+						await valueHandler({
+							index,
+							currentValue,
+							valuesArrays,
+							templateStringsArray,
+							inputLength,
+						}),
+					);
 				}
 			}
 			const resTrue = result.join('');
-			if (!postProcess) {
+			if (
+				/**  */
+				!postProcess
+			) {
 				return resTrue;
 			}
-			return postProcess(resTrue);
+			return await postProcess(resTrue);
 		};
 	}
-	// @ts-expect-error
-	return (strings, ...values) => {
+	return (templateStringsArray, ...valuesArrays) => {
 		const result = [];
-		for (let i = 0; i < strings.length; i++) {
-			result.push(strings[i]);
-			if (i < values.length) {
-				const value = values[i];
-				if (value === undefined) {
+		const inputLength = templateStringsArray.length;
+		for (let index = 0; index < templateStringsArray.length; index++) {
+			result.push(templateStringsArray[index]);
+			if (
+				/**  */
+				index < valuesArrays.length
+			) {
+				const currentValue = valuesArrays[index];
+				if (
+					/**  */
+					currentValue === undefined
+				) {
 					continue;
 				}
-				result.push(valueHandler(value));
+				result.push(
+					valueHandler({
+						index,
+						currentValue,
+						valuesArrays,
+						templateStringsArray,
+						inputLength,
+					}),
+				);
 			}
 		}
 		const resTrue = result.join('');
-		if (!postProcess) {
+		if (
+			/**  */
+			!postProcess
+		) {
 			return resTrue;
 		}
 		return postProcess(resTrue);

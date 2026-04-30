@@ -3,22 +3,25 @@
 import { Signal } from './Signal.mjs';
 import { Console } from './Console.mjs';
 import { Effect } from './Effect.mjs';
-import { LazyFactory } from '../function/LazyFactory.mjs';
-import { unwrapLazy } from '../common/lazie.mjs';
 
 /**
  * @description
  * - a class for creating derived version of [Signal](#signal);
  * @template VALUE
- * @extends Signal<VALUE>
+ * @extends Signal<VALUE|undefined>
  */
 export class Derived extends Signal {
 	/**
 	 * @description
 	 * - Derived used [Signal](#signal) and [Effect](#effect) under the hood;
-	 * @param {(effectInstanceOptions:Omit<Effect["options"] &
-	 * Derived<VALUE>["options"], unwrapLazy>) =>
-	 * Promise<VALUE>} derivedFunction
+	 * @param {(this: Derived<VALUE>,effectInstanceOptions:
+	 * Parameters<ConstructorParameters<typeof Effect>[0]>[0])
+	 * => Promise<VALUE>} derivedFunction
+	 * - use regullar function instead of arrow function when needed to throw early;
+	 * @param {ConstructorParameters<typeof Effect>[1]} [maxTimelapseBeingDebounced]
+	 * - prevent rapid changes from being unhandled more than the value;
+	 * - in miliseconds;
+	 * - default: `2_000`;
 	 * @example
 	 * import { Signal, Derived } from  'vivth';
 	 *
@@ -27,7 +30,7 @@ export class Derived extends Signal {
 	 * 		subscribe,
 	 * 		// : registrar callback for this derived instance, immediately return the signal instance
 	 * 	}) => {
-	 * 	return subscribe(count).value + count.value;
+	 * 	return subscribe(count).value \* 2;
 	 * 	// double listen to count changes, by returning the value, double.value also changes
 	 * 	// notice the count.value are accessed double, but it's all safe,
 	 * 	// since the wrapped one is the only one that are recorded as notifier.
@@ -35,64 +38,73 @@ export class Derived extends Signal {
 	 *
 	 * count.value++;
 	 */
-	constructor(derivedFunction) {
-		// @ts-expect-error
+	constructor(derivedFunction, maxTimelapseBeingDebounced = undefined) {
 		super(undefined);
-		const derived_instanceOptions = this.options;
+		derivedFunction = derivedFunction.bind(this);
 		new Effect(async (options) => {
-			const currentValue = await derivedFunction({
-				...options,
-				...derived_instanceOptions[unwrapLazy](),
-			});
-			if (currentValue === derived_instanceOptions.dontUpdate) {
+			// @ts-expect-error
+			const currentValue = await derivedFunction(options);
+			if (
+				/**  */
+				currentValue === this.dontUpdate
+			) {
 				return;
 			}
 			super.value = currentValue;
-		});
+		}, maxTimelapseBeingDebounced);
 	}
 	/**
 	 * @description
-	 * - additional helper to be accessed on effect;
+	 * - return this value to not to update the value of this instance, even when returning early;
+	 * >- can only be accessed when `derivedFunction` is declared as regullar function instead of arrow function;
+	 * @type {Object}
+	 * @example
+	 * import { Signal, Derived } from  'vivth';
+	 *
+	 * const count = new Signal(0);
+	 * const double = new Derived(async function({
+	 * 		subscribe,
+	 * 		isLastCalled,
+	 * 	}) {
+	 * 		if(!(await isLastCalled(100))) {
+	 * 			return this.dontUpdate;
+	 * 		}
+	 * 		const currentValue = subscribe(count).value;
+	 * 		const res = await fetch(`some/path/${curentValue.toString()}`);
+	 * 		if (
+	 * 			!(await isLastCalled()) ||
+	 * 			!res
+	 * 		) {
+	 * 			// returning early prevent race condition, even if the earlier fetch return late;
+	 *			return this.dontUpdate;
+	 *			// returning this.dontUpdate, will not modify the derived instance value;
+	 * 		}
+	 * 		count.value++;
+	 * 		return res;
+	 * });
+	 *
 	 */
-	options = LazyFactory(() => {
-		return {
-			/**
-			 * @instance options
-			 * @description
-			 * - return this value tandem with `isLastCalled`, to not to update the value of this instance, even when returning early;
-			 * @type {Object}
-			 * @example
-			 * import { Signal, Derived } from  'vivth';
-			 *
-			 * const count = new Signal(0);
-			 * const double = new Derived(async({
-			 * 		subscribe,
-			 * 		dontUpdate,
-			 * 		isLastCalled,
-			 * 	}) => {
-			 * 		const currentValue = subscribe(count).value;
-			 * 		if (!(await isLastCalled(10))) {
-			 *			return dontUpdate;
-			 * 		}
-			 * 		const res = await fetch(`some/path/${curentValue.toString()}`);
-			 * 		if (!(await isLastCalled())) {
-			 *			return dontUpdate; // this will prevent race condition, even if the earlier fetch return late;
-			 * 		}
-			 * 		return res;
-			 * });
-			 *
-			 * count.value++;
-			 */
-			dontUpdate: {},
-		};
-	});
+	dontUpdate = Object.freeze({});
 	/**
 	 * @description
 	 * - the most recent value of the instance
 	 * - can be turn into reactive with Effect or Derived instantiation;
-	 * - initial value are always `undefined`, make sure to put a check before consuming(inside an `Effect`);
-	 * @returns {VALUE}
+	 * - value are allowed to be `undefined` and always be `undefined` at the instantiation time;
+	 * >- make sure to put a check before consuming(inside an `Effect`);
+	 * @returns {VALUE|undefined}
 	 * @override
+	 * @example
+	 * import { Signal, Derived, Effect } from 'vivth';
+	 *
+	 * const numberSignal = new Signal(0);
+	 * const doubleDerived = new Derived(async({ subscribe }) => {
+	 * 	return subscribe(numberSignal).value \* 2;
+	 * });
+	 *
+	 * new Effect(async({ subscribe }) => {
+	 * 	console.log(subscribe(doubleDerived).value);
+	 * })
+	 * numberSignal++;
 	 */
 	get value() {
 		return super.value;
@@ -100,9 +112,9 @@ export class Derived extends Signal {
 	/**
 	 * @description
 	 * - Derived instance value cannot be manually assigned;
-	 * - it's value should always be determined by it's own `derivedFunction`;
+	 * - it's value should always be determined by it's own returned value from `derivedFunction`;
 	 * @private
-	 * @type {VALUE}
+	 * @type {(value:VALUE|undefined)=>void}
 	 * @override
 	 */
 	set value(newValue) {

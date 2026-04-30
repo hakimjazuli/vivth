@@ -9,8 +9,10 @@ import { exec } from 'pkg';
 import { EsBundler } from './EsBundler.mjs';
 import { FileSafe } from '../class/FileSafe.mjs';
 import { TryAsync } from '../function/TryAsync.mjs';
-import { FSInlineAnalyzer } from './FSInlineAnalyzer.mjs';
-import { removeVivthDevCodeBlock } from './adds/ToBundledJSPlugin.mjs';
+import { commonContentFixesBundled } from './adds/ToBundledJSPlugin.mjs';
+import { Preferrence } from '../common/Preferrence.mjs';
+import { ForInSync } from '../function/ForInSync.mjs';
+import { FSAnalyzer } from './FSAnalyzer.mjs';
 
 /**
  * @typedef {'win32' | 'linux' | 'darwin' | string} PlatformKey
@@ -27,18 +29,26 @@ let binaryExtension;
  * @returns {string[]}
  */
 const generateFlagsValue = (compilerOptions) => {
+	/**
+	 * @type {Array<string>}
+	 */
 	const options = [];
-	for (const flag in compilerOptions) {
-		const value = compilerOptions[flag];
+	ForInSync(compilerOptions, (flag, value) => {
 		options.push(`--${flag}`);
-		if (Array.isArray(value) === false) {
-			if (value) {
+		if (
+			/**  */
+			Array.isArray(value) === false
+		) {
+			if (
+				/**  */
+				value
+			) {
 				options.push(value);
 			}
-			continue;
+			return;
 		}
 		options.push(value.filter((val) => !!val).join(','));
-	}
+	});
 	return options;
 };
 /**
@@ -47,7 +57,10 @@ const generateFlagsValue = (compilerOptions) => {
  * @returns {string} extension including dot (e.g. '.exe', '')
  */
 const getBinaryExtension = () => {
-	if (binaryExtension === undefined) {
+	if (
+		/**  */
+		binaryExtension === undefined
+	) {
 		switch (platform()) {
 			case 'win32':
 				binaryExtension = '.exe';
@@ -70,20 +83,20 @@ const getBinaryExtension = () => {
  * - function to compile `.ts`|`.mts`|`.mjs` file, into a single executable;
  * - also generate js representation of the `bundled` version of the target;
  * - uses [pkg](https://www.npmjs.com/package/pkg), [bun](https://bun.com/docs/bundler/executables), and [deno](https://docs.deno.com/runtime/reference/cli/compile/) compiler under the hood;
- * >- they are used only as packaging/compiler agent, and doesn't necessarily supports their advanced feature, such as, assets bundling(use [`FSInline`](#fsinline) instead);
- * >- `WorkerThread` will be converted to inline using `FSInline` too;
+ * >- they are used only as packaging/compiler agent, and doesn't necessarily supports their advanced feature, such as, assets bundling(use [`FSasar`](#fsasar) instead);
+ * >- `WorkerThread` will be converted to inline using `FSasar` too;
  *
- * !!!WARNING!!!
- * !!!WARNING!!!
- * !!!WARNING!!!
+ * ---
+ * ---
+ * ---
  *
  * - This function does not obfuscate and will not prevent decompilation. Do not embed environment variables or sensitive information inside `options.entryPoint`;
  * - It is designed for quick binarization, allowing execution on machines without `Node.js`, `Bun`, or `Deno` installed;
- * - The resulting binary will contain `FSInline` and `WorkerMainThread` target paths Buffers, which are loaded into memory at runtime. If your logic depends on the file system, use `node:fs` or `node:fs/promises` APIs and ship external files alongside the binary (not compiled);
+ * - The resulting binary will contain `FSasar` and `WorkerMainThread` target paths Buffers, which are loaded into memory at runtime. If your logic depends on the file system, use `node:fs` or `node:fs/promises` APIs and ship external =  files alongside the binary (not compiled);new Set((not compiled)
  *
- * !!!WARNING!!!
- * !!!WARNING!!!
- * !!!WARNING!!!
+ * ---
+ * ---
+ * ---
  *
  * @param {Object} options
  * @param {string} options.entryPoint
@@ -97,17 +110,28 @@ const getBinaryExtension = () => {
  * - returned value then passed to `ESBundler`;
  * @param {boolean} options.minifyFirst
  * - minify the bundle before compilation;
+ * @param {Object} [options.asar]
+ * @param {Parameters<typeof import('@electron/asar')["createPackageFromFiles"]>[3]} [options.asar.InputMetadata]
+ * @param {Parameters<typeof import('@electron/asar')["createPackageFromFiles"]>[4]} [options.asar.options]
  * @param {string} options.outDir
  * - need manual prefix;
  * @param {'pkg'|'bun'|'deno'} [options.compiler]
  * - default: no comilation, just bundling;
  * - `bun` and `pkg` is checked, if there's bug on `deno`, please report on github for issues;
+ * - normally when using `pkg`, you will find something like this:
+ * ```shell
+ * [WARNING] "import.meta" is not available with the "cjs" output format and will be empty [empty-import-meta]
+ * ```
+ * >- it should be more or less safe to ignore;
+ * >- `CompileJS` modify `cjs` finalContent of any `import.meta` that uses it's url into `{url:__filename}`;
  * @param {Record<string, string>} [options.compilerArguments]
  * - `key` are to used as `--keyName`;
  * - value are the following value of the key;
  * - no need to add the output/outdir, as it use the `options.outDir`;
  * @param {ReturnType<CreateESPlugin>[]} [options.esBundlerPlugins]
  * - plugins for `EsBundler`;
+ * @param {Parameters<typeof EsBundler>[1]} [options.esbuildOptions]
+ * - options for `EsBundler`;
  * @return {ReturnType<typeof TryAsync<{compileResult:Promise<any>|undefined,
  * commandCalled: string|undefined;
  * compiledBinFile: string|undefined;
@@ -128,53 +152,51 @@ const getBinaryExtension = () => {
  * 	terminator: () => process.exit(0),
  * 	listener: (eventName) => {
  * 		process.once(eventName, function () {
- * 			if (!safeExit.instance) {
- * 				return;
- * 			}
- * 			safeExit.instance.exiting.correction(true);
+ * 			safeExit.triggerExit();
  * 			Console.log(`safe exit via "${eventName}"`);
  * 		});
  * 	},
  * });
  * const pathRoot = Paths.root;
- * if (pathRoot) {
- * 	const [[, error], [, errorbun]] = await Promise.all([
- * 		CompileJS({
- * 			entryPoint: join(pathRoot, '/dev/myEntryPoint.mjs'),
- * 			minifyFirst: true,
- * 			outDir: join(pathRoot, '/dev-pkg/'),
- * 			compiler: 'pkg',
- * 			compilerArguments: {
- * 				target: 'node18-win-x64',
- * 			},
- * 			encoding: 'utf-8',
- * 		}),
- * 		await CompileJS({
- * 			entryPoint: join(pathRoot, '/dev/myEntryPoint.mjs'),
- * 			minifyFirst: true,
- * 			outDir: join(pathRoot, '/dev-bun/'),
- * 			compiler: 'bun',
- * 			compilerArguments: {
- * 				target: 'bun-win-x64',
- * 			},
- * 			encoding: 'utf-8',
- * 		}),
- * 	]);
- * 	if (error || errorbun) {
- * 		Console.error({ error, errorbun });
- * 	}
+ * const [[, error], [, errorbun]] = await Promise.all([
+ * 	CompileJS({
+ * 		entryPoint: join(pathRoot, '/dev/myEntryPoint.mjs'),
+ * 		minifyFirst: true,
+ * 		outDir: join(pathRoot, '/dev-pkg/'),
+ * 		compiler: 'pkg',
+ * 		compilerArguments: {
+ * 			target: 'node18-win-x64',
+ * 		},
+ * 		asar: {},
+ * 		encoding: 'utf-8',
+ * 	}),
+ * 	await CompileJS({
+ * 		entryPoint: join(pathRoot, '/dev/myEntryPoint.mjs'),
+ * 		minifyFirst: true,
+ * 		outDir: join(pathRoot, '/dev-bun/'),
+ * 		compiler: 'bun',
+ * 		compilerArguments: {
+ * 			target: 'bun-win-x64',
+ * 		},
+ * 		asar: {},
+ * 		encoding: 'utf-8',
+ * 	}),
+ * ]);
+ * if (error || errorbun) {
+ * 	Console.error({ error, errorbun });
  * }
- *
  */
 export async function CompileJS({
 	entryPoint,
 	minifyFirst,
-	encoding = 'utf-8',
+	encoding = Preferrence.encoding,
 	outDir,
+	asar = {},
 	preprocessEntryPoint = undefined,
 	compiler = undefined,
 	compilerArguments = {},
 	esBundlerPlugins = [],
+	esbuildOptions = {},
 }) {
 	return await TryAsync(async () => {
 		/**
@@ -201,12 +223,17 @@ export async function CompileJS({
 			case '.mjs':
 				break;
 			default:
-				throw new Error(
-					`extention mismatch: "${extOfSource}", should be one of:".mjs"|".mts"|".ts"`
-				);
+				throw `extention mismatch: "${extOfSource}", should be one of:".mjs"|".mts"|".ts"`;
 		}
-		let sourceText = removeVivthDevCodeBlock(await readFile(entryPoint, { encoding }));
-		if (preprocessEntryPoint) {
+		let sourceText = commonContentFixesBundled(
+			entryPoint,
+			format,
+			await readFile(entryPoint, { encoding }),
+		);
+		if (
+			/**  */
+			preprocessEntryPoint
+		) {
 			sourceText = preprocessEntryPoint(sourceText);
 		}
 		const [bundledPrep, errorPrep] = await EsBundler(
@@ -220,20 +247,30 @@ export async function CompileJS({
 				minify: minifyFirst,
 				format,
 				plugins: esBundlerPlugins,
-			}
+				...esbuildOptions,
+			},
 		);
-		if (errorPrep) {
+		if (
+			/**  */
+			errorPrep
+		) {
 			throw errorPrep;
-		}
-		const [analyzedBundled, errorAnalyze] = await FSInlineAnalyzer.finalContent(
-			bundledPrep,
-			format
-		);
-		if (errorAnalyze) {
-			throw errorAnalyze;
 		}
 		const outputBaseNameNoExt = join(outDir, basename(entryPoint).replace(extOfSource, ''));
 		const bundledJSFile = `${outputBaseNameNoExt}${format === 'cjs' ? '.cjs' : '.mjs'}`;
+		const [analyzedBundled, errorAnalyze] = await FSAnalyzer.finalContent(
+			entryPoint,
+			bundledPrep,
+			format,
+			asar,
+			bundledJSFile,
+		);
+		if (
+			/**  */
+			errorAnalyze
+		) {
+			throw errorAnalyze;
+		}
 		await FileSafe.write(bundledJSFile, analyzedBundled, { encoding });
 		const compiledBinFile = `${outputBaseNameNoExt}${getBinaryExtension()}`;
 		switch (compiler) {

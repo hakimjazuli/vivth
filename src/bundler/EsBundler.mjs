@@ -6,7 +6,7 @@ import { Console } from '../class/Console.mjs';
 import { Paths } from '../class/Paths.mjs';
 import { TryAsync } from '../function/TryAsync.mjs';
 import { pluginVivthBundle } from './adds/pluginVivthBundle.mjs';
-import { externals } from './adds/externals.mjs';
+import { BrowserExternals } from './adds/BrowserExternals.mjs';
 
 /**
  * @description
@@ -20,7 +20,7 @@ import { externals } from './adds/externals.mjs';
  * @param {'.mts'|'.ts'|'.mjs'|'.cjs'} options.extension
  * @param {boolean} [options.withBinHeader]
  * @param {Omit<Parameters<build>[0],
- * 'entryPoints'|'bundle'|'write'|'sourcemap'>
+ * 'entryPoints'|'bundle'|'write'|'sourcemap'|'outdir'|'splitting'|'loader'>
  * } [esbuildOptions]
  * @returns {ReturnType<typeof TryAsync<string>>}
  * @example
@@ -38,7 +38,7 @@ import { externals } from './adds/externals.mjs';
  */
 export async function EsBundler(
 	{ content, extension, root, withBinHeader = false },
-	esbuildOptions = {}
+	esbuildOptions = {},
 ) {
 	return await TryAsync(async () => {
 		/**
@@ -61,14 +61,29 @@ export async function EsBundler(
 					acceptedextensions: ['.mts', '.ts', '.mjs'],
 				};
 				Console.error(error);
-				throw new Error(JSON.stringify(error));
+				throw JSON.stringify(error);
 		}
-		esbuildOptions.external = [...(esbuildOptions?.external ?? []), ...externals];
+		const format = esbuildOptions.format ?? 'esm';
+		const mainFields = esbuildOptions.mainFields;
+		if (
+			/**  */
+			!mainFields?.length
+		) {
+			esbuildOptions.mainFields = [format === 'esm' ? 'module' : 'main', 'main'];
+		}
+		esbuildOptions.external = [...(esbuildOptions?.external ?? [])];
+		if (
+			/**  */
+			esbuildOptions.platform === 'browser'
+		) {
+			esbuildOptions.external = Array.from(
+				new Set(esbuildOptions.external).union(BrowserExternals),
+			);
+		}
 		esbuildOptions.plugins = [...(esbuildOptions?.plugins ?? []), pluginVivthBundle];
 		const result = await build({
 			target: 'esnext',
 			platform: 'node',
-			format: 'esm',
 			...esbuildOptions,
 			stdin: {
 				contents: content,
@@ -83,11 +98,17 @@ export async function EsBundler(
 				...esbuildOptions.banner,
 			},
 		});
-		if (result.warnings?.length) {
+		if (
+			/**  */
+			result.warnings?.length
+		) {
 			Console.warn(result.warnings.map((w) => w.text).join('\n'));
 		}
 		const resString = result.outputFiles?.[0]?.text;
-		if (resString === undefined) {
+		if (
+			/**  */
+			resString === undefined
+		) {
 			return '';
 		}
 		return resString;

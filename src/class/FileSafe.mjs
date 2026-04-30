@@ -14,7 +14,7 @@ export class FileSafe {
 	/**
 	 * @description
 	 * - method to safely detects whether filePaths exist;
-	 * - uses fs/promises access under the hood;
+	 * - uses `'node:fs/promises'.access` under the hood;
 	 * - also returning promise of result & error as value;
 	 * @param {string} filePath
 	 * @returns {ReturnType<typeof TryAsync<true>>}
@@ -22,7 +22,7 @@ export class FileSafe {
 	 * import { join } from 'node:path';
 	 * import { FileSafe, Paths } from 'vivth';
 	 *
-	 * const [, error] = await FileSafe.exist(
+	 * const [isFileExist, error] = await FileSafe.exist(
 	 * 	join(Paths.root, '/some/path.mjs'),
 	 * );
 	 * if (!error) {
@@ -59,8 +59,11 @@ export class FileSafe {
 	static write = async (outFile, content, options) => {
 		return await TryAsync(async () => {
 			const [, errorMkDir] = await FileSafe.mkdir(dirname(outFile.toString()));
-			if (errorMkDir) {
-				throw new Error(`error mkdir, "${dirname(outFile.toString())}"`);
+			if (
+				/**  */
+				errorMkDir
+			) {
+				throw `error mkdir, "${dirname(outFile.toString())}"`;
 			}
 			return writeFile(outFile, content, options);
 		});
@@ -87,8 +90,11 @@ export class FileSafe {
 		return await TryAsync(async () => {
 			const dest_ = destinationFile.toString();
 			const [, errorMkDir] = await FileSafe.mkdir(dirname(dest_));
-			if (errorMkDir) {
-				throw new Error(`error mkdir, "${dirname(dest_)}"`);
+			if (
+				/**  */
+				errorMkDir
+			) {
+				throw `error mkdir, "${dirname(dest_)}"`;
 			}
 			return await copyFile(sourceFile, destinationFile, mode);
 		});
@@ -113,8 +119,11 @@ export class FileSafe {
 		return await TryAsync(async () => {
 			const dest_ = newPath.toString();
 			const [, errorMkDir] = await FileSafe.mkdir(dirname(dest_));
-			if (errorMkDir) {
-				throw new Error(`error mkdir, "${dirname(dest_)}"`);
+			if (
+				/**  */
+				errorMkDir
+			) {
+				throw `error mkdir, "${dirname(dest_)}"`;
 			}
 			return await rename(oldPath, newPath);
 		});

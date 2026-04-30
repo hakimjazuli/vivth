@@ -15,15 +15,18 @@ export class EnvSignal {
 	 * @description
 	 * - create `EnvSignal` instance;
 	 * @param {VALUE} initialValue
+	 * @example
+	 * import { EnvSignal } from 'vivth';
+	 *
+	 * export const myEnv = new EnvSignal(true);
 	 */
 	constructor(initialValue) {
 		this.#proxyConst = LazyFactory(() => new Signal(initialValue));
-		this.env = LazyFactory(
-			() =>
-				new Derived(async ({ subscribe }) => {
-					return subscribe(this.#proxyConst).value;
-				})
-		);
+		this.env = LazyFactory(() => {
+			return new Derived(async ({ subscribe }) => {
+				return subscribe(this.#proxyConst).value;
+			});
+		});
 	}
 	#isModified = false;
 	/**
@@ -61,11 +64,17 @@ export class EnvSignal {
 	 * myEnv.correction(false); // this will notify all subscribers;
 	 */
 	correction = (correctedValue) => {
-		if (this.#proxyConst.value === null) {
+		if (
+			/**  */
+			this.#proxyConst.value === null
+		) {
 			return;
 		}
 		Console;
-		if (this.#isModified) {
+		if (
+			/**  */
+			this.#isModified
+		) {
 			Console.warn({
 				correctedValue,
 				value: this.#proxyConst.value,

@@ -1,34 +1,31 @@
 // @ts-check
 
-import { FSInline } from '../bundler/FSInline.mjs';
+import { PathFSFile } from '../bundler/adds/PathFSFile.mjs';
+import { FSasar } from '../bundler/FSasar.mjs';
 import { Base64URL } from '../common/Base64URL.mjs';
 import { closeWorkerThreadEventObject } from '../common/eventObjects.mjs';
+import { Preferrence } from '../common/Preferrence.mjs';
 import { GetRuntime } from '../function/GetRuntime.mjs';
 import { Tries } from '../function/Tries.mjs';
 import { Console } from './Console.mjs';
 import { Derived } from './Derived.mjs';
 import { Effect } from './Effect.mjs';
-import { Paths } from './Paths.mjs';
 import { SafeExit } from './SafeExit.mjs';
 import { Signal } from './Signal.mjs';
-
-/**
- * @template POST
- * @typedef {import('./WorkerResult.mjs').WorkerResult<POST>} WorkerResult
- */
-/**
- * @template RECEIVE
- * @template POST
- * @typedef {import('./WorkerThread.mjs').WorkerThread<RECEIVE, POST>} WorkerThread
- */
-/**
- * @typedef {import('../common/lazie.mjs').unwrapLazy} unwrapLazy
- */
 
 /**
  * @template {WorkerThread<any, any>} WT
  */
 export class WorkerMainThread {
+	/**
+	 * @template POST
+	 * @typedef {import('./WorkerResult.mjs').WorkerResult<POST>} WorkerResult
+	 */
+	/**
+	 * @template RECEIVE
+	 * @template POST
+	 * @typedef {import('./WorkerThread.mjs').WorkerThread<RECEIVE, POST>} WorkerThread
+	 */
 	/**
 	 * @type {boolean}
 	 */
@@ -39,10 +36,10 @@ export class WorkerMainThread {
 	 * @param {typeof WorkerMainThread["pathValidator"]} param0.pathValidator
 	 */
 	static setup = ({ workerClass, pathValidator }) => {
-		if (Paths.root === undefined) {
-			return;
-		}
-		if (WorkerMainThread.#isRegistered) {
+		if (
+			/**  */
+			WorkerMainThread.#isRegistered
+		) {
 			Console.warn({ message: 'WorkerMainThread.setup, can only be called once' });
 			return;
 		}
@@ -63,17 +60,8 @@ export class WorkerMainThread {
 			type: 'module',
 		});
 	/**
-	 * @template {WorkerThread<any, any>} WT
-	 * @param {string} handler
-	 * @param {Omit<WorkerOptions|import('node:worker_threads').WorkerOptions, 'eval'|'type'>} [options]
-	 * @returns {WorkerMainThread<WT>}
-	 */
-	static newVivthWorker(handler, options = {}) {
-		return new WorkerMainThread(handler, options);
-	}
-	/**
-	 * @param {Parameters<typeof WorkerMainThread<WT>["newVivthWorker"]>[0]} handler
-	 * @param {Parameters<typeof WorkerMainThread<WT>["newVivthWorker"]>[1]} [options]
+	 * @param {PathFSFile} handler
+	 * @param {Omit<WorkerOptions|import('node:worker_threads').WorkerOptions, 'eval'|'type'>} options
 	 */
 	constructor(handler, options = {}) {
 		/**
@@ -83,7 +71,7 @@ export class WorkerMainThread {
 		const listener = (ev) => {
 			this.#proxyReceiver.value = ev;
 		};
-		WorkerMainThread.#workerFilehandler(handler, options, this, listener);
+		WorkerMainThread.#workerFilehandler(handler.path, options, this, listener);
 	}
 	/**
 	 * @type {import('./Signal.mjs').Signal<import('./WorkerResult.mjs').WorkerResult<WT["POST"]>|MessageEvent<import('./WorkerResult.mjs').WorkerResult<WT["POST"]>>>}
@@ -101,20 +89,24 @@ export class WorkerMainThread {
 	 */
 	static async #workerFilehandler(handler, options, worker, listener) {
 		WorkerMainThread.#options.eval = true;
-		const resolvedPath = (await FSInline.vivthFSInlineFile(handler)).toString('utf-8');
+		const resolvedPath =
+			(await FSasar.file(PathFSFile.vivthFile(handler)))?.toString(Preferrence.encoding) ?? '';
 		const runtime = GetRuntime();
 		const workerClass = WorkerMainThread.workerClass;
 		if (
-			//
+			/**  */
 			!workerClass
 		) {
 			Console.error('invalid `Worker` inputed to `WorkerMainThread`;');
 			return;
 		}
-		const [, errorCreatingWorker] = await Tries({
+		const [[key], errorCreatingWorker] = await Tries({
 			browser: async () => {
-				if (runtime !== 'browser') {
-					throw new Error('not a browser');
+				if (
+					/**  */
+					runtime !== 'browser'
+				) {
+					throw 'not a browser';
 				}
 				const inlineURL = Base64URL(handler, 'application/javascript', btoa);
 				const worker_ = (worker.#worker.value = new workerClass(
@@ -123,57 +115,80 @@ export class WorkerMainThread {
 					{
 						...options,
 						...WorkerMainThread.#options,
-					}
+					},
 				));
-				if ('onmessage' in worker_ === false) {
-					throw new Error('not a browser');
+				if (
+					/**  */
+					'onmessage' in worker_ ===
+					false
+				) {
+					throw 'not a browser';
 				}
 				worker_.onmessage = listener;
-				if (SafeExit.instance) {
+				if (
+					/**  */
+					SafeExit.instance
+				) {
 					SafeExit.instance.addCallback(async () => {
 						worker_.onmessage = null;
 					});
 				}
 			},
 			nonBrowser: async () => {
-				if (workerClass !== (await import('node:worker_threads')).Worker) {
-					throw "Worker are not impored from 'node:worker_threads'";
-				}
-				const worker_ = (worker.#worker.value = new workerClass(resolvedPath, {
-					...options,
-					...WorkerMainThread.#options,
-				}));
-				if ('addEventListener' in worker_) {
+				const worker_ = (worker.#worker.value = new workerClass(
+					resolvedPath,
 					// @ts-expect-error
+					{ ...options, ...WorkerMainThread.#options },
+				));
+				if (
+					/**  */
+					'addEventListener' in worker_
+				) {
 					worker_.addEventListener('message', listener);
-					if (SafeExit.instance) {
+					if (
+						/**  */
+						SafeExit.instance
+					) {
 						SafeExit.instance.addCallback(async () => {
-							// @ts-expect-error
 							worker_.removeEventListener('message', listener);
 						});
 					}
-				} else if ('addListener' in worker_) {
+					return;
+				}
+				if (
+					/**  */
+					'addListener' in worker_
+				) {
 					worker_.addListener('message', listener);
-					if (SafeExit.instance) {
+					if (
+						/**  */
+						SafeExit.instance
+					) {
 						SafeExit.instance.addCallback(async () => {
 							worker_.removeListener('message', listener);
 						});
 					}
-				} else {
-					throw new Error('not a standard non browser');
+					return;
 				}
+				throw 'not a standard non browser';
 			},
 		});
-		if (errorCreatingWorker) {
-			Console.error(errorCreatingWorker);
+		if (
+			/**  */
+			key
+		) {
+			if (
+				/**  */
+				!SafeExit.instance
+			) {
+				return;
+			}
+			SafeExit.instance.addCallback(async () => {
+				worker.terminate();
+			});
 			return;
 		}
-		if (!SafeExit.instance) {
-			return;
-		}
-		SafeExit.instance.addCallback(async () => {
-			worker.terminate();
-		});
+		Console.error({ errorCreatingWorker });
 	}
 	/**
 	 * lazyly generated because node version need to await
@@ -188,7 +203,11 @@ export class WorkerMainThread {
 	#handler = new Effect(async ({ subscribe }) => {
 		const postData = subscribe(this.#proxyPost).value;
 		const worker = subscribe(this.#worker).value;
-		if (worker === undefined || postData === undefined) {
+		if (
+			/**  */
+			worker === undefined ||
+			postData === undefined
+		) {
 			return;
 		}
 		worker.postMessage(postData, []);
@@ -213,7 +232,10 @@ export class WorkerMainThread {
 	 */
 	receiverSignal = new Derived(async ({ subscribe }) => {
 		const val = subscribe(this.#proxyReceiver).value;
-		if (val instanceof MessageEvent) {
+		if (
+			/**  */
+			val instanceof MessageEvent
+		) {
 			return val.data;
 		}
 		return val;
