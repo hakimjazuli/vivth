@@ -1,5 +1,6 @@
 // @ts-check
 
+import { Signal } from '../class/Signal.mjs';
 import { WalkThrough } from '../class/WalkThrough.mjs';
 import { ForInSync } from '../function/ForInSync.mjs';
 import { ForOfSync } from '../function/ForOfSync.mjs';
@@ -11,7 +12,9 @@ import { WC_createNamedSlot } from './bindings/WC_createNamedSlot.mjs';
  * @import {ArrayToKeys} from '../typehints/ArrayToKeys.mjs'
  * @import {WC_TagName_type} from './common/WC_TagName_type.mjs'
  */
-
+/**
+ * @typedef {typeof import('../function/IsTypeOf.mjs').TypeMap} TypeMap
+ */
 /**
  * @description
  * - Generates a base class for Web Component definitions.
@@ -32,24 +35,27 @@ import { WC_createNamedSlot } from './bindings/WC_createNamedSlot.mjs';
  * 	style?:string;
  *  observedAttributes?: readonly string[];
  *  namedSlots?: readonly string[];
- * }} STATICMEM
+ * 	props?: Record<string, keyof TypeMap|(new (...args:any[])=>any)>;
+ * }} STANDARD
  * @template {(BASE_CONSTRUCTOR) & {
  * 	tagName: string;
  * 	extendIs: string;
- * 	observedAttributes?: STATICMEM["observedAttributes"];
- * 	namedSlots?: STATICMEM["namedSlots"];
+ * 	observedAttributes?: STANDARD["observedAttributes"];
+ * 	namedSlots?: STANDARD["namedSlots"];
+ * 	props?: STANDARD["props"];
  * }} CREATEARGS
  * @template { (new (...args: any[]) => InstanceType<BASE_CONSTRUCTOR> & {
  * 		setObservedAttributes(attributes:Partial<
- * 			Record<ArrayToKeys<STATICMEM["observedAttributes"]extends readonly string[]
- * 				? STATICMEM["observedAttributes"]
+ * 			Record<ArrayToKeys<STANDARD["observedAttributes"]extends readonly string[]
+ * 				? STANDARD["observedAttributes"]
  * 				:never>,
  * 			string>
  * 		>):void;
+ *  	props: STANDARD["props"];
  *    adoptedCallback():void;
  *    connectedCallback():void;
  *    disonnectedCallback():void;
- * 		attributeChangedCallback(name:ArrayToKeys<STATICMEM["observedAttributes"]extends readonly string[]?STATICMEM["observedAttributes"]:never>, oldValue:string|null, newValue:string|null): void;
+ * 		attributeChangedCallback(name:ArrayToKeys<STANDARD["observedAttributes"]extends readonly string[]?STANDARD["observedAttributes"]:never>, oldValue:string|null, newValue:string|null): void;
  * 		ON:<OBJ extends any & {
  * 				onConnected?: NonNullable<Parameters<InstanceType<RET>["ON"]>[1]>["connected"];
  * 				onDisconnected?: NonNullable<Parameters<InstanceType<RET>["ON"]>[1]>["disconnected"];
@@ -63,8 +69,8 @@ import { WC_createNamedSlot } from './bindings/WC_createNamedSlot.mjs';
  * 				adopted?:(obj:OBJ)=>void;
  * 				attributeChanged?:(
  * 					obj:OBJ,
- * 					name:STATICMEM["observedAttributes"]extends readonly string[]
- * 						? ArrayToKeys<STATICMEM["observedAttributes"]>
+ * 					name:STANDARD["observedAttributes"]extends readonly string[]
+ * 						? ArrayToKeys<STANDARD["observedAttributes"]>
  * 						: never,
  * 					oldValue:string|null,
  * 					newValue:string|null
@@ -73,9 +79,9 @@ import { WC_createNamedSlot } from './bindings/WC_createNamedSlot.mjs';
  *  }) & {
  * 		tagName:string;
  * 		extendIs:string;
- *  	namedSlots: STATICMEM["namedSlots"];
- *  	observedAttributes: STATICMEM["observedAttributes"];
- * 		createNamedSlot: typeof WC_createNamedSlot<STATICMEM>;
+ *  	namedSlots: STANDARD["namedSlots"];
+ *  	observedAttributes: STANDARD["observedAttributes"];
+ * 		createNamedSlot: typeof WC_createNamedSlot<STANDARD>;
  * 		define:<TAG extends string, CLASSREF extends CREATEARGS>
  * 			(
  * 				tagName:WC_TagName_type<TAG>,
@@ -85,7 +91,7 @@ import { WC_createNamedSlot } from './bindings/WC_createNamedSlot.mjs';
  * 	}
  * } RET
  * @param {BASE_CONSTRUCTOR} Base
- * @param {STATICMEM} [staticMember]
+ * @param {STANDARD} [staticMember]
  * @returns {RET}
  * @example
  * export MyWebComponent extends WC_extendsA(HTMLElement, {...options}){
@@ -96,6 +102,11 @@ export function WC_extendsA(Base, staticMember = /** @type {any} */ ({})) {
 	const { class: class_ = '', style = '', observedAttributes = [], namedSlots = [] } = staticMember;
 	class MyClass extends Base {
 		static observedAttributes = observedAttributes;
+
+		/**
+		 * @type {STANDARD["props"]|undefined}
+		 */
+		props = {};
 
 		/** @type {Set<()=>void>} */
 		#setOfConnected = new Set();
@@ -122,8 +133,8 @@ export function WC_extendsA(Base, staticMember = /** @type {any} */ ({})) {
 		 * @param {(obj:OBJ)=>void} [callbacks.adopted]
 		 * @param {(
 		 * 	obj:OBJ,
-		 * 	name:STATICMEM["observedAttributes"]extends readonly string[]
-		 * 		? ArrayToKeys<STATICMEM["observedAttributes"]>
+		 * 	name:STANDARD["observedAttributes"]extends readonly string[]
+		 * 		? ArrayToKeys<STANDARD["observedAttributes"]>
 		 * 		: never,
 		 * 	oldValue:string|null,
 		 * 	newValue:string|null
@@ -296,3 +307,21 @@ export function WC_extendsA(Base, staticMember = /** @type {any} */ ({})) {
 	}
 	return /** @type {RET} */ (/** @type {unknown} */ (MyClass));
 }
+
+class e extends WC_extendsA(HTMLElement, {
+	namedSlots: /** @type {const} */ (['a', 'b']),
+	props: {
+		a: 'string',
+		/**  @type {typeof Signal<string[]>}  */
+		k: Signal,
+	},
+}) {
+	static create = this.define('a-a', this);
+	constructor() {
+		super();
+		this.props.k.length;
+	}
+}
+e.create({
+	props: { a: '0', k: new Signal(['']) },
+});

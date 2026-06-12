@@ -203,8 +203,7 @@ npm i vivth
 - [neutral.ObserverSignal](#observersignal)
 - [neutral.WC_litRef](#wc_litref)
 - [neutral.WC_loopedSiblingsRef](#wc_loopedsiblingsref)
-- [neutral.WC_parentComponentRef](#wc_parentcomponentref)
-- [neutral.WC_extendsA](#wc_extendsa)
+- [browser.WC_extendsA](#wc_extendsa)
 - [neutral.WC_extendsB](#wc_extendsb)
 
 ---
@@ -6692,34 +6691,32 @@ const esWatcherInstance = this.registerObjectWithAutoCleanup(
 
 ```js
 /**
- * @template {(new (...args: any[]) => HTMLElement) & {
+ * @template {(new (...args: any[]) => HTMLElement & {
+ * 		props?: Record<string, keyof TypeMap|(new (...args:any[])=>any)>;
+ * 	}) & {
  *  tagName: string;
  * 	extendIs: string;
  *  observedAttributes?: readonly string[];
  *  namedSlots?: readonly string[];
+ * 	props?: Record<string, keyof TypeMap|(new (...args:any[])=>any)>;
  * }} BASE_CONSTRUCTOR
  * @param {BASE_CONSTRUCTOR} arg0
- * @returns {{
- * 		dom:(
- * 		 		attributes?:BASE_CONSTRUCTOR['observedAttributes'] extends readonly string[]
- * 		 			? Partial<
- * 		 					Record<ArrayToKeys<BASE_CONSTRUCTOR['observedAttributes']>, string>
- * 		 				>
- * 		 			: undefined,
- * 		 		childrenData?:(slotName:Record<ArrayToKeys<BASE_CONSTRUCTOR['namedSlots']>, string>)=>TemplateResult,
- * 		 		renderOptions?:RenderOptions
- * 		 	)=>InstanceType<BASE_CONSTRUCTOR>;
- * 		template:
- * 			(
- * 				attributes?:BASE_CONSTRUCTOR['observedAttributes'] extends readonly string[]
- * 					? Partial<
- * 							Record<ArrayToKeys<BASE_CONSTRUCTOR['observedAttributes']>, string>
- * 						>
- * 					: undefined,
- * 				childrenData?:(slotName:Record<ArrayToKeys<BASE_CONSTRUCTOR['namedSlots']>, string>)=>TemplateResult,
- * 			)=>TemplateResult
- * 	}
- * }
+ * @returns {(
+ * 	param?:{
+ * 		attrs?:BASE_CONSTRUCTOR['observedAttributes'] extends readonly string[]
+ * 			? Partial<
+ * 					Record<ArrayToKeys<BASE_CONSTRUCTOR['observedAttributes']>, string>
+ * 				>
+ * 			: undefined;
+ * 		props?: {[K in keyof NonNullable<BASE_CONSTRUCTOR["props"]>]:
+ * 			NonNullable<BASE_CONSTRUCTOR["props"][K]> extends string
+ * 				? TypeMap[NonNullable<BASE_CONSTRUCTOR["props"]>[K]]
+ * 				: InstanceType<NonNullable<BASE_CONSTRUCTOR["props"][K]>>
+ * 		};
+ * 		children?:(slotName:Record<ArrayToKeys<BASE_CONSTRUCTOR['namedSlots']>, string>)=>TemplateResult;
+ * 		renderOptions?:RenderOptions;
+ * 	},
+ * )=>InstanceType<BASE_CONSTRUCTOR>}
  */
 ```
 
@@ -7280,52 +7277,7 @@ text.nodeValue = "hello world";
 
 ---
 
-<h2 id="wc_parentcomponentref">neutral.WC_parentComponentRef</h2>
-
-#### reference: `WC_parentComponentRef`
-
-- `Signal` to check parentComponent;
-- automatically trigger check upon connectedCallback, by wrapping it with `this.ON` even without second argument;
-- automatically trigger cleanup upon disconnectedCallback, by wrapping it with `this.ON` even without second argument;
-
-```js
-/**
- * @template {HTMLElement} TEMP
- * @extends {Signal<TEMP|undefined|null>}
- */
-```
-
-#### reference: `WC_parentComponentRef_instance.onConnected`
-
-- self auto register and cleanup when assigned with `ON` jut by passing empty object as second argument;
-- the automatic part only works on `WC_extends${suffix}`;
-  > - the cleanup logic are infered by `WC_extends${suffix}` class inner behaviour;
-- still need to be called manually if used outside `vivth/neutral` `WebComponent`;
-
-```js
-/**
- * @type {()=>void}
- */
-```
-
-#### reference: `WC_parentComponentRef_instance.onDisconnected`
-
-- self auto register and cleanup when assigned with `ON` jut by passing empty object as second argument;
-- the automatic part only works on `WC_extends${suffix}`;
-  > - the cleanup logic are infered by `WC_extends${suffix}` class inner behaviour;
-- still need to be called manually if used outside `vivth/neutral` `WebComponent`;
-
-```js
-/**
- * @type {()=>void}
- */
-```
-
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
-
----
-
-<h2 id="wc_extendsa">neutral.WC_extendsA</h2>
+<h2 id="wc_extendsa">browser.WC_extendsA</h2>
 
 #### reference: `WC_extendsA`
 
@@ -7352,24 +7304,27 @@ text.nodeValue = "hello world";
  * 	style?:string;
  *  observedAttributes?: readonly string[];
  *  namedSlots?: readonly string[];
- * }} STATICMEM
+ * 	props?: Record<string, keyof TypeMap|(new (...args:any[])=>any)>;
+ * }} STANDARD
  * @template {(BASE_CONSTRUCTOR) & {
  * 	tagName: string;
  * 	extendIs: string;
- * 	observedAttributes?: STATICMEM["observedAttributes"];
- * 	namedSlots?: STATICMEM["namedSlots"];
+ * 	observedAttributes?: STANDARD["observedAttributes"];
+ * 	namedSlots?: STANDARD["namedSlots"];
+ * 	props?: STANDARD["props"];
  * }} CREATEARGS
  * @template { (new (...args: any[]) => InstanceType<BASE_CONSTRUCTOR> & {
  * 		setObservedAttributes(attributes:Partial<
- * 			Record<ArrayToKeys<STATICMEM["observedAttributes"]extends readonly string[]
- * 				? STATICMEM["observedAttributes"]
+ * 			Record<ArrayToKeys<STANDARD["observedAttributes"]extends readonly string[]
+ * 				? STANDARD["observedAttributes"]
  * 				:never>,
  * 			string>
  * 		>):void;
+ *  	props: STANDARD["props"];
  *    adoptedCallback():void;
  *    connectedCallback():void;
  *    disonnectedCallback():void;
- * 		attributeChangedCallback(name:ArrayToKeys<STATICMEM["observedAttributes"]extends readonly string[]?STATICMEM["observedAttributes"]:never>, oldValue:string|null, newValue:string|null): void;
+ * 		attributeChangedCallback(name:ArrayToKeys<STANDARD["observedAttributes"]extends readonly string[]?STANDARD["observedAttributes"]:never>, oldValue:string|null, newValue:string|null): void;
  * 		ON:<OBJ extends any & {
  * 				onConnected?: NonNullable<Parameters<InstanceType<RET>["ON"]>[1]>["connected"];
  * 				onDisconnected?: NonNullable<Parameters<InstanceType<RET>["ON"]>[1]>["disconnected"];
@@ -7383,8 +7338,8 @@ text.nodeValue = "hello world";
  * 				adopted?:(obj:OBJ)=>void;
  * 				attributeChanged?:(
  * 					obj:OBJ,
- * 					name:STATICMEM["observedAttributes"]extends readonly string[]
- * 						? ArrayToKeys<STATICMEM["observedAttributes"]>
+ * 					name:STANDARD["observedAttributes"]extends readonly string[]
+ * 						? ArrayToKeys<STANDARD["observedAttributes"]>
  * 						: never,
  * 					oldValue:string|null,
  * 					newValue:string|null
@@ -7393,9 +7348,9 @@ text.nodeValue = "hello world";
  *  }) & {
  * 		tagName:string;
  * 		extendIs:string;
- *  	namedSlots: STATICMEM["namedSlots"];
- *  	observedAttributes: STATICMEM["observedAttributes"];
- * 		createNamedSlot: typeof WC_createNamedSlot<STATICMEM>;
+ *  	namedSlots: STANDARD["namedSlots"];
+ *  	observedAttributes: STANDARD["observedAttributes"];
+ * 		createNamedSlot: typeof WC_createNamedSlot<STANDARD>;
  * 		define:<TAG extends string, CLASSREF extends CREATEARGS>
  * 			(
  * 				tagName:WC_TagName_type<TAG>,
@@ -7405,7 +7360,7 @@ text.nodeValue = "hello world";
  * 	}
  * } RET
  * @param {BASE_CONSTRUCTOR} Base
- * @param {STATICMEM} [staticMember]
+ * @param {STANDARD} [staticMember]
  * @returns {RET}
  */
 ```
@@ -7437,8 +7392,8 @@ text.nodeValue = "hello world";
  * @param {(obj:OBJ)=>void} [callbacks.adopted]
  * @param {(
  * 	obj:OBJ,
- * 	name:STATICMEM["observedAttributes"]extends readonly string[]
- * 		? ArrayToKeys<STATICMEM["observedAttributes"]>
+ * 	name:STANDARD["observedAttributes"]extends readonly string[]
+ * 		? ArrayToKeys<STANDARD["observedAttributes"]>
  * 		: never,
  * 	oldValue:string|null,
  * 	newValue:string|null
@@ -7523,24 +7478,27 @@ text.nodeValue = "hello world";
  * 	style?:string;
  *  observedAttributes?: readonly string[];
  *  namedSlots?: readonly string[];
- * }} STATICMEM
+ * 	props?: Record<string, keyof TypeMap|(new (...args:any[])=>any)>;
+ * }} STANDARD
  * @template {(BASE_CONSTRUCTOR) & {
  * 	tagName: string;
  * 	extendIs: string;
- * 	observedAttributes?: STATICMEM["observedAttributes"];
- * 	namedSlots?: STATICMEM["namedSlots"];
+ * 	observedAttributes?: STANDARD["observedAttributes"];
+ * 	namedSlots?: STANDARD["namedSlots"];
+ * 	props?: STANDARD["props"];
  * }} CREATEARGS
  * @template { (new (...args: any[]) => InstanceType<BASE_CONSTRUCTOR> & {
  * 		setObservedAttributes(attributes:Partial<
- * 			Record<ArrayToKeys<STATICMEM["observedAttributes"]extends readonly string[]
- * 				? STATICMEM["observedAttributes"]
+ * 			Record<ArrayToKeys<STANDARD["observedAttributes"]extends readonly string[]
+ * 				? STANDARD["observedAttributes"]
  * 				:never>,
  * 			string>
  * 		>):void;
+ * 		props?: STANDARD["props"];
  *    adoptedCallback():void;
  *    connectedCallback():void;
  *    disonnectedCallback():void;
- * 		attributeChangedCallback(name:ArrayToKeys<STATICMEM["observedAttributes"]extends readonly string[]?STATICMEM["observedAttributes"]:never>, oldValue:string|null, newValue:string|null): void;
+ * 		attributeChangedCallback(name:ArrayToKeys<STANDARD["observedAttributes"]extends readonly string[]?STANDARD["observedAttributes"]:never>, oldValue:string|null, newValue:string|null): void;
  * 		ON:<OBJ extends any & {
  * 				onConnected?: NonNullable<Parameters<InstanceType<RET>["ON"]>[1]>["connected"];
  * 				onConnectedMove?: NonNullable<Parameters<InstanceType<RET>["ON"]>[1]>["connectedMove"];
@@ -7556,8 +7514,8 @@ text.nodeValue = "hello world";
  * 				adopted?:(obj:OBJ)=>void;
  * 				attributeChanged?:(
  * 					obj:OBJ,
- * 					name:STATICMEM["observedAttributes"]extends readonly string[]
- * 						? ArrayToKeys<STATICMEM["observedAttributes"]>
+ * 					name:STANDARD["observedAttributes"]extends readonly string[]
+ * 						? ArrayToKeys<STANDARD["observedAttributes"]>
  * 						: never,
  * 					oldValue:string|null,
  * 					newValue:string|null
@@ -7566,9 +7524,9 @@ text.nodeValue = "hello world";
  *  }) & {
  * 		tagName:string;
  * 		extendIs:string;
- *  	namedSlots: STATICMEM["namedSlots"];
- *  	observedAttributes: STATICMEM["observedAttributes"];
- * 		createNamedSlot: typeof WC_createNamedSlot<STATICMEM>;
+ *  	namedSlots: STANDARD["namedSlots"];
+ *  	observedAttributes: STANDARD["observedAttributes"];
+ * 		createNamedSlot: typeof WC_createNamedSlot<STANDARD>;
  * 		define:<TAG extends string, CLASSREF extends CREATEARGS>
  * 			(
  * 				tagName:WC_TagName_type<TAG>,
@@ -7578,7 +7536,7 @@ text.nodeValue = "hello world";
  * 	}
  * } RET
  * @param {BASE_CONSTRUCTOR} Base
- * @param {STATICMEM} [staticMember]
+ * @param {STANDARD} [staticMember]
  * @returns {RET}
  */
 ```
@@ -7604,8 +7562,8 @@ text.nodeValue = "hello world";
  * @param {(obj:OBJ)=>void} [callbacks.adopted]
  * @param {(
  * 	obj:OBJ,
- * 	name:STATICMEM["observedAttributes"]extends readonly string[]
- * 		? ArrayToKeys<STATICMEM["observedAttributes"]>
+ * 	name:STANDARD["observedAttributes"]extends readonly string[]
+ * 		? ArrayToKeys<STANDARD["observedAttributes"]>
  * 		: never,
  * 	oldValue:string|null,
  * 	newValue:string|null

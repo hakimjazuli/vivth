@@ -3,7 +3,7 @@
  * Using a constant object allows for type-safe extraction without
  * manual conditional mapping.
  */
-const TypeMap = {
+export const TypeMap = {
 	string: '',
 	number: 0,
 	boolean: true,

@@ -22,5 +22,6 @@ function IsTypeOf(object, type) {
   return typeof object === type;
 }
 export {
-  IsTypeOf
+  IsTypeOf,
+  TypeMap
 };

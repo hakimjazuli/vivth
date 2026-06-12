@@ -3,6 +3,9 @@
  * @import {WC_TagName_type} from './common/WC_TagName_type.mjs'
  */
 /**
+ * @typedef {typeof import('../function/IsTypeOf.mjs').TypeMap} TypeMap
+ */
+/**
  * @description
  * - Generates a base class for Web Component definitions.
  * - Note: This generator does not support `connectedMoveCallback`.
@@ -22,24 +25,27 @@
  * 	style?:string;
  *  observedAttributes?: readonly string[];
  *  namedSlots?: readonly string[];
- * }} STATICMEM
+ * 	props?: Record<string, keyof TypeMap|(new (...args:any[])=>any)>;
+ * }} STANDARD
  * @template {(BASE_CONSTRUCTOR) & {
  * 	tagName: string;
  * 	extendIs: string;
- * 	observedAttributes?: STATICMEM["observedAttributes"];
- * 	namedSlots?: STATICMEM["namedSlots"];
+ * 	observedAttributes?: STANDARD["observedAttributes"];
+ * 	namedSlots?: STANDARD["namedSlots"];
+ * 	props?: STANDARD["props"];
  * }} CREATEARGS
  * @template { (new (...args: any[]) => InstanceType<BASE_CONSTRUCTOR> & {
  * 		setObservedAttributes(attributes:Partial<
- * 			Record<ArrayToKeys<STATICMEM["observedAttributes"]extends readonly string[]
- * 				? STATICMEM["observedAttributes"]
+ * 			Record<ArrayToKeys<STANDARD["observedAttributes"]extends readonly string[]
+ * 				? STANDARD["observedAttributes"]
  * 				:never>,
  * 			string>
  * 		>):void;
+ * 		props?: STANDARD["props"];
  *    adoptedCallback():void;
  *    connectedCallback():void;
  *    disonnectedCallback():void;
- * 		attributeChangedCallback(name:ArrayToKeys<STATICMEM["observedAttributes"]extends readonly string[]?STATICMEM["observedAttributes"]:never>, oldValue:string|null, newValue:string|null): void;
+ * 		attributeChangedCallback(name:ArrayToKeys<STANDARD["observedAttributes"]extends readonly string[]?STANDARD["observedAttributes"]:never>, oldValue:string|null, newValue:string|null): void;
  * 		ON:<OBJ extends any & {
  * 				onConnected?: NonNullable<Parameters<InstanceType<RET>["ON"]>[1]>["connected"];
  * 				onConnectedMove?: NonNullable<Parameters<InstanceType<RET>["ON"]>[1]>["connectedMove"];
@@ -55,8 +61,8 @@
  * 				adopted?:(obj:OBJ)=>void;
  * 				attributeChanged?:(
  * 					obj:OBJ,
- * 					name:STATICMEM["observedAttributes"]extends readonly string[]
- * 						? ArrayToKeys<STATICMEM["observedAttributes"]>
+ * 					name:STANDARD["observedAttributes"]extends readonly string[]
+ * 						? ArrayToKeys<STANDARD["observedAttributes"]>
  * 						: never,
  * 					oldValue:string|null,
  * 					newValue:string|null
@@ -65,9 +71,9 @@
  *  }) & {
  * 		tagName:string;
  * 		extendIs:string;
- *  	namedSlots: STATICMEM["namedSlots"];
- *  	observedAttributes: STATICMEM["observedAttributes"];
- * 		createNamedSlot: typeof WC_createNamedSlot<STATICMEM>;
+ *  	namedSlots: STANDARD["namedSlots"];
+ *  	observedAttributes: STANDARD["observedAttributes"];
+ * 		createNamedSlot: typeof WC_createNamedSlot<STANDARD>;
  * 		define:<TAG extends string, CLASSREF extends CREATEARGS>
  * 			(
  * 				tagName:WC_TagName_type<TAG>,
@@ -77,25 +83,28 @@
  * 	}
  * } RET
  * @param {BASE_CONSTRUCTOR} Base
- * @param {STATICMEM} [staticMember]
+ * @param {STANDARD} [staticMember]
  * @returns {RET}
  */
-export function WC_extendsB<BASE_CONSTRUCTOR extends new (...args: any[]) => HTMLElement, STATICMEM extends {
+export function WC_extendsB<BASE_CONSTRUCTOR extends new (...args: any[]) => HTMLElement, STANDARD extends {
     class?: string;
     style?: string;
     observedAttributes?: readonly string[];
     namedSlots?: readonly string[];
+    props?: Record<string, keyof TypeMap | (new (...args: any[]) => any)>;
 }, CREATEARGS extends (BASE_CONSTRUCTOR) & {
     tagName: string;
     extendIs: string;
-    observedAttributes?: STATICMEM["observedAttributes"];
-    namedSlots?: STATICMEM["namedSlots"];
+    observedAttributes?: STANDARD["observedAttributes"];
+    namedSlots?: STANDARD["namedSlots"];
+    props?: STANDARD["props"];
 }, RET extends (new (...args: any[]) => InstanceType<BASE_CONSTRUCTOR> & {
-    setObservedAttributes(attributes: Partial<Record<ArrayToKeys<STATICMEM["observedAttributes"] extends readonly string[] ? STATICMEM["observedAttributes"] : never>, string>>): void;
+    setObservedAttributes(attributes: Partial<Record<ArrayToKeys<STANDARD["observedAttributes"] extends readonly string[] ? STANDARD["observedAttributes"] : never>, string>>): void;
+    props?: STANDARD["props"];
     adoptedCallback(): void;
     connectedCallback(): void;
     disonnectedCallback(): void;
-    attributeChangedCallback(name: ArrayToKeys<STATICMEM["observedAttributes"] extends readonly string[] ? STATICMEM["observedAttributes"] : never>, oldValue: string | null, newValue: string | null): void;
+    attributeChangedCallback(name: ArrayToKeys<STANDARD["observedAttributes"] extends readonly string[] ? STANDARD["observedAttributes"] : never>, oldValue: string | null, newValue: string | null): void;
     ON: <OBJ extends any & {
         onConnected?: NonNullable<Parameters<InstanceType<RET>["ON"]>[1]>["connected"];
         onConnectedMove?: NonNullable<Parameters<InstanceType<RET>["ON"]>[1]>["connectedMove"];
@@ -107,16 +116,17 @@ export function WC_extendsB<BASE_CONSTRUCTOR extends new (...args: any[]) => HTM
         connectedMove?: (obj: OBJ) => void;
         disconnected?: (obj: OBJ) => void;
         adopted?: (obj: OBJ) => void;
-        attributeChanged?: (obj: OBJ, name: STATICMEM["observedAttributes"] extends readonly string[] ? ArrayToKeys<STATICMEM["observedAttributes"]> : never, oldValue: string | null, newValue: string | null) => void;
+        attributeChanged?: (obj: OBJ, name: STANDARD["observedAttributes"] extends readonly string[] ? ArrayToKeys<STANDARD["observedAttributes"]> : never, oldValue: string | null, newValue: string | null) => void;
     }) => OBJ;
 }) & {
     tagName: string;
     extendIs: string;
-    namedSlots: STATICMEM["namedSlots"];
-    observedAttributes: STATICMEM["observedAttributes"];
-    createNamedSlot: typeof WC_createNamedSlot<STATICMEM>;
+    namedSlots: STANDARD["namedSlots"];
+    observedAttributes: STANDARD["observedAttributes"];
+    createNamedSlot: typeof WC_createNamedSlot<STANDARD>;
     define: <TAG extends string, CLASSREF extends CREATEARGS>(tagName: WC_TagName_type<TAG>, classRef: CLASSREF, elementDefinitionOptions?: ElementDefinitionOptions) => ReturnType<typeof WC_createElement_bind<CLASSREF>>;
-}>(Base: BASE_CONSTRUCTOR, staticMember?: STATICMEM): RET;
+}>(Base: BASE_CONSTRUCTOR, staticMember?: STANDARD): RET;
+export type TypeMap = typeof import("../function/IsTypeOf.mjs").TypeMap;
 import type { ArrayToKeys } from '../typehints/ArrayToKeys.mjs';
 import { WC_createNamedSlot } from './bindings/WC_createNamedSlot.mjs';
 import type { WC_TagName_type } from './common/WC_TagName_type.mjs';

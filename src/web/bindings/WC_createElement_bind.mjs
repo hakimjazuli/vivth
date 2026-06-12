@@ -1,7 +1,6 @@
 // @ts-check
 
-import { html, render } from 'lit-html';
-import { html as htmlStatic, unsafeStatic } from 'lit-html/static.js';
+import { render } from 'lit-html';
 
 import { ForInSync } from '../../function/ForInSync.mjs';
 import { ForOfSync } from '../../function/ForOfSync.mjs';
@@ -10,7 +9,9 @@ import { ForOfSync } from '../../function/ForOfSync.mjs';
  * @import {ArrayToKeys} from '../../typehints/ArrayToKeys.mjs'
  * @import {TemplateResult, RenderOptions} from 'lit-html'
  */
-
+/**
+ * @typedef {typeof import('../../function/IsTypeOf.mjs').TypeMap} TypeMap
+ */
 /**
  * @param {readonly string[]} namedSlots
  * @param {Record<string, string>|undefined} childrenDataArgsPlaceholder
@@ -32,34 +33,32 @@ const getChildrenData = (namedSlots, childrenDataArgsPlaceholder) => {
  * - this function is returned by static method `.define`;
  * >- bind it with static property;
  * - uses `lit-html` under the hood;
- * @template {(new (...args: any[]) => HTMLElement) & {
+ * @template {(new (...args: any[]) => HTMLElement & {
+ * 		props?: Record<string, keyof TypeMap|(new (...args:any[])=>any)>;
+ * 	}) & {
  *  tagName: string;
  * 	extendIs: string;
  *  observedAttributes?: readonly string[];
  *  namedSlots?: readonly string[];
+ * 	props?: Record<string, keyof TypeMap|(new (...args:any[])=>any)>;
  * }} BASE_CONSTRUCTOR
  * @param {BASE_CONSTRUCTOR} arg0
- * @returns {{
- * 		dom:(
- * 		 		attributes?:BASE_CONSTRUCTOR['observedAttributes'] extends readonly string[]
- * 		 			? Partial<
- * 		 					Record<ArrayToKeys<BASE_CONSTRUCTOR['observedAttributes']>, string>
- * 		 				>
- * 		 			: undefined,
- * 		 		childrenData?:(slotName:Record<ArrayToKeys<BASE_CONSTRUCTOR['namedSlots']>, string>)=>TemplateResult,
- * 		 		renderOptions?:RenderOptions
- * 		 	)=>InstanceType<BASE_CONSTRUCTOR>;
- * 		template:
- * 			(
- * 				attributes?:BASE_CONSTRUCTOR['observedAttributes'] extends readonly string[]
- * 					? Partial<
- * 							Record<ArrayToKeys<BASE_CONSTRUCTOR['observedAttributes']>, string>
- * 						>
- * 					: undefined,
- * 				childrenData?:(slotName:Record<ArrayToKeys<BASE_CONSTRUCTOR['namedSlots']>, string>)=>TemplateResult,
- * 			)=>TemplateResult
- * 	}
- * }
+ * @returns {(
+ * 	param?:{
+ * 		attrs?:BASE_CONSTRUCTOR['observedAttributes'] extends readonly string[]
+ * 			? Partial<
+ * 					Record<ArrayToKeys<BASE_CONSTRUCTOR['observedAttributes']>, string>
+ * 				>
+ * 			: undefined;
+ * 		props?: {[K in keyof NonNullable<BASE_CONSTRUCTOR["props"]>]:
+ * 			NonNullable<BASE_CONSTRUCTOR["props"][K]> extends string
+ * 				? TypeMap[NonNullable<BASE_CONSTRUCTOR["props"]>[K]]
+ * 				: InstanceType<NonNullable<BASE_CONSTRUCTOR["props"][K]>>
+ * 		};
+ * 		children?:(slotName:Record<ArrayToKeys<BASE_CONSTRUCTOR['namedSlots']>, string>)=>TemplateResult;
+ * 		renderOptions?:RenderOptions;
+ * 	},
+ * )=>InstanceType<BASE_CONSTRUCTOR>}
  * @example
  * // webcomponent context via `WC_extends`
  * static createElement = this.define(...args);
@@ -70,56 +69,29 @@ export function WC_createElement_bind({ tagName, extendIs, namedSlots = [] }) {
 	 * @type {Record<string, string>|undefined}
 	 */
 	let childrenDataArgsPlaceholder;
-	return {
-		dom: (attributes, childrenData, renderOptions) => {
-			/**
-			 * @type {InstanceType<BASE_CONSTRUCTOR>}
-			 */
-			let element;
-			if (!extendIs) {
-				// @ts-expect-error
-				element = document.createElement(tagName);
-			} else {
-				// @ts-expect-error
-				element = document.createElement(tagName, {
-					is: extendIs,
-				});
-			}
-			if (attributes) {
-				ForInSync(attributes, (key, value) => {
-					element.setAttribute(key.toString(), value ?? '');
-				});
-			}
-			if (childrenData) {
-				const trueChildrenData = childrenData(
-					getChildrenData(namedSlots, childrenDataArgsPlaceholder),
-				);
-				render(trueChildrenData, element, renderOptions);
-			}
-			return element;
-		},
-		template(attributes, childrenData) {
-			/**
-			 * @type {string[]}
-			 */
-			let attrs = [];
-			if (attributes) {
-				ForInSync(attributes, (key, value) => {
-					attrs.push(`${key.toString()}="${value}"`);
-				});
-			}
-			const tag = unsafeStatic(tagName);
-			let attrsString = unsafeStatic(attrs.join(' '));
-			/**
-			 * @type {TemplateResult}
-			 */
-			let trueChildrenData;
-			if (!childrenData) {
-				trueChildrenData = html``;
-			} else {
-				trueChildrenData = childrenData(getChildrenData(namedSlots, childrenDataArgsPlaceholder));
-			}
-			return htmlStatic`<${tag} ${attrsString}>${trueChildrenData}</${tag}>`;
-		},
+	return ({ attrs, children, renderOptions, props } = {}) => {
+		/**
+		 * @type {InstanceType<BASE_CONSTRUCTOR>}
+		 */
+		let element;
+		if (!extendIs) {
+			// @ts-expect-error
+			element = document.createElement(tagName);
+		} else {
+			// @ts-expect-error
+			element = document.createElement(tagName, {
+				is: extendIs,
+			});
+		}
+		if (attrs) {
+			ForInSync(attrs, (key, value) => {
+				element.setAttribute(key.toString(), value ?? '');
+			});
+		}
+		if (children) {
+			const trueChildrenData = children(getChildrenData(namedSlots, childrenDataArgsPlaceholder));
+			render(trueChildrenData, element, renderOptions);
+		}
+		return Object.assign(element, { props });
 	};
 }

@@ -3,7 +3,7 @@
  * Using a constant object allows for type-safe extraction without
  * manual conditional mapping.
  */
-declare const TypeMap: {
+export declare const TypeMap: {
     string: string;
     number: number;
     boolean: boolean;
@@ -23,4 +23,3 @@ declare const TypeMap: {
  * @returns {object is typeof TypeMap[K]} - Returns true if the type matches, narrowing the type.
  */
 export declare function IsTypeOf<K extends keyof typeof TypeMap>(object: unknown, type: K): object is (typeof TypeMap)[K];
-export {};
