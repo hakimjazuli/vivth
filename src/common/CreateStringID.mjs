@@ -5,7 +5,7 @@ import { LazyFactory } from '../function/LazyFactory.mjs';
 import { Timeout } from '../function/Timeout.mjs';
 import { TryAsync } from '../function/TryAsync.mjs';
 
-const qchannel = LazyFactory(() => new QChannel('CreateStringID'));
+const q = LazyFactory(() => new QChannel('CreateStringID'));
 
 /**
  * @description
@@ -16,7 +16,7 @@ const qchannel = LazyFactory(() => new QChannel('CreateStringID'));
  * @param {string} [suffix]
  * @returns {ReturnType<typeof TryAsync<string>>}
  * @example
- * import { CreateStringID } from 'vivth';
+ * import { CreateStringID } from 'vivth/neutral';
  *
  * (async () => {
  * 	const [myUniqueID, errorCreatingUniqueID] = await CreateStringID('myPrefix', 'mySuffix');
@@ -27,7 +27,7 @@ const qchannel = LazyFactory(() => new QChannel('CreateStringID'));
  * })()
  */
 export async function CreateStringID(prefix = '', suffix = '') {
-	return await qchannel.callback('newStringID', async () => {
+	return await q.callback('newStringID', async () => {
 		await Timeout(1);
 		return `${prefix}${Date.now()}${suffix}`;
 	});

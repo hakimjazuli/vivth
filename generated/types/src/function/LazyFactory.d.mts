@@ -4,12 +4,14 @@
  * >- usefull for lazily instantiating an object, since instance naturally have props/methods;
  * @template FACTORY
  * @param {() => FACTORY} factory
- * @returns {FACTORY & {[unwrapLazy]: ()=> FACTORY}}
- * - the unwrapLazy prop can be accessed to force instatiation/call;
- * >- `unwrapLazy` prop name can be checked by checking the list of possible prop, from your ide;
- * >- as of version `1.0.0`, value is `vivth:unwrapLazy;`;
+ * @returns {FACTORY & {[FactoryKey]: FACTORY}}
+ * - the FactoryKey prop can be accessed to force instatiation/call;
+ * - usefull for Object that has different accessor behaviour when being get via Proxy, including but not limited too:
+ * >- `Set<any>`;
+ * >- `Map<any, any>`;
+ * >- non referenced object, like `Effect`;
  * @example
- * import { LazyFactory } from  'vivth';
+ * import { LazyFactory, FactoryKey } from 'vivth/neutral';
  *
  * class MyClass{
  *    constructor() {
@@ -29,9 +31,6 @@
  * const a = myInstance; // not yet initiated;
  * const b = a.myProp // imediately initiated;
  * // OR
- * myInstance["vivth:unwrapLazy;"]() // forcefully call factory generator;
+ * myInstance[FactoryKey] // forcefully call factory generator;
  */
-export function LazyFactory<FACTORY>(factory: () => FACTORY): FACTORY & {
-    [unwrapLazy]: () => FACTORY;
-};
-import { unwrapLazy } from '../common/lazie.mjs';
+export function LazyFactory<FACTORY>(factory: () => FACTORY): FACTORY & {};

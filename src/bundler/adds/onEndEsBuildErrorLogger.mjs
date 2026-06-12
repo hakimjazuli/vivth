@@ -14,15 +14,9 @@ export const onEndEsBuildErrorLogger = (errorData) => {
 	};
 	const errorText = errorData[0]?.text;
 	const match = errorText?.toLocaleLowerCase().match(/could not resolve\s+"([^"]+)"/i);
-	if (
-		/**  */
-		match
-	) {
+	if (match) {
 		const [, lib] = match;
-		if (
-			/**  */
-			IsStringLooksLikeAPath(lib ?? '')
-		) {
+		if (IsStringLooksLikeAPath(lib ?? '')) {
 			Object.assign(errorLog, {
 				message: `'${lib}' doesn't exist`,
 			});
@@ -35,6 +29,6 @@ export const onEndEsBuildErrorLogger = (errorData) => {
 			});
 		}
 	}
-	Console.error(errorLog);
+	Console.error(errorLog, { now: true });
 	return;
 };

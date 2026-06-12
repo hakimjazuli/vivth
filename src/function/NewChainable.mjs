@@ -2,48 +2,54 @@
 
 /**
  * @description
- * - Wraps a target object in a chainable.
+ * - Wraps a target object in a chainable;
  * - example:
  * ```html
  * <canvas id="myCanvas" width="400" height="400"></canvas>
  * ```
  * - chain call are synchronous without awaiting;
  * >- if the method are async, it could cause race condition;
- * @template {object} T
- * @param {T} ctx
- * @returns {import("../typehints/ChainableType.mjs").ChainableType<T>}
+ * @template {object} OBJ
+ * @param {OBJ} ctx
+ * @returns {import("../typehints/ChainableType.mjs").ChainableType<OBJ>}
  * @example
- * import { NewChainable } from "vivth";
+ * import { NewChainable, TrySync } from 'vivth/neutral';
  *
- * (()=>{
- * const canvas = document.getElementById("myCanvas");
+ * TrySync(()=>{
+ * const canvas = document.getElementById('myCanvas');
  * if (!canvas) {
  * 	return;
  * }
- * // Now you can chain:
- * NewChainable(canvas.getContext("2d"))
+ *
+ * const ctx2D = canvas.getContext('2d');
+ *
+ * // instead of repeating call method from `ctx2D`, you can:
+ * NewChainable(ctx2D)
  * 	.beginPath()
  * 	.moveTo(50, 50)
  * 	.lineTo(200, 50)
  * 	.lineTo(200, 200)
  * 	.closePath()
  * 	.stroke();
- * })()
+ * 	// .this to get ctx2D reference;
+ * })
  */
 export function NewChainable(ctx) {
-	/** @type {import("../typehints/ChainableType.mjs").ChainableType<T>} */
+	/**
+	 * @type {import("../typehints/ChainableType.mjs").ChainableType<OBJ>}
+	 */
 	// @ts-expect-error
 	let proxy = null;
 
 	// @ts-expect-error
 	proxy = new Proxy(ctx, {
 		get(target, prop, receiver) {
+			if (prop === 'this') {
+				return ctx;
+			}
 			const value = Reflect.get(target, prop, receiver);
 
-			if (
-				/**  */
-				typeof value === 'function'
-			) {
+			if (typeof value === 'function') {
 				// @ts-expect-error
 				return (...args) => {
 					value.apply(target, args);
@@ -59,6 +65,5 @@ export function NewChainable(ctx) {
 			return true;
 		},
 	});
-
 	return proxy;
 }

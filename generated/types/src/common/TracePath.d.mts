@@ -11,7 +11,7 @@
  * - if return false, continue to check the stacks;
  * @returns {string|undefined}
  * @example
- * import { TracePath, Console } from 'vivth';
+ * import { TracePath, Console } from 'vivth/neutral';
  *
  * Console.log(
  * 	TracePath((stackString) => {

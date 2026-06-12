@@ -1,5 +1,7 @@
 // @ts-check
 
+import { join, normalize, sep } from 'path-unified';
+
 /**
  * @description
  * - class helpers to define pathReference;
@@ -26,7 +28,7 @@ export class Paths {
 	 * ```
 	 * - other: you need to check your JSRuntime for the rootPath reference;
 	 * @example
-	 * import { Paths } from 'vivth';
+	 * import { Paths } from 'vivth/neutral';
 	 *
 	 * new Paths({
 	 * 	// root: location.origin,
@@ -34,10 +36,7 @@ export class Paths {
 	 * })
 	 */
 	constructor({ root }) {
-		if (
-			/**  */
-			Paths.#instance
-		) {
+		if (Paths.#instance) {
 			return Paths.#instance;
 		}
 		Paths.#instance = this;
@@ -58,11 +57,7 @@ export class Paths {
 	 * @type {string}
 	 */
 	static get root() {
-		if (
-			/**  */
-			Paths.#instance === undefined ||
-			!Paths.#instance.#root
-		) {
+		if (Paths.#instance === undefined || !Paths.#instance.#root) {
 			throw {
 				error: 'Paths.instance.#root is undefined',
 				solutions: 'instantiate `Paths` or instantiate `Setup`',
@@ -72,37 +67,68 @@ export class Paths {
 	}
 	/**
 	 * @description
-	 * - normalize path separator to forward slash `/`;
-	 * @param {string} path_
+	 * - replace path separator to forward slash `/`;
+	 * - remove repeating `./`;
+	 * @param {string} path
 	 * @returns {string}
 	 * @example
-	 * import { Paths } from 'vivth';
+	 * import { Paths } from 'vivth/neutral';
 	 *
 	 * Paths.normalize('file:\\D:\\myFile.mjs'); //  "file://D://myFile.mjs"
 	 */
-	static normalize = (path_) => {
-		return path_.replace(/\\/g, '/');
+	static normalize = (path) => {
+		return normalize(path)
+			.replace(/\\/g, '/')
+			.replace(/\/\.\//g, '');
 	};
 	/**
 	 * @description
-	 * - normalize path separator to forward slash `/`;
-	 * - then starts with forward slash `/`;
-	 * @param {string} path_
+	 * - replace path separator to `sep`;
+	 * @param {string} path
+	 * @returns {string}
+	 * @example
+	 * import { Paths } from 'vivth/neutral';
+	 *
+	 * Paths.nativeSep('path//myFile.mjs'); //  "path\myFile.mjs" OR "path/myFile.mjs" depending on sep value;
+	 */
+	static nativeSep = (path) => {
+		return Paths.normalize(path).replace(/\//g, sep);
+	};
+	/**
+	 * @description
+	 * - normalized then starts with forward slash `/`;
+	 * @param {string} path
 	 * @returns {`/${string}`}
 	 * @example
-	 * import { Paths } from 'vivth';
+	 * import { Paths } from 'vivth/neutral';
 	 *
 	 * Paths.normalizesForRoot('path\\myFile.mjs'); //  "/path/myFile.mjs"
 	 */
-	static normalizesForRoot = (path_) => {
-		let normalized = Paths.normalize(path_);
-		if (
-			/**  */
-			normalized.startsWith('/') === false
-		) {
+	static normalizeForRoot = (path) => {
+		let normalized = Paths.normalize(path);
+		if (!normalized.startsWith('/')) {
 			normalized = `/${normalized}`;
 		}
 		// @ts-expect-error
 		return normalized;
+	};
+	/**
+	 * @description
+	 * - convert path to diskAbsolute and normalized to be using forward slash;
+	 * - usefull for arguments for `methods` OR `functions` that needs to be absolute disk path, regardles if path is relative to project root, or already absolute path;
+	 * @param {string} path
+	 * @returns {string}
+	 * @example
+	 * import { Paths } from 'vivth/neutral';
+	 *
+	 * Paths.normalizesForRoot('\\path\\myFile.mjs'); //  "D://something/path/myFile.mjs"
+	 */
+	static diskAbsolute = (path) => {
+		path = Paths.normalize(path);
+		const rootPath = Paths.normalize(Paths.root);
+		if (!path.startsWith(rootPath)) {
+			path = Paths.normalize(join(rootPath, path));
+		}
+		return path;
 	};
 }

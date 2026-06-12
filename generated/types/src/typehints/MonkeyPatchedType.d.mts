@@ -1,0 +1,1 @@
+export type MonkeyPatchedType<ORIOBJ extends unknown> = ORIOBJ extends (...args: infer A) => infer R ? (...args: A) => R : ORIOBJ extends abstract new (...args: infer C) => infer I ? abstract new (...args: C) => I : any;

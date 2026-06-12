@@ -7,7 +7,7 @@
  * @param {string} [suffix]
  * @returns {ReturnType<typeof TryAsync<string>>}
  * @example
- * import { CreateStringID } from 'vivth';
+ * import { CreateStringID } from 'vivth/neutral';
  *
  * (async () => {
  * 	const [myUniqueID, errorCreatingUniqueID] = await CreateStringID('myPrefix', 'mySuffix');

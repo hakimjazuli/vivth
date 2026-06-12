@@ -1,1 +1,3 @@
-export type ChainableType<T extends object> = { [K in keyof T]: T[K] extends (...args: any[]) => any ? (...args: Parameters<T[K]>) => ChainableType<T> : T[K]; };
+export type ChainableType<OBJ extends object> = {
+    this: OBJ;
+} & { [K in keyof OBJ]: OBJ[K] extends (...args: any[]) => any ? (...args: Parameters<OBJ[K]>) => ChainableType<OBJ> : OBJ[K]; };

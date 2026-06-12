@@ -1,17 +1,21 @@
 /**
+ * @typedef { import('../typehints/VivthCleanup.mjs').VivthCleanup } VivthCleanup
+ */
+/**
  * @description
  * - Signal based on shared/globally available `Object` as key;
  * @template {any} SHAREDOBJECT
+ * @implements {VivthCleanup}
  */
-export class ObjectSignal<SHAREDOBJECT extends unknown> {
-    /**
-     * @type {WeakMap<Object, ObjectSignal<any>>}
-     */
-    static "__#private@#mappedSignal": WeakMap<Object, ObjectSignal<any>>;
+export class ObjectSignal<SHAREDOBJECT extends unknown> implements VivthCleanup {
     /**
      * @type {QChannel<Object>}
      */
-    static "__#private@#q": QChannel<Object>;
+    static #q: QChannel<Object>;
+    /**
+     * @type {WeakMap<Object, ObjectSignal<any>>}
+     */
+    static #mappedSignal: WeakMap<Object, ObjectSignal<any>>;
     /**
      * @template {any} SHAREDOBJECT
      * @param {Object} object
@@ -32,7 +36,7 @@ export class ObjectSignal<SHAREDOBJECT extends unknown> {
          * @param {import('./Effect.mjs').Effect} effectInstance
          * @returns {void}
          * @example
-         * import { ObjectSignal } from 'vivth';
+         * import { ObjectSignal } from 'vivth/neutral';
          *
          * ObjectSignal.remove.subscriber('yourObjectSignalName', myEffectInstance);
          */
@@ -44,7 +48,7 @@ export class ObjectSignal<SHAREDOBJECT extends unknown> {
          * @param {string} name
          * @returns {void}
          * @example
-         * import { ObjectSignal } from 'vivth';
+         * import { ObjectSignal } from 'vivth/neutral';
          *
          * ObjectSignal.remove.allSubscribers('yourObjectSignalName');
          */
@@ -56,13 +60,13 @@ export class ObjectSignal<SHAREDOBJECT extends unknown> {
          * @param {string} name
          * @returns {void}
          * @example
-         * import { ObjectSignal } from 'vivth';
+         * import { ObjectSignal } from 'vivth/neutral';
          *
          * ObjectSignal.remove.refs('yourObjectSignalName');
          */
         refs: (name: string) => void;
     } & {
-        "vivth:unwrapLazy;": () => {
+        [x: symbol]: {
             /**
              * @static remove
              * @description
@@ -71,7 +75,7 @@ export class ObjectSignal<SHAREDOBJECT extends unknown> {
              * @param {import('./Effect.mjs').Effect} effectInstance
              * @returns {void}
              * @example
-             * import { ObjectSignal } from 'vivth';
+             * import { ObjectSignal } from 'vivth/neutral';
              *
              * ObjectSignal.remove.subscriber('yourObjectSignalName', myEffectInstance);
              */
@@ -83,7 +87,7 @@ export class ObjectSignal<SHAREDOBJECT extends unknown> {
              * @param {string} name
              * @returns {void}
              * @example
-             * import { ObjectSignal } from 'vivth';
+             * import { ObjectSignal } from 'vivth/neutral';
              *
              * ObjectSignal.remove.allSubscribers('yourObjectSignalName');
              */
@@ -95,21 +99,22 @@ export class ObjectSignal<SHAREDOBJECT extends unknown> {
              * @param {string} name
              * @returns {void}
              * @example
-             * import { ObjectSignal } from 'vivth';
+             * import { ObjectSignal } from 'vivth/neutral';
              *
              * ObjectSignal.remove.refs('yourObjectSignalName');
              */
             refs: (name: string) => void;
         };
     };
+    vivthCleanup: () => Promise<void>;
     /**
      * @description
      * - is [Signal](#signal);
      * - if needed to pass along the messages, it can be used as `dispatcher` and `listener` at the same time;
      * - is `lazily` created;
-     * @type {Signal<SHAREDOBJECT>}
+     * @type {Signal<SHAREDOBJECT|undefined>}
      * @example
-     * import { ObjectSignal, Effect, Console } from 'vivth';
+     * import { ObjectSignal, Effect, Console } from 'vivth/neutral';
      *
      * const myObjectSignal = await ObjectSignal.get('dataEvent', false);
      *
@@ -120,15 +125,15 @@ export class ObjectSignal<SHAREDOBJECT extends unknown> {
      * })
      * myObjectSignal.dispatch.value = 'hey';
      */
-    dispatcher: Signal<SHAREDOBJECT>;
+    dispatcher: Signal<SHAREDOBJECT | undefined>;
     /**
      * @description
      * - is [Derived](#derived);
      * - can be used as listener when passed down value shouldn't be modified manually;
      * - is `lazily` created along with `dispatch`, if `listen` is accessed first, then `dispatch` will also be created automatically;
-     * @type {Derived<SHAREDOBJECT>}
+     * @type {Derived<SHAREDOBJECT|undefined>}
      * @example
-     * import { ObjectSignal, Effect, Console } from 'vivth';
+     * import { ObjectSignal, Effect, Console } from 'vivth/neutral';
      *
      * const myObjectSignal = await ObjectSignal.get('dataEvent', false);
      *
@@ -139,7 +144,7 @@ export class ObjectSignal<SHAREDOBJECT extends unknown> {
      * })
      * myObjectSignal.dispatch.value = 'hey';
      */
-    listener: Derived<SHAREDOBJECT>;
+    listener: Derived<SHAREDOBJECT | undefined>;
     remove: {
         /**
          * @instance remove
@@ -148,7 +153,7 @@ export class ObjectSignal<SHAREDOBJECT extends unknown> {
          * @param {import('./Effect.mjs').Effect} effectInstance
          * @returns {void}
          * @example
-         * import { ObjectSignal, Effect, Console } from 'vivth';
+         * import { ObjectSignal, Effect, Console } from 'vivth/neutral';
          *
          * const myObjectSignal = await ObjectSignal.get('dataEvent', false);
          *
@@ -166,7 +171,7 @@ export class ObjectSignal<SHAREDOBJECT extends unknown> {
          * - remove allSubscribers from the `ObjectSignal_instance`;
          * @type  {()=>void}
          * @example
-         * import { ObjectSignal, Effect, Console } from 'vivth';
+         * import { ObjectSignal, Effect, Console } from 'vivth/neutral';
          *
          * const myObjectSignal = await ObjectSignal.get('dataEvent', false);
          *
@@ -184,7 +189,7 @@ export class ObjectSignal<SHAREDOBJECT extends unknown> {
          * - remove reference of the `proxySignals` of the `ObjectSignal_instance`;
          * @type {()=>void}
          * @example
-         * import { ObjectSignal, Effect, Console } from 'vivth';
+         * import { ObjectSignal, Effect, Console } from 'vivth/neutral';
          *
          * const myObjectSignal = await ObjectSignal.get('dataEvent', false);
          *
@@ -197,7 +202,7 @@ export class ObjectSignal<SHAREDOBJECT extends unknown> {
          */
         ref: () => void;
     } & {
-        "vivth:unwrapLazy;": () => {
+        [x: symbol]: {
             /**
              * @instance remove
              * @description
@@ -205,7 +210,7 @@ export class ObjectSignal<SHAREDOBJECT extends unknown> {
              * @param {import('./Effect.mjs').Effect} effectInstance
              * @returns {void}
              * @example
-             * import { ObjectSignal, Effect, Console } from 'vivth';
+             * import { ObjectSignal, Effect, Console } from 'vivth/neutral';
              *
              * const myObjectSignal = await ObjectSignal.get('dataEvent', false);
              *
@@ -223,7 +228,7 @@ export class ObjectSignal<SHAREDOBJECT extends unknown> {
              * - remove allSubscribers from the `ObjectSignal_instance`;
              * @type  {()=>void}
              * @example
-             * import { ObjectSignal, Effect, Console } from 'vivth';
+             * import { ObjectSignal, Effect, Console } from 'vivth/neutral';
              *
              * const myObjectSignal = await ObjectSignal.get('dataEvent', false);
              *
@@ -241,7 +246,7 @@ export class ObjectSignal<SHAREDOBJECT extends unknown> {
              * - remove reference of the `proxySignals` of the `ObjectSignal_instance`;
              * @type {()=>void}
              * @example
-             * import { ObjectSignal, Effect, Console } from 'vivth';
+             * import { ObjectSignal, Effect, Console } from 'vivth/neutral';
              *
              * const myObjectSignal = await ObjectSignal.get('dataEvent', false);
              *
@@ -256,6 +261,7 @@ export class ObjectSignal<SHAREDOBJECT extends unknown> {
         };
     };
 }
+export type VivthCleanup = import("../typehints/VivthCleanup.mjs").VivthCleanup;
 import { Signal } from './Signal.mjs';
 import { Derived } from './Derived.mjs';
 import { QChannel } from './QChannel.mjs';

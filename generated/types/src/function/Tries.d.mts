@@ -17,7 +17,7 @@
  * 	| [[undefined, undefined], Set<Error>]
  * >}
  * @example
- * import { Tries } from 'vivth';
+ * import { Tries } from 'vivth/neutral';
  *
  * const [[key, result], setOfError] = await Tries({
  * 	someRuntime: async ({ prevError }) => {

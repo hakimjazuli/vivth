@@ -7,7 +7,8 @@ import { Signal } from '../class/Signal.mjs';
 import { ForOfSync } from '../function/ForOfSync.mjs';
 import { LazyFactory } from '../function/LazyFactory.mjs';
 import { TryAsync } from '../function/TryAsync.mjs';
-import { Trace } from './Trace.mjs';
+import { FactoryKey } from './FactoryKey.mjs';
+import { TracePath } from './TracePath.mjs';
 
 /**
  * @typedef {import('../typehints/EnvModeType.mjs').EnvModeType} EnvModeType
@@ -30,7 +31,7 @@ export class EnvMode {
 	 * >- for listener only;
 	 * @type {Derived<EnvModeType>}
 	 * @example
-	 * import { EnvMode, Effect } from 'vivth';
+	 * import { EnvMode, Effect } from 'vivth/neutral';
 	 *
 	 * console.log(EnvMode.mode.value); // default: 'dev'
 	 *
@@ -52,7 +53,7 @@ export class EnvMode {
 	 * @param {EnvModeType} mode
 	 * @returns {void}
 	 * @example
-	 * import { EnvMode } from 'vivth';
+	 * import { EnvMode } from 'vivth/neutral';
 	 *
 	 * EnvMode.enforce('dev'); // OR
 	 * EnvMode.enforce('prod');
@@ -72,11 +73,14 @@ export class EnvMode {
 	 * @type {Signal<Map<string,Awaited<ReturnType<typeof TryAsync<boolean>>>>>}
 	 */
 	static #notifications = LazyFactory(() => new Signal(new Map()));
+
 	/**
 	 * @type {DevTestCB}
 	 */
 	static #test = (testName, testCallback) => {
-		testName = `${testName}:'${Trace(4)}'`;
+		testName = `${testName}:'${TracePath((path) => {
+			return !path.includes('vivth/src/common/EnvMode.mjs');
+		})}'`;
 		EnvMode.#notifications.subscribers.notify(async ({ signalInstance }) => {
 			signalInstance.value.set(
 				testName,
@@ -85,7 +89,7 @@ export class EnvMode {
 				}),
 			);
 		});
-		EnvMode.#effectForCheck['vivth:unwrapLazy;']();
+		EnvMode.#effectForCheck[FactoryKey];
 		return {
 			removeId: () => {
 				EnvMode.#notifications.subscribers.notify(async ({ signalInstance }) => {
@@ -94,15 +98,13 @@ export class EnvMode {
 			},
 		};
 	};
+
 	static #effectForCheck = LazyFactory(
 		() =>
 			new Effect(async ({ subscribe }) => {
 				const notifications = subscribe(EnvMode.#notifications).value;
 				const testCount = notifications.size;
-				if (
-					/**  */
-					!testCount
-				) {
+				if (!testCount) {
 					return;
 				}
 				/**
@@ -114,11 +116,7 @@ export class EnvMode {
 				 */
 				const failedTests = new Set();
 				ForOfSync(notifications, ([notificationID, [isCorrect, error]]) => {
-					if (
-						/**  */
-						error ||
-						isCorrect !== true
-					) {
+					if (error || isCorrect !== true) {
 						failedTests.add(notificationID);
 						return;
 					}
@@ -132,19 +130,13 @@ export class EnvMode {
 				 * }}
 				 */
 				let warn = { testCount };
-				if (
-					/**  */
-					succeedTests.size
-				) {
+				if (succeedTests.size) {
 					warn.succeed = {
 						count: `${succeedTests.size} of ${testCount}`,
 						testIDs: succeedTests,
 					};
 				}
-				if (
-					/**  */
-					failedTests.size
-				) {
+				if (failedTests.size) {
 					warn.failed = {
 						count: `${failedTests.size} of ${testCount}`,
 						testIDs: failedTests,
@@ -170,13 +162,10 @@ export class EnvMode {
 		 * @type {EnvModeType|undefined}
 		 */
 		let mode;
-		if (
-			/**  */
-			!subscribe
-		) {
-			mode = EnvMode.mode.value;
+		if (!subscribe) {
+			mode = EnvMode.#mode.value;
 		} else {
-			mode = subscribe(EnvMode.mode).value;
+			mode = subscribe(EnvMode.#mode).value;
 		}
 		await callback(mode === 'dev' ? { devTest: EnvMode.#test } : { devTest: undefined });
 	}

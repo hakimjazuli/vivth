@@ -10,23 +10,25 @@ import { BrowserExternals } from './adds/BrowserExternals.mjs';
 
 /**
  * @description
- * - opinionated bundler for extension below using esbuild;
+ * - opinionated bundler for limited extensions using esbuild;
  * - bundles all imports into a single output string;
  * @param {Object} options
  * @param {string} options.content
  * - the code can also uses composites from the result from multiple readFiles;
  * @param {string} options.root
  * - use dirname of said fileString path;
- * @param {'.mts'|'.ts'|'.mjs'|'.cjs'} options.extension
+ * @param {'.mts'|'.ts'|'.mjs'} options.extension
+ * - supported extension;
  * @param {boolean} [options.withBinHeader]
  * @param {Omit<Parameters<build>[0],
- * 'entryPoints'|'bundle'|'write'|'sourcemap'|'outdir'|'splitting'|'loader'>
+ * 'entryPoints'|'bundle'|'write'|'sourcemap'|'outdir'|'splitting'|'format'>
  * } [esbuildOptions]
+ * - assume `esm`;
  * @returns {ReturnType<typeof TryAsync<string>>}
  * @example
- * import { EsBundler } from 'vivth';
+ * import { EsBundler } from 'vivth/node';
  *
- * const bundledString = EsBundler(
+ * const [bundledString, errorBundling] = EsBundler(
  * 	{
  * 		content: ``,
  * 		extension: '.mts',
@@ -51,7 +53,6 @@ export async function EsBundler(
 				loader = 'ts';
 				break;
 			case '.mjs':
-			case '.cjs':
 				loader = 'js';
 				break;
 			default:
@@ -60,22 +61,15 @@ export async function EsBundler(
 					message: 'Invalid extension passed to EsBundler',
 					acceptedextensions: ['.mts', '.ts', '.mjs'],
 				};
-				Console.error(error);
+				Console.error(error, { now: true });
 				throw JSON.stringify(error);
 		}
-		const format = esbuildOptions.format ?? 'esm';
 		const mainFields = esbuildOptions.mainFields;
-		if (
-			/**  */
-			!mainFields?.length
-		) {
-			esbuildOptions.mainFields = [format === 'esm' ? 'module' : 'main', 'main'];
+		if (!mainFields?.length) {
+			esbuildOptions.mainFields = ['module', 'main'];
 		}
 		esbuildOptions.external = [...(esbuildOptions?.external ?? [])];
-		if (
-			/**  */
-			esbuildOptions.platform === 'browser'
-		) {
+		if (esbuildOptions.platform === 'browser') {
 			esbuildOptions.external = Array.from(
 				new Set(esbuildOptions.external).union(BrowserExternals),
 			);
@@ -90,6 +84,8 @@ export async function EsBundler(
 				loader,
 				resolveDir: root ?? Paths.root,
 			},
+			loader: esbuildOptions.loader,
+			format: 'esm',
 			bundle: true,
 			write: false,
 			sourcemap: false,
@@ -98,17 +94,25 @@ export async function EsBundler(
 				...esbuildOptions.banner,
 			},
 		});
-		if (
-			/**  */
-			result.warnings?.length
-		) {
-			Console.warn(result.warnings.map((w) => w.text).join('\n'));
+		if (result.warnings?.length) {
+			const warningText = result.warnings.map((w) => w.text).join('\n');
+			const warningArray = [warningText];
+			/**
+			 * auto cjs mitigation no longer supported
+			 * ```js
+			 * const regex = /import\.meta[\s\S]*cjs|cjs[\s\S]*import\.meta/i;
+			 * if (regex.test(warningText)) {
+			 * 	warningArray.push(
+			 * 		`⚠️ Note: This is a false positive. 'vivth/node.EsBundler' already mitigates it with __filename.`,
+			 * 		`As long as only 'import.meta.url' is accessed, it is most likely fine.`,
+			 * 	);
+			 * }
+			 * ```
+			 */
+			Console.warn(warningArray, { now: true });
 		}
 		const resString = result.outputFiles?.[0]?.text;
-		if (
-			/**  */
-			resString === undefined
-		) {
+		if (resString === undefined) {
 			return '';
 		}
 		return resString;

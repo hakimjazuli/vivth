@@ -1,10 +1,9 @@
 // @ts-check
 
+import { spawnSync } from 'node:child_process';
 import { readFile } from 'node:fs/promises';
 import { join, extname, basename, dirname } from 'node:path';
 import { platform } from 'node:os';
-
-import { exec } from 'pkg';
 
 import { EsBundler } from './EsBundler.mjs';
 import { FileSafe } from '../class/FileSafe.mjs';
@@ -16,7 +15,7 @@ import { FSAnalyzer } from './FSAnalyzer.mjs';
 
 /**
  * @typedef {'win32' | 'linux' | 'darwin' | string} PlatformKey
- * @typedef {import('./CreateESPlugin.mjs')["CreateESPlugin"]} CreateESPlugin
+ * @typedef {typeof import('./CreateESPlugin.mjs')["CreateESPlugin"]} CreateESPlugin
  */
 
 /**
@@ -25,24 +24,19 @@ import { FSAnalyzer } from './FSAnalyzer.mjs';
 let binaryExtension;
 
 /**
- * @param {Record<string, string[]|string>} compilerOptions
+ * @param {Record<string, string[]|string>} bunCompilerArguments
  * @returns {string[]}
  */
-const generateFlagsValue = (compilerOptions) => {
+const generateFlagsValue = (bunCompilerArguments = {}) => {
 	/**
 	 * @type {Array<string>}
 	 */
 	const options = [];
-	ForInSync(compilerOptions, (flag, value) => {
+	ForInSync(bunCompilerArguments, (flag, value) => {
 		options.push(`--${flag}`);
-		if (
-			/**  */
-			Array.isArray(value) === false
-		) {
-			if (
-				/**  */
-				value
-			) {
+		if (!Array.isArray(value)) {
+			value = value.trim();
+			if (value) {
 				options.push(value);
 			}
 			return;
@@ -51,26 +45,20 @@ const generateFlagsValue = (compilerOptions) => {
 	});
 	return options;
 };
+
 /**
  * Maps Node.js platform to binary file extension.
  *
  * @returns {string} extension including dot (e.g. '.exe', '')
  */
 const getBinaryExtension = () => {
-	if (
-		/**  */
-		binaryExtension === undefined
-	) {
+	if (binaryExtension === undefined) {
 		switch (platform()) {
 			case 'win32':
 				binaryExtension = '.exe';
 				break;
 			case 'linux':
-				binaryExtension = ''; // Linux binaries typically have no extension
-				break;
 			case 'darwin':
-				binaryExtension = ''; // macOS binaries typically have no extension
-				break;
 			default:
 				binaryExtension = ''; // fallback for unknown platforms
 				break;
@@ -78,12 +66,13 @@ const getBinaryExtension = () => {
 	}
 	return binaryExtension;
 };
+
 /**
  * @description
  * - function to compile `.ts`|`.mts`|`.mjs` file, into a single executable;
  * - also generate js representation of the `bundled` version of the target;
- * - uses [pkg](https://www.npmjs.com/package/pkg), [bun](https://bun.com/docs/bundler/executables), and [deno](https://docs.deno.com/runtime/reference/cli/compile/) compiler under the hood;
- * >- they are used only as packaging/compiler agent, and doesn't necessarily supports their advanced feature, such as, assets bundling(use [`FSasar`](#fsasar) instead);
+ * - uses [bun](https://bun.com/docs/bundler/executables) compiler under the hood;
+ * >- it is used only as packaging/compiler agent, and doesn't necessarily supports their advanced feature, such as, assets bundling(use [`FSasar`](#fsasar) instead);
  * >- `WorkerThread` will be converted to inline using `FSasar` too;
  *
  * ---
@@ -91,8 +80,8 @@ const getBinaryExtension = () => {
  * ---
  *
  * - This function does not obfuscate and will not prevent decompilation. Do not embed environment variables or sensitive information inside `options.entryPoint`;
- * - It is designed for quick binarization, allowing execution on machines without `Node.js`, `Bun`, or `Deno` installed;
- * - The resulting binary will contain `FSasar` and `WorkerMainThread` target paths Buffers, which are loaded into memory at runtime. If your logic depends on the file system, use `node:fs` or `node:fs/promises` APIs and ship external =  files alongside the binary (not compiled);new Set((not compiled)
+ * - It is designed for quick binarization, allowing execution on machines without `Bun` installed;
+ * - The resulting binary will contain `FSasar` and `WorkerMainThread` target paths Buffers, which are loaded into memory at runtime. If your logic depends on the file system, use `node:fs` or `node:fs/promises` APIs and ship external files alongside the `binary` and `.asar` file (not compiled);
  *
  * ---
  * ---
@@ -108,114 +97,74 @@ const getBinaryExtension = () => {
  * - to modify entry point before bundling;
  * - `entryPointContent` is the original string of the entry point;
  * - returned value then passed to `ESBundler`;
- * @param {boolean} options.minifyFirst
+ * @param {boolean} [options.minifyFirst]
  * - minify the bundle before compilation;
  * @param {Object} [options.asar]
  * @param {Parameters<typeof import('@electron/asar')["createPackageFromFiles"]>[3]} [options.asar.InputMetadata]
  * @param {Parameters<typeof import('@electron/asar')["createPackageFromFiles"]>[4]} [options.asar.options]
  * @param {string} options.outDir
  * - need manual prefix;
- * @param {'pkg'|'bun'|'deno'} [options.compiler]
- * - default: no comilation, just bundling;
- * - `bun` and `pkg` is checked, if there's bug on `deno`, please report on github for issues;
- * - normally when using `pkg`, you will find something like this:
- * ```shell
- * [WARNING] "import.meta" is not available with the "cjs" output format and will be empty [empty-import-meta]
- * ```
- * >- it should be more or less safe to ignore;
- * >- `CompileJS` modify `cjs` finalContent of any `import.meta` that uses it's url into `{url:__filename}`;
- * @param {Record<string, string>} [options.compilerArguments]
+ * @param {Record<string, string[]|string>} [options.bunCompilerArguments]
  * - `key` are to used as `--keyName`;
- * - value are the following value of the key;
+ * - value are the `value` of the `key`;
+ * >- `string`: will be inputed as is;
+ * >- `string[]`: will be joined with `,`;
  * - no need to add the output/outdir, as it use the `options.outDir`;
  * @param {ReturnType<CreateESPlugin>[]} [options.esBundlerPlugins]
  * - plugins for `EsBundler`;
  * @param {Parameters<typeof EsBundler>[1]} [options.esbuildOptions]
  * - options for `EsBundler`;
- * @return {ReturnType<typeof TryAsync<{compileResult:Promise<any>|undefined,
+ * @param {string[]} [options.additionalCommandArgument]
+ * - argument to be passed process generator;
+ * @return {ReturnType<typeof TryAsync<{compileResult: any,
  * commandCalled: string|undefined;
  * compiledBinFile: string|undefined;
- * bundledJSFile:string|undefined
+ * bundledJSFile: string|undefined
  * }>>}
  * @example
  * import process from 'node:process';
  * import { join } from 'node:path';
  *
- * import { CompileJS, Console, Paths, Setup } from 'vivth';
+ * import { CompileJS, SafeExit } from 'vivth/node';
+ * import { Console, Paths } from 'vivth/neutral';
  *
- * const { paths, safeExit } = Setup;
- * new paths({
+ * new Paths({
  * 	root: process.env.INIT_CWD ?? process.cwd(),
  * });
- * new safeExit({
- * 	eventNames: ['SIGINT', 'SIGTERM'],
- * 	terminator: () => process.exit(0),
- * 	listener: (eventName) => {
- * 		process.once(eventName, function () {
- * 			safeExit.triggerExit();
- * 			Console.log(`safe exit via "${eventName}"`);
- * 		});
- * 	},
- * });
+ *
+ * new SafeExit('SIGINT', 'SIGTERM');
+ *
  * const pathRoot = Paths.root;
- * const [[, error], [, errorbun]] = await Promise.all([
- * 	CompileJS({
- * 		entryPoint: join(pathRoot, '/dev/myEntryPoint.mjs'),
- * 		minifyFirst: true,
- * 		outDir: join(pathRoot, '/dev-pkg/'),
- * 		compiler: 'pkg',
- * 		compilerArguments: {
- * 			target: 'node18-win-x64',
- * 		},
- * 		asar: {},
- * 		encoding: 'utf-8',
- * 	}),
- * 	await CompileJS({
- * 		entryPoint: join(pathRoot, '/dev/myEntryPoint.mjs'),
- * 		minifyFirst: true,
- * 		outDir: join(pathRoot, '/dev-bun/'),
- * 		compiler: 'bun',
- * 		compilerArguments: {
- * 			target: 'bun-win-x64',
- * 		},
- * 		asar: {},
- * 		encoding: 'utf-8',
- * 	}),
- * ]);
- * if (error || errorbun) {
- * 	Console.error({ error, errorbun });
+ *
+ * const [,errorbun] = await CompileJS({
+ * 	entryPoint: join(pathRoot, '/dev/myEntryPoint.mjs'),
+ * 	minifyFirst: true,
+ * 	outDir: join(pathRoot, '/dev-bun/'),
+ * 	compiler: 'bun',
+ * 	compilerArguments: {
+ * 		target: 'bun-win-x64',
+ * 	},
+ * 	asar: {},
+ * 	encoding: 'utf-8',
+ * });
+ *
+ * if (errorbun) {
+ * 	Console.error({ errorbun });
  * }
  */
 export async function CompileJS({
 	entryPoint,
-	minifyFirst,
+	minifyFirst = true,
 	encoding = Preferrence.encoding,
 	outDir,
 	asar = {},
 	preprocessEntryPoint = undefined,
-	compiler = undefined,
-	compilerArguments = {},
+	bunCompilerArguments = undefined,
 	esBundlerPlugins = [],
 	esbuildOptions = {},
+	additionalCommandArgument = [],
 }) {
 	return await TryAsync(async () => {
-		/**
-		 * @type {'cjs'|'esm'}
-		 */
-		let format;
-		switch (compiler) {
-			case 'pkg':
-				format = 'cjs';
-				break;
-			case 'bun':
-			case 'deno':
-				format = 'esm';
-				break;
-			default:
-				minifyFirst = true;
-				format = 'esm';
-				break;
-		}
 		const extOfSource = extname(entryPoint);
 		switch (extOfSource) {
 			case '.mts':
@@ -227,13 +176,9 @@ export async function CompileJS({
 		}
 		let sourceText = commonContentFixesBundled(
 			entryPoint,
-			format,
 			await readFile(entryPoint, { encoding }),
 		);
-		if (
-			/**  */
-			preprocessEntryPoint
-		) {
+		if (preprocessEntryPoint) {
 			sourceText = preprocessEntryPoint(sourceText);
 		}
 		const [bundledPrep, errorPrep] = await EsBundler(
@@ -241,99 +186,44 @@ export async function CompileJS({
 				content: sourceText,
 				extension: extOfSource,
 				root: dirname(entryPoint),
-				withBinHeader: compiler ? true : false,
+				withBinHeader: !!bunCompilerArguments,
 			},
 			{
 				minify: minifyFirst,
-				format,
 				plugins: esBundlerPlugins,
 				...esbuildOptions,
 			},
 		);
-		if (
-			/**  */
-			errorPrep
-		) {
+		if (errorPrep) {
 			throw errorPrep;
 		}
 		const outputBaseNameNoExt = join(outDir, basename(entryPoint).replace(extOfSource, ''));
-		const bundledJSFile = `${outputBaseNameNoExt}${format === 'cjs' ? '.cjs' : '.mjs'}`;
+		const bundledJSFile = `${outputBaseNameNoExt}.mjs`;
 		const [analyzedBundled, errorAnalyze] = await FSAnalyzer.finalContent(
 			entryPoint,
 			bundledPrep,
-			format,
 			asar,
 			bundledJSFile,
 		);
-		if (
-			/**  */
-			errorAnalyze
-		) {
+		if (errorAnalyze) {
 			throw errorAnalyze;
 		}
 		await FileSafe.write(bundledJSFile, analyzedBundled, { encoding });
 		const compiledBinFile = `${outputBaseNameNoExt}${getBinaryExtension()}`;
-		switch (compiler) {
-			case 'pkg': {
-				const commandCalled = [
-					bundledJSFile,
-					...generateFlagsValue(compilerArguments),
-					'--output',
-					compiledBinFile,
-				];
-				return {
-					compileResult: await exec(commandCalled),
-					commandCalled: `pkg ${commandCalled.join(' ')}`,
-					compiledBinFile,
-					bundledJSFile,
-				};
-			}
-			case 'bun': {
-				const commandCalled = [
-					'build',
-					bundledJSFile,
-					'--compile',
-					...generateFlagsValue(compilerArguments),
-					'--outfile',
-					compiledBinFile,
-				];
-				return {
-					compileResult: await Bun.spawn(['bun', ...commandCalled]),
-					commandCalled: `bun ${commandCalled.join(' ')}`,
-					compiledBinFile,
-					bundledJSFile,
-				};
-			}
-			case 'deno': {
-				const commandCalled = [
-					'compile',
-					...generateFlagsValue(compilerArguments),
-					'--output',
-					compiledBinFile,
-					bundledJSFile,
-					'--verbose',
-				];
-				// @ts-expect-error
-				const command = new Deno.Command('deno', {
-					args: commandCalled,
-					stdout: 'piped',
-					stderr: 'piped',
-				});
-				return {
-					compileResult: await command.output(),
-					commandCalled: `deno ${commandCalled.join(' ')}`,
-					compiledBinFile,
-					bundledJSFile,
-				};
-			}
-			default: {
-				return {
-					compileResult: undefined,
-					commandCalled: undefined,
-					compiledBinFile: undefined,
-					bundledJSFile,
-				};
-			}
-		}
+		const commandCalled = [
+			'build',
+			bundledJSFile,
+			'--compile',
+			...generateFlagsValue(bunCompilerArguments ?? {}),
+			'--outfile',
+			compiledBinFile,
+			...additionalCommandArgument,
+		];
+		return {
+			compileResult: spawnSync('bun', commandCalled),
+			commandCalled: `bun ${commandCalled.join(' ')}`,
+			compiledBinFile,
+			bundledJSFile,
+		};
 	});
 }

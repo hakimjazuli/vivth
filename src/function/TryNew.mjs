@@ -12,7 +12,7 @@ import { resolveErrorArray } from './resolveErrorArray.mjs';
  * @returns {[InstanceType<CLASSREF>, undefined]|
  * [undefined, Error]}
  * @example
- * import { TryNew } from 'vivth';
+ * import { TryNew } from 'vivth/neutral';
  *
  * const [instance, error] = TryNew(ClassReference, ...classConstructorParameters)
  * if(!error) {

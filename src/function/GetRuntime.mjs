@@ -1,5 +1,7 @@
 // @ts-check
 
+import { IsTypeOf } from './IsTypeOf.mjs';
+
 /**
  * @typedef {import("../typehints/Runtime.mjs").Runtime} Runtime
  */
@@ -14,37 +16,20 @@ let runtime;
  * - detects the current JavaScript runtime;
  * @type {()=>Runtime}
  * @example
- * import { GetRuntime } form 'vivth';
+ * import { GetRuntime } from 'vivth/neutral';
  *
  * const runtime = GetRuntime();
  */
 export function GetRuntime() {
-	if (
-		/**  */
-		runtime === undefined
-	) {
+	if (runtime === undefined) {
 		if (
-			/**  */
-			typeof Bun !== 'undefined'
+			// @ts-expect-error
+			!IsTypeOf(Bun, 'undefined')
 		) {
 			runtime = 'bun';
-		} else if (
-			/**  */
-			// @ts-expect-error
-			typeof Deno !== 'undefined'
-		) {
-			runtime = 'deno';
-		} else if (
-			/**  */
-			typeof process !== 'undefined' &&
-			process.versions?.node
-		) {
+		} else if (!IsTypeOf(process, 'undefined') && process.versions?.node) {
 			runtime = 'node';
-		} else if (
-			/**  */
-			typeof window !== 'undefined' &&
-			typeof document !== 'undefined'
-		) {
+		} else if (!IsTypeOf(window, 'undefined') && !IsTypeOf(document, 'undefined')) {
 			runtime = 'browser';
 		} else {
 			runtime = 'unknown';

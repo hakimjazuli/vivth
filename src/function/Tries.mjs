@@ -21,7 +21,7 @@ import { ForInAsync } from './ForInAsync.mjs';
  * 	| [[undefined, undefined], Set<Error>]
  * >}
  * @example
- * import { Tries } from 'vivth';
+ * import { Tries } from 'vivth/neutral';
  *
  * const [[key, result], setOfError] = await Tries({
  * 	someRuntime: async ({ prevError }) => {
@@ -69,10 +69,7 @@ export async function Tries(tryRecord) {
 			result = result_;
 		},
 	);
-	if (
-		/**  */
-		key
-	) {
+	if (key) {
 		// @ts-expect-error
 		return [[key, result], undefined];
 	}

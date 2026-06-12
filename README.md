@@ -14,15 +14,12 @@ npm i vivth
   underlying framework;
 - `vivth` are leaning to `esm(.mjs)+jsdoc` first;
   > - some functionality "might need" work around if you are using other than `esm+jsdoc`;
-  > - `CompileJS`, `ESBundler` expose `format` option for some leeway for `commonJS`;
-- completely `JSruntime` agnostic:
-  > - instead of `vivth` trying to guess, all runtime specific API should be provided by dev;
 - contains helpers to help you write data driven javascript program, including:
-  > - collections of extremely ⚡ performant `signal` classes;
+  > - collections of ⚡ performant `signal` classes;
   >   > - `vivth` deliberately take away `auto-subscription`:
   >   >   > - and introducing more imperative way of subsrciption yet still simple enough, which in
-  >   >   >   turn, it completely removes total code blocking on previously needed auto subsrciption
-  >   >   >   process on first run;
+  >   >   >   turn, it completely removes abstraction performance headsup on previously needed auto
+  >   >   >   subsrciption process on first run;
   >   >   > - and also make previously unthinkable dynamic subscription on conditionals that runs
   >   >   >   outside first run, now completely possible;
   > - collections of `queue-helper` classes;
@@ -32,12 +29,10 @@ npm i vivth
   > - opionated `bundler`:
   >   > - abstracted via `esbuild`;
   > - opionated `compiler`;
-  >   > - abstracted via `pkg`, `deno`, and `bun`;
-- when using runtime that doesn't provide specific common modules golbally(like `Deno`), dev should
-  import it statically from `node:${module_name}`, example:
-  ```js
-  import process from "node:process";
-  ```
+  >   > - abstracted via `bun`;
+- core `dependency`:
+  > - `bunJS`(hard mandatory);
+  > - `nodeJS`(checks for compatibility if you need to run things in node instead of bun);
 
 ---
 
@@ -59,137 +54,172 @@ npm i vivth
   > - [EnvMode](#envmode) are now independent from whether it's bundled or not, and need to be
   >   separately declared;
   > - add mechanism for `Effect` callback to run periodically when under heavy calls;
-  > - move all logic for `FSInline` to [FSasar](#fsasar)
+  > - move all logic for `FSInline` to [FSasar](#fsasar);
+  > - modify [JSautoDoc](#jsautodoc) for `multi-exports`, as to prevent runtime to run incorrect
+  >   platform module due to importing from `libName` still walktrhough all of listed exports
+  >   regardless if it's being imported or not;
 
 ---
 
 <h2 id="list-of-exported-api-and-typehelpers">list of exported API and typehelpers</h2>
 
-- [ASARFilePathConverter](#asarfilepathconverter)
-- [BrowserExternals](#browserexternals)
-- [CreateTransform](#createtransform)
-- [NodeModuleList](#nodemodulelist)
-- [PathFSBundles](#pathfsbundles)
-- [PathFSDir](#pathfsdir)
-- [PathFSFile](#pathfsfile)
-- [ToBundledJSPlugin](#tobundledjsplugin)
-- [CompileAS](#compileas)
-- [CompileJS](#compilejs)
-- [CreateESPlugin](#createesplugin)
-- [EsBundler](#esbundler)
-- [FileSelfMapper](#fileselfmapper)
-- [FSAnalyzer](#fsanalyzer)
-- [FSasar](#fsasar)
-- [JSDirMapper](#jsdirmapper)
-- [Console](#console)
-- [DataLog](#datalog)
-- [Derived](#derived)
-- [Effect](#effect)
-- [EnvSignal](#envsignal)
-- [EsWatcher](#eswatcher)
-- [EventSignal](#eventsignal)
-- [FileSafe](#filesafe)
-- [ForSignal](#forsignal)
-- [GetterSetter](#gettersetter)
-- [ListSignal](#listsignal)
-- [LitExp](#litexp)
-- [ObjectSignal](#objectsignal)
-- [Paths](#paths)
-- [QChannel](#qchannel)
-- [SafeExit](#safeexit)
-- [Setup](#setup)
-- [Signal](#signal)
-- [SignalCollection](#signalcollection)
-- [WalkThrough](#walkthrough)
-- [WorkerMainThread](#workermainthread)
-- [WorkerResult](#workerresult)
-- [WorkerThread](#workerthread)
-- [Base64URL](#base64url)
-- [Base64URLFromFile](#base64urlfromfile)
-- [BundledV](#bundledv)
-- [CreateStringID](#createstringid)
-- [EnvMode](#envmode)
-- [EventNameSpace](#eventnamespace)
-- [Preferrence](#preferrence)
-- [Trace](#trace)
-- [TracePath](#tracepath)
-- [VivthUnBundledCodeBlock](#vivthunbundledcodeblock)
-- [JSautoDOC](#jsautodoc)
-- [CreateImmutable](#createimmutable)
-- [EventCheck](#eventcheck)
-- [EventObject](#eventobject)
-- [ForInAsync](#forinasync)
-- [ForInSync](#forinsync)
-- [ForOfAsync](#forofasync)
-- [ForOfSync](#forofsync)
-- [GetBufferFromRelativePath](#getbufferfromrelativepath)
-- [GetFilesFromDir](#getfilesfromdir)
-- [GetMaxFilenameLength](#getmaxfilenamelength)
-- [GetNamedImportAlias](#getnamedimportalias)
-- [GetRuntime](#getruntime)
-- [InstantiateAssemblyScript](#instantiateassemblyscript)
-- [IsAsync](#isasync)
-- [IsInstanceOf](#isinstanceof)
-- [IsSameFile](#issamefile)
-- [IsStringLooksLikeAPath](#isstringlookslikeapath)
-- [IsTypeOf](#istypeof)
-- [JoinPathsThenNormalize](#joinpathsthennormalize)
-- [LazyFactory](#lazyfactory)
-- [NewChainable](#newchainable)
-- [ObjectRegistrar](#objectregistrar)
-- [PipeAsync](#pipeasync)
-- [PipeSync](#pipesync)
-- [TemplateLiteral](#templateliteral)
-- [Timeout](#timeout)
-- [Tries](#tries)
-- [TryAsync](#tryasync)
-- [TryNew](#trynew)
-- [TrySync](#trysync)
-- [TsToMjs](#tstomjs)
-- [UniqueFSTempName](#uniquefstempname)
-- [AnyButUndefined](#anybutundefined)
-- [AssemblyScriptExportsType](#assemblyscriptexportstype)
-- [AssemblyScriptLoaderInstantiate](#assemblyscriptloaderinstantiate)
-- [AutoDocASOptions](#autodocasoptions)
-- [ChainableType](#chainabletype)
-- [DevTestCB](#devtestcb)
-- [EnvModeType](#envmodetype)
-- [ExtnameType](#extnametype)
-- [ListArg](#listarg)
-- [LitExpKeyType](#litexpkeytype)
-- [LitExpResultType](#litexpresulttype)
-- [MutationType](#mutationtype)
-- [QCBFIFOReturn](#qcbfiforeturn)
-- [QCBReturn](#qcbreturn)
-- [Runtime](#runtime)
-- [TemplateLiteralValueHandler](#templateliteralvaluehandler)
-- [VLifecycleCallbacks](#vlifecyclecallbacks)
+- [node.BrowserExternals](#browserexternals)
+- [node.CreateTransform](#createtransform)
+- [node.LastEditedUnix](#lasteditedunix)
+- [node.NodeModuleList](#nodemodulelist)
+- [node.PathFSBundles](#pathfsbundles)
+- [node.PathFSDir](#pathfsdir)
+- [node.PathFSFile](#pathfsfile)
+- [node.ToBundledJSPlugin](#tobundledjsplugin)
+- [node.CompileAS](#compileas)
+- [node.CompileJS](#compilejs)
+- [neutral.CreateESPlugin](#createesplugin)
+- [node.EsBundler](#esbundler)
+- [node.FileSelfMapper](#fileselfmapper)
+- [node.FSAnalyzer](#fsanalyzer)
+- [node.FSasar](#fsasar)
+- [node.JSDirMapper](#jsdirmapper)
+- [node.RunWatchThenCompileJSOnSafeExit](#runwatchthencompilejsonsafeexit)
+- [neutral.AwaitSignal](#awaitsignal)
+- [neutral.Console](#console)
+- [neutral.DataLog](#datalog)
+- [neutral.Derived](#derived)
+- [neutral.Effect](#effect)
+- [neutral.EnvSignal](#envsignal)
+- [node.EsWatcher](#eswatcher)
+- [neutral.EventSignal](#eventsignal)
+- [node.FileSafe](#filesafe)
+- [neutral.ForEach](#foreach)
+- [neutral.ForSignal](#forsignal)
+- [node.FSDirArchWatcher](#fsdirarchwatcher)
+- [neutral.GetterSetter](#gettersetter)
+- [node.JSONFileHandler](#jsonfilehandler)
+- [neutral.ListSignal](#listsignal)
+- [neutral.LitExp](#litexp)
+- [neutral.ObjectSignal](#objectsignal)
+- [neutral.Paths](#paths)
+- [node.Prettivy](#prettivy)
+- [neutral.QChannel](#qchannel)
+- [node.SafeExit](#safeexit)
+- [node.Setup](#setup)
+- [neutral.Signal](#signal)
+- [neutral.SignalCollection](#signalcollection)
+- [neutral.WalkThrough](#walkthrough)
+- [neutral.WorkerMainThread](#workermainthread)
+- [neutral.WorkerResult](#workerresult)
+- [neutral.WorkerThread](#workerthread)
+- [neutral.Base64URL](#base64url)
+- [node.Base64URLFromFile](#base64urlfromfile)
+- [neutral.BundledV](#bundledv)
+- [neutral.CreateStringID](#createstringid)
+- [neutral.EnvMode](#envmode)
+- [neutral.EventNameSpace](#eventnamespace)
+- [neutral.FactoryKey](#factorykey)
+- [neutral.Preferrence](#preferrence)
+- [neutral.Trace](#trace)
+- [neutral.TracePath](#tracepath)
+- [neutral.VivthUnBundledCodeBlock](#vivthunbundledcodeblock)
+- [node.JSautoDOC](#jsautodoc)
+- [node.ClearRequireCache](#clearrequirecache)
+- [neutral.CreateImmutable](#createimmutable)
+- [neutral.EventCheck](#eventcheck)
+- [neutral.EventObject](#eventobject)
+- [neutral.ForInAsync](#forinasync)
+- [neutral.ForInSync](#forinsync)
+- [neutral.ForOfAsync](#forofasync)
+- [neutral.ForOfSync](#forofsync)
+- [node.GetBufferFromRelativePath](#getbufferfromrelativepath)
+- [node.GetFilesFromDir](#getfilesfromdir)
+- [node.GetMaxFilenameLength](#getmaxfilenamelength)
+- [node.GetModuleEsbuildPlatform](#getmoduleesbuildplatform)
+- [neutral.GetNamedImportAlias](#getnamedimportalias)
+- [neutral.GetRuntime](#getruntime)
+- [node.InstantiateAssemblyScript](#instantiateassemblyscript)
+- [neutral.IsAsync](#isasync)
+- [neutral.IsInstanceOf](#isinstanceof)
+- [neutral.IsSameFile](#issamefile)
+- [neutral.IsStringLooksLikeAPath](#isstringlookslikeapath)
+- [neutral.IsTypeOf](#istypeof)
+- [neutral.LazyFactory](#lazyfactory)
+- [neutral.MonkeyPatch](#monkeypatch)
+- [neutral.NewAnimationTimeline](#newanimationtimeline)
+- [neutral.NewChainable](#newchainable)
+- [neutral.NewObjectWrapper](#newobjectwrapper)
+- [neutral.ObjectRegistrar](#objectregistrar)
+- [node.ParseSQLFile](#parsesqlfile)
+- [neutral.PipeAsync](#pipeasync)
+- [neutral.PipeSync](#pipesync)
+- [node.SafeImport](#safeimport)
+- [neutral.TemplateLiteral](#templateliteral)
+- [neutral.Timeout](#timeout)
+- [neutral.Tries](#tries)
+- [neutral.TryAsync](#tryasync)
+- [neutral.TryNew](#trynew)
+- [neutral.TrySync](#trysync)
+- [node.TsToMjs](#tstomjs)
+- [node.UniqueFSTempName](#uniquefstempname)
+- [node.VivthyNeinth](#vivthyneinth)
+- [neutral.AnyButUndefined](#anybutundefined)
+- [neutral.ArrayToKeys](#arraytokeys)
+- [neutral.AssemblyScriptExportsType](#assemblyscriptexportstype)
+- [neutral.AssemblyScriptLoaderInstantiate](#assemblyscriptloaderinstantiate)
+- [neutral.AutoDocASOptions](#autodocasoptions)
+- [neutral.ChainableType](#chainabletype)
+- [neutral.ComponentDecorator_Constructor](#componentdecorator_constructor)
+- [neutral.ConsoleAdditionalSettingType](#consoleadditionalsettingtype)
+- [neutral.Decorator](#decorator)
+- [neutral.DecoratorMonkeyPatch](#decoratormonkeypatch)
+- [neutral.DevTestCB](#devtestcb)
+- [neutral.EnvModeType](#envmodetype)
+- [neutral.ExtnameType](#extnametype)
+- [neutral.ListArg](#listarg)
+- [neutral.LitExpKeyType](#litexpkeytype)
+- [neutral.LitExpResultType](#litexpresulttype)
+- [neutral.MonkeyPatchedType](#monkeypatchedtype)
+- [neutral.MutationType](#mutationtype)
+- [neutral.ParametersFollowingN](#parametersfollowingn)
+- [neutral.PrefixedKeysOf](#prefixedkeysof)
+- [neutral.QCBFIFOReturn](#qcbfiforeturn)
+- [neutral.QCBReturn](#qcbreturn)
+- [neutral.Runtime](#runtime)
+- [neutral.SafeImportReturnType](#safeimportreturntype)
+- [neutral.StylePropRefType](#stylepropreftype)
+- [neutral.TemplateLiteralValueHandler](#templateliteralvaluehandler)
+- [neutral.VivthCleanup](#vivthcleanup)
+- [neutral.VLifecycleCallbacks](#vlifecyclecallbacks)
+- [neutral.WC_createElement_bind](#wc_createelement_bind)
+- [neutral.WC_createNamedSlot](#wc_createnamedslot)
+- [neutral.WC_litRender_bind](#wc_litrender_bind)
+- [neutral.WC_litStyleMap](#wc_litstylemap)
+- [neutral.WC_StyleProp_bind](#wc_styleprop_bind)
+- [node.BrowserDirMapper](#browserdirmapper)
+- [neutral.CSS](#css)
+- [neutral.E](#e)
+- [neutral.NewStyleSheetAsync](#newstylesheetasync)
+- [neutral.NewStyleSheetSync](#newstylesheetsync)
+- [neutral.WC_TagName_type](#wc_tagname_type)
+- [neutral.EnsureValidTag](#ensurevalidtag)
+- [neutral.IsInViewPortSignal](#isinviewportsignal)
+- [neutral.ObserverSignal](#observersignal)
+- [neutral.WC_litRef](#wc_litref)
+- [neutral.WC_loopedSiblingsRef](#wc_loopedsiblingsref)
+- [neutral.WC_parentComponentRef](#wc_parentcomponentref)
+- [neutral.WC_extendsA](#wc_extendsa)
+- [neutral.WC_extendsB](#wc_extendsb)
 
 ---
 
-<h2 id="asarfilepathconverter">ASARFilePathConverter</h2>
+<h2 id="browserexternals">node.BrowserExternals</h2>
 
-#### reference:`ASARFilePathConverter`
+#### reference: `BrowserExternals`
 
-- for internal uses only;
-- `asar` uses os separator for detection, while `vivth` strictly uses forward slash;
-
-```js
-/**
- * @param {string} path
- */
-```
-
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
-
----
-
-<h2 id="browserexternals">BrowserExternals</h2>
-
-#### reference:`BrowserExternals`
-
-- esbuild external Set for browser platform;
+- esbuild external `Set` for browser platform;
 - this Set is automatically applied to [FileSelfMapper](#fileselfmapper) and [EsBundler](#esbundler) if platform is equal to browser;
+- while `vivth` already exports environtment specific(`node`, `browser`, `neutral`) via `vivth/node.JSAutoDoc`, there are possibility of other library might bleeded out when trying to:
+  > - use esbuild;
+  > - earlier version of `vivth`;
+  > - importing from `vivth`, which is definitely bleeded out, and you need to import from proper `exports`;
+  > - importing from `vivth/all`, which is definitely bleeded out, and you need to import from proper `exports`;
 
 ```js
 /**
@@ -197,13 +227,25 @@ npm i vivth
  */
 ```
 
+- <i>example</i>:
+
+```js
+import { BrowserExternals } from "vivth/node";
+import { build } from "esbuild";
+await build({
+  ...esbuildOptions,
+  platform: "browser",
+  external: Array.from(BrowserExternals),
+});
+```
+
 \*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
-<h2 id="createtransform">CreateTransform</h2>
+<h2 id="createtransform">node.CreateTransform</h2>
 
-#### reference:`CreateTransform`
+#### reference: `CreateTransform`
 
 - function helper to turn string into `node:stream.Transform` instance;
 - usefull for generating return value for `asar.options.transform`;
@@ -218,8 +260,7 @@ npm i vivth
 - <i>example</i>:
 
 ```js
-import { CreateTransform } from "vivht";
-
+import { CreateTransform } from "vivth/node";
 // asar input context:
 const transform = (filePath) => {
   filePath = Paths.normalize(filePath);
@@ -240,9 +281,15 @@ const transform = (filePath) => {
 
 ---
 
-<h2 id="nodemodulelist">NodeModuleList</h2>
+<h2 id="lasteditedunix">node.LastEditedUnix</h2>
 
-#### reference:`NodeModuleList`
+\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+---
+
+<h2 id="nodemodulelist">node.NodeModuleList</h2>
+
+#### reference: `NodeModuleList`
 
 - generate Set of `node` built in modules;
 
@@ -252,26 +299,38 @@ const transform = (filePath) => {
  */
 ```
 
+- <i>example</i>:
+
+```js
+import { build } from "esbuild";
+import { NodeModuleList } from "vivth/node";
+await build({
+  ...buildOptions,
+  platform: "browser",
+  external: Array.from(NodeModuleList()),
+});
+```
+
 \*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
-<h2 id="pathfsbundles">PathFSBundles</h2>
+<h2 id="pathfsbundles">node.PathFSBundles</h2>
 
-#### reference:`PathFSBundles`
+#### reference: `PathFSBundles`
 
 - when used with `EsBundler+ToBundledJSPlugin` the file on the dir that are match the rule are `Bundled` first before being put on the `.asar`;
 
-#### reference:`PathFSBundles.vivthBundles`
+#### reference: `PathFSBundles.vivthBundles`
 
 ```js
 /**
  * @param {string} relativePath
  * - to the dirname of the file you are calling this method;
- * @param {{shouldNotInlcudes:string}} [options]
- * - `shouldNotInlcudes`:
+ * @param {{shouldNotIncludes:string}} [options]
+ * - `shouldNotIncludes`:
  * >- when this method receive non immediate string(declared on other file),
- * >- `shouldNotInlcudes` should be filled with the string like,
+ * >- `shouldNotIncludes` should be filled with the string like,
  * >- `/${libname}/path/to/file/this/method/is/being/called.extname`;
  * @returns {PathFSBundles}
  */
@@ -280,12 +339,14 @@ const transform = (filePath) => {
 - <i>example</i>:
 
 ```js
-import { PathFSBundles } from "vivth";
-
-PathFSBundles.vivthBundles("../src/entryPoint.mjs");
+// D://true/path/mypath.mjs
+import { PathFSBundles } from "vivth/node";
+PathFSBundles.vivthBundles("../src/entryPoint.mjs", {
+  shouldNotIncludes: "D://true/path/mypath.mjs",
+});
 ```
 
-#### reference:`PathFSBundles_instance.path:getter`
+#### reference: `PathFSBundles_instance.path:getter`
 
 - relative path of the target to the project root;
 
@@ -295,15 +356,15 @@ PathFSBundles.vivthBundles("../src/entryPoint.mjs");
  */
 ```
 
-#### reference:`PathFSBundles_instance.callerPath:getter`
+#### reference: `PathFSBundles_instance.callerPath:getter`
 
 - depending on whether running on bundled or not;
-- unBundled: absolute disk path of the file caller;
-- bundled: `blankstring`;
 
 ```js
 /**
  * @returns {string}
+ * - unBundled: `absolutePath` on disk of the file caller;
+ * - bundled: `blankString`;
  */
 ```
 
@@ -311,18 +372,18 @@ PathFSBundles.vivthBundles("../src/entryPoint.mjs");
 
 ---
 
-<h2 id="pathfsdir">PathFSDir</h2>
+<h2 id="pathfsdir">node.PathFSDir</h2>
 
-#### reference:`PathFSDir`
+#### reference: `PathFSDir`
 
-- includes all files, that match the rule to `.asar`;
+- includes all files, that match the rule to `.asar` specification;
 
-#### reference:`PathFSDir.vivthDir`
+#### reference: `PathFSDir.vivthDir`
 
 ```js
 /**
  * @param {string} relativePath
- * - to the dirname of the file you are calling this method;
+ * - relativePath to the `dirname` of the file you are calling this method;
  * @param {RegExp} rule
  * @param {Parameters<typeof import('./PathFSBundles.mjs').PathFSBundles["vivthBundles"]>[1]} [options]
  * @returns {PathFSDir}
@@ -332,13 +393,12 @@ PathFSBundles.vivthBundles("../src/entryPoint.mjs");
 - <i>example</i>:
 
 ```js
-import { PathFSDir } from "vivth";
-
-PathFSDir.vivthDir("../src/", /[\s\S]*[noblank]/);
-// without `[noblank]`;
+import { PathFSDir } from "vivth/node";
+PathFSDir.vivthDir("../src/", /[\s\S]*/);
+// visible for ide inline check: without ``;
 ```
 
-#### reference:`PathFSDir_instance.rule:getter`
+#### reference: `PathFSDir_instance.rule:getter`
 
 - rule for dir, to get file any file match the rule inside that directory;
 
@@ -348,7 +408,7 @@ PathFSDir.vivthDir("../src/", /[\s\S]*[noblank]/);
  */
 ```
 
-#### reference:`PathFSDir_instance.path:getter`
+#### reference: `PathFSDir_instance.path:getter`
 
 - relative path of the target to the project root;
 
@@ -358,7 +418,7 @@ PathFSDir.vivthDir("../src/", /[\s\S]*[noblank]/);
  */
 ```
 
-#### reference:`PathFSDir_instance.callerPath:getter`
+#### reference: `PathFSDir_instance.callerPath:getter`
 
 - depending on whether running on bundled or not;
 - unBundled: absolute disk path of the file caller;
@@ -374,14 +434,14 @@ PathFSDir.vivthDir("../src/", /[\s\S]*[noblank]/);
 
 ---
 
-<h2 id="pathfsfile">PathFSFile</h2>
+<h2 id="pathfsfile">node.PathFSFile</h2>
 
-#### reference:`PathFSFile`
+#### reference: `PathFSFile`
 
 > - the file are added to `asar` AS IS, OR
 > - transformed according to the `asar.options.transform` value;
 
-#### reference:`PathFSFile.vivthFile`
+#### reference: `PathFSFile.vivthFile`
 
 ```js
 /**
@@ -395,12 +455,11 @@ PathFSDir.vivthDir("../src/", /[\s\S]*[noblank]/);
 - <i>example</i>:
 
 ```js
-import { PathFSFile } from "vivth";
-
+import { PathFSFile } from "vivth/node";
 PathFSFile.vivthFile("../CompileAS.mjs");
 ```
 
-#### reference:`PathFSFile_instance.path:getter`
+#### reference: `PathFSFile_instance.path:getter`
 
 - relative path of the target to the project root;
 
@@ -410,7 +469,7 @@ PathFSFile.vivthFile("../CompileAS.mjs");
  */
 ```
 
-#### reference:`PathFSFile_instance.callerPath:getter`
+#### reference: `PathFSFile_instance.callerPath:getter`
 
 - depending on whether running on bundled or not;
 - unBundled: absolute disk path of the file caller;
@@ -426,15 +485,15 @@ PathFSFile.vivthFile("../CompileAS.mjs");
 
 ---
 
-<h2 id="tobundledjsplugin">ToBundledJSPlugin</h2>
+<h2 id="tobundledjsplugin">node.ToBundledJSPlugin</h2>
 
-#### reference:`ToBundledJSPlugin`
+#### reference: `ToBundledJSPlugin`
 
 - generate `esbuild.Plugin` for changing unbundled time file into runtime file;
 - on using esbuild with this plugin, it will:
   > - replace any module that have similiar file name but ended with Bundled(before extname);
-  > - works on `.mts`|`.ts`|`.mjs`|`.cjs`|`.js`;
-  > - `${fileName}.mjs` -> seek for and use `${fileName}Bundled.mjs`, if not found use `${fileName}.mjs`;
+  > - works on `.mts`|`.ts`|`.mjs`|`.js`;
+  > - `${fileName}.mjs` -> seek for and use `${fileName}.bundled.mjs`, if not found use `${fileName}.mjs`;
   > - removes `BundledV.vivthUnBundledCodeBlock` code block;
 
 ```js
@@ -448,8 +507,7 @@ PathFSFile.vivthFile("../CompileAS.mjs");
 - <i>example</i>:
 
 ```js
-import { ToBundledJSPlugin } from "vivth";
-
+import { ToBundledJSPlugin } from "vivth/node";
 export const myBundledPlugin = ToBundledJSPlugin("/myProjectName/src/");
 ```
 
@@ -457,9 +515,9 @@ export const myBundledPlugin = ToBundledJSPlugin("/myProjectName/src/");
 
 ---
 
-<h2 id="compileas">CompileAS</h2>
+<h2 id="compileas">node.CompileAS</h2>
 
-#### reference:`CompileAS`
+#### reference: `CompileAS`
 
 - helper to compile `AssemblyScript`;
 - file name should endswith `.as.ts`;
@@ -467,13 +525,13 @@ export const myBundledPlugin = ToBundledJSPlugin("/myProjectName/src/");
 - will generate:
   > - `${fileBaseNameNoExt}_import.mjs`: setting for import input;
   >   > - also the only file that are editable;
-  > - `${fileBaseNameNoExt}.ts`: asc generated typehint;
+  > - `${fileBaseNameNoExt}.d.ts`: asc generated typehint;
   > - `${fileBaseNameNoExt}.js`: asc generated esm binding;
   > - `${fileBaseNameNoExt}.wasm`: asc compiled;
   > - `${fileBaseNameNoExt}_ASUniversal.mjs`: able to be `JSautoDOC`ed, for universal runtime;
   > - `${fileBaseNameNoExt}_ASasar.mjs`: able to be `JSautoDOC`ed, use as `vivth.FSasar` binding;
 - generated file are on the same directory as the source, so make sure to isolate the source from other file(in a single different directory), as to not make it messy real fast;
-- set for `js/tsconfig.json`:
+- assuming `js/tsconfig.json` should already set this following value:
   > - `compilerOptions.allowJs`: true;
   > - `compilerOptions.checkJs`: false;
   > - should excludes: `.js`, `.as.ts`, `.wasm`;
@@ -481,7 +539,7 @@ export const myBundledPlugin = ToBundledJSPlugin("/myProjectName/src/");
 ```js
 /**
  * @param {Parameters<import('assemblyscript/asc')["main"]>} args
- * - as of `v:1.5.x`, `arg0` type `string[]` produce more stable results than `CompilerOptions`;
+ * - as of `vivth@1.5.x`, `arg0` type `string[]` produce more stable results than `CompilerOptions`;
  * @returns {ReturnType<import('assemblyscript/asc')["main"]>}
  */
 ```
@@ -489,8 +547,7 @@ export const myBundledPlugin = ToBundledJSPlugin("/myProjectName/src/");
 - <i>example</i>:
 
 ```js
-import { CompileAS } from "vivth";
-
+import { CompileAS } from "vivth/node";
 const { error } = await CompileAS(
   [inputABSPath, "--outFile", wasmABSPath, "--bindings", "esm", ...ASArgv],
   ASAPIOptions,
@@ -501,14 +558,14 @@ const { error } = await CompileAS(
 
 ---
 
-<h2 id="compilejs">CompileJS</h2>
+<h2 id="compilejs">node.CompileJS</h2>
 
-#### reference:`CompileJS`
+#### reference: `CompileJS`
 
 - function to compile `.ts`|`.mts`|`.mjs` file, into a single executable;
 - also generate js representation of the `bundled` version of the target;
-- uses [pkg](https://www.npmjs.com/package/pkg), [bun](https://bun.com/docs/bundler/executables), and [deno](https://docs.deno.com/runtime/reference/cli/compile/) compiler under the hood;
-  > - they are used only as packaging/compiler agent, and doesn't necessarily supports their advanced feature, such as, assets bundling(use [`FSasar`](#fsasar) instead);
+- uses [bun](https://bun.com/docs/bundler/executables) compiler under the hood;
+  > - it is used only as packaging/compiler agent, and doesn't necessarily supports their advanced feature, such as, assets bundling(use [`FSasar`](#fsasar) instead);
   > - `WorkerThread` will be converted to inline using `FSasar` too;
 
 ---
@@ -518,8 +575,8 @@ const { error } = await CompileAS(
 ---
 
 - This function does not obfuscate and will not prevent decompilation. Do not embed environment variables or sensitive information inside `options.entryPoint`;
-- It is designed for quick binarization, allowing execution on machines without `Node.js`, `Bun`, or `Deno` installed;
-- The resulting binary will contain `FSasar` and `WorkerMainThread` target paths Buffers, which are loaded into memory at runtime. If your logic depends on the file system, use `node:fs` or `node:fs/promises` APIs and ship external = files alongside the binary (not compiled);new Set((not compiled)
+- It is designed for quick binarization, allowing execution on machines without `Bun` installed;
+- The resulting binary will contain `FSasar` and `WorkerMainThread` target paths Buffers, which are loaded into memory at runtime. If your logic depends on the file system, use `node:fs` or `node:fs/promises` APIs and ship external files alongside the `binary` and `.asar` file (not compiled);
 
 ---
 
@@ -527,7 +584,7 @@ const { error } = await CompileAS(
 
 ---
 
-````js
+```js
 /**
  * @param {Object} options
  * @param {string} options.entryPoint
@@ -539,87 +596,58 @@ const { error } = await CompileAS(
  * - to modify entry point before bundling;
  * - `entryPointContent` is the original string of the entry point;
  * - returned value then passed to `ESBundler`;
- * @param {boolean} options.minifyFirst
+ * @param {boolean} [options.minifyFirst]
  * - minify the bundle before compilation;
  * @param {Object} [options.asar]
  * @param {Parameters<typeof import('@electron/asar')["createPackageFromFiles"]>[3]} [options.asar.InputMetadata]
  * @param {Parameters<typeof import('@electron/asar')["createPackageFromFiles"]>[4]} [options.asar.options]
  * @param {string} options.outDir
  * - need manual prefix;
- * @param {'pkg'|'bun'|'deno'} [options.compiler]
- * - default: no comilation, just bundling;
- * - `bun` and `pkg` is checked, if there's bug on `deno`, please report on github for issues;
- * - normally when using `pkg`, you will find something like this:
- * ```shell
- * [WARNING] "import.meta" is not available with the "cjs" output format and will be empty [empty-import-meta]
- * ```
- * >- it should be more or less safe to ignore;
- * >- `CompileJS` modify `cjs` finalContent of any `import.meta` that uses it's url into `{url:__filename}`;
- * @param {Record<string, string>} [options.compilerArguments]
+ * @param {Record<string, string[]|string>} [options.bunCompilerArguments]
  * - `key` are to used as `--keyName`;
- * - value are the following value of the key;
+ * - value are the `value` of the `key`;
+ * >- `string`: will be inputed as is;
+ * >- `string[]`: will be joined with `,`;
  * - no need to add the output/outdir, as it use the `options.outDir`;
  * @param {ReturnType<CreateESPlugin>[]} [options.esBundlerPlugins]
  * - plugins for `EsBundler`;
  * @param {Parameters<typeof EsBundler>[1]} [options.esbuildOptions]
  * - options for `EsBundler`;
- * @return {ReturnType<typeof TryAsync<{compileResult:Promise<any>|undefined,
+ * @param {string[]} [options.additionalCommandArgument]
+ * - argument to be passed process generator;
+ * @return {ReturnType<typeof TryAsync<{compileResult: any,
  * commandCalled: string|undefined;
  * compiledBinFile: string|undefined;
- * bundledJSFile:string|undefined
+ * bundledJSFile: string|undefined
  * }>>}
  */
-````
+```
 
 - <i>example</i>:
 
 ```js
 import process from "node:process";
 import { join } from "node:path";
-
-import { CompileJS, Console, Paths, Setup } from "vivth";
-
-const { paths, safeExit } = Setup;
-new paths({
+import { CompileJS, SafeExit } from "vivth/node";
+import { Console, Paths } from "vivth/neutral";
+new Paths({
   root: process.env.INIT_CWD ?? process.cwd(),
 });
-new safeExit({
-  eventNames: ["SIGINT", "SIGTERM"],
-  terminator: () => process.exit(0),
-  listener: (eventName) => {
-    process.once(eventName, function () {
-      safeExit.triggerExit();
-      Console.log(`safe exit via "${eventName}"`);
-    });
-  },
-});
+new SafeExit("SIGINT", "SIGTERM");
 const pathRoot = Paths.root;
-const [[, error], [, errorbun]] = await Promise.all([
-  CompileJS({
-    entryPoint: join(pathRoot, "/dev/myEntryPoint.mjs"),
-    minifyFirst: true,
-    outDir: join(pathRoot, "/dev-pkg/"),
-    compiler: "pkg",
-    compilerArguments: {
-      target: "node18-win-x64",
-    },
-    asar: {},
-    encoding: "utf-8",
-  }),
-  await CompileJS({
-    entryPoint: join(pathRoot, "/dev/myEntryPoint.mjs"),
-    minifyFirst: true,
-    outDir: join(pathRoot, "/dev-bun/"),
-    compiler: "bun",
-    compilerArguments: {
-      target: "bun-win-x64",
-    },
-    asar: {},
-    encoding: "utf-8",
-  }),
-]);
-if (error || errorbun) {
-  Console.error({ error, errorbun });
+const [, errorbun] = await CompileJS({
+  entryPoint: join(pathRoot, "/dev/myEntryPoint.mjs"),
+  minifyFirst: true,
+  outDir: join(pathRoot, "/dev-bun/"),
+  compiler: "bun",
+  compilerArguments: {
+    target: "bun-win-x64",
+  },
+  asar: {},
+  encoding: "utf-8",
+});
+if (errorbun) {
+  Console.error({ errorbun });
 }
 ```
 
@@ -627,9 +655,9 @@ if (error || errorbun) {
 
 ---
 
-<h2 id="createesplugin">CreateESPlugin</h2>
+<h2 id="createesplugin">neutral.CreateESPlugin</h2>
 
-#### reference:`CreateESPlugin`
+#### reference: `CreateESPlugin`
 
 - typed esbuild Plugin generator;
 
@@ -644,8 +672,7 @@ if (error || errorbun) {
 - <i>example</i>:
 
 ```js
-import { CreateESPlugin } from "vivth";
-
+import { CreateESPlugin } from "vivth/neutral";
 export const pluginAddCopyRight = CreateESPlugin(
   "MyCopyrightDeclaration",
   async (build) => {
@@ -658,11 +685,11 @@ export const pluginAddCopyRight = CreateESPlugin(
 
 ---
 
-<h2 id="esbundler">EsBundler</h2>
+<h2 id="esbundler">node.EsBundler</h2>
 
-#### reference:`EsBundler`
+#### reference: `EsBundler`
 
-- opinionated bundler for extension below using esbuild;
+- opinionated bundler for limited extensions using esbuild;
 - bundles all imports into a single output string;
 
 ```js
@@ -672,11 +699,13 @@ export const pluginAddCopyRight = CreateESPlugin(
  * - the code can also uses composites from the result from multiple readFiles;
  * @param {string} options.root
  * - use dirname of said fileString path;
- * @param {'.mts'|'.ts'|'.mjs'|'.cjs'} options.extension
+ * @param {'.mts'|'.ts'|'.mjs'} options.extension
+ * - supported extension;
  * @param {boolean} [options.withBinHeader]
  * @param {Omit<Parameters<build>[0],
- * 'entryPoints'|'bundle'|'write'|'sourcemap'|'outdir'|'splitting'|'loader'>
+ * 'entryPoints'|'bundle'|'write'|'sourcemap'|'outdir'|'splitting'|'format'>
  * } [esbuildOptions]
+ * - assume `esm`;
  * @returns {ReturnType<typeof TryAsync<string>>}
  */
 ```
@@ -684,9 +713,8 @@ export const pluginAddCopyRight = CreateESPlugin(
 - <i>example</i>:
 
 ```js
-import { EsBundler } from "vivth";
-
-const bundledString = EsBundler(
+import { EsBundler } from "vivth/node";
+const [bundledString, errorBundling] = EsBundler(
   {
     content: ``,
     extension: ".mts",
@@ -702,17 +730,12 @@ const bundledString = EsBundler(
 
 ---
 
-<h2 id="fileselfmapper">FileSelfMapper</h2>
+<h2 id="fileselfmapper">node.FileSelfMapper</h2>
 
-#### reference:`FileSelfMapper`
-
-- this Class require `esbuild` to be installed, example using npm:
-
-```shell
-npm install esbuild
-```
+#### reference: `FileSelfMapper`
 
 - each file can define it's own `targetPaths` inline by adding comment then fullpath on the begining of the file:
+  > - `mjs`;
 
 ```js
 // D://my/path/something.mjs
@@ -720,6 +743,8 @@ npm install esbuild
 
 console.log("hello");
 ```
+
+> - `scss`;
 
 ```scss
 /* D://my/path/something.css */
@@ -731,35 +756,55 @@ body {
 }
 ```
 
--files extention:
+> - `.ignore`;
 
-> - `js`/`ts` files will compiled with esbuild cli, using `option.esbuild` as argument;
-> - `sass`/`scss` it will be compiled to css first;
-> - other than those files, they will just copied to `targetPaths`;
+```.ignore
+# D:/my/project/root/.gitignore
+# D:/my/project/root/.npmignore
 
-#### reference:`new FileSelfMapper`
+/dev/
+```
+
+- files extention:
+  > - `js`/`ts` files will be compiled with `vivth/node.EsWathcer`, using `option.esbuild` as argument;
+  > - `sass`/`scss` it will be compiled to `css` first;
+  > - other than those files, they will be just copied to `targetPaths`;
+- for runtime example see file `/dev/auto/` on source code;
 
 ```js
 /**
- * @param {string} relativeWatchPathToRoot
+ * @implements {VivthCleanup}
+ */
+```
+
+#### reference: `new FileSelfMapper`
+
+```js
+/**
+ * @param {string} watchPath
+ * - `relative`(to `Paths.root`) OR `absolute`, both are accepted;
  * @param {Object} options
  * @param {Omit<Parameters<import('esbuild')["context"]>[0], "write"|"minify"|"format"|"mainFields"|"outfile"|"bundle">} [options.esbuild]
  * - `logLimit`: default = `3`;
  * - `outFile`: auto determined by comment line on top level of each files;
  * - `minify`: determined by file `relativePath`(to dirname of `watchpath`) name included `.min.`;
  * - `format`: determined by file `relativePath`(to dirname of `watchpath`) name included `.esm.` or `.iife.`;
- * - `mainFields`: determined by file externtion if `.cjs` -> `main,module` else `module,main`;
+ * - `mainFields`: `module,main`;
  * - `bundle`: automatically added by `vivth.FileSelfMapper`;
  * - `write`: automatically added by `vivth.FileSelfMapper`;
  * @param {boolean} [options.deleteTempFilesAfterExit]
+ * @param {(path:{mapTo:string, src:string}, content:string)=>(string|false)} [options.postProcessDirectCopy]
+ * - works for:
+ * >- `.js`;
+ * >- anything that are not `sass` and `module js/ts`;
+ * - return `false` to exclude `target` from mapping;
  */
 ```
 
 - <i>example</i>:
 
 ```js
-import { FileSelfMapper } from "vivth";
-
+import { FileSelfMapper } from "vivth/node";
 new FileSelfMapper("../ssg-assets/", {
   esbuild: {},
   // deleteTempFilesAfterExit: true,
@@ -770,15 +815,15 @@ new FileSelfMapper("../ssg-assets/", {
 
 ---
 
-<h2 id="fsanalyzer">FSAnalyzer</h2>
+<h2 id="fsanalyzer">node.FSAnalyzer</h2>
 
-#### reference:`FSAnalyzer`
+#### reference: `FSAnalyzer`
 
 - collections of static method to process content for:
   > - `FSasar`;
 - mostly used internally;
 
-#### reference:`FSAnalyzer.finalContent`
+#### reference: `FSAnalyzer.finalContent`
 
 - to be used on bundled content;
 
@@ -786,7 +831,6 @@ new FileSelfMapper("../ssg-assets/", {
 /**
  * @param {string} entryPoint
  * @param {string} content
- * @param {'cjs'|'esm'} format
  * @param {Object} asarConfig
  * @param {Parameters<createPackageFromFiles>[3]} [asarConfig.InputMetadata]
  * @param {Parameters<createPackageFromFiles>[4]} [asarConfig.options]
@@ -799,38 +843,41 @@ new FileSelfMapper("../ssg-assets/", {
 
 ```js
 import { readFile } from "node:fs/promises";
-
-import { FSInlineAnalyzer } from "vivth";
-
-const filePath = join(Paths.root, "README.md"); // assuming Paths is already instantiated once;
-const [resultFinalContent, errorFinalContent] =
-  await FSInlineAnalyzer.finalContent(
-    filePath,
-    await readFile(filePath, { encoding: "utf-8" }),
-    "esm",
-    {},
-    ...args,
-  );
+import { FSAnalyzer } from "vivth/node";
+import { Preferrence } from "vivth/neutral";
+const filePath = "README.md";
+const [resultFinalContent, errorFinalContent] = await FSAnalyzer.finalContent(
+  filePath,
+  await readFile(filePath, { encoding: Preferrence.encoding }),
+  "esm",
+  {},
+  ...args,
+);
 ```
 
 \*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
-<h2 id="fsasar">FSasar</h2>
+<h2 id="fsasar">node.FSasar</h2>
 
-#### reference:`FSasar`
+#### reference: `FSasar`
 
 - class helper to bundle assets files as `.asar`;
   > - as `type: "buffer"`;
-  > - uses `[at]electron/asar` under the hood;
-- use only if you are planning to use [CompileJS](#compilejs);
-  > - the class static methods don't obfuscate target file;
-  > - don't embed any sensitive content using this methods of `CompileJS`;
+  > - uses `
 
-#### reference:`FSasar.file`
+```js
+/**
+ * @electron/asar` under the hood;
+ * - use only if you are planning to use [CompileJS](#compilejs);
+ * >- the class static methods don't obfuscate target file;
+ * >- don't embed any sensitive content using this methods of `CompileJS`;
+ * >- it's better to place it on `.env`;
+ */
+```
 
-- get file buffer from relative path;
+#### reference: `FSasar.file`
 
 ```js
 /**
@@ -842,14 +889,13 @@ const [resultFinalContent, errorFinalContent] =
 - <i>example</i>:
 
 ```js
-import { FSasar, PathFSFile } from "vivth";
-
+import { FSasar, PathFSFile } from "vivth/node";
 const fileBuffer = await FSasar.file(
   PathFSFile.vivthFile("../function/myModule.mjs"),
 );
 ```
 
-#### reference:`FSasar.dir`
+#### reference: `FSasar.dir`
 
 - helper function for asar dir;
 
@@ -867,8 +913,7 @@ const fileBuffer = await FSasar.file(
 - <i>example</i>:
 
 ```js
-import { FSasar, PathFSDir } from "vivth";
-
+import { FSasar, PathFSDir } from "vivth/node";
 const { forEachFiles, getFile } = FSasar.dir(
   PathFSDir.vivthDir("../function/", /[\s\S]*[noblank]/),
 ); // without `[noblank]`;
@@ -882,9 +927,9 @@ forEachFiles(async ({ inputRelative, asar }) => {
 
 ---
 
-<h2 id="jsdirmapper">JSDirMapper</h2>
+<h2 id="jsdirmapper">node.JSDirMapper</h2>
 
-#### reference:`JSDirMapper`
+#### reference: `JSDirMapper`
 
 - class helper for one to one Mapping JS files;
 - only bundles `.mts` AND `.mjs` in the `path.watch` directory, extension restriction to module as to enforce:
@@ -893,30 +938,49 @@ forEachFiles(async ({ inputRelative, asar }) => {
 
 ```js
 /**
- * @template {import('esbuild').BuildOptions} O
+ * @template {BuildOptions} OPT
+ * @implements {VivthCleanup}
  */
 ```
 
-#### reference:`new JSDirMapper`
+#### reference: `new JSDirMapper`
 
 ```js
 /**
  * @param {Object} path
- * - relative from project root;
- * - only bundles `.mts` AND `.mjs`:
- * >- `.wasm`: will be copied as is;
- * >- `.as.ts` will be dealt accordingly based on `options.asTsToMjsHandler`;
+ * - `relative`(to `Paths.root`) OR `absolute`, both are accepted;
+ * - handles:
+ * >- `.mts`,`.mjs`: bundled;
+ * >- `.css`: minified;
+ * >-`.scss`, `sass`: two step bundling;
+ * >>- bundle to `.s.css` at source path;
+ * >>- write to `.s.css` on target path;
+ * >- `.as.ts` and it's companion `js` will be dealt accordingly based on `options.asTsToMjsHandler`;
+ * >>- `.ts` and `.js` that are not `.wasm` related are ignored;
+ * >- everything else will be copied as is;
  * @param {string} path.watch
  * - watch this path for changes;
  * @param {string} path.mapTo
  * - bundles to this path
+ * @param {(
+ * 		arg0:
+ * 			{
+ * 				source:string;
+ * 				target:string;
+ * 				eventName:EventName;
+ * 			}
+ * 	)=>Promise<{
+ * 		shouldProcessDefault:
+ * 			boolean|{selfCleanup:()=>Promise<void>};
+ * 	}>
+ * } [path.filter]
+ * - handler trap before sending it to
  * @param {Object} options
  * @param {Object} options.esbuild
- * @param {Omit<ConstructorParameters<typeof EsWatcher<O>>[0],
+ * @param {Omit<ConstructorParameters<typeof EsWatcher<OPT>>[0],
  * 	"entryPoints"|
  * 	"outFile"|
  * 	"write"|
- * 	"loader"|
  * 	"format"|
  * 	"bundle"|
  * 	"logLevel"|
@@ -926,16 +990,16 @@ forEachFiles(async ({ inputRelative, asar }) => {
  * - `entryPoints`: auto filled with `path.watch` + filepath;
  * - `outFile`: auto filled with `path.mapTo` + filepath(suffixed with `.mjs`);
  * - `write`: auto filled by `vivth.JSDirMapper`;
- * - `loader`: auto filled by `vivth.JSDirMapper` depended on file extname;
  * - `mainFields`: auto filled by `vivth.JSDirMapper`, ['module', 'main'];
  * - `format`: auto filled by `vivth.JSDirMapper`, always `esm`;
  * - `bundle`: auto filled by `vivth.JSDirMapper`, always `true`;
  * - `logLevel`: auto filled by `vivth.JSDirMapper`;
- * @param {ConstructorParameters<typeof EsWatcher<O>>[1]} [options.esbuild.watchOption]
+ * @param {ConstructorParameters<typeof EsWatcher<OPT>>[1]} [options.esbuild.watchOption]
  * @param {Parameters<typeof TsToMjs>[1]} [options.asTsToMjsHandler]
  * - argument[1] used for `.as.ts` extention(assemblyscript to `.wasm` + `.mjs` loader):
  * >- handled via `vivth.TsToMjs`;
  * >- preferably to be isolated on a single folder;
+ * - when falsy -> ignore `.as.ts`;
  */
 ```
 
@@ -943,18 +1007,11 @@ forEachFiles(async ({ inputRelative, asar }) => {
 
 ```js
 import process from "node:process";
-
-import { SafeExit, Paths, JSDirMapper } from "../index.mjs";
-
+import { SafeExit, Paths, JSDirMapper } from "vivth/node";
 new Paths({
   root: process.env.INIT_CWD ?? process.cwd(),
 });
-
-new SafeExit({
-  eventNames: ["SIGINT", "SIGTERM"],
-  terminator: () => process.exit(0),
-});
-
+new SafeExit("SIGINT", "SIGTERM");
 new JSDirMapper(
   {
     mapTo: "/test/jsdirmapped/",
@@ -963,7 +1020,6 @@ new JSDirMapper(
   {
     esbuild: { buildOptions: { platform: "browser" } },
     asTsToMjsHandler: { assemblyScriptOptions: {} },
-    // `assemblyScriptOptions` must be truthy to handle `.as.ts`
   },
 );
 ```
@@ -972,17 +1028,115 @@ new JSDirMapper(
 
 ---
 
-<h2 id="console">Console</h2>
+<h2 id="runwatchthencompilejsonsafeexit">node.RunWatchThenCompileJSOnSafeExit</h2>
 
-#### reference:`Console`
+#### reference: `RunWatchThenCompileJSOnSafeExit`
+
+- function to:
+  > - spawn watcher on `source`;
+  > - run the `source`;
+  > - compile `source` to target on `SafeExit`;
+- this function assume `Paths` and `SafeExit` to be instantiated;
+
+```js
+/**
+ * @param {Object} options
+ * @param {boolean} options.showLog
+ * @param {string} options.source
+ * - filepath for source;
+ * - `relative`(to `Paths.root`) OR `absolute`, both are accepted;
+ * @param {string} options.target
+ * - dirpath for compile target;
+ * - `relative`(to `Paths.root`) OR `absolute`, both are accepted;
+ * @param {string[]} [options.additionalSpawnArgument]
+ * @param {Omit<
+ * 	Parameters<typeof import('./CompileJS.mjs').CompileJS>[0],
+ * 	"entryPoint"|
+ * 	"outDir"
+ * >} [options.compileJSargs]
+ * @returns {ReturnType<typeof TryAsync<import('../typehints/VivthCleanup.mjs').VivthCleanup>>}
+ */
+```
+
+- <i>example</i>:
+
+```js
+import { RunWatchThenCompileJSOnSafeExit } from "vivth/node";
+// assume `Paths` and `SafeExit` to be instantiated;
+await RunWatchThenCompileJSOnSafeExit({
+  showLog: false,
+  source: "/test/watchrun/hi.mjs",
+  target: "/test/watchrun/compile-bun/",
+  compileJSargs: {
+    minifyFirst: false,
+    esbuildOptions: {},
+    compilerArguments: {
+      target: "bun-win-x64",
+    },
+    asar: {},
+    encoding: "utf-8",
+  },
+});
+```
+
+\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+---
+
+<h2 id="awaitsignal">neutral.AwaitSignal</h2>
+
+#### reference: `AwaitSignal`
+
+- `Signal` to unwrap `Promise`;
+- useful to create underlying mechanism for something like react `Suspense` component;
+- auto queued for last unwrap request;
+
+```js
+/**
+ * @template {any} VALUE
+ * @template {any[]} ARGS
+ * @extends {Signal<VALUE|Promise<VALUE>|Error>}
+ * @implements {VivthCleanup}
+ */
+```
+
+- <i>example</i>:
+
+```js
+import { AwaitSignal, Effect } from "vivth/neutral";
+const bigAwaitSignal = new AwaitSignal(fetch("../SomethingReallyBig"));
+new Effect(async ({ subscribe }) => {
+  const myBigLoadProgress = subscribe(bigAwaitSignal).value;
+  const isError = IsInstanceOf(myBigLoadProgress, Error);
+  if (isError) {
+    // handle error here
+    return;
+  }
+  const isAPromise = IsInstanceOf(myBigLoadProgress, Promise);
+  if (isAPromise) {
+    // handle suspense here;
+    return;
+  }
+  // handle ready state here;
+});
+```
+
+\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+---
+
+<h2 id="console">neutral.Console</h2>
+
+#### reference: `Console`
 
 - class with static methods to print to standard console with bare minimum ANSI styles;
 
-#### reference:`Console.log`
+#### reference: `Console.log`
 
 ```js
 /**
  * @param {any} data
+ * @param {import("../typehints/ConsoleAdditionalSettingType.mjs").ConsoleAdditionalSettingType} [addArgs]
  * @returns {void}
  */
 ```
@@ -990,18 +1144,18 @@ new JSDirMapper(
 - <i>example</i>:
 
 ```js
-import { Console } from "vivth";
-
+import { Console } from "vivth/neutral";
 Console.log({
   hello: "world!!",
 });
 ```
 
-#### reference:`Console.info`
+#### reference: `Console.info`
 
 ```js
 /**
  * @param {any} data
+ * @param {import("../typehints/ConsoleAdditionalSettingType.mjs").ConsoleAdditionalSettingType} [addArgs]
  * @returns {void}
  */
 ```
@@ -1009,18 +1163,18 @@ Console.log({
 - <i>example</i>:
 
 ```js
-import { Console } from "vivth";
-
+import { Console } from "vivth/neutral";
 Console.info({
   hello: "world!!",
 });
 ```
 
-#### reference:`Console.warn`
+#### reference: `Console.warn`
 
 ```js
 /**
  * @param {any} data
+ * @param {import("../typehints/ConsoleAdditionalSettingType.mjs").ConsoleAdditionalSettingType} [addArgs]
  * @returns {void}
  */
 ```
@@ -1028,18 +1182,18 @@ Console.info({
 - <i>example</i>:
 
 ```js
-import { Console } from "vivth";
-
+import { Console } from "vivth/neutral";
 Console.warn({
   hello: "world!!",
 });
 ```
 
-#### reference:`Console.error`
+#### reference: `Console.error`
 
 ```js
 /**
  * @param {any} data
+ * @param {import("../typehints/ConsoleAdditionalSettingType.mjs").ConsoleAdditionalSettingType} [addArgs]
  * @returns {void}
  */
 ```
@@ -1047,8 +1201,7 @@ Console.warn({
 - <i>example</i>:
 
 ```js
-import { Console } from "vivth";
-
+import { Console } from "vivth/neutral";
 Console.error({
   hello: "world!!",
 });
@@ -1058,9 +1211,9 @@ Console.error({
 
 ---
 
-<h2 id="datalog">DataLog</h2>
+<h2 id="datalog">neutral.DataLog</h2>
 
-#### reference:`DataLog`
+#### reference: `DataLog`
 
 - class helper for signal performant logging, more or less just for type hinting;
 - internally used as Signal value logging instance;
@@ -1071,7 +1224,7 @@ Console.error({
  */
 ```
 
-#### reference:`new DataLog`
+#### reference: `new DataLog`
 
 ```js
 /**
@@ -1079,7 +1232,7 @@ Console.error({
  */
 ```
 
-#### reference:`DataLog_instance.value`
+#### reference: `DataLog_instance.value`
 
 - data value;
 
@@ -1089,7 +1242,7 @@ Console.error({
  */
 ```
 
-#### reference:`DataLog_instance.timeStamp`
+#### reference: `DataLog_instance.timeStamp`
 
 - occurence unix timestamp;
 
@@ -1103,9 +1256,9 @@ Console.error({
 
 ---
 
-<h2 id="derived">Derived</h2>
+<h2 id="derived">neutral.Derived</h2>
 
-#### reference:`Derived`
+#### reference: `Derived`
 
 - a class for creating derived version of [Signal](#signal);
 
@@ -1116,16 +1269,19 @@ Console.error({
  */
 ```
 
-#### reference:`new Derived`
+#### reference: `new Derived`
 
 - Derived used [Signal](#signal) and [Effect](#effect) under the hood;
 
 ```js
 /**
- * @param {(this: Derived<VALUE>,effectInstanceOptions:
- * Parameters<ConstructorParameters<typeof Effect>[0]>[0])
- * => Promise<VALUE>} derivedFunction
- * - use regullar function instead of arrow function when needed to throw early;
+ * @param {(
+ * 		effectInstanceOptions: Parameters<ConstructorParameters<typeof Effect>[0]>[0] &
+ * 		{
+ * 			dontUpdate:Derived<VALUE>["dontUpdate"]
+ * 		}
+ * 	) => Promise<Derived<VALUE>["dontUpdate"] | VALUE>
+ * } derivedFunction
  * @param {ConstructorParameters<typeof Effect>[1]} [maxTimelapseBeingDebounced]
  * - prevent rapid changes from being unhandled more than the value;
  * - in miliseconds;
@@ -1136,8 +1292,7 @@ Console.error({
 - <i>example</i>:
 
 ```js
-import { Signal, Derived } from "vivth";
-
+import { Signal, Derived } from "vivth/neutral";
 const count = new Signal(0);
 const double = new Derived(
   async ({
@@ -1150,28 +1305,25 @@ const double = new Derived(
     // since the wrapped one is the only one that are recorded as notifier.
   },
 );
-
 count.value++;
 ```
 
-#### reference:`Derived_instance.dontUpdate`
+#### reference: `Derived_instance.dontUpdate`
 
 - return this value to not to update the value of this instance, even when returning early;
-  > - can only be accessed when `derivedFunction` is declared as regullar function instead of arrow function;
 
 ```js
 /**
- * @type {Object}
+ * @type {Symbol}
  */
 ```
 
 - <i>example</i>:
 
 ```js
-import { Signal, Derived } from "vivth";
-
+import { Signal, Derived } from "vivth/neutral";
 const count = new Signal(0);
-const double = new Derived(async function ({ subscribe, isLastCalled }) {
+const double = new Derived(async ({ subscribe, isLastCalled }) => {
   if (!(await isLastCalled(100))) {
     return this.dontUpdate;
   }
@@ -1187,9 +1339,9 @@ const double = new Derived(async function ({ subscribe, isLastCalled }) {
 });
 ```
 
-#### reference:`Derived_instance.value:getter`
+#### reference: `Derived_instance.value:getter`
 
-- the most recent value of the instance
+- the most recent value of the instance;
 - can be turn into reactive with Effect or Derived instantiation;
 - value are allowed to be `undefined` and always be `undefined` at the instantiation time;
   > - make sure to put a check before consuming(inside an `Effect`);
@@ -1204,20 +1356,18 @@ const double = new Derived(async function ({ subscribe, isLastCalled }) {
 - <i>example</i>:
 
 ```js
-import { Signal, Derived, Effect } from "vivth";
-
+import { Signal, Derived, Effect } from "vivth/neutral";
 const numberSignal = new Signal(0);
 const doubleDerived = new Derived(async ({ subscribe }) => {
   return subscribe(numberSignal).value * 2;
 });
-
 new Effect(async ({ subscribe }) => {
   console.log(subscribe(doubleDerived).value);
 });
 numberSignal++;
 ```
 
-#### reference:`Derived_instance.value:setter`
+#### reference: `Derived_instance.value:setter`
 
 - Derived instance value cannot be manually assigned;
 - it's value should always be determined by it's own returned value from `derivedFunction`;
@@ -1234,9 +1384,9 @@ numberSignal++;
 
 ---
 
-<h2 id="effect">Effect</h2>
+<h2 id="effect">neutral.Effect</h2>
 
-#### reference:`Effect`
+#### reference: `Effect`
 
 - a class for creating effect;
 - behaviour:
@@ -1245,15 +1395,20 @@ numberSignal++;
   > - doesn't block other queues during first run;
   > - can dynamically subscribes to signal, even on conditionals, that are not run during first run;
 
-#### reference:`new Effect`
+```js
+/**
+ * @implements {VivthCleanup}
+ */
+```
+
+#### reference: `new Effect`
 
 ```js
 /**
- * @param {( arg0:
- * Omit<Effect["options"],
- * typeof unwrapLazy>
- * ) =>
- * Promise<void>} effect
+ * @param {(
+ * 		arg0: Effect["options"]
+ * 	) => Promise<void>
+ * } effect
  * @param {number} [maxTimelapseBeingDebounced]
  * - prevent rapid changes from being unhandled more than the value;
  * - in miliseconds;
@@ -1264,10 +1419,10 @@ numberSignal++;
 - <i>example</i>:
 
 ```js
-import { Signal, Derived, Effect, Console } from "vivth";
-
+import { Signal, Derived, Effect, Console } from "vivth/neutral";
 const count = new Signal(0);
-const double = new Derived(async ({ $ }) => $(count).value * 2); // double listen to count changes
+// double listen to count changes
+const double = new Derived(async ({ subscribe }) => subscribe(count).value * 2);
 new Effect(
   async ({
     subscribe, // : registrar callback for this effect instance, immediately return the signal instance
@@ -1278,15 +1433,14 @@ new Effect(
     Console.log({ currentValue, prevValue });
   },
 );
-
 count.value++;
 ```
 
-#### reference:`Effect_instance.options`
+#### reference: `Effect_instance.options`
 
 - collections of methods to handle effect calls of this instance;
 
-#### reference:`Effect_instance.options.subscribe`
+#### reference: `Effect_instance.options.subscribe`
 
 - subscribe to `Signal_instance`;
 - normally it's passed as argument to constructor, however it is also accessible from `options` property;
@@ -1302,17 +1456,49 @@ count.value++;
 - <i>example</i>:
 
 ```js
-import { Signal, Effect } from "vivth";
-
+import { Signal, Effect } from "vivth/neutral";
 const signal1 = new Signal(0);
 const signal2 = new Signal(true);
+const signal3 = new Signal(true);
 const effect = new Effect(async ({ subscribe }) => {
-  subscribe(Signal1).value;
+  const signal1Value = subscribe(signal1).value;
+  if (signal1Value % 2) {
+    // only subscribe to signal3, on conditional block
+    const signal3Value = subscribe(signal3).value;
+  }
 });
 effect.options.subscribe(signal2);
 ```
 
-#### reference:`Effect_instance.options.removeEffect`
+#### reference: `Effect_instance.options.subscribes`
+
+- the same with `.options.subscribe`, but for batches subscription;
+- ideal for first run which to add signal to subscription on main condition;
+- normally it's passed as argument to constructor, however it is also accessible from `options` property;
+
+```js
+/**
+ * @template {ReadonlyArray<any>} T
+ * @param {T} signalInstances
+ * @returns {T}
+ */
+```
+
+- <i>example</i>:
+
+```js
+import { Signal, Effect } from "vivth/neutral";
+const signal1 = new Signal(0);
+const signal2 = new Signal(true);
+const effect = new Effect(async ({ subscribes }) => {
+  const [{ value: signal1Value }, { value: signal2Value }] = subscribes([
+    signal1,
+    signal2,
+  ]);
+});
+```
+
+#### reference: `Effect_instance.options.removeEffect`
 
 - normally it's passed as argument to constructor, however it is also accessible from `options` property;
 
@@ -1325,8 +1511,7 @@ effect.options.subscribe(signal2);
 - <i>example</i>:
 
 ```js
-import { Effect } from "vivth";
-
+import { Effect } from "vivth/neutral";
 const effect = new Effect(async ({ removeEffect }) => {
   if (someCondition) {
     removeEffect();
@@ -1337,7 +1522,7 @@ const effect = new Effect(async ({ removeEffect }) => {
 effect.options.removeEffect();
 ```
 
-#### reference:`Effect_instance.removeSignal`
+#### reference: `Effect_instance.removeSignal`
 
 - remove inputed signal from this `Effect_instance`;
 - if effect signal has no other `Signal_instance` to listen to, it will then completely rendered non reactive;
@@ -1353,8 +1538,7 @@ effect.options.removeEffect();
 - <i>example</i>:
 
 ```js
-import { Effect, Signal } from "vivth";
-
+import { Effect, Signal } from "vivth/neutral";
 const count = new Signal(0);
 const effect = new Effect(async ({ subscribe }) => {
   console.log(subscribe(count).value); // will subscribe  count changes;
@@ -1364,7 +1548,7 @@ effect.options.removeSignal(count);
 count.value++; // will increase the count but will no longer trigger effect;
 ```
 
-#### reference:`Effect_instance.removeCollection`
+#### reference: `Effect_instance.removeCollection`
 
 - remove inputed `SignalCollection` from this `Effect_instance`;
 - normally it's passed as argument to constructor, however it is also accessible from `options` property;
@@ -1379,15 +1563,13 @@ count.value++; // will increase the count but will no longer trigger effect;
 - <i>example</i>:
 
 ```js
-import { Signal, Derived, Effect, SignalCollection } from "vivth";
-
+import { Signal, Derived, Effect, SignalCollection } from "vivth/neutral";
 const a = new Signal("a");
 const b = new Signal("b");
 const c = new Derived(async ({ subscribe }) => {
   return `${subscribe(b).value}_b`;
 });
 const f = new SignalCollection({ a, c });
-
 const e = new Effect(async ({ subscribe, isLastCalled, removeCollection }) => {
   const {
     a: { value: aa }, // safely desctructured and auto subscribed
@@ -1402,7 +1584,7 @@ const e = new Effect(async ({ subscribe, isLastCalled, removeCollection }) => {
 e.options.removeCollection(f);
 ```
 
-#### reference:`Effect_instance.options.isLastCalled:getter`
+#### reference: `Effect_instance.options.isLastCalled:getter`
 
 ```js
 /**
@@ -1415,8 +1597,7 @@ e.options.removeCollection(f);
 - <i>example</i>:
 
 ```js
-import { Effect } from "vivth";
-
+import { Effect } from "vivth/neutral";
 const effect = new Effect(async ({ isLastCalled }) => {
   if (!(await isLastCalled(100))) {
     return;
@@ -1432,7 +1613,7 @@ const effect = new Effect(async ({ isLastCalled }) => {
 });
 ```
 
-#### reference:`Effect_instance.run`
+#### reference: `Effect_instance.run`
 
 - normally is to let to be automatically run when dependency signals changes, however it's also accessible as instance method;
 
@@ -1445,8 +1626,7 @@ const effect = new Effect(async ({ isLastCalled }) => {
 - <i>example</i>:
 
 ```js
-import { Effect } from "vivth";
-
+import { Effect } from "vivth/neutral";
 const effect = new Effect(async () => {
   // code
 });
@@ -1457,9 +1637,9 @@ effect.run();
 
 ---
 
-<h2 id="envsignal">EnvSignal</h2>
+<h2 id="envsignal">neutral.EnvSignal</h2>
 
-#### reference:`EnvSignal`
+#### reference: `EnvSignal`
 
 - uses [Signal](#signal) and [Derived](#derived) under the hood;
 
@@ -1469,7 +1649,7 @@ effect.run();
  */
 ```
 
-#### reference:`new EnvSignal`
+#### reference: `new EnvSignal`
 
 - create `EnvSignal` instance;
 
@@ -1482,12 +1662,11 @@ effect.run();
 - <i>example</i>:
 
 ```js
-import { EnvSignal } from "vivth";
-
+import { EnvSignal } from "vivth/neutral";
 export const myEnv = new EnvSignal(true);
 ```
 
-#### reference:`EnvSignal_instance.env`
+#### reference: `EnvSignal_instance.env`
 
 - exposed property to listen to;
 
@@ -1500,8 +1679,7 @@ export const myEnv = new EnvSignal(true);
 - <i>example</i>:
 
 ```js
-import { EnvSignal, Effect } from "vivth";
-
+import { EnvSignal, Effect } from "vivth/neutral";
 export const myEnv = new EnvSignal(true);
 new Effect(async ({ subscribe }) => {
   const myEnvValue = subscribe(myEnv.env).value;
@@ -1509,7 +1687,7 @@ new Effect(async ({ subscribe }) => {
 });
 ```
 
-#### reference:`EnvSignal_instance.correction`
+#### reference: `EnvSignal_instance.correction`
 
 - call to correct the value of previously declared value;
 - can only be called once;
@@ -1524,13 +1702,10 @@ new Effect(async ({ subscribe }) => {
 - <i>example</i>:
 
 ```js
-import { EnvSignal } from "vivth";
-
+import { EnvSignal } from "vivth/neutral";
 export const myEnv = new EnvSignal(true);
-
 // somewhere else on the program
 import { myEnv } from "./myEnv.mjs";
-
 myEnv.correction(false); // this will notify all subscribers;
 ```
 
@@ -1538,9 +1713,9 @@ myEnv.correction(false); // this will notify all subscribers;
 
 ---
 
-<h2 id="eswatcher">EsWatcher</h2>
+<h2 id="eswatcher">node.EsWatcher</h2>
 
-#### reference:`EsWatcher`
+#### reference: `EsWatcher`
 
 - wrapper for `watcher` via `esbuild.context`;
 - watcher cleanup is automatically registered to `SafeExit`;
@@ -1548,10 +1723,11 @@ myEnv.correction(false); // this will notify all subscribers;
 ```js
 /**
  * @template {import('esbuild').BuildOptions} O
+ * @implements {VivthCleanup}
  */
 ```
 
-#### reference:`new EsWatcher`
+#### reference: `new EsWatcher`
 
 ```js
 /**
@@ -1563,24 +1739,13 @@ myEnv.correction(false); // this will notify all subscribers;
 - <i>example</i>:
 
 ```js
-import { EsWatcher } from "vivth";
-
+import { EsWatcher } from "vivth/node";
 const { context, remove } = new EsWatcher({
   ...esbuildOptions,
 });
 ```
 
-#### reference:`EsWatcher_instance.remove`
-
-- manually and safely call `cancel` and `dispose` on `BuildContext`;
-
-```js
-/**
- * @type {()=>Promise<void>}
- */
-```
-
-#### reference:`EsWatcher_instance.ctx`
+#### reference: `EsWatcher_instance.ctx`
 
 - Promise of `BuildContext`;
 
@@ -1594,9 +1759,9 @@ const { context, remove } = new EsWatcher({
 
 ---
 
-<h2 id="eventsignal">EventSignal</h2>
+<h2 id="eventsignal">neutral.EventSignal</h2>
 
-#### reference:`EventSignal`
+#### reference: `EventSignal`
 
 - Signal implementation for `CustomEvent`, to dispatch and listen;
 - it's based on string as key, so it can be listened/dispatched even without direct instance reference;
@@ -1604,10 +1769,11 @@ const { context, remove } = new EsWatcher({
 ```js
 /**
  * @template {any} TYPE
+ * @implements {VivthCleanup}
  */
 ```
 
-#### reference:`EventSignal.get`
+#### reference: `EventSignal.get`
 
 - the constructor it self is set to `private`;
 - it's globally queued:
@@ -1623,8 +1789,7 @@ const { context, remove } = new EsWatcher({
 - <i>example</i>:
 
 ```js
-import { EventSignal, Trace } from "vivth";
-
+import { EventSignal, Trace } from "vivth/neutral";
 const myEventSignal = await EventSignal.get("dataEvent");
 // recommendation
 const myEventSignalGenerator = async (name) => {
@@ -1632,7 +1797,7 @@ const myEventSignalGenerator = async (name) => {
 };
 ```
 
-#### reference:`EventSignal_instance.listener`
+#### reference: `EventSignal_instance.dispatcher`
 
 - is [Signal](#signal) instance;
 - if needed to pass along the messages, it can be used as `dispatcher` and `listener` at the same time;
@@ -1647,43 +1812,47 @@ const myEventSignalGenerator = async (name) => {
 - <i>example</i>:
 
 ```js
- import { EventSignal, Effect, Console } from 'vivth';
-
- const myEventSignal = await EventSignal.get('dataEvent', false);
-
- new Effect(({ subscribe })=>{
- 	const listenValue = subscribe(myEventSignal.dispatch).value;
- 	// dispatch can be used as two way communication;
- 	Console.log({ listenValue });
- })
- myEventSignal.dispatch.value = 'hey';
- / 	// @ts-expect-error 	dispatcher = LazyFactory(() => { 		return new Signal(undefined); 	}); 	/
-
- @description
- - is [Derived](#derived);
- - can be used as listener when passed down value shouldn't be modified manually;
- - is `lazily` created along with `dispatch`, if `listen` is accessed first, then `dispatch` will also be created automatically;
- @type {Derived<TYPE>}
- @example
- import { EventSignal, Effect, Console } from 'vivth';
-
- const myEventSignal = await EventSignal.get('dataEvent', false);
-
- new Effect(({ subscribe })=>{
- 	const listenValue = subscribe(myEventSignal.listen).value;
- 	// listen can be used only as listener for one way communication;
- 	Console.log({ listenValue });
- })
- myEventSignal.dispatch.value = 'hey';
-
+import { EventSignal, Effect, Console } from "vivth/neutral";
+const myEventSignal = await EventSignal.get("dataEvent", false);
+new Effect(({ subscribe }) => {
+  const listenValue = subscribe(myEventSignal.dispatch).value;
+  // dispatch can be used as two way communication;
+  Console.log({ listenValue });
+});
+myEventSignal.dispatch.value = "hey";
 ```
 
-#### reference:`EventSignal.remove`
+#### reference: `EventSignal_instance.listener`
+
+- is [Derived](#derived);
+- can be used as listener when passed down value shouldn't be modified manually;
+- is `lazily` created along with `dispatch`, if `listen` is accessed first, then `dispatch` will also be created automatically;
+
+```js
+/**
+ * @type {Derived<TYPE>}
+ */
+```
+
+- <i>example</i>:
+
+```js
+import { EventSignal, Effect, Console } from "vivth/neutral";
+const myEventSignal = await EventSignal.get("dataEvent", false);
+new Effect(({ subscribe }) => {
+  const listenValue = subscribe(myEventSignal.listen).value;
+  // listen can be used only as listener for one way communication;
+  Console.log({ listenValue });
+});
+myEventSignal.dispatch.value = "hey";
+```
+
+#### reference: `EventSignal.remove`
 
 - methods of this static property is lazily created;
 - remove signal and effect subscription of the named `EventSignal_instance`;
 
-#### reference:`EventSignal.remove.subscriber`
+#### reference: `EventSignal.remove.subscriber`
 
 - remove subscriber from the named `EventSignal_instance`;
 
@@ -1698,12 +1867,11 @@ const myEventSignalGenerator = async (name) => {
 - <i>example</i>:
 
 ```js
-import { EventSignal } from "vivth";
-
+import { EventSignal } from "vivth/neutral";
 EventSignal.remove.subscriber("yourEventSignalName", myEffectInstance);
 ```
 
-#### reference:`EventSignal.remove.allSubscribers`
+#### reference: `EventSignal.remove.allSubscribers`
 
 - remove all subscribers from the named `EventSignal_instance`;
 
@@ -1717,12 +1885,11 @@ EventSignal.remove.subscriber("yourEventSignalName", myEffectInstance);
 - <i>example</i>:
 
 ```js
-import { EventSignal } from "vivth";
-
+import { EventSignal } from "vivth/neutral";
 EventSignal.remove.allSubscribers("yourEventSignalName");
 ```
 
-#### reference:`EventSignal.remove.refs`
+#### reference: `EventSignal.remove.refs`
 
 - remove reference of the `proxySignals` of the named `EventSignal_instance`;
 
@@ -1736,12 +1903,11 @@ EventSignal.remove.allSubscribers("yourEventSignalName");
 - <i>example</i>:
 
 ```js
-import { EventSignal } from "vivth";
-
+import { EventSignal } from "vivth/neutral";
 EventSignal.remove.refs("yourEventSignalName");
 ```
 
-#### reference:`EventSignal_instance.remove.subscriber`
+#### reference: `EventSignal_instance.remove.subscriber`
 
 - remove subscriber from the `EventSignal_instance`;
 
@@ -1755,10 +1921,8 @@ EventSignal.remove.refs("yourEventSignalName");
 - <i>example</i>:
 
 ```js
-import { EventSignal, Effect, Console } from "vivth";
-
+import { EventSignal, Effect, Console } from "vivth/neutral";
 const myEventSignal = await EventSignal.get("dataEvent", false);
-
 const myEffectInstance = new Effect(({ subscribe }) => {
   const listenValue = subscribe(myEventSignal.dispatch).value;
   Console.log({ listenValue });
@@ -1767,7 +1931,7 @@ myEventSignal.dispatch.value = "hey";
 eventSignal_instance.remove.subscriber(myEffectInstance);
 ```
 
-#### reference:`EventSignal_instance.remove.allSubscribers`
+#### reference: `EventSignal_instance.remove.allSubscribers`
 
 - remove allSubscribers from the `EventSignal_instance`;
 
@@ -1780,10 +1944,8 @@ eventSignal_instance.remove.subscriber(myEffectInstance);
 - <i>example</i>:
 
 ```js
-import { EventSignal, Effect, Console } from "vivth";
-
+import { EventSignal, Effect, Console } from "vivth/neutral";
 const myEventSignal = await EventSignal.get("dataEvent", false);
-
 const myEffectInstance = new Effect(({ subscribe }) => {
   const listenValue = subscribe(myEventSignal.dispatch).value;
   Console.log({ listenValue });
@@ -1792,7 +1954,7 @@ myEventSignal.dispatch.value = "hey";
 eventSignal_instance.remove.allSubscribers();
 ```
 
-#### reference:`EventSignal_instance.remove.ref`
+#### reference: `EventSignal_instance.remove.ref`
 
 - remove reference of the `proxySignals` of the `EventSignal_instance`;
 
@@ -1805,15 +1967,12 @@ eventSignal_instance.remove.allSubscribers();
 - <i>example</i>:
 
 ```js
-import { EventSignal, Effect, Console } from "vivth";
-
+import { EventSignal, Effect, Console } from "vivth/neutral";
 const myEventSignal = await EventSignal.get("dataEvent", false);
-
 const myEffectInstance = new Effect(({ subscribe }) => {
   const listenValue = subscribe(myEventSignal.dispatch).value;
   Console.log({ listenValue });
 });
-
 eventSignal_instance.remove.ref();
 ```
 
@@ -1821,13 +1980,13 @@ eventSignal_instance.remove.ref();
 
 ---
 
-<h2 id="filesafe">FileSafe</h2>
+<h2 id="filesafe">node.FileSafe</h2>
 
-#### reference:`FileSafe`
+#### reference: `FileSafe`
 
 - collection of static methods of file access with added safety to mkdir before proceeding;
 
-#### reference:`FileSafe.exist`
+#### reference: `FileSafe.exist`
 
 - method to safely detects whether filePaths exist;
 - uses `'node:fs/promises'.access` under the hood;
@@ -1836,7 +1995,7 @@ eventSignal_instance.remove.ref();
 ```js
 /**
  * @param {string} filePath
- * @returns {ReturnType<typeof TryAsync<true>>}
+ * @returns {Promise<boolean>}
  */
 ```
 
@@ -1844,19 +2003,12 @@ eventSignal_instance.remove.ref();
 
 ```js
 import { join } from "node:path";
-import { FileSafe, Paths } from "vivth";
-
-const [isFileExist, error] = await FileSafe.exist(
-  join(Paths.root, "/some/path.mjs"),
-);
-if (!error) {
-  // file exists
-} else {
-  // file not exists
-}
+import { FileSafe } from "vivth/node";
+import { Paths } from "vivth/neutral";
+const isExist = await FileSafe.exist(join(Paths.root, "/some/path.mjs"));
 ```
 
-#### reference:`FileSafe.write`
+#### reference: `FileSafe.write`
 
 - method to create file safely by recursively mkdir the dirname of the outFile;
 - also returning promise of result & error as value;
@@ -1866,6 +2018,9 @@ if (!error) {
  * @param {Parameters<writeFile>[0]} outFile
  * @param {Parameters<writeFile>[1]} content
  * @param {Parameters<writeFile>[2]} [options]
+ * @param {boolean} [checkFuzySame]
+ * - true: check while normalize consecutive whitespace into singel white space;
+ * - false(default): check absolute value;
  * @returns {ReturnType<typeof TryAsync<void>>}
  */
 ```
@@ -1874,8 +2029,8 @@ if (!error) {
 
 ```js
 import { join } from "node:path";
-import { FileSafe, Paths } from "vivth";
-
+import { FileSafe } from "vivth/node";
+import { Paths } from "vivth/neutral";
 const [, errorWrite] = await FileSafe.write(
   join(Paths.root, "/some/path.mjs"),
   `console.log("hello-world!!");`,
@@ -1883,7 +2038,7 @@ const [, errorWrite] = await FileSafe.write(
 );
 ```
 
-#### reference:`FileSafe.copy`
+#### reference: `FileSafe.copy`
 
 - method to copy file/dir safely by recursively mkdir the dirname of the dest;
 - also returning promise of result & error as value;
@@ -1901,8 +2056,8 @@ const [, errorWrite] = await FileSafe.write(
 
 ```js
 import { join } from "node:path";
-import { FileSafe, Paths } from "vivth";
-
+import { FileSafe } from "vivth/node";
+import { Paths } from "vivth/neutral";
 const [, errorWrite] = await FileSafe.copy(
   join(Paths.root, "/some/path.mjs"),
   join(Paths.root, "/other/path.copy.mjs"),
@@ -1910,7 +2065,7 @@ const [, errorWrite] = await FileSafe.copy(
 );
 ```
 
-#### reference:`FileSafe.rename`
+#### reference: `FileSafe.rename`
 
 - method to rename file/dir safely by recursively mkdir the dirname of the dest;
 - also returning promise of result & error as value;
@@ -1927,15 +2082,15 @@ const [, errorWrite] = await FileSafe.copy(
 
 ```js
 import { join } from "node:path";
-import { FileSafe, Paths } from "vivth";
-
+import { FileSafe } from "vivth/node";
+import { Paths } from "vivth/neutral";
 const [, errorRename] = await FileSafe.rename(
   join(Paths.root, "some/path"),
   join(Paths.root, "other/path"),
 );
 ```
 
-#### reference:`FileSafe.rm`
+#### reference: `FileSafe.rm`
 
 - function to remove dir and file;
 - also returning promise of result & error as value;
@@ -1948,7 +2103,7 @@ const [, errorRename] = await FileSafe.rename(
  */
 ```
 
-#### reference:`FileSafe.mkdir`
+#### reference: `FileSafe.mkdir`
 
 - create directory recursively;
 - also returning promise of result & error as value;
@@ -1965,8 +2120,8 @@ const [, errorRename] = await FileSafe.rename(
 
 ```js
 import { join } from "node:path";
-import { FileSafe, Paths } from "vivth";
-
+import { FileSafe } from "vivth/node";
+import { Paths } from "vivth/neutral";
 const [str, errorMkDir] = await FileSafe.mkdir(
   join(Paths.root, "/some/path/example"),
 );
@@ -1976,43 +2131,115 @@ const [str, errorMkDir] = await FileSafe.mkdir(
 
 ---
 
-<h2 id="forsignal">ForSignal</h2>
+<h2 id="foreach">neutral.ForEach</h2>
 
-#### reference:`ForSignal`
+#### reference: `ForEach`
 
-- this class is extends `Signal`;
+- is collections of safe `.forEach` wrapper;
+  > - via [TrySync](#trysync);
+
+#### reference: `ForEach.array`
+
+- static method helper for `array` to be iterate safely;
+
+```js
+/**
+ * @template T, R
+ * @param {T[]} array
+ * @param {(value: T, index: number, array: T[]) => R} handler
+ * @returns {Array<ReturnType<typeof TrySync<R>>>}
+ */
+```
+
+- <i>example</i>:
+
+```js
+import { Foreach } from "vivth/neutral";
+const arr = ["a", "b"];
+ForEach(arr, (string, i, arr_) => {
+  // unsafe Code
+});
+```
+
+#### reference: `ForEach.set`
+
+- static method helper for `set` to be iterate safely;
+
+```js
+/**
+ * @template T, R
+ * @param {Set<T>} set
+ * @param {(value: T, value2: T, set: Set<T>) => R} handler
+ * @returns {Array<ReturnType<typeof TrySync<R>>>}
+ */
+```
+
+- <i>example</i>:
+
+```js
+import { Foreach } from "vivth/neutral";
+const set = new Set();
+ForEach(set, (value, value2, set_) => {
+  // unsafe Code
+});
+```
+
+#### reference: `ForEach.map`
+
+- static method helper for `map` to be iterate safely;
+
+```js
+/**
+ * @template K, V, R
+ * @param {Map<K,V>} map
+ * @param {(value: V, key: K, map: Map<K,V>) => R} handler
+ * @returns {Array<ReturnType<typeof TrySync<R>>>}
+ */
+```
+
+- <i>example</i>:
+
+```js
+import { Foreach } from "vivth/neutral";
+const map = new Map();
+ForEach(map, (value, key, map_) => {
+  // unsafe Code
+});
+```
+
+\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+---
+
+<h2 id="forsignal">neutral.ForSignal</h2>
+
+#### reference: `ForSignal`
+
+- this class extends `Signal`;
 - `ForSignal_instance.runCleanUp` still needs to be manually called, when cleaning up this instance;
 
 ```js
 /**
  * @template {any} TYPE
+ * @implements {VivthCleanup}
  * @extends {Signal<Array<TYPE|undefined>>}
  */
 ```
 
-#### reference:`new ForSignal`
+#### reference: `new ForSignal`
 
 ```js
 /**
  * @param {(
- * this: ForSignal<TYPE>,
- * arg:{
- *  index:number,
- *  value:{
- * 		value:TYPE,
- * 		isValueDefined:true,
- * 	}|{
- * 		value:undefined,
- * 		isValueDefined:false,
- * 	},
- *  prev:{
- * 		prev:TYPE,
- * 		isPrevDefined:true,
- * 	}|{
- * 		prev:undefined,
- * 		isPrevDefined:false,
- * 	},
- * })=>void} loopCallback
+ *	this: ForSignal<TYPE>,
+ *	arg:{
+ *		index:number,
+ *		value:{ value:TYPE, isValueDefined:true, }|
+ *			{ value:undefined, isValueDefined:false, },
+ *		prev:{ prev:TYPE, isPrevDefined:true, }|
+ * 			{ prev:undefined, isPrevDefined:false, },
+ * 	})=>void
+ * } loopCallback
  * - the diffence of `current` and `prev` or `isValueDefined` and `isPrevDefined` can be used for sideEffect, such as;
  * >- `adding/removing/modifiying` `childNode`s on a parent element;
  * >- `adding/removing/modifiying` `Signal` instances;
@@ -2024,8 +2251,7 @@ const [str, errorMkDir] = await FileSafe.mkdir(
 - <i>example</i>:
 
 ```js
-import { ForSignal } from "vivth";
-
+import { ForSignal } from "vivth/neutral";
 const myLoop = new ForSignal(
   function ({
     index,
@@ -2041,13 +2267,14 @@ const myLoop = new ForSignal(
 // myLoop.runCleanUp(); // need to be called manually when the instance are to out of scope;
 ```
 
-#### reference:`ForSignal_instance.runCleanUp`
+#### reference: `ForSignal_instance.vivthCleanup`
 
 - need to be manually called when disposing/cleaning up this instance;
 
 ```js
 /**
- * @type {()=>void}
+ * @type {()=>Promise<void>}
+ * @override
  */
 ```
 
@@ -2055,25 +2282,126 @@ const myLoop = new ForSignal(
 
 ---
 
-<h2 id="gettersetter">GetterSetter</h2>
+<h2 id="fsdirarchwatcher">node.FSDirArchWatcher</h2>
 
-#### reference:`GetterSetter`
+#### reference: `FSDirArchWatcher`
 
-- create getter setter in one place;
+- class helper for chokidar abstraction to watch and iterate paths;
+- this class assume `Paths` and `SafeExit` to be instantiated;
 
 ```js
 /**
- * @template {any} T
- * @template {(...any:any[])=>T} TG
- * @template {(...any:any[])=>void} TS
+ * @template {any} PASSEDVALUE
+ * @implements {VivthCleanup}
+ */
+```
+
+#### reference: `FSDirArchWatcher_instance.eachHandler`
+
+- callback to handle each path;
+
+```js
+/**
+ * @type {(
+ *  eventName: import('chokidar/handler.js').EventName,
+ *  path: import('chokidar/handler.js').Path,
+ *  stats?: import('node:fs').Stats,
+ *  ) => Promise<PASSEDVALUE>
+ * }
+ */
+```
+
+#### reference: `FSDirArchWatcher_instance.fullHandler`
+
+- callback to handle all registered path;
+- debounced to only handle last changes on full registry with:
+  > - `options.debounce`;
+  > - `QChannel` `isLastOnQ`;
+
+```js
+/**
+ * @type {(
+ * 		alphabeticallySortedSharedValue: {
+ * 			map: Map<string, PASSEDVALUE>,
+ * 			array: Array<[path: string, PASSEDVALUE]>,
+ * 		}
+ * 	) => Promise<void>
+ * }
+ */
+```
+
+#### reference: `new FSDirArchWatcher`
+
+```js
+/**
+ * @param {string[]} watchPaths
+ * @param {Object} options
+ * @param {FSDirArchWatcher<PASSEDVALUE>["eachHandler"]} options.each
+ * - throw to `ignore` OR `delete` path from the result passed to `.full`;
+ * @param {FSDirArchWatcher<PASSEDVALUE>["fullHandler"]} options.full
+ * @param {number} [options.debounce]
+ * - debounce on calling `fullHandler`;
+ * @param {import('chokidar').ChokidarOptions} [options.chokidarOptions]
+ * - `ChokidarOptions`;
  */
 ```
 
 - <i>example</i>:
 
 ```js
-import { GetterSetter } from "vivth";
+import { FSDirArchWatcher, IsSameFile } from "vivth/node";
+const settingFile = "/fsrouter.setting.mjs";
+new FSDirArchWatcher(["/routers/", "/fsrouter.setting.mjs"], {
+  // debounce: 100,
+  each: async (eventName, path, stats) => {
+    // this callback is queued already;
+    // path are already `Paths.normalized`;
+    if (IsSameFile(path, settingFile)) {
+      // code;
+    }
+    switch (eventName) {
+      case "add":
+      case "change":
+        // structure route here and return;
+        // a throwed call, will delete from sharedMap;
+        return {};
+      default:
+        // only for imperative handler when needed;
+        // or you can just throw here;
+        return {};
+    }
+    // only non throwed call of path is registered to sharedMap;
+    // throwed call of path is unregistered from sharedMap;
+  },
+  full: async (sharedMap) => {
+    // this callback is queued already;
+    // loop through returned from loop then write to a file;
+  },
+});
+```
 
+\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+---
+
+<h2 id="gettersetter">neutral.GetterSetter</h2>
+
+#### reference: `GetterSetter`
+
+- create getter setter in one place;
+
+```js
+/**
+ * @template {any} RET
+ * @template {((...any:any[])=>RET)} TG
+ * @template {((...any:any[])=>void)} TS
+ */
+```
+
+- <i>example</i>:
+
+```js
+import { GetterSetter } from "vivth/neutral";
 const localA = new GetterSetter({
   get: () => {
     return localStorage.getItem("myAValue");
@@ -2084,16 +2412,81 @@ const localA = new GetterSetter({
 });
 localA.get(); // null;
 localA.set("my new value");
-localA.get();
+localA.get(); // 'my new value'
 ```
 
 \*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
-<h2 id="listsignal">ListSignal</h2>
+<h2 id="jsonfilehandler">node.JSONFileHandler</h2>
 
-#### reference:`ListSignal`
+#### reference: `JSONFileHandler`
+
+- class helper to handle `.json` file;
+- this class assume, `Paths` already instantiated;
+
+#### reference: `JSONFileHandler_instance.read`
+
+```js
+/**
+ * @returns {ReturnType<typeof TryAsync<Object>>}
+ */
+```
+
+- <i>example</i>:
+
+```js
+import { JSONFileHandler } from "vivth/node";
+const packageJSONHandler = new JSONFileHandler("/package.json");
+const [content, error] = await packageJSONHandler.read();
+```
+
+#### reference: `JSONFileHandler_instance.write`
+
+```js
+/**
+ * @param {Object} newObj
+ * @return { ReturnType<typeof TryAsync<void>> }
+ */
+```
+
+- <i>example</i>:
+
+```js
+ import { this.writeJSONFileHandler } from "vivth/node";
+  const packageJSONHandler = new JSONFileHandler('/package.json');
+ const [, error] = await packageJSONHandler.write({
+  ...object,
+ });
+```
+
+#### reference: `JSONFileHandler_instance.assign`
+
+```js
+/**
+ * @param {Object} object
+ * @return { ReturnType<typeof TryAsync<void>> }
+ */
+```
+
+- <i>example</i>:
+
+```js
+import { JSONFileHandler } from "vivth/node";
+const packageJSONHandler = new JSONFileHandler("/package.json");
+const [, error] = await packageJSONHandler.assign({
+  ...object,
+});
+```
+
+\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+---
+
+<h2 id="listsignal">neutral.ListSignal</h2>
+
+#### reference: `ListSignal`
 
 - class to create list that satisfy `Array<Record<string, string>>`.
 
@@ -2104,7 +2497,7 @@ localA.get();
  */
 ```
 
-#### reference:`ListSignal.isValid`
+#### reference: `ListSignal.isValid`
 
 - Checks if the input is an array whose first item (if present) is a plain object
 - with string keys and string values. Allows empty arrays.
@@ -2116,7 +2509,7 @@ localA.get();
  */
 ```
 
-#### reference:`new ListSignal`
+#### reference: `new ListSignal`
 
 - usefull for `loops`;
 
@@ -2131,12 +2524,11 @@ localA.get();
 - <i>example</i>:
 
 ```js
-import { ListSignal } from "vivth";
-
+import { ListSignal } from "vivth/neutral";
 const listExample = new ListSignal([{ key1: "test1" }, { key1: "test2" }]);
 ```
 
-#### reference:`ListSignal_instance.value:getter`
+#### reference: `ListSignal_instance.value:getter`
 
 - reference to original inputed `value`;
 
@@ -2147,7 +2539,7 @@ const listExample = new ListSignal([{ key1: "test1" }, { key1: "test2" }]);
  */
 ```
 
-#### reference:`ListSignal_instance.value:setter`
+#### reference: `ListSignal_instance.value:setter`
 
 - you cannot mannually set`value` `ListSignal_instance`;
 
@@ -2159,23 +2551,23 @@ const listExample = new ListSignal([{ key1: "test1" }, { key1: "test2" }]);
  */
 ```
 
-#### reference:`ListSignal_instance.prev:getter`
+#### reference: `ListSignal_instance.prev:getter`
 
 - structuredClone of prev
 
 ```js
 /**
- * @override
  * @type {LISTARG[]|undefined}
+ * @override
  */
 ```
 
-#### reference:`ListSignal_instance.arrayMethods`
+#### reference: `ListSignal_instance.arrayMethods`
 
 - methods collection that mimics `Array` API;
 - calling this methods will notify subscribers for changes, except for some;
 
-#### reference:`ListSignal_instance.arrayMethods.structuredClone:getter`
+#### reference: `ListSignal_instance.arrayMethods.structuredClone:getter`
 
 - reference to `structuredClone` elements of `value`;
 - calling doesn't notify for changes;
@@ -2191,14 +2583,12 @@ const listExample = new ListSignal([{ key1: "test1" }, { key1: "test2" }]);
 - <i>example</i>:
 
 ```js
-import { ListSignal, Derived } from "vivth";
-
+import { ListSignal, Derived } from "vivth/neutral";
 const myListSignal = new ListSignal([
   { key: "a", group: 0 },
   { key: "b", group: 1 },
   { key: "c", group: 0 },
 ]);
-
 const myFilteredListSignal = new Derived(async ({ subscribe }) => {
   return subscribe(myListSignal).structuredClone.filter((val) => {
     // return specific val
@@ -2206,7 +2596,7 @@ const myFilteredListSignal = new Derived(async ({ subscribe }) => {
 });
 ```
 
-#### reference:`ListSignal_instance.arrayMethods.push`
+#### reference: `ListSignal_instance.arrayMethods.push`
 
 - appends new elements to the end;
 
@@ -2217,7 +2607,7 @@ const myFilteredListSignal = new Derived(async ({ subscribe }) => {
  */
 ```
 
-#### reference:`ListSignal_instance.arrayMethods.shift`
+#### reference: `ListSignal_instance.arrayMethods.shift`
 
 - removes the first element;
 
@@ -2227,7 +2617,7 @@ const myFilteredListSignal = new Derived(async ({ subscribe }) => {
  */
 ```
 
-#### reference:`ListSignal_instance.arrayMethods.unshift`
+#### reference: `ListSignal_instance.arrayMethods.unshift`
 
 - inserts new element at the start;
 
@@ -2238,7 +2628,7 @@ const myFilteredListSignal = new Derived(async ({ subscribe }) => {
  */
 ```
 
-#### reference:`ListSignal_instance.arrayMethods.slice`
+#### reference: `ListSignal_instance.arrayMethods.slice`
 
 - for both start and end, a negative index can be used to indicate an offset from the end of the data. For example, -2 refers to the second to last element of the data;
 
@@ -2252,7 +2642,7 @@ const myFilteredListSignal = new Derived(async ({ subscribe }) => {
  */
 ```
 
-#### reference:`ListSignal_instance.arrayMethods.replace`
+#### reference: `ListSignal_instance.arrayMethods.replace`
 
 - replace whole `List` data with new array.
 
@@ -2264,7 +2654,7 @@ const myFilteredListSignal = new Derived(async ({ subscribe }) => {
  */
 ```
 
-#### reference:`ListSignal_instance.arrayMethods.splice`
+#### reference: `ListSignal_instance.arrayMethods.splice`
 
 - removes elements from an data and, if necessary, inserts new elements in their place;
 
@@ -2280,7 +2670,7 @@ const myFilteredListSignal = new Derived(async ({ subscribe }) => {
  */
 ```
 
-#### reference:`ListSignal_instance.arrayMethods.swap`
+#### reference: `ListSignal_instance.arrayMethods.swap`
 
 - swap `List` data between two indexes;
 
@@ -2292,7 +2682,7 @@ const myFilteredListSignal = new Derived(async ({ subscribe }) => {
  */
 ```
 
-#### reference:`ListSignal_instance.arrayMethods.modify`
+#### reference: `ListSignal_instance.arrayMethods.modify`
 
 - modify `List` element at specific index;
 
@@ -2304,7 +2694,7 @@ const myFilteredListSignal = new Derived(async ({ subscribe }) => {
  */
 ```
 
-#### reference:`ListSignal_instance.arrayMethods.remove`
+#### reference: `ListSignal_instance.arrayMethods.remove`
 
 - remove `List` element at specific index;
 
@@ -2315,7 +2705,7 @@ const myFilteredListSignal = new Derived(async ({ subscribe }) => {
  */
 ```
 
-#### reference:`ListSignal_instance.arrayMethods.reverse`
+#### reference: `ListSignal_instance.arrayMethods.reverse`
 
 - reverses the elements in an `List` in place.
 
@@ -2325,7 +2715,7 @@ const myFilteredListSignal = new Derived(async ({ subscribe }) => {
  */
 ```
 
-#### reference:`ListSignal_instance.arrayMethods.pop`
+#### reference: `ListSignal_instance.arrayMethods.pop`
 
 - removes the last element;
 
@@ -2339,9 +2729,9 @@ const myFilteredListSignal = new Derived(async ({ subscribe }) => {
 
 ---
 
-<h2 id="litexp">LitExp</h2>
+<h2 id="litexp">neutral.LitExp</h2>
 
-#### reference:`LitExp`
+#### reference: `LitExp`
 
 - class helper to created opionated regex helper;
 - named capture uses `es6+` feature, you might need to add polyfill to target extremely old browser;
@@ -2358,7 +2748,7 @@ const myFilteredListSignal = new Derived(async ({ subscribe }) => {
  */
 ```
 
-#### reference:`LitExp.escape`
+#### reference: `LitExp.escape`
 
 - to escape special chars from string literal;
 - returned value can be used to create instance of RegExp;
@@ -2374,12 +2764,11 @@ const myFilteredListSignal = new Derived(async ({ subscribe }) => {
 
 ```js
 import { LitExp } from "vivt";
-
 const escapedLiteral = LitExp.escape(`something[][;alerk325]`);
 new RegExp(escapedLiteral, "g");
 ```
 
-#### reference:`LitExp.prepare`
+#### reference: `LitExp.prepare`
 
 - constructor helper;
 - under the hood it is an abstraction of `RegExp`, with more template literal touch;
@@ -2411,8 +2800,7 @@ new RegExp(escapedLiteral, "g");
 - <i>example</i>:
 
 ```js
-import { LitExp } from "vivth";
-
+import { LitExp } from "vivth/neutral";
 (() => {
   const [liteal, errorPrep] = LitExp.prepare({
     myKey: /myCustomCapture/, // is placed on (?<myKey>myCustomCapture)
@@ -2428,11 +2816,11 @@ import { LitExp } from "vivth";
 })();
 ```
 
-#### reference:`LitExp_instance.make`
+#### reference: `LitExp_instance.make`
 
 - instance methods for generating things;
 
-#### reference:`LitExp_instance.make.string`
+#### reference: `LitExp_instance.make.string`
 
 - to make string based on the template literal;
 
@@ -2446,64 +2834,58 @@ import { LitExp } from "vivth";
 - <i>example</i>:
 
 ```js
-import { LitExp } from "vivth";
-
+import { LitExp } from "vivth/neutral";
 const [literal, errorPreparing] = LitExp.prepare({
   myKey: false,
   ...keyCaptureLogicPair,
 });
-
 // asuming no error
 litExp_instance = `templateLiteral:${"myKey"};`;
 const [result, error] = litExp_instance.make.string({
   myKey: "actualvalue",
 });
-
 console.log(result); // "templateLiteral:actualvalue;"
 ```
 
-#### reference:`LitExp_instance.evaluate`
+#### reference: `LitExp_instance.evaluate`
 
 - methods collections to evaluate string with `Literal Expression`;
 
-#### reference:`LitExp_instance.evaluate.execGroups`
+#### reference: `LitExp_instance.evaluate.execGroups`
 
 - to exec and grouped based on `key`;
 
 ```js
 /**
- * @param {string} string 			 
- * @param {Object} options 			 
- * @param {ConstructorParameters<typeof RegExp>[1]} options.flags 			 
- * @param {boolean} options.whiteSpaceSensitive 			 
- * - true: leave any whitespace as is to be used as regex detection; 			 
- * - false: convert all whitespace to `\s+`; 			 
- * @param {boolean} options.absoluteLeadAndFollowing 			 
- * - false: standard capture; 			 
- * - true: add `^` and `<h2 id="litexp">LitExp</h2>
+ * @param {string} string
+	* @param {Object} options
+	* @param {ConstructorParameters<typeof RegExp>[1]} options.flags
+	* @param {boolean} options.whiteSpaceSensitive
+	* - true: leave any whitespace as is to be used as regex detection;
+	* - false: convert all whitespace to `\s+`;
+	* @param {boolean} options.absoluteLeadAndFollowing
+	* - false: standard capture;
+	* - true: add `^` and `<h2 id="litexp">neutral.LitExp</h2>
 
- to capture definition: 			 
- * >- meaning string will have to match starting and end of line from capture definition; 			 
- * @returns {ReturnType<typeof TrySync<{ 			 
- * result:{ whole:string, named: Record<keyof KEYS, string>}, 			 
- * regexp:RegExp}>> 			 
- * } 			 
- */
+ to capture definition:
+	* >- meaning string will have to match starting and end of line from capture definition;
+	* @returns {ReturnType<typeof TrySync<{
+	* result:{ whole:string, named: Record<keyof KEYS, string>},
+	* regexp:RegExp}>>
+	* }
+	*/
 ```
 
 - <i>example</i>:
 
 ```js
-import { LitExp } from "vivth";
-
+import { LitExp } from "vivth/neutral";
 const [literal, errorPreparing] = LitExp.prepare({
   myKey: false,
   ...keyCaptureLogicPair,
 });
-
 // asuming no eror
 const litExp_instance = literal`templateLiteral:${"myKey"};`;
-
 const [
   {
     result: {
@@ -2517,12 +2899,11 @@ const [
 ] = litExp_instance.evaluate.execGroups(`templateLiteral:Something;`, {
   ...options,
 });
-
 console.log(whole); // "templateLiteral:Something;"
 console.log(myKey); // "Something"
 ```
 
-#### reference:`LitExp_instance.evaluate.matchedAllAndGrouped`
+#### reference: `LitExp_instance.evaluate.matchedAllAndGrouped`
 
 - to match all and grouped based on `key`;
 
@@ -2538,19 +2919,16 @@ console.log(myKey); // "Something"
 - <i>example</i>:
 
 ```js
-import { LitExp, Console } from "vivth";
-
+import { LitExp, Console } from "vivth/neutral";
 const [literal, errorPreparing] = LitExp.prepare({
   myKey: false,
   ...keyCaptureLogicPair,
 });
-
 // asuming no error;
 litExp_instance = literal`templateLiteral:${"myKey"};`;
-
 const [resultOfMatchedAllAndGrouped, error] =
   litExp_instance.evaluate.matchedAllAndGrouped(
-    `templateLiteral:Something; 			 
+    `templateLiteral:Something;
  	templateLiteral:SomethingElse;`,
     { ...options },
   )(() => {
@@ -2562,7 +2940,6 @@ const [resultOfMatchedAllAndGrouped, error] =
       result: { whole, named },
       regexp,
     } = resultOfMatchedAllAndGrouped;
-
     named.foreach(({ myKey }) => {
       // code
     });
@@ -2576,19 +2953,20 @@ const [resultOfMatchedAllAndGrouped, error] =
 
 ---
 
-<h2 id="objectsignal">ObjectSignal</h2>
+<h2 id="objectsignal">neutral.ObjectSignal</h2>
 
-#### reference:`ObjectSignal`
+#### reference: `ObjectSignal`
 
 - Signal based on shared/globally available `Object` as key;
 
 ```js
 /**
  * @template {any} SHAREDOBJECT
+ * @implements {VivthCleanup}
  */
 ```
 
-#### reference:`ObjectSignal_instance.listener`
+#### reference: `ObjectSignal_instance.dispatcher`
 
 - is [Signal](#signal);
 - if needed to pass along the messages, it can be used as `dispatcher` and `listener` at the same time;
@@ -2596,50 +2974,54 @@ const [resultOfMatchedAllAndGrouped, error] =
 
 ```js
 /**
- * @type {Signal<SHAREDOBJECT>}
+ * @type {Signal<SHAREDOBJECT|undefined>}
  */
 ```
 
 - <i>example</i>:
 
 ```js
- import { ObjectSignal, Effect, Console } from 'vivth';
-
- const myObjectSignal = await ObjectSignal.get('dataEvent', false);
-
- new Effect(({ subscribe })=>{
- 	const listenValue = subscribe(myObjectSignal.dispatch).value;
- 	// dispatch can be used as two way communication;
- 	Console.log({ listenValue });
- })
- myObjectSignal.dispatch.value = 'hey';
- / 	// @ts-expect-error 	dispatcher = LazyFactory(() => { 		return new Signal(undefined); 	}); 	/
-
- @description
- - is [Derived](#derived);
- - can be used as listener when passed down value shouldn't be modified manually;
- - is `lazily` created along with `dispatch`, if `listen` is accessed first, then `dispatch` will also be created automatically;
- @type {Derived<SHAREDOBJECT>}
- @example
- import { ObjectSignal, Effect, Console } from 'vivth';
-
- const myObjectSignal = await ObjectSignal.get('dataEvent', false);
-
- new Effect(({ subscribe })=>{
- 	const listenValue = subscribe(myObjectSignal.listen).value;
- 	// listen can be used only as listener for one way communication;
- 	Console.log({ listenValue });
- })
- myObjectSignal.dispatch.value = 'hey';
-
+import { ObjectSignal, Effect, Console } from "vivth/neutral";
+const myObjectSignal = await ObjectSignal.get("dataEvent", false);
+new Effect(({ subscribe }) => {
+  const listenValue = subscribe(myObjectSignal.dispatch).value;
+  // dispatch can be used as two way communication;
+  Console.log({ listenValue });
+});
+myObjectSignal.dispatch.value = "hey";
 ```
 
-#### reference:`ObjectSignal.remove`
+#### reference: `ObjectSignal_instance.listener`
+
+- is [Derived](#derived);
+- can be used as listener when passed down value shouldn't be modified manually;
+- is `lazily` created along with `dispatch`, if `listen` is accessed first, then `dispatch` will also be created automatically;
+
+```js
+/**
+ * @type {Derived<SHAREDOBJECT|undefined>}
+ */
+```
+
+- <i>example</i>:
+
+```js
+import { ObjectSignal, Effect, Console } from "vivth/neutral";
+const myObjectSignal = await ObjectSignal.get("dataEvent", false);
+new Effect(({ subscribe }) => {
+  const listenValue = subscribe(myObjectSignal.listen).value;
+  // listen can be used only as listener for one way communication;
+  Console.log({ listenValue });
+});
+myObjectSignal.dispatch.value = "hey";
+```
+
+#### reference: `ObjectSignal.remove`
 
 - methods of this static property is lazily created;
 - remove signal and effect subscription of the named `ObjectSignal_instance`;
 
-#### reference:`ObjectSignal.remove.subscriber`
+#### reference: `ObjectSignal.remove.subscriber`
 
 - remove subscriber from the named `ObjectSignal_instance`;
 
@@ -2654,12 +3036,11 @@ const [resultOfMatchedAllAndGrouped, error] =
 - <i>example</i>:
 
 ```js
-import { ObjectSignal } from "vivth";
-
+import { ObjectSignal } from "vivth/neutral";
 ObjectSignal.remove.subscriber("yourObjectSignalName", myEffectInstance);
 ```
 
-#### reference:`ObjectSignal.remove.allSubscribers`
+#### reference: `ObjectSignal.remove.allSubscribers`
 
 - remove all subscribers from the named `ObjectSignal_instance`;
 
@@ -2673,12 +3054,11 @@ ObjectSignal.remove.subscriber("yourObjectSignalName", myEffectInstance);
 - <i>example</i>:
 
 ```js
-import { ObjectSignal } from "vivth";
-
+import { ObjectSignal } from "vivth/neutral";
 ObjectSignal.remove.allSubscribers("yourObjectSignalName");
 ```
 
-#### reference:`ObjectSignal.remove.refs`
+#### reference: `ObjectSignal.remove.refs`
 
 - remove reference of the `proxySignals` of the named `ObjectSignal_instance`;
 
@@ -2692,12 +3072,11 @@ ObjectSignal.remove.allSubscribers("yourObjectSignalName");
 - <i>example</i>:
 
 ```js
-import { ObjectSignal } from "vivth";
-
+import { ObjectSignal } from "vivth/neutral";
 ObjectSignal.remove.refs("yourObjectSignalName");
 ```
 
-#### reference:`ObjectSignal_instance.remove.subscriber`
+#### reference: `ObjectSignal_instance.remove.subscriber`
 
 - remove subscriber from the `ObjectSignal_instance`;
 
@@ -2711,10 +3090,8 @@ ObjectSignal.remove.refs("yourObjectSignalName");
 - <i>example</i>:
 
 ```js
-import { ObjectSignal, Effect, Console } from "vivth";
-
+import { ObjectSignal, Effect, Console } from "vivth/neutral";
 const myObjectSignal = await ObjectSignal.get("dataEvent", false);
-
 const myEffectInstance = new Effect(({ subscribe }) => {
   const listenValue = subscribe(myObjectSignal.dispatch).value;
   Console.log({ listenValue });
@@ -2723,7 +3100,7 @@ myObjectSignal.dispatch.value = "hey";
 objectSigObjectSignal_instance.remove.subscriber(myEffectInstance);
 ```
 
-#### reference:`ObjectSignal_instance.remove.allSubscribers`
+#### reference: `ObjectSignal_instance.remove.allSubscribers`
 
 - remove allSubscribers from the `ObjectSignal_instance`;
 
@@ -2736,10 +3113,8 @@ objectSigObjectSignal_instance.remove.subscriber(myEffectInstance);
 - <i>example</i>:
 
 ```js
-import { ObjectSignal, Effect, Console } from "vivth";
-
+import { ObjectSignal, Effect, Console } from "vivth/neutral";
 const myObjectSignal = await ObjectSignal.get("dataEvent", false);
-
 const myEffectInstance = new Effect(({ subscribe }) => {
   const listenValue = subscribe(myObjectSignal.dispatch).value;
   Console.log({ listenValue });
@@ -2748,7 +3123,7 @@ myObjectSignal.dispatch.value = "hey";
 objectSigObjectSignal_instance.remove.allSubscribers();
 ```
 
-#### reference:`ObjectSignal_instance.remove.ref`
+#### reference: `ObjectSignal_instance.remove.ref`
 
 - remove reference of the `proxySignals` of the `ObjectSignal_instance`;
 
@@ -2761,15 +3136,12 @@ objectSigObjectSignal_instance.remove.allSubscribers();
 - <i>example</i>:
 
 ```js
-import { ObjectSignal, Effect, Console } from "vivth";
-
+import { ObjectSignal, Effect, Console } from "vivth/neutral";
 const myObjectSignal = await ObjectSignal.get("dataEvent", false);
-
 const myEffectInstance = new Effect(({ subscribe }) => {
   const listenValue = subscribe(myObjectSignal.dispatch).value;
   Console.log({ listenValue });
 });
-
 objectSigObjectSignal_instance.remove.ref();
 ```
 
@@ -2777,15 +3149,15 @@ objectSigObjectSignal_instance.remove.ref();
 
 ---
 
-<h2 id="paths">Paths</h2>
+<h2 id="paths">neutral.Paths</h2>
 
-#### reference:`Paths`
+#### reference: `Paths`
 
 - class helpers to define pathReference;
 - is a singleton;
 - most of functionality need to access `Paths.root`, if you get warning, you can instantiate `Paths` before running anything;
 
-#### reference:`new Paths`
+#### reference: `new Paths`
 
 ````js
 /**
@@ -2807,15 +3179,14 @@ objectSigObjectSignal_instance.remove.ref();
 - <i>example</i>:
 
 ```js
-import { Paths } from "vivth";
-
+import { Paths } from "vivth/neutral";
 new Paths({
   // root: location.origin,
   // root: process.env.INIT_CWD ?? process.cwd(),
 });
 ```
 
-#### reference:`Paths.root:getter`
+#### reference: `Paths.root:getter`
 
 - MIGHT THROW AN ERROR;
   > - most `vivth` modules uses this value, so you need to instantiate Paths by all means before using them;
@@ -2830,13 +3201,14 @@ new Paths({
  */
 ```
 
-#### reference:`Paths.normalize`
+#### reference: `Paths.normalize`
 
-- normalize path separator to forward slash `/`;
+- replace path separator to forward slash `/`;
+- remove repeating `./`;
 
 ```js
 /**
- * @param {string} path_
+ * @param {string} path
  * @returns {string}
  */
 ```
@@ -2844,19 +3216,35 @@ new Paths({
 - <i>example</i>:
 
 ```js
-import { Paths } from "vivth";
-
+import { Paths } from "vivth/neutral";
 Paths.normalize("file:\\D:\\myFile.mjs"); //  "file://D://myFile.mjs"
 ```
 
-#### reference:`Paths.normalizesForRoot`
+#### reference: `Paths.nativeSep`
 
-- normalize path separator to forward slash `/`;
-- then starts with forward slash `/`;
+- replace path separator to `sep`;
 
 ```js
 /**
- * @param {string} path_
+ * @param {string} path
+ * @returns {string}
+ */
+```
+
+- <i>example</i>:
+
+```js
+import { Paths } from "vivth/neutral";
+Paths.nativeSep("path//myFile.mjs"); //  "path\myFile.mjs" OR "path/myFile.mjs" depending on sep value;
+```
+
+#### reference: `Paths.normalizeForRoot`
+
+- normalized then starts with forward slash `/`;
+
+```js
+/**
+ * @param {string} path
  * @returns {`/${string}`}
  */
 ```
@@ -2864,28 +3252,57 @@ Paths.normalize("file:\\D:\\myFile.mjs"); //  "file://D://myFile.mjs"
 - <i>example</i>:
 
 ```js
-import { Paths } from "vivth";
-
+import { Paths } from "vivth/neutral";
 Paths.normalizesForRoot("path\\myFile.mjs"); //  "/path/myFile.mjs"
+```
+
+#### reference: `Paths.diskAbsolute`
+
+- convert path to diskAbsolute and normalized to be using forward slash;
+- usefull for arguments for `methods` OR `functions` that needs to be absolute disk path, regardles if path is relative to project root, or already absolute path;
+
+```js
+/**
+ * @param {string} path
+ * @returns {string}
+ */
+```
+
+- <i>example</i>:
+
+```js
+import { Paths } from "vivth/neutral";
+Paths.normalizesForRoot("\\path\\myFile.mjs"); //  "D://something/path/myFile.mjs"
 ```
 
 \*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
-<h2 id="qchannel">QChannel</h2>
+<h2 id="prettivy">node.Prettivy</h2>
 
-#### reference:`QChannel`
+#### reference: `Prettivy`
+
+- `prettier` wrapper with option inference from path;
+
+\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+---
+
+<h2 id="qchannel">neutral.QChannel</h2>
+
+#### reference: `QChannel`
 
 - class for `Queue` handling;
 
 ```js
 /**
  * @template {AnyButUndefined} DEFINEDANY
+ * @implements {VivthCleanup}
  */
 ```
 
-#### reference:`QChannel.setup`
+#### reference: `QChannel.setup`
 
 - to modify `MapReference`
 
@@ -2900,17 +3317,16 @@ Paths.normalizesForRoot("path\\myFile.mjs"); //  "/path/myFile.mjs"
 - <i>example</i>:
 
 ```js
-import { QChannel } from "vivth";
-
+import { QChannel } from "vivth/neutral";
 const myMappedQref = (window["myMappedQref"] = new Map());
 export const MyQClass = QChannel.setup(myMappedQref);
 ```
 
-#### reference:`QChannel.fifo`
+#### reference: `QChannel.fifo`
 
 - first in first out handler
 
-#### reference:`QChannel.fifo.key`
+#### reference: `QChannel.fifo.key`
 
 - blocks execution for subsequent calls until the current one finishes.
 
@@ -2928,7 +3344,7 @@ const { resume } = await QChannel.fifo.key();
 resume();
 ```
 
-#### reference:`QChannel.fifo.callback`
+#### reference: `QChannel.fifo.callback`
 
 - blocks execution for subsequent calls until the current one finishes.
 
@@ -2946,10 +3362,9 @@ resume();
  const [result, error] = await QChannel.fifo.callback(async () = > {
  	// code
  })
-
 ```
 
-#### reference:`QChannel_instance.close`
+#### reference: `QChannel_instance.close`
 
 - disable queue;
 - when `closed`, `isLastOnQ` will allways return `false`;
@@ -2960,7 +3375,7 @@ resume();
  */
 ```
 
-#### reference:`QChannel_instance.open`
+#### reference: `QChannel_instance.open`
 
 - enable queue;
 - when `opened`, `isLastOnQ` will evaluate whether calls are actually the last of queue;
@@ -2971,7 +3386,7 @@ resume();
  */
 ```
 
-#### reference:`QChannel_instance.key`
+#### reference: `QChannel_instance.key`
 
 - each `QChannelInstance` are managing it's own `queue`, and will not `await` for other `QChannelInstance`;
 - caveat:
@@ -3003,7 +3418,7 @@ const handler = async () => {
 handler();
 ```
 
-#### reference:`QChannel_instance.callback`
+#### reference: `QChannel_instance.callback`
 
 - `callbackBlock` with error as value:
 - caveat:
@@ -3038,15 +3453,15 @@ const [result, error] = await q.callback(keyID, async ({ isLastOnQ }) => {
 
 ---
 
-<h2 id="safeexit">SafeExit</h2>
+<h2 id="safeexit">node.SafeExit</h2>
 
-#### reference:`SafeExit`
+#### reference: `SafeExit`
 
 - class helper for describing how to Safely Response on exit events
 - singleton;
 - most of functionality might need to access `SafeExit.instance.exiting`, if you get warning, you can instantiate `SafeExit` before running anything;
 
-#### reference:`SafeExit.instance`
+#### reference: `SafeExit.instance`
 
 - only accessible after instantiation;
 
@@ -3056,22 +3471,15 @@ const [result, error] = await q.callback(keyID, async ({ isLastOnQ }) => {
  */
 ```
 
-#### reference:`new SafeExit`
+#### reference: `new SafeExit`
 
 ````js
 /**
- * @param {Object} options
- * @param {[string, ...string[]]} options.eventNames
- * - eventNames are blank by default, you need to manually name them all;
- * - 'exit' will be omited, as it might cause async callbacks failed to execute;
+ * @param {...NodeJS.Signals} eventNames
+ * - `beforeExit` is auto included;
  * - example:
  * ```js
- *  ['SIGINT', 'SIGTERM']
- * ```
- * @param {()=>void} options.terminator
- * - standard, process must be imported statically from 'node:process':
- * ```js
- * () => process.exit(0),
+ *  ['SIGINT', 'SIGTERM'] // both are automatically added
  * ```
  */
 ````
@@ -3080,48 +3488,34 @@ const [result, error] = await q.callback(keyID, async ({ isLastOnQ }) => {
 
 ```js
 import process from "node:process";
-import { SafeExit, Console } from "vivth";
-
-new SafeExit({
-  eventNames: ["SIGINT", "SIGTERM", ...eventNames],
-  terminator: () => process.exit(0),
-});
+import { SafeExit } from "vivth/node";
+new SafeExit("SIGINT", "SIGTERM", ...eventNames);
 ```
 
-#### reference:`SafeExit_instance.exiting`
+#### reference: `SafeExit_instance.addCallback`
 
-- optional exit event registration, by listening to it inside an `Effect`;
-- when the value is `true`, meaning program is exitting;
+- `SafeExit` ${eventName}.Callback registration;
+- `onEventName` all callbacks are called simultanousely using `await Promise.all`;
+  > - for sequential event you need to put them in a single callback;
 
 ```js
 /**
- * @type {EnvSignal<boolean>}
- */
-```
-
-#### reference:`SafeExit_instance.addCallback`
-
-- optional exit event registration;
-- the callbacks will be called when exiting;
-
-```js
-/**
- * @param {()=>(Promise<void>)} cb
+ * @param {()=>(Promise<void>)} safeExitCallback
+ * @returns {{removeCallback:()=>void}}
  */
 ```
 
 - <i>example</i>:
 
 ```js
-import { SafeExit } from "vivth";
-
+import { SafeExit } from "vivth/node";
 const exitCallback = async () => {
   // code
 };
 SafeExit.instance.addCallback(exitCallback);
 ```
 
-#### reference:`SafeExit_instance.removeCallback`
+#### reference: `SafeExit_instance.removeCallback`
 
 - optional exit event removal;
 - the callbacks will be removed from registered via `addCallback` exiting;
@@ -3135,68 +3529,58 @@ SafeExit.instance.addCallback(exitCallback);
 - <i>example</i>:
 
 ```js
- import { SafeExit } from 'vivth';
-
- const exitCallback () => {
+ import { SafeExit } from 'vivth/node';
+  const exitCallback () => {
  	// code
  }
  SafeExit.instance.addCallback(exitCallback);
  // somewhere else
  SafeExit.instance.removeCallback(exitCallback);
-
 ```
 
 \*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
-<h2 id="setup">Setup</h2>
+<h2 id="setup">node.Setup</h2>
 
-#### reference:`Setup`
+#### reference: `Setup`
 
 - class with collections of methods/constructors for setting up necessary variables for vivth internal functionalities;
 
-#### reference:`Setup.safeExit`
+#### reference: `Setup.safeExit`
 
 - proxy `SafeExit_instance` for Setup
 
 - <i>example</i>:
 
 ```js
-import { Setup, Console } from "vivth";
-
-new Setup.safeExit({
-  // eventNames are blank by default, you need to manually name them all;
-  // 'exit' will be omited, as it might cause async callbacks failed to execute;
-  eventNames: ["SIGINT", "SIGTERM", ...eventNames],
-  terminator: () => process.exit(0),
-});
+import { Setup } from "vivth/node";
+new Setup.safeExit("SIGINT", "SIGTERM", ...eventNames);
 ```
 
-#### reference:`Setup.paths`
+#### reference: `Setup.paths`
 
 - proxy `Paths_instance` for Setup;
 
 - <i>example</i>:
 
 ```js
-import { Setup } from "vivth";
-
+import { Setup } from "vivth/node";
 new Setup.paths({
   root: location.origin, // browser example
 });
 ```
 
-#### reference:`Setup.workerMain`
+#### reference: `Setup.workerMain`
 
 - proxy `WorkerMainThread_instance` for Setup;
 
 - <i>example</i>:
 
 ```js
-import { Setup } from "vivth";
+import { Setup } from "vivth/node";
 import { Worker } from "node:worker_threads";
-
 Setup.workerMain({
   workerClass: Worker,
   basePath: "public/assets/js/workers",
@@ -3208,7 +3592,7 @@ Setup.workerMain({
 });
 ```
 
-#### reference:`Setup.workerThread`
+#### reference: `Setup.workerThread`
 
 - correct `parentPort` reference when needed;
 - export to create new reference to be use to create new WorkerThread instance;
@@ -3216,58 +3600,55 @@ Setup.workerMain({
 - <i>example</i>:
 
 ```js
-import { Setup } from "vivth";
+import { Setup } from "vivth/node";
 import { parentPort } from "node:worker_threads";
-
 export const MyWorkerThreadRef = Setup.workerThread({ parentPort });
 // that is the default value, if your parentPort/equivalent API is not that;
 // you need to call this method;
 ```
 
-#### reference:`Setup.enforceEnvMode`
+#### reference: `Setup.enforceEnvMode`
 
 - setup envMode into `developement`('default') or `production`;
 
 - <i>example</i>:
 
 ```js
-import { Setup } from "vivth";
-
+import { Setup } from "vivth/node";
 Setup.enforceEnvMode("prod");
-
 // default behaviour, technically only need to be call for reactive functionality;
 Setup.enforceEnvMode("dev");
 ```
 
-#### reference:`Setup.preferrence`
+#### reference: `Setup.preferrence`
 
 - setup `vivth `preffered encoding;
 
 - <i>example</i>:
 
 ```js
-import { Setup } from "vivth";
-
-Setup.preferrence("prod");
+import { Setup } from "vivth/node";
+Setup.preferrence({ encoding: "utf-8" });
 ```
 
 \*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
-<h2 id="signal">Signal</h2>
+<h2 id="signal">neutral.Signal</h2>
 
-#### reference:`Signal`
+#### reference: `Signal`
 
 - a class for creating effect to signals;
 
 ```js
 /**
  * @template VALUE
+ * @implements {VivthCleanup}
  */
 ```
 
-#### reference:`new Signal`
+#### reference: `new Signal`
 
 - create a `Signal`;
 
@@ -3283,16 +3664,15 @@ Setup.preferrence("prod");
 - <i>example</i>:
 
 ```js
-import { Signal, Effect } from "vivth";
-
+import { Signal, Effect } from "vivth/neutral";
 const count = new Signal(0);
 ```
 
-#### reference:`Signal_instance.subscribers`
+#### reference: `Signal_instance.subscribers`
 
 - subsrcibers reference of this instance;
 
-#### reference:`Signal_instance.subscribers.setOf`
+#### reference: `Signal_instance.subscribers.setOf`
 
 - subscribedEffects
 
@@ -3302,27 +3682,26 @@ const count = new Signal(0);
  */
 ```
 
-#### reference:`Signal_instance.subscribers.notify`
+#### reference: `Signal_instance.subscribers.notify`
 
 - manually notify on non primitive value or value that have depths;
 
 ```js
 /**
  * @param {(options:{signalInstance:Signal<VALUE>})=>Promise<void>} [callback]
- * @returns {void}
+ * @param {(error:Error|undefined)=>Promise<void>} [afterCompletion]
+ * @returns {Promise<void>}
  */
 ```
 
 - <i>example</i>:
 
 ```js
-import { Signal } from "vivth";
-
+import { Signal } from "vivth/neutral";
 // for deep signal like array or object you can:
 const arraySignal = new Signal([1, 2]);
 arraySignal.value.push(3);
 arraySignal.subscribers.notify();
-
 // OR for more complex mutation:
 const objectSignal = new Signal({ a: "test", b: "test" });
 objectSignal.subscribers.notify(async ({ signalInstance }) => {
@@ -3331,11 +3710,11 @@ objectSignal.subscribers.notify(async ({ signalInstance }) => {
 });
 ```
 
-#### reference:`Signal_instance.remove`
+#### reference: `Signal_instance.remove`
 
 - collection of remove methods
 
-#### reference:`Signal_instance.remove.subscriber`
+#### reference: `Signal_instance.remove.subscriber`
 
 - remove effect subscriber to react from this instance value changes;
 
@@ -3346,7 +3725,7 @@ objectSignal.subscribers.notify(async ({ signalInstance }) => {
  */
 ```
 
-#### reference:`Signal_instance.remove.allSubscribers`
+#### reference: `Signal_instance.remove.allSubscribers`
 
 - remove all effect subscribers to react from this instance value changes;
 
@@ -3356,7 +3735,7 @@ objectSignal.subscribers.notify(async ({ signalInstance }) => {
  */
 ```
 
-#### reference:`Signal_instance.remove.ref`
+#### reference: `Signal_instance.remove.ref`
 
 - remove this instance from `vivth` reactivity engine, and nullify it's own value;
 
@@ -3366,7 +3745,7 @@ objectSignal.subscribers.notify(async ({ signalInstance }) => {
  */
 ```
 
-#### reference:`Signal_instance.prev:getter`
+#### reference: `Signal_instance.prev:getter`
 
 - value before change;
 
@@ -3376,7 +3755,7 @@ objectSignal.subscribers.notify(async ({ signalInstance }) => {
  */
 ```
 
-#### reference:`Signal_instance.value:getter`
+#### reference: `Signal_instance.value:getter`
 
 - value after change;
 
@@ -3389,11 +3768,9 @@ objectSignal.subscribers.notify(async ({ signalInstance }) => {
 - <i>example</i>:
 
 ```js
-import { Signal, Effect, Derived } from "vivth";
-
+import { Signal, Effect, Derived } from "vivth/neutral";
 const count = new Signal(0);
 count.value; // not reactive
-
 new Effect(async ({ subscribe }) => {
   const countValue = subscribe(count).value; // reactive
 });
@@ -3402,7 +3779,7 @@ const oneMoreThanCount = new Derived(async function ({ subscribe }) {
 });
 ```
 
-#### reference:`Signal_instance.value:setter`
+#### reference: `Signal_instance.value:setter`
 
 - assign new value then automatically notify all subscribers;
 
@@ -3415,8 +3792,7 @@ const oneMoreThanCount = new Derived(async function ({ subscribe }) {
 - <i>example</i>:
 
 ```js
-import { Signal } from "vivth";
-
+import { Signal } from "vivth/neutral";
 const count = new Signal(0);
 count.value++;
 // OR
@@ -3427,9 +3803,9 @@ count.value = 9;
 
 ---
 
-<h2 id="signalcollection">SignalCollection</h2>
+<h2 id="signalcollection">neutral.SignalCollection</h2>
 
-#### reference:`SignalCollection`
+#### reference: `SignalCollection`
 
 - class helper for creating Collection of `Signals` for Object of Signals to be subscribed to(on `Effect`/`Derived`) collectively as signals;
   > - uses as `Facade` Pattern;
@@ -3437,10 +3813,11 @@ count.value = 9;
 ```js
 /**
  * @template {Record<string, import('./Signal.mjs').Signal<any>>} SIGNALS
+ * @implements {VivthCleanup}
  */
 ```
 
-#### reference:`new SignalCollection`
+#### reference: `new SignalCollection`
 
 - creates instance of `SignalCollection`, by referencing to named Signal;
 
@@ -3453,18 +3830,16 @@ count.value = 9;
 - <i>example</i>:
 
 ```js
-import { Signal, Derived, SignalCollection } from "vivth";
-
+import { Signal, Derived, SignalCollection } from "vivth/neutral";
 const a = new Signal("a");
 const b = new Signal("b");
 const c = new Derived(async ({ subscribe }) => {
   return `${subscribe(b).value}_b`;
 });
-
 const f = new SignalCollection({ a, c });
 ```
 
-#### reference:`SignalCollection_instance.signals`
+#### reference: `SignalCollection_instance.signals`
 
 - accessor for signals, to be subscribed to;
 
@@ -3478,16 +3853,13 @@ const f = new SignalCollection({ a, c });
 - <i>example</i>:
 
 ```js
-import { Signal, Derived, Effect, SignalCollection } from "vivth";
-
+import { Signal, Derived, Effect, SignalCollection } from "vivth/neutral";
 const a = new Signal("a");
 const b = new Signal("b");
 const c = new Derived(async ({ subscribe }) => {
   return `${subscribe(b).value}_b`;
 });
-
 const f = new SignalCollection({ a, c });
-
 new Effect(async ({ subscribe, isLastCalled }) => {
   const {
     a: { value: aa }, // aa is safely desctructured and auto subscribed
@@ -3497,7 +3869,6 @@ new Effect(async ({ subscribe, isLastCalled }) => {
     return; // impertaive debounce
   }
 });
-
 const d = new Derived(async function ({ subscribe, isLastCalled }) {
   const {
     a: { value: aa }, // aa is safely desctructured and auto subscribed
@@ -3510,7 +3881,7 @@ const d = new Derived(async function ({ subscribe, isLastCalled }) {
 });
 ```
 
-#### reference:`SignalCollection_instance.forInSignals`
+#### reference: `SignalCollection_instance.forInSignals`
 
 - is looping synchronously;
   > - will not await any async block;
@@ -3530,16 +3901,13 @@ const d = new Derived(async function ({ subscribe, isLastCalled }) {
 - <i>example</i>:
 
 ```js
-import { Signal, Derived, Effect, SignalCollection } from "vivth";
-
+import { Signal, Derived, Effect, SignalCollection } from "vivth/neutral";
 const a = new Signal("a");
 const b = new Signal("b");
 const c = new Derived(async ({ subscribe }) => {
   return `${subscribe(b).value}_b`;
 });
-
 const f = new SignalCollection({ a, c });
-
 f.forInSignals((key, signal) => {
   // code
 });
@@ -3549,15 +3917,15 @@ f.forInSignals((key, signal) => {
 
 ---
 
-<h2 id="walkthrough">WalkThrough</h2>
+<h2 id="walkthrough">neutral.WalkThrough</h2>
 
-#### reference:`WalkThrough`
+#### reference: `WalkThrough`
 
 - collection of static `methods` to walktrhough things, instead of regular looping;
 - usefull to iterator that might be modified during iteration;
 - mostlikely to be less performant, but with better result clarity;
 
-#### reference:`WalkThrough.set`
+#### reference: `WalkThrough.set`
 
 - method helper to WalkThrough `Set`;
 
@@ -3573,14 +3941,13 @@ f.forInSignals((key, signal) => {
 - <i>example</i>:
 
 ```js
-import { WalkThrough } from "vivth";
-
+import { WalkThrough } from "vivth/neutral";
 WalkThrough.set(setOfSomething, (value) => {
   // code
 });
 ```
 
-#### reference:`WalkThrough.map`
+#### reference: `WalkThrough.map`
 
 - method helper to WalkThrough `Map`;
 
@@ -3596,14 +3963,13 @@ WalkThrough.set(setOfSomething, (value) => {
 - <i>example</i>:
 
 ```js
-import { WalkThrough } from "vivth";
-
+import { WalkThrough } from "vivth/neutral";
 WalkThrough.map(mapOfSomething, ([key, value]) => {
   // code
 });
 ```
 
-#### reference:`WalkThrough.array`
+#### reference: `WalkThrough.array`
 
 - method helper to WalkThrough `Array`;
 
@@ -3619,8 +3985,7 @@ WalkThrough.map(mapOfSomething, ([key, value]) => {
 - <i>example</i>:
 
 ```js
-import { WalkThrough } from "vivth";
-
+import { WalkThrough } from "vivth/neutral";
 WalkThrough.array(arrayOfSomething, ([value, index]) => {
   // code
 });
@@ -3630,9 +3995,9 @@ WalkThrough.array(arrayOfSomething, ([value, index]) => {
 
 ---
 
-<h2 id="workermainthread">WorkerMainThread</h2>
+<h2 id="workermainthread">neutral.WorkerMainThread</h2>
 
-#### reference:`WorkerMainThread`
+#### reference: `WorkerMainThread`
 
 - class helper to create `Worker` instance;
 - before any `Worker` functionaily to be used, you need to setup it with `WorkerThread.setup` and `WorkerMainThread.setup` before runing anytyhing;
@@ -3640,10 +4005,11 @@ WalkThrough.array(arrayOfSomething, ([value, index]) => {
 ```js
 /**
  * @template {WorkerThread<any, any>} WT
+ * @implements {VivthCleanup}
  */
 ```
 
-#### reference:`WorkerMainThread.setup`
+#### reference: `WorkerMainThread.setup`
 
 - need to be called first, before any `WorkerMainThread` instantiation:
 
@@ -3672,8 +4038,7 @@ WalkThrough.array(arrayOfSomething, ([value, index]) => {
 
 ```js
 import { Worker } from "node:worker_threads";
-import { WorkerMainThread } from "vivth";
-
+import { WorkerMainThread } from "vivth/neutral";
 WorkerMainThread.setup({
   workerClass: Worker,
   pathValidator: async ({ worker, root }) => {
@@ -3689,7 +4054,7 @@ WorkerMainThread.setup({
 });
 ```
 
-#### reference:`WorkerMainThread.workerClass`
+#### reference: `WorkerMainThread.workerClass`
 
 - reference for `Worker` class;
 - edit via `setup`;
@@ -3700,7 +4065,7 @@ WorkerMainThread.setup({
  */
 ```
 
-#### reference:`WorkerMainThread.pathValidator`
+#### reference: `WorkerMainThread.pathValidator`
 
 - reference for validating path;
 - edit via `setup`;
@@ -3711,7 +4076,7 @@ WorkerMainThread.setup({
  */
 ```
 
-#### reference:`new WorkerMainThread`
+#### reference: `new WorkerMainThread`
 
 - create Worker_instance;
 
@@ -3725,24 +4090,23 @@ WorkerMainThread.setup({
 - <i>example</i>:
 
 ```js
-import { WorkerMainThread } from "vivth";
-
+import { WorkerMainThread } from "vivth/neutral";
 export const myDoubleWorker = new WorkerMainThread(
   PathFSBundles.vivthBundles("./doubleWorkerThread.mjs"),
 );
 ```
 
-#### reference:`WorkerMainThread_instance.terminate`
+#### reference: `WorkerMainThread_instance.vivthCleanup`
 
 - terminate all signals that are used on this instance;
 
 ```js
 /**
- * @return {void}
+ * @return {Promise<void>}
  */
 ```
 
-#### reference:`WorkerMainThread_instance.receiverSignal`
+#### reference: `WorkerMainThread_instance.receiverSignal`
 
 - result signal of the processed message;
 
@@ -3755,9 +4119,8 @@ export const myDoubleWorker = new WorkerMainThread(
 - <i>example</i>:
 
 ```js
-import { Effect } from "vivth";
+import { Effect } from "vivth/neutral";
 import { myDoubleWorker } from "./myDoubleWorker.mjs";
-
 const doubleReceiverSignal = myDoubleWorker.receiverSignal;
 new Effect(async ({ subscribe }) => {
   const value = subscribe(doubleReceiverSignal).value;
@@ -3765,7 +4128,7 @@ new Effect(async ({ subscribe }) => {
 });
 ```
 
-#### reference:`WorkerMainThread_instance.postMessage`
+#### reference: `WorkerMainThread_instance.postMessage`
 
 - callback to send message to the worker thread;
 
@@ -3779,7 +4142,6 @@ new Effect(async ({ subscribe }) => {
 
 ```js
 import { myDoubleWorker } from "./myDoubleWorker.mjs";
-
 myDoubleWorker.postMessage(90);
 ```
 
@@ -3787,9 +4149,9 @@ myDoubleWorker.postMessage(90);
 
 ---
 
-<h2 id="workerresult">WorkerResult</h2>
+<h2 id="workerresult">neutral.WorkerResult</h2>
 
-#### reference:`WorkerResult`
+#### reference: `WorkerResult`
 
 - typeHelper for `Worker` message passing;
 - uses error as value instead;
@@ -3800,7 +4162,7 @@ myDoubleWorker.postMessage(90);
  */
 ```
 
-#### reference:`WorkerResult_instance.data`
+#### reference: `WorkerResult_instance.data`
 
 - result value;
 
@@ -3810,7 +4172,7 @@ myDoubleWorker.postMessage(90);
  */
 ```
 
-#### reference:`WorkerResult_instance.error`
+#### reference: `WorkerResult_instance.error`
 
 - error value;
 
@@ -3824,9 +4186,9 @@ myDoubleWorker.postMessage(90);
 
 ---
 
-<h2 id="workerthread">WorkerThread</h2>
+<h2 id="workerthread">neutral.WorkerThread</h2>
 
-#### reference:`WorkerThread`
+#### reference: `WorkerThread`
 
 - class helper for `WorkerThread` creation;
 - before any `Worker` functionaily to be used, you need to setup it with `WorkerThread.setup` and `WorkerMainThread.setup` before runing anytyhing;
@@ -3835,10 +4197,11 @@ myDoubleWorker.postMessage(90);
 /**
  * @template RECEIVE
  * @template POST
+ * @implements {VivthCleanup}
  */
 ```
 
-#### reference:`WorkerThread.setup`
+#### reference: `WorkerThread.setup`
 
 - need to be called and exported as new `WorkerThread` class reference;
 
@@ -3858,13 +4221,12 @@ myDoubleWorker.postMessage(90);
 - <i>example</i>:
 
 ```js
-import { WorkerThread } from "vivth";
 import { parentPort } from "node:worker_threads";
-
+import { WorkerThread } from "vivth/neutral";
 export const MyWorkerThreadRef = WorkerThread.setup({ parentPort });
 ```
 
-#### reference:`new WorkerThread`
+#### reference: `new WorkerThread`
 
 - instantiate via created class from `setup` static method;
 
@@ -3878,7 +4240,6 @@ export const MyWorkerThreadRef = WorkerThread.setup({ parentPort });
 
 ```js
 import { MyWorkerThread } from "./MyWorkerThread.mjs";
-
 const handler = async (ev, isLastOnQ) => {
   // if(!isLastOnQ()) {
   // 	return null; // can be used for imperative debouncing;
@@ -3892,7 +4253,7 @@ const handler = async (ev, isLastOnQ) => {
 new MyWorkerThread(handler);
 ```
 
-#### reference:`WorkerThread_instance.handler`
+#### reference: `WorkerThread_instance.handler`
 
 - type helper;
 
@@ -3902,13 +4263,33 @@ new MyWorkerThread(handler);
  */
 ```
 
+#### reference: `WorkerThread_instance.RECEIVE`
+
+- helper type, hold no actual value;
+
+```js
+/**
+ * @type {RECEIVE}
+ */
+```
+
+#### reference: `WorkerThread_instance.POST`
+
+- helper type, hold no actual value;
+
+```js
+/**
+ * @type {POST}
+ */
+```
+
 \*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
-<h2 id="base64url">Base64URL</h2>
+<h2 id="base64url">neutral.Base64URL</h2>
 
-#### reference:`Base64URL`
+#### reference: `Base64URL`
 
 - create inline base64 url;
 - usage:
@@ -3933,10 +4314,8 @@ new MyWorkerThread(handler);
 - <i>example</i>:
 
 ```js
-import { Base64URL } from "vivth";
-
+import { Base64URL } from "vivth/neutral";
 import fileString from "./fileString.mjs";
-
 // example for browser;
 Base64URL(fileString, "application/javascript", btoa);
 ```
@@ -3945,9 +4324,9 @@ Base64URL(fileString, "application/javascript", btoa);
 
 ---
 
-<h2 id="base64urlfromfile">Base64URLFromFile</h2>
+<h2 id="base64urlfromfile">node.Base64URLFromFile</h2>
 
-#### reference:`Base64URLFromFile`
+#### reference: `Base64URLFromFile`
 
 - create inline base64 url;
 - usage:
@@ -3957,7 +4336,7 @@ Base64URL(fileString, "application/javascript", btoa);
 ```js
 /**
  * @param {string} filePath
- * @returns {Promise<string>}
+ * @returns {Promise<{data:string, mime:string|false}|undefined>}
  */
 ```
 
@@ -3965,9 +4344,8 @@ Base64URL(fileString, "application/javascript", btoa);
 
 ```js
 import { join } from "node:path";
-
-import { Base64URLFromFile, Paths } from "vivth";
-
+import { Base64URLFromFile } from "vivth/node";
+import { Paths } from "vivth/neutral";
 await Base64URLFromFile(join(Paths.root, "/path/to/file"));
 ```
 
@@ -3975,13 +4353,13 @@ await Base64URLFromFile(join(Paths.root, "/path/to/file"));
 
 ---
 
-<h2 id="bundledv">BundledV</h2>
+<h2 id="bundledv">neutral.BundledV</h2>
 
-#### reference:`BundledV`
+#### reference: `BundledV`
 
 - class helper for `vivth` `Bundled` values;
 
-#### reference:`BundledV.isBundled:getter`
+#### reference: `BundledV.isBundled:getter`
 
 - readonly value of whether the script run after being bundled with `vivth` or not;
 
@@ -3995,14 +4373,13 @@ await Base64URLFromFile(join(Paths.root, "/path/to/file"));
 - <i>example</i>:
 
 ```js
-import { BundledV } from "vivth";
-
+import { BundledV } from "vivth/neutral";
 if (BundledV.isBundled) {
   // code
 }
 ```
 
-#### reference:`BundledV.vivthUnBundledCodeBlock`
+#### reference: `BundledV.vivthUnBundledCodeBlock`
 
 - to create `unbundled` only codeBlock;
   > - when properly bundled via `vivth` bundling mechanism, this code block will be removed;
@@ -4019,8 +4396,7 @@ if (BundledV.isBundled) {
 - <i>example</i>:
 
 ```js
-import { BundledV } from "vivth";
-
+import { BundledV } from "vivth/neutral";
 BundledV.vivthUnBundledCodeBlock(() => {
   // code
 }, "vivthUnBundledCodeBlock");
@@ -4030,9 +4406,9 @@ BundledV.vivthUnBundledCodeBlock(() => {
 
 ---
 
-<h2 id="createstringid">CreateStringID</h2>
+<h2 id="createstringid">neutral.CreateStringID</h2>
 
-#### reference:`CreateStringID`
+#### reference: `CreateStringID`
 
 - function helper to generate absolute unique ID;
 - the asynchrounous nature is to prevent race condition that might resulting same Id being generated;
@@ -4049,8 +4425,7 @@ BundledV.vivthUnBundledCodeBlock(() => {
 - <i>example</i>:
 
 ```js
-import { CreateStringID } from "vivth";
-
+import { CreateStringID } from "vivth/neutral";
 (async () => {
   const [myUniqueID, errorCreatingUniqueID] = await CreateStringID(
     "myPrefix",
@@ -4067,13 +4442,13 @@ import { CreateStringID } from "vivth";
 
 ---
 
-<h2 id="envmode">EnvMode</h2>
+<h2 id="envmode">neutral.EnvMode</h2>
 
-#### reference:`EnvMode`
+#### reference: `EnvMode`
 
 - class helper for determining environtment mode to be `developement` or `production`;
 
-#### reference:`EnvMode.mode`
+#### reference: `EnvMode.mode`
 
 - `Derived` wrapper of whether is in `dev` mode or `prod` not;
   > - for listener only;
@@ -4087,10 +4462,8 @@ import { CreateStringID } from "vivth";
 - <i>example</i>:
 
 ```js
-import { EnvMode, Effect } from "vivth";
-
+import { EnvMode, Effect } from "vivth/neutral";
 console.log(EnvMode.mode.value); // default: 'dev'
-
 // listeneing to changes;
 new Effect(async ({ subscribe }) => {
   const mode = subscribe(EnvMode.mode).value;
@@ -4098,7 +4471,7 @@ new Effect(async ({ subscribe }) => {
 });
 ```
 
-#### reference:`EnvMode.enforce`
+#### reference: `EnvMode.enforce`
 
 - enforce development or production mode;
 - DO NOT EXPOSE THIS API TO UNSECURED ACCESS, DIRECTLY NOR INDIRECTLY;
@@ -4113,13 +4486,12 @@ new Effect(async ({ subscribe }) => {
 - <i>example</i>:
 
 ```js
-import { EnvMode } from "vivth";
-
+import { EnvMode } from "vivth/neutral";
 EnvMode.enforce("dev"); // OR
 EnvMode.enforce("prod");
 ```
 
-#### reference:`EnvMode.codeBlock`
+#### reference: `EnvMode.codeBlock`
 
 ```js
 /**
@@ -4139,9 +4511,9 @@ EnvMode.enforce("prod");
 
 ---
 
-<h2 id="eventnamespace">EventNameSpace</h2>
+<h2 id="eventnamespace">neutral.EventNameSpace</h2>
 
-#### reference:`EventNameSpace`
+#### reference: `EventNameSpace`
 
 - namespacing for event, string as ID, related API;
 
@@ -4155,13 +4527,32 @@ EnvMode.enforce("prod");
 
 ---
 
-<h2 id="preferrence">Preferrence</h2>
+<h2 id="factorykey">neutral.FactoryKey</h2>
 
-#### reference:`Preferrence`
+#### reference: `FactoryKey`
+
+- key symbol to imediately generate object wrapped by `LazyFactory`;
+- usefull for Object that has different accessor behaviour when being get via Proxy, like:
+  > - `Set<any>`;
+  > - `Map<any, any>`;
+
+```js
+/**
+ * @type {symbol}
+ */
+```
+
+\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+---
+
+<h2 id="preferrence">neutral.Preferrence</h2>
+
+#### reference: `Preferrence`
 
 - class wrapper for `vivth` innerworking preferrences;
 
-#### reference:`Preferrence.encoding`
+#### reference: `Preferrence.encoding`
 
 - default `vivth` innerworking encoding;
 
@@ -4171,7 +4562,7 @@ EnvMode.enforce("prod");
  */
 ```
 
-#### reference:`Preferrence.setup`
+#### reference: `Preferrence.setup`
 
 - setup `vivth `preffered encoding;
 
@@ -4185,18 +4576,17 @@ EnvMode.enforce("prod");
 - <i>example</i>:
 
 ```js
-import { Preferrence } from "vivth";
-
-Preferrence.setup("prod");
+import { Preferrence } from "vivth/neutral";
+Preferrence.setup({ encoding: "utf-8" });
 ```
 
 \*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
-<h2 id="trace">Trace</h2>
+<h2 id="trace">neutral.Trace</h2>
 
-#### reference:`Trace`
+#### reference: `Trace`
 
 - returns position of stack trace as string, formatted like `fileName:lineNumber:columnNumber`;
 - extremely usefull for:
@@ -4213,8 +4603,7 @@ Preferrence.setup("prod");
 - <i>example</i>:
 
 ```js
-import { Trace, Console } from "vivth";
-
+import { Trace, Console } from "vivth/neutral";
 Console.log(Trace(3)); // "D://test.mjs:3:13"
 ```
 
@@ -4222,9 +4611,9 @@ Console.log(Trace(3)); // "D://test.mjs:3:13"
 
 ---
 
-<h2 id="tracepath">TracePath</h2>
+<h2 id="tracepath">neutral.TracePath</h2>
 
-#### reference:`TracePath`
+#### reference: `TracePath`
 
 - get stack trace path that matched with truthy filterCallback;
 - returns position of stack trace as string, formatted like `fileName:lineNumber:columnNumber`;
@@ -4245,8 +4634,7 @@ Console.log(Trace(3)); // "D://test.mjs:3:13"
 - <i>example</i>:
 
 ```js
-import { TracePath, Console } from "vivth";
-
+import { TracePath, Console } from "vivth/neutral";
 Console.log(
   TracePath((stackString) => {
     return stackString.includes("test.mjs");
@@ -4258,9 +4646,9 @@ Console.log(
 
 ---
 
-<h2 id="vivthunbundledcodeblock">VivthUnBundledCodeBlock</h2>
+<h2 id="vivthunbundledcodeblock">neutral.VivthUnBundledCodeBlock</h2>
 
-#### reference:`VivthUnBundledCodeBlock`
+#### reference: `VivthUnBundledCodeBlock`
 
 - string typehinting value for unbundled only code;
 
@@ -4274,9 +4662,9 @@ Console.log(
 
 ---
 
-<h2 id="jsautodoc">JSautoDOC</h2>
+<h2 id="jsautodoc">node.JSautoDOC</h2>
 
-#### reference:`JSautoDOC`
+#### reference: `JSautoDOC`
 
 - class for auto documenting mjs package/project, using jsdoc;
 - this autodocumenter uses [chokidar](https://npmjs.com/package/chokidar) under the hood;
@@ -4301,18 +4689,33 @@ Console.log(
   >     > - use `"at"preserve` to preserve tsdoc comment section;
   > 8.  integrated with assembly script to wasm compiler on the doc;
   >     > - see [AssemblyScript](#assemblyscript);
+  > 9.  modify following root json files:
+  >     > - `package.json`: assign `exports`, `main`, `module`;
+  >     > - `tsconfig.json`: assign `includes`, anything passed on `options.jstsconfigs`;
+  >     > - `jsconfig.json`: assign `includes`, anything passed on `options.jstsconfigs`;
+  > 10. generates files to `/generated/vivth/exports/`:
+  >     > - `./browser.mjs`: able to be called on `browser` platform;
+  >     > - `./node.mjs`: able to be called on `node` platform;
+  >     > - `./neutral.mjs`: able to be called on `node` and `browser` platform;
+  >     > - `./unsupported.mjs`: most likely will throw error when called, it is more of a logged error to be managed;
+  >     > - `./all.mjs`: collections of all platform;
+  > 11. doesn't support accessor;
+  >     > - due to how TLS way accessor type not casting its getter and setter working around accessor requires ignoring this specific error, and it might become ugly real quick;
+  >     > - we recomend to stick with getter and setter;
+- for runtime example see file `/dev/auto-doc.mjs` on source code;
 
-#### reference:`new JSautoDOC`
+```js
+/**
+ * @implements {VivthCleanup}
+ */
+```
+
+#### reference: `new JSautoDOC`
 
 ```js
 /**
  * @param {Object} options
- * @param {Object} [options.paths]
- * @param {string} options.paths.file
- * - entry point;
- * @param {string} options.paths.readMe
- * - readme target;
- * @param {string} options.paths.dir
+ * @param {string} options.src
  * - source directory;
  * @param {string} [options.copyright]
  * @param {string} [options.tableOfContentTitle]
@@ -4322,19 +4725,34 @@ Console.log(
  * - ChokidarOptions;
  * @param {import('../typehints/AutoDocASOptions.mjs').AutoDocASOptions} [options.assemblyScriptOptions]
  * - abstracted details to handle `.as.ts` file;
- * @param {(arg0:{documentedFilePathsStructuredClone:Set<string>})=>Promise<void>} [options.onLastGeneratedCallback]
+ * @param {(arg0:{map:Map<string, {
+ *     path: string;
+ *     parsed: undefined;
+ *     ext: `.${string}`;
+ *     type: returnTypeStringType;
+ *     readme?:string;
+ * } | {
+ *     path: string;
+ *     parsed: parsedFileForDOC;
+ *     ext: string;
+ *     type: returnTypeStringType;
+ *     readme?:string;
+ * }>})=>Promise<void>} [options.onLastGeneratedCallback]
  * - callback to be run on finishing generating document AND exports;
  * - only handle that marked as `isLastCalled`;
+ * @param { import('typescript').CompilerOptions |
+ * 	import('typescript').ParsedCommandLine
+ * } [options.jstsconfigs]
+ * - type of `ts/jsconfig` to be assigned to existing respective `.json` file;
  */
 ```
 
 - <i>example</i>:
 
 ```js
-import { JSautoDOC } from "vivth";
-
+import { JSautoDOC } from "vivth/node";
 new JSautoDOC({
-  paths: { dir: "src", file: "index.mjs", readMe: "README.md" },
+  src: "/src",
   copyright: "this library is made and distributed under MIT license;",
   tableOfContentTitle: "list of exported API and typehelpers",
   // assemblyScriptOptions: {},
@@ -4348,9 +4766,32 @@ new JSautoDOC({
 
 ---
 
-<h2 id="createimmutable">CreateImmutable</h2>
+<h2 id="clearrequirecache">node.ClearRequireCache</h2>
 
-#### reference:`CreateImmutable`
+#### reference: `ClearRequireCache`
+
+- safely clear `import`/`require` `caches`;
+
+```js
+/**
+ * @type {(path:string)=>void}
+ */
+```
+
+- <i>example</i>:
+
+```js
+import { ClearRequireCache } from "vivth/node";
+ClearRequireCache("D://path/to.mjs");
+```
+
+\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+---
+
+<h2 id="createimmutable">neutral.CreateImmutable</h2>
+
+#### reference: `CreateImmutable`
 
 - function for create immutable object;
 - usefull for binding immutable object to global for shared object:
@@ -4365,33 +4806,30 @@ new JSautoDOC({
  * @param {(this:PARENT)=>OBJECT} object
  * @param {Object} [options]
  * @param {boolean} [options.lazy]
- * @return {OBJECT}
+ * @return {ReturnType<typeof TrySync<OBJECT>>}
  */
 ```
 
 - <i>example</i>:
 
 ```js
- import { CreateImmutable } from 'vivth';
-
- const mappedObject = new Map();
-
- CreateImmutable(window, 'mySharedObject', {
+ import { CreateImmutable } from 'vivth/neutral';
+  const mappedObject = new Map();
+  const [object, errorCreatingImmutable] = CreateImmutable(window, 'mySharedObject', {
  	setMap(name_, value) => {
  		mappedObject.set(name_, value)
  	},
  	getMap(name_) => mappedObject.get(name_),
  })
-
 ```
 
 \*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
-<h2 id="eventcheck">EventCheck</h2>
+<h2 id="eventcheck">neutral.EventCheck</h2>
 
-#### reference:`EventCheck`
+#### reference: `EventCheck`
 
 - simple validation function for [EventObject](#eventobject), for multiple context, eg: `mainThread` <-> `workerThread`;
 
@@ -4406,11 +4844,9 @@ new JSautoDOC({
 - <i>example</i>:
 
 ```js
-import { EventCheck } from "vivth";
+import { EventCheck } from "vivth/neutral";
 import { incomingMessage } from "./some/where.mjs";
-
 const eventObjectPayload = EventObject("worker:exit");
-
 console.log(EventCheck(incomingMessage, eventObjectPayload));
 // assuming `incomingMessage`, also created using EventObject('worker:exit');
 // or manually {[EventNameSpace]:'worker:exit'};
@@ -4421,9 +4857,9 @@ console.log(EventCheck(incomingMessage, eventObjectPayload));
 
 ---
 
-<h2 id="eventobject">EventObject</h2>
+<h2 id="eventobject">neutral.EventObject</h2>
 
-#### reference:`EventObject`
+#### reference: `EventObject`
 
 - simple object generation function helper for [EventCheck](#eventcheck), for multiple context, eg: `mainThread` <-> `workerThread`;
 
@@ -4438,8 +4874,7 @@ console.log(EventCheck(incomingMessage, eventObjectPayload));
 - <i>example</i>:
 
 ```js
-import { EventObject } from "vivth";
-
+import { EventObject } from "vivth/neutral";
 export const eventObjectPayload = EventObject("worker:exit");
 ```
 
@@ -4447,16 +4882,16 @@ export const eventObjectPayload = EventObject("worker:exit");
 
 ---
 
-<h2 id="forinasync">ForInAsync</h2>
+<h2 id="forinasync">neutral.ForInAsync</h2>
 
-#### reference:`ForInAsync`
+#### reference: `ForInAsync`
 
 - safe `Object` async iterator helper;
   > - collect errors then returns it as Set<Error>;
 
 ```js
 /**
- * @template {Record<string, any>} OBJECT
+ * @template {Record<string|number|symbol, any>} OBJECT
  * @template {any} RETURNTYPE
  * @param {OBJECT} object
  * @param {(
@@ -4476,8 +4911,7 @@ export const eventObjectPayload = EventObject("worker:exit");
 - <i>example</i>:
 
 ```js
-import { ForInAsync } from "vivth";
-
+import { ForInAsync } from "vivth/neutral";
 const object = { A: "a", B: "b" };
 const setOfError = await ForInAsync(
   object,
@@ -4494,16 +4928,16 @@ const setOfError = await ForInAsync(
 
 ---
 
-<h2 id="forinsync">ForInSync</h2>
+<h2 id="forinsync">neutral.ForInSync</h2>
 
-#### reference:`ForInSync`
+#### reference: `ForInSync`
 
 - safe `Object` iterator helper;
   > - collect errors then returns it as Set<Error>;
 
 ```js
 /**
- * @template {Record<string, any>} OBJECT
+ * @template {Record<string|number|symbol, any>} OBJECT
  * @template {any} RETURNTYPE
  * @param {OBJECT} object
  * @param {(
@@ -4523,8 +4957,7 @@ const setOfError = await ForInAsync(
 - <i>example</i>:
 
 ```js
-import { ForInSync } from "vivth";
-
+import { ForInSync } from "vivth/neutral";
 const object = { A: "a", B: "b" };
 const [setOfResult, setOfError] = ForInSync(
   object,
@@ -4541,9 +4974,9 @@ const [setOfResult, setOfError] = ForInSync(
 
 ---
 
-<h2 id="forofasync">ForOfAsync</h2>
+<h2 id="forofasync">neutral.ForOfAsync</h2>
 
-#### reference:`ForOfAsync`
+#### reference: `ForOfAsync`
 
 - loop through iterable safely;
 
@@ -4566,8 +4999,7 @@ const [setOfResult, setOfError] = ForInSync(
 - <i>example</i>:
 
 ```js
-import { ForOfAsync } from "vivth";
-
+import { ForOfAsync } from "vivth/neutral";
 await ForOfAsync(iterable, async (value, { prevError, breakEarly }) => {
   // code
 });
@@ -4577,9 +5009,9 @@ await ForOfAsync(iterable, async (value, { prevError, breakEarly }) => {
 
 ---
 
-<h2 id="forofsync">ForOfSync</h2>
+<h2 id="forofsync">neutral.ForOfSync</h2>
 
-#### reference:`ForOfSync`
+#### reference: `ForOfSync`
 
 - loop through iterable safely;
 
@@ -4602,20 +5034,34 @@ await ForOfAsync(iterable, async (value, { prevError, breakEarly }) => {
 - <i>example</i>:
 
 ```js
-import { ForOfSync } from "vivth";
-
+import { ForOfSync, TryAsync } from "vivth/neutral";
 ForOfSync(iterable, (value, { prevError, breakEarly }) => {
   // code
 });
+await Promise.all(
+  ForOfSync(
+    [
+      async () => {
+        // code to run pararelly
+      },
+      async () => {
+        // code to run pararelly
+      },
+    ],
+    async (cb) => {
+      return await cb();
+    },
+  )[0],
+);
 ```
 
 \*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
-<h2 id="getbufferfromrelativepath">GetBufferFromRelativePath</h2>
+<h2 id="getbufferfromrelativepath">node.GetBufferFromRelativePath</h2>
 
-#### reference:`GetBufferFromRelativePath`
+#### reference: `GetBufferFromRelativePath`
 
 - get content from relativePath;
 - only usefull to unbundled environtment;
@@ -4632,8 +5078,7 @@ ForOfSync(iterable, (value, { prevError, breakEarly }) => {
 - <i>example</i>:
 
 ```js
-import { GetContentFromRelativePath } from "vivth";
-
+import { GetContentFromRelativePath } from "vivth/node";
 await GetContentFromRelativePath("../doc/parsedFile.mjs", "utf-8");
 ```
 
@@ -4641,9 +5086,9 @@ await GetContentFromRelativePath("../doc/parsedFile.mjs", "utf-8");
 
 ---
 
-<h2 id="getfilesfromdir">GetFilesFromDir</h2>
+<h2 id="getfilesfromdir">node.GetFilesFromDir</h2>
 
-#### reference:`GetFilesFromDir`
+#### reference: `GetFilesFromDir`
 
 - helper function to get file from dir;
 
@@ -4660,8 +5105,7 @@ await GetContentFromRelativePath("../doc/parsedFile.mjs", "utf-8");
 - <i>example</i>:
 
 ```js
-import { GetFilesFromDir } from "vivth";
-
+import { GetFilesFromDir } from "vivth/node";
 const files = await GetFilesFromDir(
   join(Paths.root, "/dev/"),
   /[\s\S]*[noblank]/,
@@ -4672,13 +5116,14 @@ const files = await GetFilesFromDir(
 
 ---
 
-<h2 id="getmaxfilenamelength">GetMaxFilenameLength</h2>
+<h2 id="getmaxfilenamelength">node.GetMaxFilenameLength</h2>
 
-#### reference:`GetMaxFilenameLength`
+#### reference: `GetMaxFilenameLength`
 
-Get OS-specific max filename length.
-On POSIX: fs.constants.NAME_MAX
-On Windows: 255 (per component, unless long paths enabled)
+- Get OS-specific max filename length;
+- On POSIX: fs.constants.NAME_MAX;
+- On Windows: 255 (per component, unless long paths enabled);
+- used internally to validate name length for [`UniqueFSTempName`](#uniquefstempname);
 
 ```js
 /**
@@ -4690,9 +5135,35 @@ On Windows: 255 (per component, unless long paths enabled)
 
 ---
 
-<h2 id="getnamedimportalias">GetNamedImportAlias</h2>
+<h2 id="getmoduleesbuildplatform">node.GetModuleEsbuildPlatform</h2>
 
-#### reference:`GetNamedImportAlias`
+#### reference: `GetModuleEsbuildPlatform`
+
+- get valid esbuild platform name for a module path;
+
+```js
+/**
+ * @param { string } path
+ * @returns { Promise<'browser'|'node'|'neutral'|'unsupported'> }
+ */
+```
+
+- <i>example</i>:
+
+```js
+// D://lib-root/myModule.mjs
+import process from "node:process"; // lookupA;
+import { GetModuleEsbuildPlatform } from "vivth/node";
+await GetModuleEsbuildPlatform("./myModule.mjs"); // 'node'; caused of lookupA;
+```
+
+\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+---
+
+<h2 id="getnamedimportalias">neutral.GetNamedImportAlias</h2>
+
+#### reference: `GetNamedImportAlias`
 
 - regex helper for:
   > - get named import; OR
@@ -4710,13 +5181,12 @@ On Windows: 255 (per component, unless long paths enabled)
 - <i>example</i>:
 
 ```js
-import { GetNamedImportAlias } from "vivth";
-
-const checkNoAlias = `  
- import { something } from 'packageName';  
+import { GetNamedImportAlias } from "vivth/neutral";
+const checkNoAlias = `
+ import { something } from 'packageName';
  `;
-const checkAlias = `  
- import { something as somethingElse } from 'packageName';  
+const checkAlias = `
+ import { something as somethingElse } from 'packageName';
  `;
 GetNamedImportAlias(checkNoAlias, "something", "packageName"); // 'something'
 GetNamedImportAlias(checkAlias, "something", "packageName"); // 'somethingElse'
@@ -4726,9 +5196,9 @@ GetNamedImportAlias(checkAlias, "something", "packageName"); // 'somethingElse'
 
 ---
 
-<h2 id="getruntime">GetRuntime</h2>
+<h2 id="getruntime">neutral.GetRuntime</h2>
 
-#### reference:`GetRuntime`
+#### reference: `GetRuntime`
 
 - detects the current JavaScript runtime;
 
@@ -4741,19 +5211,17 @@ GetNamedImportAlias(checkAlias, "something", "packageName"); // 'somethingElse'
 - <i>example</i>:
 
 ```js
- import { GetRuntime } form 'vivth';
-
- const runtime = GetRuntime();
-
+import { GetRuntime } from "vivth/neutral";
+const runtime = GetRuntime();
 ```
 
 \*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
-<h2 id="instantiateassemblyscript">InstantiateAssemblyScript</h2>
+<h2 id="instantiateassemblyscript">node.InstantiateAssemblyScript</h2>
 
-#### reference:`InstantiateAssemblyScript`
+#### reference: `InstantiateAssemblyScript`
 
 - function wrapper for `.asar` `.wasm` from `AssemblyScript` asset;
 - conventions for using this class in conjuction with `JSautoDOC`:
@@ -4771,8 +5239,7 @@ GetNamedImportAlias(checkAlias, "something", "packageName"); // 'somethingElse'
 - <i>example</i>:
 
 ```js
-import { PathFSFile, InstantiateAssemblyScript } from "vivth";
-
+import { PathFSFile, InstantiateAssemblyScript } from "vivth/node";
 InstantiateAssemblyScript(PathFSFile.vivthFile("../function/myAsm.wasm"));
 ```
 
@@ -4780,9 +5247,9 @@ InstantiateAssemblyScript(PathFSFile.vivthFile("../function/myAsm.wasm"));
 
 ---
 
-<h2 id="isasync">IsAsync</h2>
+<h2 id="isasync">neutral.IsAsync</h2>
 
-#### reference:`IsAsync`
+#### reference: `IsAsync`
 
 - function helper for checking whether `functionReference` is async;
 
@@ -4796,15 +5263,13 @@ InstantiateAssemblyScript(PathFSFile.vivthFile("../function/myAsm.wasm"));
 - <i>example</i>:
 
 ```js
-import { IsAsync } from "vivth";
-
+import { IsAsync } from "vivth/neutral";
 const a = function (params) {
   // code
 };
 const b = async () => {
   // code
 };
-
 IsAsync(a); // false
 IsAsync(b); // true
 ```
@@ -4813,37 +5278,34 @@ IsAsync(b); // true
 
 ---
 
-<h2 id="isinstanceof">IsInstanceOf</h2>
+<h2 id="isinstanceof">neutral.IsInstanceOf</h2>
 
-#### reference:`IsInstanceOf`
+#### reference: `IsInstanceOf`
 
 A type-safe `instanceof` helper.
 
 ```js
 /**
- * @template T
+ * @template OBJ
  * @param {unknown} obj - The object to test
- * @param {new (...args: any[]) => T} classRef - A constructor reference for T
- * @returns {obj is T}
+ * @param {new (...args: any[]) => OBJ} classRef - A constructor reference for T
+ * @returns {obj is OBJ}
  */
 ```
 
 - <i>example</i>:
 
 ```js
-import { IsInstanceOf, Signal, Effect } from "vivth";
-
+import { IsInstanceOf, Signal, Effect } from "vivth/neutral";
 const a = new Signal(0);
 IsInstanceOf(a, Signal); // true
 IsInstanceOf(a, Effect); // false
-
 // but why not
 if (!(a instanceof Signal)) {
   //
 }
-
 // here's why
-if (!IsTypeOf(a, Signal)) {
+if (!IsInstanceOf(a, Signal)) {
   //
 }
 ```
@@ -4852,9 +5314,9 @@ if (!IsTypeOf(a, Signal)) {
 
 ---
 
-<h2 id="issamefile">IsSameFile</h2>
+<h2 id="issamefile">neutral.IsSameFile</h2>
 
-#### reference:`IsSameFile`
+#### reference: `IsSameFile`
 
 - check if two path is the same file;
 
@@ -4866,13 +5328,24 @@ if (!IsTypeOf(a, Signal)) {
  */
 ```
 
+- <i>example</i>:
+
+```js
+// `D://myFile.mjs` cwd at `D://`
+import { IsSameFile } from "vivth/node";
+IsSameFile("D:\\mFile.mjs", "D://mFile.mjs"); // true;
+IsSameFile("//mFile.mjs", "D://mFile.mjs"); // true;
+// both path are auto resolved to Paths.root;
+IsSameFile("D:\\mFile.mjs", "D:\\notmfile.mjs"); // false;
+```
+
 \*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
-<h2 id="isstringlookslikeapath">IsStringLooksLikeAPath</h2>
+<h2 id="isstringlookslikeapath">neutral.IsStringLooksLikeAPath</h2>
 
-#### reference:`IsStringLooksLikeAPath`
+#### reference: `IsStringLooksLikeAPath`
 
 - check if string lookslike a path;
 
@@ -4886,8 +5359,7 @@ if (!IsTypeOf(a, Signal)) {
 - <i>example</i>:
 
 ```js
-import { IsStringLooksLikeAPath } from "vivth";
-
+import { IsStringLooksLikeAPath } from "vivth/neutral";
 looksLikePath("./foo.mjs"); // true
 looksLikePath("../bar.ts"); // true
 looksLikePath("/usr/lib.js"); // true
@@ -4900,53 +5372,18 @@ looksLikePath("node:path"); // false
 
 ---
 
-<h2 id="istypeof">IsTypeOf</h2>
+<h2 id="istypeof">neutral.IsTypeOf</h2>
 
-#### reference:`IsTypeOf`
+#### reference: ``
 
 A type-safe `typeof` helper.
 
 ```js
 /**
- * @template {any} O
- * @param {O} object
- * @param {"string" | "number" | "boolean" | "object" | "function" | "undefined" | "symbol" | "bigint"} type
- * @returns {boolean}
- */
-```
-
-- <i>example</i>:
-
-```js
-import { IsinstanceOf, Signal, Effect } from "vivth";
-
-const a = "hei";
-IsTypeOf(a, "string"); // true
-IsTypeOf(a, "number"); // false
-
-// but why not
-if (!(typeof a === "number")) {
-  //
-}
-
-// here's why
-if (!IsTypeOf(a, "string")) {
-  //
-}
-```
-
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
-
----
-
-<h2 id="joinpathsthennormalize">JoinPathsThenNormalize</h2>
-
-#### reference:`JoinPathsThenNormalize`
-
-```js
-/**
- * @param {string[]} paths
- * @returns {string}
+ * @template {keyof typeof TypeMap} K
+ * @param {unknown} object - The value to check.
+ * @param {K} type - The type string to compare against.
+ * @returns {object is typeof TypeMap[K]} - Returns true if the type matches, narrowing the type.
  */
 ```
 
@@ -4954,9 +5391,9 @@ if (!IsTypeOf(a, "string")) {
 
 ---
 
-<h2 id="lazyfactory">LazyFactory</h2>
+<h2 id="lazyfactory">neutral.LazyFactory</h2>
 
-#### reference:`LazyFactory`
+#### reference: `LazyFactory`
 
 - function helper for creating lazyObject:
   > - usefull for lazily instantiating an object, since instance naturally have props/methods;
@@ -4965,48 +5402,75 @@ if (!IsTypeOf(a, "string")) {
 /**
  * @template FACTORY
  * @param {() => FACTORY} factory
- * @returns {FACTORY & {[unwrapLazy]: ()=> FACTORY}}
- * - the unwrapLazy prop can be accessed to force instatiation/call;
- * >- `unwrapLazy` prop name can be checked by checking the list of possible prop, from your ide;
- * >- as of version `1.0.0`, value is `vivth:unwrapLazy;`;
+ * @returns {FACTORY & {[FactoryKey]: FACTORY}}
+ * - the FactoryKey prop can be accessed to force instatiation/call;
+ * - usefull for Object that has different accessor behaviour when being get via Proxy, including but not limited too:
+ * >- `Set<any>`;
+ * >- `Map<any, any>`;
+ * >- non referenced object, like `Effect`;
  */
 ```
 
 - <i>example</i>:
 
 ```js
-import { LazyFactory } from "vivth";
-
+import { LazyFactory, FactoryKey } from "vivth/neutral";
 class MyClass {
   constructor() {
     this.myProp = 1; // will only available when accessed;
   }
 }
-
 export const myInstance = LazyFactory(() => {
   // the instance of MyClass will only be available when,
   // it's prop, or method is accessed/reassign;
   return new MyClass();
 });
-
 // on other file
 import { myInstance } from "./myInstance.mjs";
-
 const a = myInstance; // not yet initiated;
 const b = a.myProp; // imediately initiated;
 // OR
-myInstance["vivth:unwrapLazy;"](); // forcefully call factory generator;
+myInstance[FactoryKey]; // forcefully call factory generator;
 ```
 
 \*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
-<h2 id="newchainable">NewChainable</h2>
+<h2 id="monkeypatch">neutral.MonkeyPatch</h2>
 
-#### reference:`NewChainable`
+\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
-- Wraps a target object in a chainable.
+---
+
+<h2 id="newanimationtimeline">neutral.NewAnimationTimeline</h2>
+
+#### reference: `NewAnimationTimeline`
+
+- create animation timeline helper;
+
+```js
+/**
+ * @param {Object} options
+ * @param {number} options.fps
+ * - frame per second;
+ * @param {{seconds:number}|{frames:number}} options.duration
+ * @param {(frame:{index:number, total:number, percentage:number})=>void} callback
+ * - called every frame until duration ends;
+ * @returns {()=>void}
+ * - early clearInterval callback;
+ */
+```
+
+\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+---
+
+<h2 id="newchainable">neutral.NewChainable</h2>
+
+#### reference: `NewChainable`
+
+- Wraps a target object in a chainable;
 - example:
 
 ```html
@@ -5018,79 +5482,115 @@ myInstance["vivth:unwrapLazy;"](); // forcefully call factory generator;
 
 ```js
 /**
- * @template {object} T
- * @param {T} ctx
- * @returns {import("../typehints/ChainableType.mjs").ChainableType<T>}
+ * @template {object} OBJ
+ * @param {OBJ} ctx
+ * @returns {import("../typehints/ChainableType.mjs").ChainableType<OBJ>}
  */
 ```
 
 - <i>example</i>:
 
 ```js
-import { NewChainable } from "vivth";
-
-(() => {
+import { NewChainable, TrySync } from "vivth/neutral";
+TrySync(() => {
   const canvas = document.getElementById("myCanvas");
   if (!canvas) {
     return;
   }
-  // Now you can chain:
-  NewChainable(canvas.getContext("2d"))
+  const ctx2D = canvas.getContext("2d");
+  // instead of repeating call method from `ctx2D`, you can:
+  NewChainable(ctx2D)
     .beginPath()
     .moveTo(50, 50)
     .lineTo(200, 50)
     .lineTo(200, 200)
     .closePath()
     .stroke();
-})();
+  // .this to get ctx2D reference;
+});
 ```
 
 \*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
-<h2 id="objectregistrar">ObjectRegistrar</h2>
+<h2 id="newobjectwrapper">neutral.NewObjectWrapper</h2>
 
-#### reference:`ObjectRegistrar`
+#### reference: `NewObjectWrapper`
+
+- object creation mapper;
+
+```js
+/**
+ * @template {Object} OBJ
+ * @template {any} MODIFIED
+ * @param {OBJ} object
+ * @param {(obj:OBJ)=>MODIFIED} callback
+ * @returns {MODIFIED}
+ */
+```
+
+\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+---
+
+<h2 id="objectregistrar">neutral.ObjectRegistrar</h2>
+
+#### reference: `ObjectRegistrar`
 
 - function helper to object registrar;
 
 ```js
 /**
+ * @template {any[]} ARGS
  * @template {any} OBJ
- * @param {(any:OBJ)=>void} registrarCallback
- * @returns {(obj:OBJ)=>OBJ}
+ * @param {(...args:ARGS)=>OBJ} registrarCallback
+ * @returns {Parameters<typeof ObjectRegistrar<ARGS, OBJ>>[0]}
  */
 ```
 
 - <i>example</i>:
 
 ```js
-import { ObjectRegistrar, Signal, ForOfSync } from "vivth";
-
-const setOfDCCB = new Set();
-const registrar = (obj) => {
-  setOfDCCB.add(obj);
-};
-const cleanup = () =>
-  ForOfSync(setOfDCCB, (signal) => {
-    signal.remove.ref();
-  });
-
-const autoCleanedUpSignal = ObjectRegistrar(registrar);
-const mySignal = autoCleanedUpSignal(new Signal(1));
-
-// somewhere else
-cleanup();
+import { ObjectRegistrar, Signal, ForOfSync } from "vivth/neutral";
+const autoCleanedUpSignal = ObjectRegistrar(() => {});
+const mySignal = autoCleanedUpSignal(1);
 ```
 
 \*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
-<h2 id="pipeasync">PipeAsync</h2>
+<h2 id="parsesqlfile">node.ParseSQLFile</h2>
 
-#### reference:`PipeAsync`
+#### reference: `ParseSQLFile`
+
+- parse then generate file right next to said sql file;
+- this function assume `Paths` already instantiated;s
+
+```js
+/**
+ * @param {string} path
+ * @param {(
+ *  arg0:{input:Record<string, string>,output:Record<string, string>, sqlString:string}
+ * )=>
+ *  {ext:string, content:string}
+ * } [fileGenerator]
+ * - file string generator;
+ * - the default will generate mjs callback type, and sql string;
+ * >- `callback` type: basename + 'CBType';
+ * >- `sql` string: basename + 'SQL';
+ * @returns {ReturnType<typeof TryAsync<boolean>>}
+ */
+```
+
+\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+---
+
+<h2 id="pipeasync">neutral.PipeAsync</h2>
+
+#### reference: `PipeAsync`
 
 - create an async pipeline starting from an initial value;
 - every step must return the same type (VALUE), but may be sync or async.
@@ -5107,8 +5607,7 @@ cleanup();
 - <i>example</i>:
 
 ```js
-import { PipeAsync } from "vivth";
-
+import { PipeAsync } from "vivth/neutral";
 const res = await PipeAsync(
   "intialValue", // res: Promise<"intialValue">
   (val) => `${val}:1`, // res: Promise<"intialValue:1">
@@ -5121,9 +5620,9 @@ const res = await PipeAsync(
 
 ---
 
-<h2 id="pipesync">PipeSync</h2>
+<h2 id="pipesync">neutral.PipeSync</h2>
 
-#### reference:`PipeSync`
+#### reference: `PipeSync`
 
 ```js
 /**
@@ -5137,8 +5636,7 @@ const res = await PipeAsync(
 - <i>example</i>:
 
 ```js
-import { PipeSync } from "vivth";
-
+import { PipeSync } from "vivth/neutral";
 const res = PipeSync(
   "intialValue", // res: "intialValue"
   (val) => `${val}:1`, // res: "intialValue:1"
@@ -5151,46 +5649,80 @@ const res = PipeSync(
 
 ---
 
-<h2 id="templateliteral">TemplateLiteral</h2>
+<h2 id="safeimport">node.SafeImport</h2>
 
-#### reference:`TemplateLiteral`
+#### reference: `SafeImport`
 
-- function helper to create template literal with valueHandler to handle each values;
+- import while imediately call clearing require caches;
+- `usecases`:
+  > - long running process that need to prevent memory leak from uncleanable `cached import`;
+  > - to simply import fresh everytime;
+- the imported module can then just be treated like any other variable, to only lived and tracked by variable reference only;
+- due to how `vivth/node.ClearRequireCache` works, parallel await (like using Promise.all, or not awaited until later) will be done squentially(if targetting the same path);
 
 ```js
 /**
- * @template {any} INPUTTYPE
- * @param {import('../typehints/TemplateLiteralValueHandler.mjs').TemplateLiteralValueHandler<INPUTTYPE>} valueHandler
- * @param {(result:string)=>(string|Promise<string>)} [postProcess]
- * @returns {(strings:TemplateStringsArray,
- * ...values:(INPUTTYPE)[])=>
- * ReturnType<Parameters<typeof TemplateLiteral>[0]>}
+ * @template { any } T
+ * - put the type
+ * @param {string} path
+ * - either absolute `diskAbsolutepath` or from `Paths.root`;
+ * @returns {ReturnType<typeof import('./TryAsync.mjs').TryAsync<T>>}
  */
 ```
 
 - <i>example</i>:
 
 ```js
- import { TemplateLiteral } form 'vivth';
-
- export const html = TemplateLiteral(
-  ({ ...datas }) => `my string`,
-  // optional
-  (res) => return window.body.innerHTML = res
- );
-
- html`<div>${`<button>innerButton</button>`}</div>`;
- // this will set innerHTML of body to '<div><button>innerButton</button></div>'
-
+// Paths.root/myscript.mjs
+import { SafeImport } from "vivth/node";
+// add type with: import('vivth/neutral').SafeImportReturnType<import('./something.mjs')>
+const [importedModule, errorSafeImport] = await SafeImport(
+  "/absolute/path/from/Paths.root/something.mjs",
+);
 ```
 
 \*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
-<h2 id="timeout">Timeout</h2>
+<h2 id="templateliteral">neutral.TemplateLiteral</h2>
 
-#### reference:`Timeout`
+#### reference: `TemplateLiteral`
+
+- function helper to create template literal with valueHandler to handle each values;
+
+```js
+/**
+ * @template {any} INPUTTYPE
+ * @template {string|Promise<string>} RET
+ * @param {import('../typehints/TemplateLiteralValueHandler.mjs').TemplateLiteralValueHandler<INPUTTYPE>} valueHandler
+ * @param {(result:string)=>(RET)} [postProcess]
+ * @returns {(strings:TemplateStringsArray,
+ * ...values:(INPUTTYPE)[])=>
+ * RET}
+ */
+```
+
+- <i>example</i>:
+
+```js
+ import { TemplateLiteral } from 'vivth/neutral';
+  export const html = TemplateLiteral(
+  ({ ...datas }) => `my string`,
+  // optional
+  (res) => return window.body.innerHTML = res
+ );
+  html`<div>${`<button>innerButton</button>`}</div>`;
+ // this will set innerHTML of body to '<div><button>innerButton</button></div>'
+```
+
+\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+---
+
+<h2 id="timeout">neutral.Timeout</h2>
+
+#### reference: `Timeout`
 
 - function helper to temporarily block the code in async context;
 
@@ -5205,8 +5737,7 @@ const res = PipeSync(
 - <i>example</i>:
 
 ```js
-import { Timeout } from "vivth";
-
+import { Timeout } from "vivth/neutral";
 const test = async () => {
   // code0
   await Timeout(1000);
@@ -5219,9 +5750,9 @@ test();
 
 ---
 
-<h2 id="tries">Tries</h2>
+<h2 id="tries">neutral.Tries</h2>
 
-#### reference:`Tries`
+#### reference: `Tries`
 
 - function for error as value for chained operations;
 - utility function to brute force which key is able to run;
@@ -5248,8 +5779,7 @@ test();
 - <i>example</i>:
 
 ```js
-import { Tries } from "vivth";
-
+import { Tries } from "vivth/neutral";
 const [[key, result], setOfError] = await Tries({
   someRuntime: async ({ prevError }) => {
     // asuming on this one doesn't naturally throw error,
@@ -5283,9 +5813,9 @@ const [[key, result], setOfError] = await Tries({
 
 ---
 
-<h2 id="tryasync">TryAsync</h2>
+<h2 id="tryasync">neutral.TryAsync</h2>
 
-#### reference:`TryAsync_instance.export`
+#### reference: `TryAsync`
 
 - function for error as value for asynchronous operation;
 - usefull to flatten indentation for error handlings;
@@ -5301,12 +5831,10 @@ const [[key, result], setOfError] = await Tries({
 - <i>example</i>:
 
 ```js
-import { TryAsync } from "vivth";
-
+import { TryAsync } from "vivth/neutral";
 let [res, error] = await TryAsync(async () => {
   return await fetch("./someAPI/Path");
 });
-
 [res, error] = await TryAsync(async () => {
   if (!res.ok) {
     throw 404;
@@ -5319,9 +5847,9 @@ let [res, error] = await TryAsync(async () => {
 
 ---
 
-<h2 id="trynew">TryNew</h2>
+<h2 id="trynew">neutral.TryNew</h2>
 
-#### reference:`TryNew`
+#### reference: `TryNew`
 
 - function helper to turn unsafe constructor call of classReference into safe one without tryCatch block;
 - usefull to flatten your source code;
@@ -5339,8 +5867,7 @@ let [res, error] = await TryAsync(async () => {
 - <i>example</i>:
 
 ```js
-import { TryNew } from "vivth";
-
+import { TryNew } from "vivth/neutral";
 const [instance, error] = TryNew(ClassReference, ...classConstructorParameters);
 if (!error) {
   // do something with instance safely;
@@ -5351,9 +5878,9 @@ if (!error) {
 
 ---
 
-<h2 id="trysync">TrySync</h2>
+<h2 id="trysync">neutral.TrySync</h2>
 
-#### reference:`TrySync`
+#### reference: `TrySync`
 
 - function for error as value for synchronous operation;
 - usefull to flatten indentation for error handlings;
@@ -5372,7 +5899,6 @@ if (!error) {
 ```js
 import { readFileSync } from "node:fs";
 import { TrySync } from "./yourModule.js";
-
 const [data, error] = TrySync(() => {
   return readFileSync("./some/file.txt", "utf-8");
 });
@@ -5382,19 +5908,21 @@ const [data, error] = TrySync(() => {
 
 ---
 
-<h2 id="tstomjs">TsToMjs</h2>
+<h2 id="tstomjs">node.TsToMjs</h2>
 
-#### reference:`TsToMjs`
+#### reference: `TsToMjs`
 
 - turn `.mts`||`.ts` file into `.mjs`, no bundling, just traspilation;
 - on certain circumstance where `.mjs` result needed to be typed, you need to manually add `jsdoc`;
   > - uses `"at"preserve` to register `jsdoc`;
-- auto compile and typehint `.as.ts` to `.wasm`;
+  > - at
 
 ```js
 /**
- * @param {string} path_
- * - relative path from `Paths.root`;
+ * @\[blank\]typedef, import itself.mts pointing to the same exported object to fully type it in mjs(which `vivth` used to generate exports);
+ * - auto compile and typehint `.as.ts` to `.wasm`;
+ * @param {string} path
+ * - `relative`(to `Paths.root`) OR `absolute`, both are accepted;
  * @param {Object} [options]
  * @param {string} [options.overrideOutputDir]
  * - default: write conversion to same directory;
@@ -5409,8 +5937,7 @@ const [data, error] = TrySync(() => {
 - <i>example</i>:
 
 ```js
-import { TsToMjs } from "vivth";
-
+import { TsToMjs } from "vivth/node";
 await TsToMjs("./myFile.mts", {
   encoding: "utf-8",
   overrideOutputDir: "./other/dir",
@@ -5421,9 +5948,9 @@ await TsToMjs("./myFile.mts", {
 
 ---
 
-<h2 id="uniquefstempname">UniqueFSTempName</h2>
+<h2 id="uniquefstempname">node.UniqueFSTempName</h2>
 
-#### reference:`UniqueFSTempName`
+#### reference: `UniqueFSTempName`
 
 - generate unique full path name to temp directory + 'vivth/${uniqueName}.tmp';
 - filename length already calibrated for each os;
@@ -5431,6 +5958,7 @@ await TsToMjs("./myFile.mts", {
 ```js
 /**
  * @param {string} path
+ * @param {string} [fileExtention]
  * @returns {string}
  */
 ```
@@ -5439,7 +5967,212 @@ await TsToMjs("./myFile.mts", {
 
 ---
 
-<h2 id="anybutundefined">AnyButUndefined</h2>
+<h2 id="vivthyneinth">node.VivthyNeinth</h2>
+
+#### reference: `VivthyNeinth`
+
+- alternative to `neinth`;
+
+```js
+/**
+ * @template {any} EXPORT
+ * @implements {VivthCleanup}
+ */
+```
+
+#### reference: `VivthyNeinth.start`
+
+- DO NOT CALL THIS METHOD INSIDE
+
+```js
+/**
+ * @param {Object} options
+ * @param {string} options.dirPath
+ * @param {import('../typehints/AutoDocASOptions.mjs').AutoDocASOptions} [options.assemblyScriptOptions]
+ * @returns {ReturnType<typeof TryAsync<void>>}
+ */
+```
+
+#### reference: `VivthyNeinth_instance.exportedValue:setter`
+
+- use this to update export value;
+- `WARNING`: this instance setter are accesible from outside, including importer;
+  > - usefull for treating `VivthyNeinth` instance as global signal;
+  > - you can accidentally ;
+
+```js
+/**
+ * @param {EXPORT|undefined} newExportValue
+ * @returns {void}
+ */
+```
+
+- <i>example</i>:
+
+```js
+
+```
+
+#### reference: `VivthyNeinth_instance.listener:getter`
+
+- use this to listen to dependency changes(inside `Effect`);
+
+```js
+/**
+ * @returns {Promise<Derived<EXPORT|undefined>>}
+ */
+```
+
+- <i>example</i>:
+
+```js
+
+```
+
+#### reference: `VivthyNeinth_instance.newSignal`
+
+- generate autoCleaned `Signal` instance;
+
+- <i>example</i>:
+
+```js
+/// on VivthyNeinth callback scope
+const { newSignal } = this;
+const numberSignal = newSignal(1);
+///
+```
+
+#### reference: `VivthyNeinth_instance.newEffect`
+
+- generate autoCleaned `Effect` instance;
+
+- <i>example</i>:
+
+```js
+/// on VivthyNeinth callback scope
+const { newEffect } = this;
+const numberSignal = newSignal(1);
+const effer = newEffect(async ({ subscribe }) => {
+  const numberSignalValue = subscribe(numberSignal).value;
+});
+///
+```
+
+#### reference: `VivthyNeinth_instance.newDerived`
+
+- generate autoCleaned `Derived` instance;
+
+- <i>example</i>:
+
+```js
+/// on VivthyNeinth callback scope
+const { newDerived } = this;
+const effer = newDerived(async ({ subscribe }) => {
+  const numberSignalValue = subscribe(numberSignal).value;
+  return numberSignalValue;
+  2;
+});
+///
+```
+
+#### reference: `VivthyNeinth_instance.onMutate`
+
+```js
+/**
+ * @type {Set<()=>Promise<void>>}
+ */
+```
+
+- <i>example</i>:
+
+```js
+ import { watch } from "chokidar";
+  /// on VivthyNeinth arg callback scope
+ const { onCleanups } = this;
+ const watcher = watch('/src/');
+ watcher.addListener('all', (...args)=>{
+ 	// listener code;
+ });
+ onCleanups.add(async()=>{
+ watcher.removeAllListeners();
+ watcher.close();
+ })
+ ///
+	/ 	#onCleanups = new Set();  	/
+   @description
+ - manually registering object celeanup;
+ @param {()=>Promise<void>} callback
+ @returns {void}
+ @example
+ import { watch } from 'chokidar';
+  /// on VivthyNeinth export callback scope
+ const watcher = watch('D://my/dir/path');
+ // preferably to declare the cleanup right bellow it's object creation;
+ // set 'I__the_developer__have_provided_onFileMutations_cleanupCallbacks_for_every_long_running_object_in_this_file' to false if you might want to save before full cleanup is written;
+ this.onMutate(async () => {
+ 	watcher.removeAllListeners();
+ 	watcher.close();
+ });
+  watcher.addListener('all', (eventName, path, stats) => {
+ 	//
+ })
+ ///
+ // alternative: use vivth `modules` that returns object that implements `VivthCleanup`;
+ // and call uses `registerObjectWithAutoCleanup`;
+```
+
+#### reference: `VivthyNeinth_instance.onExit`
+
+- process SafeExit;
+
+```js
+/**
+ * @param {()=>Promise<void>} callback
+ * @returns {void}
+ */
+```
+
+- <i>example</i>:
+
+```js
+import { Console } from "vivth/neutral";
+/// on VivthyNeinth export callback scope
+this.onExit(async () => {
+  Console.log("main process ends");
+});
+///
+```
+
+#### reference: `VivthyNeinth_instance.registerObjectWithAutoCleanup`
+
+- register premade cleanup `vivthCleanup` method to `VivthyNeinth` lifecycle;
+
+```js
+/**
+ * @template {Object} OBJ
+ * @param { OBJ & VivthCleanup } obj
+ * @returns {OBJ}
+ */
+```
+
+- <i>example</i>:
+
+```js
+import { EsWatcher } from "vivth/node";
+/// on VivthyNeinth export callback scope
+const esWatcherInstance = this.registerObjectWithAutoCleanup(
+  new EsWatcher({
+    ...buildOptions,
+  }),
+);
+///
+```
+
+\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+---
+
+<h2 id="anybutundefined">neutral.AnyButUndefined</h2>
 
 - jsdoc types:
 
@@ -5454,7 +6187,35 @@ await TsToMjs("./myFile.mts", {
 
 ---
 
-<h2 id="assemblyscriptexportstype">AssemblyScriptExportsType</h2>
+<h2 id="arraytokeys">neutral.ArrayToKeys</h2>
+
+- jsdoc types:
+
+````js
+/**
+ * @preserve
+ * @description
+ * - extract unique string from ArrayString[];
+ * - Takes an array/tuple type and returns a unique UNION of its elements.
+ * ```ts
+ * const a = ['hi', 'there'] as const;
+ * const check = (aa:ArrayToKeys<typeof a>) => {};
+ * ```
+ * ```js
+ * const a = /** @type {const} *[]/ (['hi', 'there']);
+ * /** @param {ArrayToKeys<typeof a>} aa *[]/
+ * const check = (aa) => {};
+ * ```
+ * @template {readonly unknown[]} T
+ * @typedef {import('../../../src/typehints/ArrayToKeys.mts').ArrayToKeys<T>} ArrayToKeys
+ */
+````
+
+\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+---
+
+<h2 id="assemblyscriptexportstype">neutral.AssemblyScriptExportsType</h2>
 
 - jsdoc types:
 
@@ -5462,7 +6223,7 @@ await TsToMjs("./myFile.mts", {
 /**
  * - `AssemblyScript` `exports` type helper;
  * @template {Record<string, unknown>} RESULTTYPE
- * @typedef {Awaited<ReturnType<typeof import('./src/typehints/@assemblyscript/loader').instantiate<RESULTTYPE>>>} AssemblyScriptExportsType
+ * @typedef {Awaited<ReturnType<typeof import('../../../src/typehints/@assemblyscript/loader').instantiate<RESULTTYPE>>>} AssemblyScriptExportsType
  */
 ```
 
@@ -5470,7 +6231,7 @@ await TsToMjs("./myFile.mts", {
 
 ---
 
-<h2 id="assemblyscriptloaderinstantiate">AssemblyScriptLoaderInstantiate</h2>
+<h2 id="assemblyscriptloaderinstantiate">neutral.AssemblyScriptLoaderInstantiate</h2>
 
 - jsdoc types:
 
@@ -5478,7 +6239,7 @@ await TsToMjs("./myFile.mts", {
 /**
  * - instantiate type helper;
  * @template {Record<string, unknown>} RESULTTYPE
- * @typedef {typeof import('./src/typehints/@assemblyscript/loader').instantiate<RESULTTYPE>} AssemblyScriptLoaderInstantiate
+ * @typedef {typeof import('../../../src/typehints/@assemblyscript/loader').instantiate<RESULTTYPE>} AssemblyScriptLoaderInstantiate
  */
 ```
 
@@ -5486,7 +6247,7 @@ await TsToMjs("./myFile.mts", {
 
 ---
 
-<h2 id="autodocasoptions">AutoDocASOptions</h2>
+<h2 id="autodocasoptions">neutral.AutoDocASOptions</h2>
 
 - jsdoc types:
 
@@ -5501,7 +6262,7 @@ await TsToMjs("./myFile.mts", {
  * @property {string[]} [ASArgv]
  * - `argv` for assembley script compiler (`asc.main`), excluding `inputPath`, `--outputFile`, `--bindings`;
  * >- `--bindings`: strictly using `esm`;
- * @property {Parameters<typeof import('./src/bundler/CompileAS.mjs').CompileAS>[1]} [ASAPIOptions]
+ * @property {Parameters<typeof import('../../../src/bundler/CompileAS.mjs').CompileAS>[1]} [ASAPIOptions]
  */
 ```
 
@@ -5509,18 +6270,18 @@ await TsToMjs("./myFile.mts", {
 
 ---
 
-<h2 id="chainabletype">ChainableType</h2>
+<h2 id="chainabletype">neutral.ChainableType</h2>
 
 - jsdoc types:
 
 ```js
 /**
- * @template {object} T
- * @typedef {{
- *   [K in keyof T]:
- *     T[K] extends (...args: any[]) => any
- *       ? (...args: Parameters<T[K]>) => ChainableType<T>
- *       : T[K]
+ * @template {object} OBJ
+ * @typedef { {this: OBJ} & {
+ *   [K in keyof OBJ]:
+ *     OBJ[K] extends (...args: any[]) => any
+ *       ? (...args: Parameters<OBJ[K]>) => ChainableType<OBJ>
+ *       : OBJ[K]
  * }} ChainableType
  */
 ```
@@ -5529,7 +6290,82 @@ await TsToMjs("./myFile.mts", {
 
 ---
 
-<h2 id="devtestcb">DevTestCB</h2>
+<h2 id="componentdecorator_constructor">neutral.ComponentDecorator_Constructor</h2>
+
+- jsdoc types:
+
+```js
+/**
+ * @description Creates a constructor structure with custom static members added.
+ * @template {new (...args: any[]) => HTMLElement} BASE
+ * @template {readonly string[]} ATTRS
+ * @typedef {BASE & {
+ *   readonly observedAttributes: ATTRS;
+ * }} ComponentDecorator_Constructor
+ */
+```
+
+\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+---
+
+<h2 id="consoleadditionalsettingtype">neutral.ConsoleAdditionalSettingType</h2>
+
+- jsdoc types:
+
+```js
+/**
+ * @typedef {Object} ConsoleAdditionalSettingType
+ * @property {boolean} [now]
+ */
+```
+
+\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+---
+
+<h2 id="decorator">neutral.Decorator</h2>
+
+- jsdoc types:
+
+```js
+/**
+ * @preserve
+ * @description
+ * - type helper to create decorator;
+ * >- matches argument with host method;
+ * @template {(...args: any[]) => any} OriginalFn - The original method type;
+ * @template {readonly unknown[]} DecoratorArgs - Tuple of custom decorator arguments;
+ * @typedef {import('../../../src/typehints/Decorator.mts').Decorator<OriginalFn, DecoratorArgs>} Decorator
+ */
+```
+
+\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+---
+
+<h2 id="decoratormonkeypatch">neutral.DecoratorMonkeyPatch</h2>
+
+- jsdoc types:
+
+```js
+/**
+ * @preserve
+ * @description
+ * - type helper to create decorator for monkeypatching class/instance method;
+ * >- matches argument with host method;
+ * >- matches return type with host method;
+ * @template {(...args: any[]) => any} OriginalFn - The original method type;
+ * @template {readonly unknown[]} DecoratorArgs - Tuple of custom decorator arguments;
+ * @typedef {import('../../../src/typehints/DecoratorMonkeyPatch.mts').DecoratorMonkeyPatch<OriginalFn, DecoratorArgs>} DecoratorMonkeyPatch
+ */
+```
+
+\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+---
+
+<h2 id="devtestcb">neutral.DevTestCB</h2>
 
 - jsdoc types:
 
@@ -5549,7 +6385,7 @@ await TsToMjs("./myFile.mts", {
 
 ---
 
-<h2 id="envmodetype">EnvModeType</h2>
+<h2 id="envmodetype">neutral.EnvModeType</h2>
 
 - jsdoc types:
 
@@ -5564,7 +6400,7 @@ await TsToMjs("./myFile.mts", {
 
 ---
 
-<h2 id="extnametype">ExtnameType</h2>
+<h2 id="extnametype">neutral.ExtnameType</h2>
 
 - jsdoc types:
 
@@ -5579,7 +6415,7 @@ await TsToMjs("./myFile.mts", {
 
 ---
 
-<h2 id="listarg">ListArg</h2>
+<h2 id="listarg">neutral.ListArg</h2>
 
 - jsdoc types:
 
@@ -5594,7 +6430,7 @@ await TsToMjs("./myFile.mts", {
 
 ---
 
-<h2 id="litexpkeytype">LitExpKeyType</h2>
+<h2 id="litexpkeytype">neutral.LitExpKeyType</h2>
 
 - jsdoc types:
 
@@ -5608,13 +6444,13 @@ await TsToMjs("./myFile.mts", {
 
 ---
 
-<h2 id="litexpresulttype">LitExpResultType</h2>
+<h2 id="litexpresulttype">neutral.LitExpResultType</h2>
 
 - jsdoc types:
 
 ```js
 /**
- * @template {import('./src/typehints/LitExpKeyType.mjs').LitExpKeyType} KEYS
+ * @template {import("../../../src/typehints/LitExpKeyType.mjs").LitExpKeyType} KEYS
  * @typedef {{result:{whole:string[], named:Array<Record<keyof KEYS, string>>},
  * regexp: RegExp}} LitExpResultType
  */
@@ -5624,7 +6460,29 @@ await TsToMjs("./myFile.mts", {
 
 ---
 
-<h2 id="mutationtype">MutationType</h2>
+<h2 id="monkeypatchedtype">neutral.MonkeyPatchedType</h2>
+
+- jsdoc types:
+
+```js
+/**
+ * @description
+ * - type helper for `MonkeyPatch`;
+ * @template {any} ORIOBJ
+ * @typedef {ORIOBJ extends (...args: infer A) => infer R
+ *    ? (...args: A) => R
+ *    : ORIOBJ extends abstract new (...args: infer C) => infer I
+ *    ? abstract new (...args: C) => I
+ *    : any
+ * } MonkeyPatchedType
+ */
+```
+
+\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+---
+
+<h2 id="mutationtype">neutral.MutationType</h2>
 
 - jsdoc types:
 
@@ -5641,14 +6499,18 @@ await TsToMjs("./myFile.mts", {
 
 ---
 
-<h2 id="qcbfiforeturn">QCBFIFOReturn</h2>
+<h2 id="parametersfollowingn">neutral.ParametersFollowingN</h2>
 
 - jsdoc types:
 
 ```js
 /**
- * - return type of Q callback fifo;
- * @typedef {Omit<import("./src/typehints/QCBReturn.mjs").QCBReturn, "isLastOnQ">} QCBFIFOReturn
+ * @preserve
+ * @description
+ * - Drop the first N parameters from METHOD and return the rest;
+ * @template {(...args: any[]) => any} METHOD
+ * @template {number} N
+ * @typedef {import('../../../src/typehints/ParametersFollowingN.mts').ParametersFollowingN<N, METHOD>} ParametersFollowingN
  */
 ```
 
@@ -5656,7 +6518,40 @@ await TsToMjs("./myFile.mts", {
 
 ---
 
-<h2 id="qcbreturn">QCBReturn</h2>
+<h2 id="prefixedkeysof">neutral.PrefixedKeysOf</h2>
+
+- jsdoc types:
+
+```js
+/**
+ * @description
+ * Define a type helper that extracts keys starting with a specific prefix
+ * @template {any} T
+ * @template {string} Prefix
+ * @typedef {Extract<keyof T, `${Prefix}${string}`>} PrefixedKeysOf
+ */
+```
+
+\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+---
+
+<h2 id="qcbfiforeturn">neutral.QCBFIFOReturn</h2>
+
+- jsdoc types:
+
+```js
+/**
+ * - return type of Q callback fifo;
+ * @typedef {Omit<import("../../../src/typehints/QCBReturn.mjs").QCBReturn, "isLastOnQ">} QCBFIFOReturn
+ */
+```
+
+\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+---
+
+<h2 id="qcbreturn">neutral.QCBReturn</h2>
 
 - jsdoc types:
 
@@ -5671,14 +6566,14 @@ await TsToMjs("./myFile.mts", {
 
 ---
 
-<h2 id="runtime">Runtime</h2>
+<h2 id="runtime">neutral.Runtime</h2>
 
 - jsdoc types:
 
 ```js
 /**
  * - for popular runtimes check;
- * @typedef {'node' | 'bun' | 'deno' | 'browser' | 'unknown'} Runtime
+ * @typedef {'node' | 'bun' | 'browser' | 'unknown'} Runtime
  */
 ```
 
@@ -5686,7 +6581,42 @@ await TsToMjs("./myFile.mts", {
 
 ---
 
-<h2 id="templateliteralvaluehandler">TemplateLiteralValueHandler</h2>
+<h2 id="safeimportreturntype">neutral.SafeImportReturnType</h2>
+
+- jsdoc types:
+
+```js
+/**
+ * @template {any} IMPORTTARGET
+ * @typedef {Awaited<ReturnType<typeof import('../../../src/function/SafeImport.mjs').SafeImport<IMPORTTARGET>>>} SafeImportReturnType
+ */
+```
+
+\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+---
+
+<h2 id="stylepropreftype">neutral.StylePropRefType</h2>
+
+- jsdoc types:
+
+```js
+/**
+ * @import {WC_StyleProp_bind} from '../web/bindings/WC_StyleProp_bind.mjs'
+ */
+/**
+ * @description
+ * - typehelper to constrict [StyleRef](#styleref) values;
+ * @template {string} STRTYPE
+ * @typedef {ReturnType<typeof WC_StyleProp_bind<STRTYPE>>} StylePropRefType
+ */
+```
+
+\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+---
+
+<h2 id="templateliteralvaluehandler">neutral.TemplateLiteralValueHandler</h2>
 
 - jsdoc types:
 
@@ -5709,7 +6639,30 @@ await TsToMjs("./myFile.mts", {
 
 ---
 
-<h2 id="vlifecyclecallbacks">VLifecycleCallbacks</h2>
+<h2 id="vivthcleanup">neutral.VivthCleanup</h2>
+
+- jsdoc types:
+
+````js
+/**
+ * @description
+ * - return type of object have this method;
+ * @typedef {{vivthCleanup: ()=>Promise<any>}} VivthCleanup
+ * - you can call:
+ * ```js
+ * something.vivthCleanup();
+ * ```
+ * >- class that implements this;
+ * >- function that have this as part of it's return;
+ * - to clean up that object, usually a long lived process;
+ */
+````
+
+\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+---
+
+<h2 id="vlifecyclecallbacks">neutral.VLifecycleCallbacks</h2>
 
 - jsdoc types:
 
@@ -5721,6 +6674,988 @@ await TsToMjs("./myFile.mts", {
  * @property {(this:HTMLElementTagNameMap[TAGNAME])=>void} [onDisconnected]
  * @property {(this:HTMLElementTagNameMap[TAGNAME], defer:(onDisconnected:()=>void)=>void)=>void} [onAdopted]
  * @property {(this:HTMLElementTagNameMap[TAGNAME], name:string, oldValue:string, newValue:string)=>void} [onAttributeChanged]
+ */
+```
+
+\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+---
+
+<h2 id="wc_createelement_bind">neutral.WC_createElement_bind</h2>
+
+#### reference: `WC_createElement_bind`
+
+- typesafe factory generator for creating element of `WC_extendsA`/`WC_extendsB` class;
+- this function is returned by static method `.define`;
+  > - bind it with static property;
+- uses `lit-html` under the hood;
+
+```js
+/**
+ * @template {(new (...args: any[]) => HTMLElement) & {
+ *  tagName: string;
+ * 	extendIs: string;
+ *  observedAttributes?: readonly string[];
+ *  namedSlots?: readonly string[];
+ * }} BASE_CONSTRUCTOR
+ * @param {BASE_CONSTRUCTOR} arg0
+ * @returns {{
+ * 		dom:(
+ * 		 		attributes?:BASE_CONSTRUCTOR['observedAttributes'] extends readonly string[]
+ * 		 			? Partial<
+ * 		 					Record<ArrayToKeys<BASE_CONSTRUCTOR['observedAttributes']>, string>
+ * 		 				>
+ * 		 			: undefined,
+ * 		 		childrenData?:(slotName:Record<ArrayToKeys<BASE_CONSTRUCTOR['namedSlots']>, string>)=>TemplateResult,
+ * 		 		renderOptions?:RenderOptions
+ * 		 	)=>InstanceType<BASE_CONSTRUCTOR>;
+ * 		template:
+ * 			(
+ * 				attributes?:BASE_CONSTRUCTOR['observedAttributes'] extends readonly string[]
+ * 					? Partial<
+ * 							Record<ArrayToKeys<BASE_CONSTRUCTOR['observedAttributes']>, string>
+ * 						>
+ * 					: undefined,
+ * 				childrenData?:(slotName:Record<ArrayToKeys<BASE_CONSTRUCTOR['namedSlots']>, string>)=>TemplateResult,
+ * 			)=>TemplateResult
+ * 	}
+ * }
+ */
+```
+
+- <i>example</i>:
+
+```js
+ // webcomponent context via `WC_extends`
+ static createElement = this.define(...args);
+ //
+```
+
+\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+---
+
+<h2 id="wc_createnamedslot">neutral.WC_createNamedSlot</h2>
+
+#### reference: `WC_createNamedSlot`
+
+- typesafe factory generator for creating slot element of `WC_extendsA`/`WC_extendsB` class;
+
+```js
+/**
+ * @template {{
+ * 	namedSlots?: readonly string[]
+ * }} NAMEDSLOTS
+ * @param {ArrayToKeys<NAMEDSLOTS["namedSlots"] extends readonly string[]
+ * 	? NAMEDSLOTS["namedSlots"]
+ * 	: never
+ * >} name
+ * @param {TemplateResult} [defaultNode]
+ * @returns {TemplateResult}
+ */
+```
+
+- <i>example</i>:
+
+```js
+// webcomponent context via `WC_extends`.callback props
+this.createNamedSlot(...args);
+//
+```
+
+\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+---
+
+<h2 id="wc_litrender_bind">neutral.WC_litRender_bind</h2>
+
+#### reference: `WC_litRender_bind`
+
+- factory to create simplified render function by omiting args[1++];
+
+```js
+/**
+ * @param {import('../../typehints/ParametersFollowingN.mts').ParametersFollowingN<typeof render, 1>} args
+ * @returns {(template: import('lit-html').TemplateResult)=>import('lit-html').RootPart}
+ */
+```
+
+- <i>example</i>:
+
+```js
+ // webcomponent context via `WC_extends`
+ constructor(){
+ 	super();
+ 	this.#root = this.attachShadow({ mode: 'closed' });
+ 	this.#render = WC_litRender_bind(this.#root, this);
+ }
+ #root;
+ #render;
+ #something(){
+ 	this.#render(html`<div></div>`); // <- args[1++] are omitted
+ }
+ ///
+```
+
+\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+---
+
+<h2 id="wc_litstylemap">neutral.WC_litStyleMap</h2>
+
+#### reference: `WC_litStyleMap`
+
+- type helper for `import { styleMap } from 'lit-html/directives/style-map.js';`, by typehinting the properties;
+
+```js
+/**
+ * @param {Partial<CSSStyleProperties>} properties
+ * @returns {import('lit-html/directive.js').DirectiveResult}
+ */
+```
+
+\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+---
+
+<h2 id="wc_styleprop_bind">neutral.WC_StyleProp_bind</h2>
+
+#### reference: `WC_StyleProp_bind`
+
+- type helper to create ref custom style `property`;
+
+#### reference: `new WC_StyleProp_bind`
+
+```js
+/**
+ * @param {HTMLElement} element
+ * @param {string} name
+ * - automatically prefixed with `--`;
+ * @param {Object} options
+ * @param {boolean} options.isGlobal
+ * - `false`: target scoped `property` on that component, and that component instance alone;
+ * >- will not even bleed to other instance with same constructor;
+ * - `true`: target style variable defined in global scope(loaded on document `styles` | `link[rel="stylesheet"]`);
+ */
+```
+
+- <i>example</i>:
+
+```js
+ @example
+ // webcomponent context via `WC_extends`
+ #myStyle = new WC_StyleProp_bind(this, 'my-theme', {isGlobal:false});
+ //
+```
+
+\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+---
+
+<h2 id="browserdirmapper">node.BrowserDirMapper</h2>
+
+#### reference: `BrowserDirMapper`
+
+- class helper to map dynamic mjs files;
+  > - includes `mts` file too;
+
+```js
+/**
+ * @implements {VivthCleanup}
+ */
+```
+
+#### reference: `new BrowserDirMapper`
+
+- instantiate the mapper;
+
+```js
+/**
+ * @param {Object} path
+ * @param {string} path.watch
+ * @param {string} path.mapTo
+ * @param {(normalizedPath:string)=>boolean} [path.eachFilter]
+ * @param {ConstructorParameters<typeof JSDirMapper>[1] &
+ * 	{
+ * 		debounce?:number,
+ * 		chokidarOptions?:import('chokidar').ChokidarOptions
+ * 	}
+ * } options
+ */
+```
+
+- <i>example</i>:
+
+```js
+import { BrowserDirMapper } from "vivth/node";
+import { Paths, SafeExit, BrowserDirMapper } from "vivth/neutral";
+new Paths({
+  root: process.env.INIT_CWD ?? process.cwd(),
+});
+new SafeExit();
+new BrowserDirMapper(
+  { mapTo: "/dist/", watch: "/src/" },
+  {
+    esbuild: {
+      buildOptions: {
+        minify: true,
+      },
+    },
+  },
+);
+```
+
+#### reference: `BrowserDirMapper_instance.dirWatcher`
+
+- `FSDirArchWatcher` instance;
+
+```js
+/**
+ * @type {FSDirArchWatcher<any>|undefined}
+ */
+```
+
+#### reference: `BrowserDirMapper_instance.dirMapper`
+
+- `JSDirMapper` instance;
+
+```js
+/**
+ * @type {JSDirMapper<any>|undefined}
+ */
+```
+
+\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+---
+
+<h2 id="css">neutral.CSS</h2>
+
+#### reference: `CSS`
+
+- generate `CSSStyleSheet` with template literal;
+
+```js
+/**
+ * @param {TemplateStringsArray} strings
+ * @param {...string} values
+ * @returns {CSSStyleSheet}
+ */
+```
+
+- <i>example</i>:
+
+```js
+ import { CSS as css } from 'vivth/neutral';
+ // webcomponent context via `WC_extends`
+ static CSS = css`
+ 	:host{
+ 		--my-theme: salmon;
+ 		background-color: var(--my-theme);
+ 	}
+ `
+ constructor(){
+ 	super();
+ 	const root = this.attachShadow({mode:'closed'});
+ 	root.adoptedStyleSheets= [MyClass.CSS];
+ }
+ //
+```
+
+\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+---
+
+<h2 id="e">neutral.E</h2>
+
+#### reference: `E`
+
+- helper function to create element;
+
+```js
+/**
+ * @template {keyof HTMLElementTagNameMap} K
+ * @template {Partial<HTMLElementTagNameMap[K]> & Record<string, any>} RR
+ * @param {K} tagName
+ * @param {(
+ *   & Omit<Record<string, string|Signal<string>>, 'style'|'class'>
+ *   & { style?: string, class?: string }
+ * )} [attrs]
+ * @param {RR} [props]
+ * @param {ChildNode[]|Signal<ChildNode[]>} [childNodes]
+ * @returns {HTMLElementTagNameMap[K]
+ * 	& RR
+ * 	& {
+ * 		onDisconnected:()=>void;
+ * 		}
+ * }
+ */
+```
+
+- <i>example</i>:
+
+```js
+const text = new Text("hello");
+const div = E(
+  "div",
+  {
+    class: "p-1 m-1",
+    id: "my-div",
+  },
+  {
+    onclick(e) {
+      console.log(e);
+    },
+  },
+  [text],
+);
+// fine grain modify
+text.nodeValue = "hello world";
+```
+
+\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+---
+
+<h2 id="newstylesheetasync">neutral.NewStyleSheetAsync</h2>
+
+#### reference: `NewStyleSheetAsync`
+
+- function helper to asynchronously `CSSStyleSheet`;
+  > - './main.css';
+
+```css
+:host {
+  background-color: red;
+}
+```
+
+- internally used for `Dynamics`;
+
+```js
+/**
+ * @param {string} string
+ * @param {ConstructorParameters<typeof CSSStyleSheet>} arg1
+ * @returns {Promise<CSSStyleSheet>}
+ */
+```
+
+\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+---
+
+<h2 id="newstylesheetsync">neutral.NewStyleSheetSync</h2>
+
+#### reference: `NewStyleSheetSync`
+
+- function helper to synchronously `CSSStyleSheet`;
+  > - './main.css';
+
+```css
+:host {
+  background-color: red;
+}
+```
+
+- internally used for `CSS`;
+
+```js
+/**
+ * @param {string} string
+ * @param {ConstructorParameters<typeof CSSStyleSheet>} arg1
+ * @returns {CSSStyleSheet}
+ */
+```
+
+\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+---
+
+<h2 id="wc_tagname_type">neutral.WC_TagName_type</h2>
+
+- jsdoc types:
+
+```js
+/**
+ * @preserve
+ * @description
+ * Validates whether a string follows the strict custom-element layout:
+ * - Must contain a hyphen (-)
+ * - No spaces allowed anywhere
+ * - Must be strictly lowercase
+ * @template {string} TAG
+ * @typedef {import('../../../src/web/common/WC_TagName_type.mts').WC_TagName_type<TAG>} WC_TagName_type
+ */
+```
+
+\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+---
+
+<h2 id="ensurevalidtag">neutral.EnsureValidTag</h2>
+
+- jsdoc types:
+
+```js
+/**
+ * @preserve
+ * @template {string} T
+ * @typedef {import('../../../src/web/EnsureValidTag.mts').EnsureValidTag<T>} EnsureValidTag
+ */
+```
+
+\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+---
+
+<h2 id="isinviewportsignal">neutral.IsInViewPortSignal</h2>
+
+#### reference: `IsInViewPortSignal`
+
+- signal helper to check whether element is in viewport;
+
+```js
+/**
+ * @implements {VivthCleanup}
+ * @extends {Signal<boolean>}
+ */
+```
+
+#### reference: `IsInViewPortSignal_instance.vivthCleanup`
+
+```js
+/**
+ * @override
+ * - cleanup callback;
+ */
+```
+
+#### reference: `new IsInViewPortSignal`
+
+```js
+/**
+ * @param {Element} element
+ */
+```
+
+#### reference: `IsInViewPortSignal_instance.value:getter`
+
+- `Signal.value` reference to check if element is in viewport;
+
+```js
+/**
+ * @returns {boolean}
+ * @override
+ */
+```
+
+\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+---
+
+<h2 id="observersignal">neutral.ObserverSignal</h2>
+
+#### reference: `ObserverSignal`
+
+- helper to create lazy `MutationObserver`;
+- use in tandem with `WC_extends`;
+
+```js
+/**
+ * @implements {VivthCleanup}
+ * @extends {Signal<MutationRecord[]|undefined>}
+ */
+```
+
+#### reference: `ObserverSignal_instance.vivthCleanup`
+
+```js
+/**
+ * @override
+ * - cleanup callback;
+ */
+```
+
+#### reference: `new ObserverSignal`
+
+```js
+/**
+ * @param {Node} node
+ * @param {ParametersFollowingN<
+ * 	MutationObserver["observe"],1
+ * >} mutationObserverInitArgs
+ * - no default value;
+ */
+```
+
+#### reference: `ObserverSignal_instance.value:getter`
+
+```js
+/**
+ * @override
+ */
+```
+
+#### reference: `ObserverSignal_instance.unobserve`
+
+- unobserve element;
+
+\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+---
+
+<h2 id="wc_litref">neutral.WC_litRef</h2>
+
+#### reference: `WC_litRef`
+
+- signal to get element reference on lit render;
+- warning, this class relies on creating macro task to trick lit-html render ref to get the `Element` reference, it might not be too accurate;
+
+```js
+/**
+ * @template {Element} EL
+ * @extends {Signal<EL|undefined>}
+ */
+```
+
+#### reference: `new WC_litRef`
+
+\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+---
+
+<h2 id="wc_loopedsiblingsref">neutral.WC_loopedSiblingsRef</h2>
+
+#### reference: `WC_loopedSiblingsRef`
+
+- `Signal` to check siblingIndex of a looped component;
+- automatically trigger check upon connectedCallback, by wrapping it with `this.ON` even without second argument;
+- automatically trigger cleanup upon disconnectedCallback, by wrapping it with `this.ON` even without second argument;
+- assumption is all sibling element must be from same class `WebCompoent`;
+
+```html
+<div>
+  <!-- looped <my-component></my-component> -->
+  <!-- looped <my-component></my-component> -->
+  <!-- looped <my-component></my-component> -->
+  <my-component></my-component>
+  <!-- looped <my-component></my-component> -->
+  <!-- looped <my-component></my-component> -->
+</div>
+```
+
+```js
+/**
+ * @extends {Signal<number|undefined>}
+ */
+```
+
+#### reference: `WC_loopedSiblingsRef_instance.onConnected`
+
+- self auto register and cleanup when assigned with `ON` jut by passing empty object as second argument;
+- the automatic part only works on `WC_extends${suffix}`;
+  > - the cleanup logic are infered by `WC_extends${suffix}` class inner behaviour;
+- still need to be called manually if used outside `vivth/neutral` `WebComponent`;
+
+```js
+/**
+ * @type {()=>void}
+ */
+```
+
+#### reference: `WC_loopedSiblingsRef_instance.onDisconnected`
+
+- self auto register and cleanup when assigned with `ON` jut by passing empty object as second argument;
+- the automatic part only works on `WC_extends${suffix}`;
+  > - the cleanup logic are infered by `WC_extends${suffix}` class inner behaviour;
+- still need to be called manually if used outside `vivth/neutral` `WebComponent`;
+
+```js
+/**
+ * @type {()=>void}
+ */
+```
+
+\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+---
+
+<h2 id="wc_parentcomponentref">neutral.WC_parentComponentRef</h2>
+
+#### reference: `WC_parentComponentRef`
+
+- `Signal` to check parentComponent;
+- automatically trigger check upon connectedCallback, by wrapping it with `this.ON` even without second argument;
+- automatically trigger cleanup upon disconnectedCallback, by wrapping it with `this.ON` even without second argument;
+
+```js
+/**
+ * @template {HTMLElement} TEMP
+ * @extends {Signal<TEMP|undefined|null>}
+ */
+```
+
+#### reference: `WC_parentComponentRef_instance.onConnected`
+
+- self auto register and cleanup when assigned with `ON` jut by passing empty object as second argument;
+- the automatic part only works on `WC_extends${suffix}`;
+  > - the cleanup logic are infered by `WC_extends${suffix}` class inner behaviour;
+- still need to be called manually if used outside `vivth/neutral` `WebComponent`;
+
+```js
+/**
+ * @type {()=>void}
+ */
+```
+
+#### reference: `WC_parentComponentRef_instance.onDisconnected`
+
+- self auto register and cleanup when assigned with `ON` jut by passing empty object as second argument;
+- the automatic part only works on `WC_extends${suffix}`;
+  > - the cleanup logic are infered by `WC_extends${suffix}` class inner behaviour;
+- still need to be called manually if used outside `vivth/neutral` `WebComponent`;
+
+```js
+/**
+ * @type {()=>void}
+ */
+```
+
+\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+---
+
+<h2 id="wc_extendsa">neutral.WC_extendsA</h2>
+
+#### reference: `WC_extendsA`
+
+- Generates a base class for Web Component definitions.
+- Note: This generator does not support `connectedMoveCallback`.
+  For the needs of opting in to [connectedMoveCallback](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_custom_elements) functionality, use [WC_extendsB](#wc_extendsb) instead.
+- This class relies heavily on complex type inference which can cause issues, during declaration file generation. To avoid "circular type" errors or build failures, set the following in your `tsconfig.json`:
+
+```json
+{
+  "compilerOptions": {
+    "declaration": false
+  }
+}
+```
+
+- By disabling `declaration`, you prevent the TypeScript compiler from attempting to resolve and export the complex recursive type definitions generated by this factory;
+
+```js
+/**
+ * @template {new (...args: any[]) => HTMLElement} BASE_CONSTRUCTOR
+ * @template {{
+ * 	class?:string;
+ * 	style?:string;
+ *  observedAttributes?: readonly string[];
+ *  namedSlots?: readonly string[];
+ * }} STATICMEM
+ * @template {(BASE_CONSTRUCTOR) & {
+ * 	tagName: string;
+ * 	extendIs: string;
+ * 	observedAttributes?: STATICMEM["observedAttributes"];
+ * 	namedSlots?: STATICMEM["namedSlots"];
+ * }} CREATEARGS
+ * @template { (new (...args: any[]) => InstanceType<BASE_CONSTRUCTOR> & {
+ * 		setObservedAttributes(attributes:Partial<
+ * 			Record<ArrayToKeys<STATICMEM["observedAttributes"]extends readonly string[]
+ * 				? STATICMEM["observedAttributes"]
+ * 				:never>,
+ * 			string>
+ * 		>):void;
+ *    adoptedCallback():void;
+ *    connectedCallback():void;
+ *    disonnectedCallback():void;
+ * 		attributeChangedCallback(name:ArrayToKeys<STATICMEM["observedAttributes"]extends readonly string[]?STATICMEM["observedAttributes"]:never>, oldValue:string|null, newValue:string|null): void;
+ * 		ON:<OBJ extends any & {
+ * 				onConnected?: NonNullable<Parameters<InstanceType<RET>["ON"]>[1]>["connected"];
+ * 				onDisconnected?: NonNullable<Parameters<InstanceType<RET>["ON"]>[1]>["disconnected"];
+ * 				onAdopted?: NonNullable<Parameters<InstanceType<RET>["ON"]>[1]>["adopted"];
+ * 				onAttributeChanged?: NonNullable<Parameters<InstanceType<RET>["ON"]>[1]>["attributeChanged"];
+ * 			}>
+ * 		(obj:OBJ, callbacks?:
+ * 			{
+ * 				connected?:(obj:OBJ)=>void;
+ * 				disconnected?:(obj:OBJ)=>void;
+ * 				adopted?:(obj:OBJ)=>void;
+ * 				attributeChanged?:(
+ * 					obj:OBJ,
+ * 					name:STATICMEM["observedAttributes"]extends readonly string[]
+ * 						? ArrayToKeys<STATICMEM["observedAttributes"]>
+ * 						: never,
+ * 					oldValue:string|null,
+ * 					newValue:string|null
+ * 				)=>void;
+ * 			})=>OBJ;
+ *  }) & {
+ * 		tagName:string;
+ * 		extendIs:string;
+ *  	namedSlots: STATICMEM["namedSlots"];
+ *  	observedAttributes: STATICMEM["observedAttributes"];
+ * 		createNamedSlot: typeof WC_createNamedSlot<STATICMEM>;
+ * 		define:<TAG extends string, CLASSREF extends CREATEARGS>
+ * 			(
+ * 				tagName:WC_TagName_type<TAG>,
+ * 				classRef:CLASSREF,
+ * 				elementDefinitionOptions?:ElementDefinitionOptions,
+ * 			)=>ReturnType<typeof WC_createElement_bind<CLASSREF>>;
+ * 	}
+ * } RET
+ * @param {BASE_CONSTRUCTOR} Base
+ * @param {STATICMEM} [staticMember]
+ * @returns {RET}
+ */
+```
+
+- <i>example</i>:
+
+```js
+ export MyWebComponent extends WC_extendsA(HTMLElement, {...options}){
+ 	static create = this.define('my-webcomponent');
+ }
+```
+
+#### reference: `WC_extendsA_instance.ON`
+
+- wrapper helper to handle returned to be assigned property on `WebComponent` lifecycle callbacks;
+
+```js
+/**
+ * @template {Object} OBJ
+ * @param {OBJ & {
+ * 	onConnected?: NonNullable<Parameters<InstanceType<RET>["ON"]>[1]>["connected"];
+ * 	onDisconnected?: NonNullable<Parameters<InstanceType<RET>["ON"]>[1]>["disconnected"];
+ * 	onAdopted?: NonNullable<Parameters<InstanceType<RET>["ON"]>[1]>["adopted"];
+ * 	onAttributeChanged?: NonNullable<Parameters<InstanceType<RET>["ON"]>[1]>["attributeChanged"];
+ * }} obj
+ * @param {Object} [callbacks]
+ * @param {(obj:OBJ)=>void} [callbacks.connected]
+ * @param {(obj:OBJ)=>void} [callbacks.disconnected]
+ * @param {(obj:OBJ)=>void} [callbacks.adopted]
+ * @param {(
+ * 	obj:OBJ,
+ * 	name:STATICMEM["observedAttributes"]extends readonly string[]
+ * 		? ArrayToKeys<STATICMEM["observedAttributes"]>
+ * 		: never,
+ * 	oldValue:string|null,
+ * 	newValue:string|null
+ * )=>void} [callbacks.attributeChanged]
+ * @returns {OBJ}
+ */
+```
+
+- <i>example</i>:
+
+```js
+ // inside WebComponent context
+ #mySignal = this.ON(createSignalFromExternalLib(0),{
+ 	disconnected:(s)=>{
+ 		s.cleanup(); // <-or any equivalent;
+ 	},
+ });
+ //
+```
+
+#### reference: `WC_extendsA_instance.setObservedAttributes`
+
+```js
+/**
+ * @type {InstanceType<RET>["setObservedAttributes"]}
+ */
+```
+
+#### reference: `WC_extendsA.createNamedSlot`
+
+```js
+/**
+ * @protected
+ */
+```
+
+#### reference: `WC_extendsA.define`
+
+- to be called before calling `ClassRef.new`;
+
+```js
+/**
+ * @type {<TAG extends string, CLASSREF extends CREATEARGS>
+ * 			(
+ * 				tagName:WC_TagName_type<TAG>,
+ * 				classRef:CLASSREF,
+ * 				elementDefinitionOptions?:ElementDefinitionOptions,
+ * 			)=>ReturnType<typeof WC_createElement_bind<CLASSREF>>
+ * 	}
+ * }
+ */
+```
+
+\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+---
+
+<h2 id="wc_extendsb">neutral.WC_extendsB</h2>
+
+#### reference: `WC_extendsB`
+
+- Generates a base class for Web Component definitions.
+- Note: This generator does not support `connectedMoveCallback`.
+  For the needs of opting in to [connectedMoveCallback](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_custom_elements) functionality, use [WC_extendsB](#wc_extendsb) instead.
+- This class relies heavily on complex type inference which can cause issues, during declaration file generation. To avoid "circular type" errors or build failures, set the following in your `tsconfig.json`:
+
+```json
+{
+  "compilerOptions": {
+    "declaration": false
+  }
+}
+```
+
+- By disabling `declaration`, you prevent the TypeScript compiler from attempting to resolve and export the complex recursive type definitions generated by this factory;
+
+```js
+/**
+ * @template {new (...args: any[]) => HTMLElement} BASE_CONSTRUCTOR
+ * @template {{
+ * 	class?:string;
+ * 	style?:string;
+ *  observedAttributes?: readonly string[];
+ *  namedSlots?: readonly string[];
+ * }} STATICMEM
+ * @template {(BASE_CONSTRUCTOR) & {
+ * 	tagName: string;
+ * 	extendIs: string;
+ * 	observedAttributes?: STATICMEM["observedAttributes"];
+ * 	namedSlots?: STATICMEM["namedSlots"];
+ * }} CREATEARGS
+ * @template { (new (...args: any[]) => InstanceType<BASE_CONSTRUCTOR> & {
+ * 		setObservedAttributes(attributes:Partial<
+ * 			Record<ArrayToKeys<STATICMEM["observedAttributes"]extends readonly string[]
+ * 				? STATICMEM["observedAttributes"]
+ * 				:never>,
+ * 			string>
+ * 		>):void;
+ *    adoptedCallback():void;
+ *    connectedCallback():void;
+ *    disonnectedCallback():void;
+ * 		attributeChangedCallback(name:ArrayToKeys<STATICMEM["observedAttributes"]extends readonly string[]?STATICMEM["observedAttributes"]:never>, oldValue:string|null, newValue:string|null): void;
+ * 		ON:<OBJ extends any & {
+ * 				onConnected?: NonNullable<Parameters<InstanceType<RET>["ON"]>[1]>["connected"];
+ * 				onConnectedMove?: NonNullable<Parameters<InstanceType<RET>["ON"]>[1]>["connectedMove"];
+ * 				onDisconnected?: NonNullable<Parameters<InstanceType<RET>["ON"]>[1]>["disconnected"];
+ * 				onAdopted?: NonNullable<Parameters<InstanceType<RET>["ON"]>[1]>["adopted"];
+ * 				onAttributeChanged?: NonNullable<Parameters<InstanceType<RET>["ON"]>[1]>["attributeChanged"];
+ * 			}>
+ * 		(obj:OBJ, callbacks?:
+ * 			{
+ * 				connected?:(obj:OBJ)=>void;
+ * 				connectedMove?:(obj:OBJ)=>void;
+ * 				disconnected?:(obj:OBJ)=>void;
+ * 				adopted?:(obj:OBJ)=>void;
+ * 				attributeChanged?:(
+ * 					obj:OBJ,
+ * 					name:STATICMEM["observedAttributes"]extends readonly string[]
+ * 						? ArrayToKeys<STATICMEM["observedAttributes"]>
+ * 						: never,
+ * 					oldValue:string|null,
+ * 					newValue:string|null
+ * 				)=>void;
+ * 			})=>OBJ;
+ *  }) & {
+ * 		tagName:string;
+ * 		extendIs:string;
+ *  	namedSlots: STATICMEM["namedSlots"];
+ *  	observedAttributes: STATICMEM["observedAttributes"];
+ * 		createNamedSlot: typeof WC_createNamedSlot<STATICMEM>;
+ * 		define:<TAG extends string, CLASSREF extends CREATEARGS>
+ * 			(
+ * 				tagName:WC_TagName_type<TAG>,
+ * 				classRef:CLASSREF,
+ * 				elementDefinitionOptions?:ElementDefinitionOptions,
+ * 			)=>ReturnType<typeof WC_createElement_bind<CLASSREF>>;
+ * 	}
+ * } RET
+ * @param {BASE_CONSTRUCTOR} Base
+ * @param {STATICMEM} [staticMember]
+ * @returns {RET}
+ */
+```
+
+#### reference: `WC_extendsB_instance.ON`
+
+- wrapper helper to handle returned to be assigned property on `WebComponent` lifecycle callbacks;
+
+```js
+/**
+ * @template {Object} OBJ
+ * @param {OBJ & {
+ * 	onConnected?: NonNullable<Parameters<InstanceType<RET>["ON"]>[1]>["connected"];
+ * 	onConnectedMove?: NonNullable<Parameters<InstanceType<RET>["ON"]>[1]>["connectedMove"];
+ * 	onDisconnected?: NonNullable<Parameters<InstanceType<RET>["ON"]>[1]>["disconnected"];
+ * 	onAdopted?: NonNullable<Parameters<InstanceType<RET>["ON"]>[1]>["adopted"];
+ * 	onAttributeChanged?: NonNullable<Parameters<InstanceType<RET>["ON"]>[1]>["attributeChanged"];
+ * }} obj
+ * @param {Object} [callbacks]
+ * @param {(obj:OBJ)=>void} [callbacks.connected]
+ * @param {(obj:OBJ)=>void} [callbacks.connectedMove]
+ * @param {(obj:OBJ)=>void} [callbacks.disconnected]
+ * @param {(obj:OBJ)=>void} [callbacks.adopted]
+ * @param {(
+ * 	obj:OBJ,
+ * 	name:STATICMEM["observedAttributes"]extends readonly string[]
+ * 		? ArrayToKeys<STATICMEM["observedAttributes"]>
+ * 		: never,
+ * 	oldValue:string|null,
+ * 	newValue:string|null
+ * )=>void} [callbacks.attributeChanged]
+ * @returns {OBJ}
+ */
+```
+
+- <i>example</i>:
+
+```js
+ // inside WebComponent context
+ #mySignal = this.ON(createSignalFromExternalLib(0),{
+ 	disconnected:(s)=>{
+ 		s.cleanup(); // <-or any equivalent;
+ 	},
+ });
+ //
+```
+
+#### reference: `WC_extendsB_instance.setObservedAttributes`
+
+```js
+/**
+ * @type {InstanceType<RET>["setObservedAttributes"]}
+ */
+```
+
+#### reference: `WC_extendsB.createNamedSlot`
+
+```js
+/**
+ * @protected
+ */
+```
+
+#### reference: `WC_extendsB.define`
+
+- to be called before calling `ClassRef.new`;
+
+```js
+/**
+ * @type {<TAG extends string, CLASSREF extends CREATEARGS>
+ * 			(
+ * 				tagName:WC_TagName_type<TAG>,
+ * 				classRef:CLASSREF,
+ * 				elementDefinitionOptions?:ElementDefinitionOptions,
+ * 			)=>ReturnType<typeof WC_createElement_bind<CLASSREF>>
+ * 	}
+ * }
  */
 ```
 

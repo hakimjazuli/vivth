@@ -1,19 +1,23 @@
 /**
+ * @typedef { import('../typehints/VivthCleanup.mjs').VivthCleanup } VivthCleanup
+ */
+/**
  * @description
  * - Signal implementation for `CustomEvent`, to dispatch and listen;
  * - it's based on string as key, so it can be listened/dispatched even without direct instance reference;
  * @template {any} TYPE
+ * @implements {VivthCleanup}
  */
-export class EventSignal<TYPE extends unknown> {
+export class EventSignal<TYPE extends unknown> implements VivthCleanup {
+    /**
+     * @type {QChannel<string>}
+     */
+    static #q: QChannel<string>;
     /**
      * - `Map` of `EventSignal`, using the `stringName` of the `EventSignal_instance` as `key`;
      * @type {Map<string, EventSignal<any>>}
      */
-    static "__#private@#map": Map<string, EventSignal<any>>;
-    /**
-     * @type {QChannel<string>}
-     */
-    static "__#private@#qChannelEventSignal": QChannel<string>;
+    static #map: Map<string, EventSignal<any>>;
     /**
      * @description
      * - the constructor it self is set to `private`;
@@ -22,7 +26,7 @@ export class EventSignal<TYPE extends unknown> {
      * @param {string} stringName
      * @returns {Promise<EventSignal<any>>}
      * @example
-     * import { EventSignal, Trace } from 'vivth';
+     * import { EventSignal, Trace } from 'vivth/neutral';
      *
      * const myEventSignal = await EventSignal.get('dataEvent');
      * // recommendation
@@ -45,7 +49,7 @@ export class EventSignal<TYPE extends unknown> {
          * @param {import('./Effect.mjs').Effect} effectInstance
          * @returns {void}
          * @example
-         * import { EventSignal } from 'vivth';
+         * import { EventSignal } from 'vivth/neutral';
          *
          * EventSignal.remove.subscriber('yourEventSignalName', myEffectInstance);
          */
@@ -57,7 +61,7 @@ export class EventSignal<TYPE extends unknown> {
          * @param {string} name
          * @returns {void}
          * @example
-         * import { EventSignal } from 'vivth';
+         * import { EventSignal } from 'vivth/neutral';
          *
          * EventSignal.remove.allSubscribers('yourEventSignalName');
          */
@@ -69,13 +73,13 @@ export class EventSignal<TYPE extends unknown> {
          * @param {string} name
          * @returns {void}
          * @example
-         * import { EventSignal } from 'vivth';
+         * import { EventSignal } from 'vivth/neutral';
          *
          * EventSignal.remove.refs('yourEventSignalName');
          */
         refs: (name: string) => void;
     } & {
-        "vivth:unwrapLazy;": () => {
+        [x: symbol]: {
             /**
              * @static remove
              * @description
@@ -84,7 +88,7 @@ export class EventSignal<TYPE extends unknown> {
              * @param {import('./Effect.mjs').Effect} effectInstance
              * @returns {void}
              * @example
-             * import { EventSignal } from 'vivth';
+             * import { EventSignal } from 'vivth/neutral';
              *
              * EventSignal.remove.subscriber('yourEventSignalName', myEffectInstance);
              */
@@ -96,7 +100,7 @@ export class EventSignal<TYPE extends unknown> {
              * @param {string} name
              * @returns {void}
              * @example
-             * import { EventSignal } from 'vivth';
+             * import { EventSignal } from 'vivth/neutral';
              *
              * EventSignal.remove.allSubscribers('yourEventSignalName');
              */
@@ -108,7 +112,7 @@ export class EventSignal<TYPE extends unknown> {
              * @param {string} name
              * @returns {void}
              * @example
-             * import { EventSignal } from 'vivth';
+             * import { EventSignal } from 'vivth/neutral';
              *
              * EventSignal.remove.refs('yourEventSignalName');
              */
@@ -120,6 +124,7 @@ export class EventSignal<TYPE extends unknown> {
      * @param {string} name
      */
     private constructor();
+    vivthCleanup: () => Promise<void>;
     /**
      * @type {string}
      */
@@ -131,7 +136,7 @@ export class EventSignal<TYPE extends unknown> {
      * - is `lazily` created;
      * @type {Signal<TYPE>}
      * @example
-     * import { EventSignal, Effect, Console } from 'vivth';
+     * import { EventSignal, Effect, Console } from 'vivth/neutral';
      *
      * const myEventSignal = await EventSignal.get('dataEvent', false);
      *
@@ -150,7 +155,7 @@ export class EventSignal<TYPE extends unknown> {
      * - is `lazily` created along with `dispatch`, if `listen` is accessed first, then `dispatch` will also be created automatically;
      * @type {Derived<TYPE>}
      * @example
-     * import { EventSignal, Effect, Console } from 'vivth';
+     * import { EventSignal, Effect, Console } from 'vivth/neutral';
      *
      * const myEventSignal = await EventSignal.get('dataEvent', false);
      *
@@ -170,7 +175,7 @@ export class EventSignal<TYPE extends unknown> {
          * @param {import('./Effect.mjs').Effect} effectInstance
          * @returns {void}
          * @example
-         * import { EventSignal, Effect, Console } from 'vivth';
+         * import { EventSignal, Effect, Console } from 'vivth/neutral';
          *
          * const myEventSignal = await EventSignal.get('dataEvent', false);
          *
@@ -188,7 +193,7 @@ export class EventSignal<TYPE extends unknown> {
          * - remove allSubscribers from the `EventSignal_instance`;
          * @type  {()=>void}
          * @example
-         * import { EventSignal, Effect, Console } from 'vivth';
+         * import { EventSignal, Effect, Console } from 'vivth/neutral';
          *
          * const myEventSignal = await EventSignal.get('dataEvent', false);
          *
@@ -206,7 +211,7 @@ export class EventSignal<TYPE extends unknown> {
          * - remove reference of the `proxySignals` of the `EventSignal_instance`;
          * @type {()=>void}
          * @example
-         * import { EventSignal, Effect, Console } from 'vivth';
+         * import { EventSignal, Effect, Console } from 'vivth/neutral';
          *
          * const myEventSignal = await EventSignal.get('dataEvent', false);
          *
@@ -219,7 +224,7 @@ export class EventSignal<TYPE extends unknown> {
          */
         ref: () => void;
     } & {
-        "vivth:unwrapLazy;": () => {
+        [x: symbol]: {
             /**
              * @instance remove
              * @description
@@ -227,7 +232,7 @@ export class EventSignal<TYPE extends unknown> {
              * @param {import('./Effect.mjs').Effect} effectInstance
              * @returns {void}
              * @example
-             * import { EventSignal, Effect, Console } from 'vivth';
+             * import { EventSignal, Effect, Console } from 'vivth/neutral';
              *
              * const myEventSignal = await EventSignal.get('dataEvent', false);
              *
@@ -245,7 +250,7 @@ export class EventSignal<TYPE extends unknown> {
              * - remove allSubscribers from the `EventSignal_instance`;
              * @type  {()=>void}
              * @example
-             * import { EventSignal, Effect, Console } from 'vivth';
+             * import { EventSignal, Effect, Console } from 'vivth/neutral';
              *
              * const myEventSignal = await EventSignal.get('dataEvent', false);
              *
@@ -263,7 +268,7 @@ export class EventSignal<TYPE extends unknown> {
              * - remove reference of the `proxySignals` of the `EventSignal_instance`;
              * @type {()=>void}
              * @example
-             * import { EventSignal, Effect, Console } from 'vivth';
+             * import { EventSignal, Effect, Console } from 'vivth/neutral';
              *
              * const myEventSignal = await EventSignal.get('dataEvent', false);
              *
@@ -278,6 +283,7 @@ export class EventSignal<TYPE extends unknown> {
         };
     };
 }
+export type VivthCleanup = import("../typehints/VivthCleanup.mjs").VivthCleanup;
 import { Signal } from './Signal.mjs';
 import { Derived } from './Derived.mjs';
 import { QChannel } from './QChannel.mjs';

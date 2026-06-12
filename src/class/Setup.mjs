@@ -16,21 +16,16 @@ export class Setup {
 	 * @description
 	 * - proxy `SafeExit_instance` for Setup
 	 * @example
-	 * import { Setup, Console } from 'vivth';
+	 * import { Setup } from 'vivth/node';
 	 *
-	 * new Setup.safeExit({
-	 * 	// eventNames are blank by default, you need to manually name them all;
-	 * 	// 'exit' will be omited, as it might cause async callbacks failed to execute;
-	 * 	eventNames: ['SIGINT', 'SIGTERM', ...eventNames],
-	 * 	terminator : () => process.exit(0),
-	 * });
+	 * new Setup.safeExit('SIGINT', 'SIGTERM', ...eventNames);
 	 */
 	static safeExit = SafeExit;
 	/**
 	 * @description
 	 * - proxy `Paths_instance` for Setup;
 	 * @example
-	 * import { Setup } from 'vivth';
+	 * import { Setup } from 'vivth/node';
 	 *
 	 * new Setup.paths({
 	 * 	root: location.origin, // browser example
@@ -41,7 +36,7 @@ export class Setup {
 	 * @description
 	 * - proxy `WorkerMainThread_instance` for Setup;
 	 * @example
-	 * import { Setup } from 'vivth';
+	 * import { Setup } from 'vivth/node';
 	 * import { Worker } from 'node:worker_threads';
 	 *
 	 * Setup.workerMain({
@@ -60,7 +55,7 @@ export class Setup {
 	 * - correct `parentPort` reference when needed;
 	 * - export to create new reference to be use to create new WorkerThread instance;
 	 * @example
-	 * import { Setup } from 'vivth';
+	 * import { Setup } from 'vivth/node';
 	 * import { parentPort } from 'node:worker_threads';
 	 *
 	 * export const MyWorkerThreadRef = Setup.workerThread({parentPort});
@@ -72,7 +67,7 @@ export class Setup {
 	 * @description
 	 * - setup envMode into `developement`('default') or `production`;
 	 * @example
-	 * import { Setup } from 'vivth';
+	 * import { Setup } from 'vivth/node';
 	 *
 	 * Setup.enforceEnvMode('prod');
 	 *
@@ -84,9 +79,9 @@ export class Setup {
 	 * @description
 	 * - setup `vivth `preffered encoding;
 	 * @example
-	 * import { Setup } from 'vivth';
+	 * import { Setup } from 'vivth/node';
 	 *
-	 * Setup.preferrence('prod');
+	 * Setup.preferrence({ encoding: 'utf-8' });
 	 */
 	static preferrence = Preferrence.setup;
 }

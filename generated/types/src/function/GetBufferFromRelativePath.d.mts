@@ -7,7 +7,7 @@
  * - relative path from the caller;
  * @returns {ReturnType<typeof FSasar.file>}
  * @example
- * import { GetContentFromRelativePath } from "vivth";
+ * import { GetContentFromRelativePath } from 'vivth/node';
  *
  * await GetContentFromRelativePath('../doc/parsedFile.mjs', 'utf-8');
  */

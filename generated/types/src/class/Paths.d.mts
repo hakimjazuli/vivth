@@ -8,7 +8,7 @@ export class Paths {
     /**
      * @type {Paths|undefined}
      */
-    static "__#private@#instance": Paths | undefined;
+    static #instance: Paths | undefined;
     /**
      * @description
      * - MIGHT THROW AN ERROR;
@@ -22,27 +22,50 @@ export class Paths {
     static get root(): string;
     /**
      * @description
-     * - normalize path separator to forward slash `/`;
-     * @param {string} path_
+     * - replace path separator to forward slash `/`;
+     * - remove repeating `./`;
+     * @param {string} path
      * @returns {string}
      * @example
-     * import { Paths } from 'vivth';
+     * import { Paths } from 'vivth/neutral';
      *
      * Paths.normalize('file:\\D:\\myFile.mjs'); //  "file://D://myFile.mjs"
      */
-    static normalize: (path_: string) => string;
+    static normalize: (path: string) => string;
     /**
      * @description
-     * - normalize path separator to forward slash `/`;
-     * - then starts with forward slash `/`;
-     * @param {string} path_
+     * - replace path separator to `sep`;
+     * @param {string} path
+     * @returns {string}
+     * @example
+     * import { Paths } from 'vivth/neutral';
+     *
+     * Paths.nativeSep('path//myFile.mjs'); //  "path\myFile.mjs" OR "path/myFile.mjs" depending on sep value;
+     */
+    static nativeSep: (path: string) => string;
+    /**
+     * @description
+     * - normalized then starts with forward slash `/`;
+     * @param {string} path
      * @returns {`/${string}`}
      * @example
-     * import { Paths } from 'vivth';
+     * import { Paths } from 'vivth/neutral';
      *
      * Paths.normalizesForRoot('path\\myFile.mjs'); //  "/path/myFile.mjs"
      */
-    static normalizesForRoot: (path_: string) => `/${string}`;
+    static normalizeForRoot: (path: string) => `/${string}`;
+    /**
+     * @description
+     * - convert path to diskAbsolute and normalized to be using forward slash;
+     * - usefull for arguments for `methods` OR `functions` that needs to be absolute disk path, regardles if path is relative to project root, or already absolute path;
+     * @param {string} path
+     * @returns {string}
+     * @example
+     * import { Paths } from 'vivth/neutral';
+     *
+     * Paths.normalizesForRoot('\\path\\myFile.mjs'); //  "D://something/path/myFile.mjs"
+     */
+    static diskAbsolute: (path: string) => string;
     /**
      * @description
      * @param {Object} options
@@ -58,7 +81,7 @@ export class Paths {
      * ```
      * - other: you need to check your JSRuntime for the rootPath reference;
      * @example
-     * import { Paths } from 'vivth';
+     * import { Paths } from 'vivth/neutral';
      *
      * new Paths({
      * 	// root: location.origin,

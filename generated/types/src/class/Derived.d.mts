@@ -8,16 +8,19 @@ export class Derived<VALUE> extends Signal<VALUE | undefined> {
     /**
      * @description
      * - Derived used [Signal](#signal) and [Effect](#effect) under the hood;
-     * @param {(this: Derived<VALUE>,effectInstanceOptions:
-     * Parameters<ConstructorParameters<typeof Effect>[0]>[0])
-     * => Promise<VALUE>} derivedFunction
-     * - use regullar function instead of arrow function when needed to throw early;
+     * @param {(
+     * 		effectInstanceOptions: Parameters<ConstructorParameters<typeof Effect>[0]>[0] &
+     * 		{
+     * 			dontUpdate:Derived<VALUE>["dontUpdate"]
+     * 		}
+     * 	) => Promise<Derived<VALUE>["dontUpdate"] | VALUE>
+     * } derivedFunction
      * @param {ConstructorParameters<typeof Effect>[1]} [maxTimelapseBeingDebounced]
      * - prevent rapid changes from being unhandled more than the value;
      * - in miliseconds;
      * - default: `2_000`;
      * @example
-     * import { Signal, Derived } from  'vivth';
+     * import { Signal, Derived } from 'vivth/neutral';
      *
      * const count = new Signal(0);
      * const double = new Derived(async({
@@ -32,20 +35,21 @@ export class Derived<VALUE> extends Signal<VALUE | undefined> {
      *
      * count.value++;
      */
-    constructor(derivedFunction: (this: Derived<VALUE>, effectInstanceOptions: Parameters<ConstructorParameters<typeof Effect>[0]>[0]) => Promise<VALUE>, maxTimelapseBeingDebounced?: ConstructorParameters<typeof Effect>[1]);
+    constructor(derivedFunction: (effectInstanceOptions: Parameters<ConstructorParameters<typeof Effect>[0]>[0] & {
+        dontUpdate: Derived<VALUE>["dontUpdate"];
+    }) => Promise<Derived<VALUE>["dontUpdate"] | VALUE>, maxTimelapseBeingDebounced?: ConstructorParameters<typeof Effect>[1]);
     /**
      * @description
      * - return this value to not to update the value of this instance, even when returning early;
-     * >- can only be accessed when `derivedFunction` is declared as regullar function instead of arrow function;
-     * @type {Object}
+     * @type {Symbol}
      * @example
-     * import { Signal, Derived } from  'vivth';
+     * import { Signal, Derived } from 'vivth/neutral';
      *
      * const count = new Signal(0);
-     * const double = new Derived(async function({
+     * const double = new Derived(async({
      * 		subscribe,
      * 		isLastCalled,
-     * 	}) {
+     * 	}) => {
      * 		if(!(await isLastCalled(100))) {
      * 			return this.dontUpdate;
      * 		}
@@ -64,7 +68,7 @@ export class Derived<VALUE> extends Signal<VALUE | undefined> {
      * });
      *
      */
-    dontUpdate: Object;
+    dontUpdate: Symbol;
 }
 import { Signal } from './Signal.mjs';
 import { Effect } from './Effect.mjs';

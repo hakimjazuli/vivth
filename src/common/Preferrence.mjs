@@ -17,9 +17,9 @@ export class Preferrence {
 	 * @param {Object} arg0
 	 * @param {typeof Preferrence["encoding"]} arg0.encoding
 	 * @example
-	 * import { Preferrence } from 'vivth';
+	 * import { Preferrence } from 'vivth/neutral';
 	 *
-	 * Preferrence.setup('prod');
+	 * Preferrence.setup({ encoding: 'utf-8' });
 	 */
 	static setup = ({ encoding }) => {
 		Preferrence.encoding = encoding;

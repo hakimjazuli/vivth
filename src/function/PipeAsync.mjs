@@ -9,7 +9,7 @@
  * @param {...((currentvalue:VALUE)=>VALUE|Promise<VALUE>)} pipeFunctions
  * @returns {Promise<VALUE>}
  * @example
- * import { PipeAsync } from 'vivth';
+ * import { PipeAsync } from 'vivth/neutral';
  *
  * const res = await PipeAsync(
  *  'intialValue', // res: Promise<"intialValue">
@@ -21,10 +21,7 @@
 export async function PipeAsync(intialValue, ...pipeFunctions) {
 	for (let i = 0; i < pipeFunctions.length; i++) {
 		const function_ = pipeFunctions[i];
-		if (
-			/**  */
-			!function_
-		) {
+		if (!function_) {
 			continue;
 		}
 		intialValue = await function_(intialValue);

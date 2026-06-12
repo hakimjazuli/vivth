@@ -1,11 +1,11 @@
 // @ts-check
 
 /**
- * @template {object} T
- * @typedef {{
- *   [K in keyof T]:
- *     T[K] extends (...args: any[]) => any
- *       ? (...args: Parameters<T[K]>) => ChainableType<T>
- *       : T[K]
+ * @template {object} OBJ
+ * @typedef { {this: OBJ} & {
+ *   [K in keyof OBJ]:
+ *     OBJ[K] extends (...args: any[]) => any
+ *       ? (...args: Parameters<OBJ[K]>) => ChainableType<OBJ>
+ *       : OBJ[K]
  * }} ChainableType
  */

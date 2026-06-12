@@ -16,7 +16,7 @@ export class EnvSignal {
 	 * - create `EnvSignal` instance;
 	 * @param {VALUE} initialValue
 	 * @example
-	 * import { EnvSignal } from 'vivth';
+	 * import { EnvSignal } from 'vivth/neutral';
 	 *
 	 * export const myEnv = new EnvSignal(true);
 	 */
@@ -38,7 +38,7 @@ export class EnvSignal {
 	 * - exposed property to listen to;
 	 * @type {Derived<VALUE>}
 	 * @example
-	 * import { EnvSignal, Effect } from 'vivth';
+	 * import { EnvSignal, Effect } from 'vivth/neutral';
 	 *
 	 * export const myEnv = new EnvSignal(true);
 	 * new Effect(async ({ subscribe }) => {
@@ -54,7 +54,7 @@ export class EnvSignal {
 	 * @param {VALUE} correctedValue
 	 * @returns {void}
 	 * @example
-	 * import { EnvSignal } from 'vivth';
+	 * import { EnvSignal } from 'vivth/neutral';
 	 *
 	 * export const myEnv = new EnvSignal(true);
 	 *
@@ -64,17 +64,11 @@ export class EnvSignal {
 	 * myEnv.correction(false); // this will notify all subscribers;
 	 */
 	correction = (correctedValue) => {
-		if (
-			/**  */
-			this.#proxyConst.value === null
-		) {
+		if (this.#proxyConst.value === null) {
 			return;
 		}
 		Console;
-		if (
-			/**  */
-			this.#isModified
-		) {
+		if (this.#isModified) {
 			Console.warn({
 				correctedValue,
 				value: this.#proxyConst.value,

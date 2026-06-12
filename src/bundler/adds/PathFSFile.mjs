@@ -18,7 +18,7 @@ export class PathFSFile {
 	 * @param {Parameters<typeof import('./PathFSBundles.mjs').PathFSBundles["vivthBundles"]>[1]} [options]
 	 * @returns {PathFSFile}
 	 * @example
-	 * import { PathFSFile } from 'vivth';
+	 * import { PathFSFile } from 'vivth/node';
 	 *
 	 * PathFSFile.vivthFile('../CompileAS.mjs');
 	 */
@@ -35,26 +35,17 @@ export class PathFSFile {
 			'/vivth/src/common/TracePath.mjs',
 			'/vivth/src/bundler/adds/PathFSFile.mjs',
 		]);
-		if (
-			/**  */
-			options
-		) {
-			let { shouldNotInlcudes: traceShouldNotIncludes_ } = options;
+		if (options) {
+			let { shouldNotIncludes: traceShouldNotIncludes_ } = options;
 			traceShouldNotIncludes_ = traceShouldNotIncludes_.trim();
-			if (
-				/**  */
-				traceShouldNotIncludes_
-			) {
+			if (traceShouldNotIncludes_) {
 				shouldNotIncludes.add(traceShouldNotIncludes_);
 			}
 		}
 		this.#callerPath =
 			TracePath((filePath) => {
 				for (const shouldNotInclude_ of shouldNotIncludes) {
-					if (
-						/**  */
-						!filePath.includes(shouldNotInclude_)
-					) {
+					if (!filePath.includes(shouldNotInclude_)) {
 						continue;
 					}
 					return false;

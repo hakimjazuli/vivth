@@ -7,7 +7,7 @@
  * @param {import('esbuild').Plugin["setup"]} setup
  * @returns {import('esbuild').Plugin}
  * @example
- * import { CreateESPlugin } from 'vivth';
+ * import { CreateESPlugin } from 'vivth/neutral';
  *
  * export const pluginAddCopyRight = CreateESPlugin(
  * 	'MyCopyrightDeclaration',

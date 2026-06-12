@@ -1,37 +1,34 @@
 // @ts-check
 
-import { basename, extname, join } from 'node:path';
+import { extname } from 'node:path';
 import { readFile } from 'node:fs/promises';
 
 import prettier from 'prettier';
-import chokidar from 'chokidar';
 
-import { EventSignal } from '../class/EventSignal.mjs';
-import { parsedFile } from './parsedFile.mjs';
-import { SafeExit } from '../class/SafeExit.mjs';
-import { Effect } from '../class/Effect.mjs';
+import { FileSafe } from '../class/FileSafe.mjs';
+import { ForEach } from '../class/ForEach.mjs';
+import { FSDirArchWatcher } from '../class/FSDirArchWatcher.mjs';
+import { JSONFileHandler } from '../class/JSONFileHandler.mjs';
 import { Paths } from '../class/Paths.mjs';
-import { Signal } from '../class/Signal.mjs';
+import { IsSameFile } from '../function/IsSameFile.mjs';
 import { LazyFactory } from '../function/LazyFactory.mjs';
 import { TryAsync } from '../function/TryAsync.mjs';
-import { Console } from '../class/Console.mjs';
-import { TsToMjs } from '../function/TsToMjs.mjs';
-import { FileSafe } from '../class/FileSafe.mjs';
-import { correctBeforeParse } from './correctBeforeParse.mjs';
+import { parsedFileForDOC } from './parsedFileForDOC.mjs';
 import { Preferrence } from '../common/Preferrence.mjs';
+import { basename, join } from 'node:path';
+import { TsToMjs } from '../function/TsToMjs.mjs';
+import { Console } from '../class/Console.mjs';
+import { correctBeforeParse } from './correctBeforeParse.mjs';
+import { GetterSetter } from '../class/GetterSetter.mjs';
 import { ForOfSync } from '../function/ForOfSync.mjs';
-import { QChannel } from '../class/QChannel.mjs';
+import { TryNew } from '../function/TryNew.mjs';
+import { cleanPreserveTypedef } from './cleanPreserveTypedef.mjs';
+
+export const multiExportEntryPointsPath = './generated/vivth/exports/';
 
 /**
- * @typedef {import('fs').Stats} Stats
+ * @typedef {import('../typehints/VivthCleanup.mjs').VivthCleanup} VivthCleanup
  */
-
-const readmesrcname = 'README.src.md';
-export const vivthJSautoDOC = 'vivth.JSautoDOC';
-/**
- * @type {Set<import('../typehints/ExtnameType.mjs').ExtnameType>}
- */
-const acceptableExt = new Set(['.js', '.mjs', '.mts', '.ts']);
 
 /**
  * @description
@@ -57,8 +54,46 @@ const acceptableExt = new Set(['.js', '.mjs', '.mts', '.ts']);
  * >>- use `"at"preserve` to preserve tsdoc comment section;
  * >8) integrated with assembly script to wasm compiler on the doc;
  * >>- see [AssemblyScript](#assemblyscript);
+ * >9) modify following root json files:
+ * >>- `package.json`: assign `exports`, `main`, `module`;
+ * >>- `tsconfig.json`: assign `includes`, anything passed on `options.jstsconfigs`;
+ * >>- `jsconfig.json`: assign `includes`, anything passed on `options.jstsconfigs`;
+ * >10) generates files to `/generated/vivth/exports/`:
+ * >>- `./browser.mjs`: able to be called on `browser` platform;
+ * >>- `./node.mjs`:  able to be called on `node` platform;
+ * >>- `./neutral.mjs`: able to be called on `node` and `browser` platform;
+ * >>- `./unsupported.mjs`: most likely will throw error when called, it is more of a logged error to be managed;
+ * >>- `./all.mjs`: collections of all platform;
+ * >11) doesn't support accessor;
+ * >>- due to how TLS way accessor type not casting its getter and setter working around accessor requires ignoring this specific error, and it might become ugly real quick;
+ * >>- we recomend to stick with getter and setter;
+ * - for runtime example see file `/dev/auto-doc.mjs` on source code;
+ * @implements {VivthCleanup}
  */
 export class JSautoDOC {
+	vivthCleanup = async () => {
+		await this.watcher?.vivthCleanup();
+	};
+	/**
+	 * @typedef {'readme' |
+	 *  'handledJS'
+	 * } returnTypeStringType
+	 */
+	/**
+	 * @typedef {FSDirArchWatcher<{
+	 *     path: string;
+	 *     parsed: undefined;
+	 *     ext: `.${string}`;
+	 *     type: returnTypeStringType;
+	 *     readme?:string;
+	 * } | {
+	 *     path: string;
+	 *     parsed: parsedFileForDOC;
+	 *     ext: string;
+	 *     type: returnTypeStringType;
+	 *     readme?:string;
+	 * }>} FSDirArchWatcher__
+	 */
 	/**
 	 * @type {JSautoDOC|undefined}
 	 */
@@ -66,12 +101,7 @@ export class JSautoDOC {
 	/**
 	 * @description
 	 * @param {Object} options
-	 * @param {Object} [options.paths]
-	 * @param {string} options.paths.file
-	 * - entry point;
-	 * @param {string} options.paths.readMe
-	 * - readme target;
-	 * @param {string} options.paths.dir
+	 * @param {string} options.src
 	 * - source directory;
 	 * @param {string} [options.copyright]
 	 * @param {string} [options.tableOfContentTitle]
@@ -81,14 +111,30 @@ export class JSautoDOC {
 	 * - ChokidarOptions;
 	 * @param {import('../typehints/AutoDocASOptions.mjs').AutoDocASOptions} [options.assemblyScriptOptions]
 	 * - abstracted details to handle `.as.ts` file;
-	 * @param {(arg0:{documentedFilePathsStructuredClone:Set<string>})=>Promise<void>} [options.onLastGeneratedCallback]
+	 * @param {(arg0:{map:Map<string, {
+	 *     path: string;
+	 *     parsed: undefined;
+	 *     ext: `.${string}`;
+	 *     type: returnTypeStringType;
+	 *     readme?:string;
+	 * } | {
+	 *     path: string;
+	 *     parsed: parsedFileForDOC;
+	 *     ext: string;
+	 *     type: returnTypeStringType;
+	 *     readme?:string;
+	 * }>})=>Promise<void>} [options.onLastGeneratedCallback]
 	 * - callback to be run on finishing generating document AND exports;
 	 * - only handle that marked as `isLastCalled`;
+	 * @param { import('typescript').CompilerOptions |
+	 * 	import('typescript').ParsedCommandLine
+	 * } [options.jstsconfigs]
+	 * - type of `ts/jsconfig` to be assigned to existing respective `.json` file;
 	 * @example
-	 * import { JSautoDOC } from 'vivth';
+	 * import { JSautoDOC } from 'vivth/node';
 	 *
 	 * new JSautoDOC({
-	 * 	paths: { dir: 'src', file: 'index.mjs', readMe: 'README.md' },
+	 * 	src: '/src',
 	 * 	copyright: 'this library is made and distributed under MIT license;',
 	 * 	tableOfContentTitle: 'list of exported API and typehelpers',
 	 * 	// assemblyScriptOptions: {},
@@ -96,472 +142,659 @@ export class JSautoDOC {
 	 * 	// 	Console.log(options);
 	 * 	// },
 	 * });
-	 *
 	 */
 	constructor({
-		paths = { dir: './src', file: './index.mjs', readMe: './README.md' },
+		src = './src',
+		onLastGeneratedCallback = undefined,
 		tableOfContentTitle = 'exported-api-and-type-list',
 		copyright = '',
 		maxDebounceForGeneratingDocAndExport = 10_000,
-		chokidarOptions = undefined,
 		assemblyScriptOptions = undefined,
-		onLastGeneratedCallback = undefined,
+		chokidarOptions = undefined,
+		jstsconfigs = undefined,
 	}) {
-		if (
-			/**  */
-			JSautoDOC.#instance instanceof JSautoDOC
-		) {
-			return this;
-		}
-		if (
-			/**  */
-			!SafeExit.instance
-		) {
-			Console.error('❌`vivth.JSautoDOC` needs `vivth.SafeExit` to be instansiated');
-			return;
+		if (JSautoDOC.#instance instanceof JSautoDOC) {
+			return JSautoDOC.#instance;
 		}
 		JSautoDOC.#instance = this;
 		this.#onLastGeneratedCallback = onLastGeneratedCallback;
 		this.#tableOfContentTitle = tableOfContentTitle;
-		this.#paths = paths;
+		this.#source = src;
 		this.#copyright = copyright;
-		this.#maxDebounceForGeneratingDocAndExport = maxDebounceForGeneratingDocAndExport;
-		const rootPath = Paths.root;
-		const watchpath = join(rootPath, this.#paths.dir);
-		const watcher = chokidar.watch(watchpath, chokidarOptions);
-		const watcherReadme = chokidar.watch(join(rootPath, readmesrcname), chokidarOptions);
 		this.#assemblyScriptOptions = assemblyScriptOptions;
-		watcher.on('all', this.#listener);
-		watcherReadme.on('all', this.#readMeListener);
-		SafeExit.instance.addCallback(async () => {
-			watcherReadme.removeAllListeners();
-			watcherReadme.close();
-			watcher.removeAllListeners();
-			watcher.close();
+		this.#readmePath = Paths.diskAbsolute('/README.src.md');
+		Promise.all([
+			this.#jstsConfigAddInclude('/tsconfig.json', jstsconfigs),
+			this.#jstsConfigAddInclude('/jsconfig.json', jstsconfigs),
+		]);
+		FileSafe.exist(this.#readmePath).then(async (isExist) => {
+			if (isExist) {
+				return;
+			}
+			await this.#writeREADMEDefaultSRC();
 		});
+		const [fsDirArchWatcher, errorfsDirArchWatcherInstance] = TryNew(
+			FSDirArchWatcher,
+			[src, this.#readmePath],
+			{
+				debounce: maxDebounceForGeneratingDocAndExport,
+				chokidarOptions,
+				/**
+				 * @type {FSDirArchWatcher__["eachHandler"]}
+				 */
+				each: async (eventName, path, stats) => {
+					/**
+					 * @type {`.${string}`}
+					 */
+					// @ts-expect-error
+					const ext = extname(path);
+					const readMeHandled = await this.checkReadmeFile(path);
+					if (readMeHandled.isBeingHandled) {
+						return { path, parsed: undefined, readme: readMeHandled.content, ext, type: 'readme' };
+					}
+					if (!this.#acceptableExt.has(ext)) {
+						throw '';
+					}
+					if (basename(path).endsWith(`.d${ext}`)) {
+						const renamedPath = path.replace(new RegExp(`.d${ext}$`), ext);
+						await FileSafe.rename(path, renamedPath);
+						throw '';
+					}
+					switch (eventName) {
+						case 'add':
+						case 'change':
+							if (ext !== '.mjs') {
+								await TsToMjs(path, {
+									encoding: Preferrence.encoding,
+									assemblyScriptOptions: this.#assemblyScriptOptions,
+								});
+								throw '';
+							}
+							if (!stats?.isFile()) {
+								throw '';
+							}
+							if (await FileSafe.exist(path.replace(/.mjs$/, '.mts'))) {
+								const newString = cleanPreserveTypedef(
+									await readFile(path, { encoding: Preferrence.encoding }),
+								);
+								if (newString) {
+									await FileSafe.write(path, newString, { encoding: Preferrence.encoding });
+								}
+							}
+							return await this.#addAndChangesHandler(ext, path, stats);
+						default:
+							/**
+							 * - auto deleted from the map so need to call `.delete`
+							 */
+							throw '';
+					}
+				},
+				// @ts-expect-error
+				full: this.#fullHandler,
+			},
+		);
+		if (errorfsDirArchWatcherInstance) {
+			Console.error({ errorfsDirArchWatcherInstance });
+			return;
+		}
+		this.watcher = fsDirArchWatcher;
 	}
 	/**
-	 * @type { import('../typehints/AutoDocASOptions.mjs').AutoDocASOptions|undefined }
+	 * @type { FSDirArchWatcher<any>|undefined }
 	 */
-	#assemblyScriptOptions;
+	watcher;
 	/**
-	 * @type {(eventName: import('chokidar/handler.js').EventName, path: string, stats?: import('fs').Stats) => void}
+	 * @type {string}
 	 */
-	#listener = (eventName, path, stats) => {
-		path = Paths.normalize(path);
-		this.#q.callback(path, async () => {
-			/**
-			 * @type {`.${string}`}
-			 */
-			// @ts-expect-error
-			const ext = extname(path);
-			if (
-				/**  */
-				!acceptableExt.has(ext)
-			) {
+	#source = './src';
+	#packageJSONHandler = LazyFactory(() => new JSONFileHandler('/package.json'));
+	/**
+	 * @type {Set<import('../typehints/ExtnameType.mjs').ExtnameType>}
+	 */
+	#acceptableExt = new Set(['.js', '.mjs', '.mts', '.ts']);
+	/**
+	 * @param {string} configPath
+	 * @param {ConstructorParameters<typeof JSautoDOC>[0]["jstsconfigs"]} jstsconfigs
+	 */
+	#jstsConfigAddInclude = async (configPath, jstsconfigs) => {
+		return await TryAsync(async () => {
+			if (!(await FileSafe.exist(Paths.diskAbsolute(configPath)))) {
 				return;
 			}
-			if (
-				/**  */
-				basename(path).endsWith(`.d${ext}`)
-			) {
-				FileSafe.rename(path, path.replace(new RegExp(`.d${ext}$`), ext));
+			const handler = new JSONFileHandler(configPath);
+			const [object, error] = await handler.read();
+			if (error) {
 				return;
 			}
-			switch (eventName) {
-				case 'add':
-				case 'change':
-					if (
-						/**  */
-						ext !== '.mjs'
-					) {
-						await TsToMjs(path, {
-							encoding: Preferrence.encoding,
-							assemblyScriptOptions: this.#assemblyScriptOptions,
-						});
-						return;
-					}
-					await this.#addHandler(eventName, path, stats);
-					break;
-				case 'unlink':
-					if (
-						/**  */
-						ext !== '.mjs'
-					) {
-						return;
-					}
-					await this.#removeHandler(eventName, path, stats);
-					break;
+			const include =
+				// @ts-expect-error
+				new Set(object.include ?? []);
+			include.add(`.${Paths.normalizeForRoot(this.#source)}`);
+			include.add('./generated/vivth/exports');
+			const obj = { include: Array.from(include) };
+			if (!jstsconfigs) {
+				Object.assign(obj, jstsconfigs);
 			}
+			await handler.assign(obj);
 		});
 	};
-	#q = LazyFactory(() => new QChannel('JSautoDOC:TsToMjs'));
 	/**
-	 * @type {undefined|((arg0:{documentedFilePathsStructuredClone:Set<string>})=>Promise<void>)}
+	 * @type {ConstructorParameters<typeof JSautoDOC>[0]["onLastGeneratedCallback"]}
 	 */
-	#onLastGeneratedCallback = undefined;
+	#onLastGeneratedCallback;
 	/**
-	 * @type {number|undefined}
+	 * @type {string|undefined}
 	 */
-	#maxDebounceForGeneratingDocAndExport = undefined;
+	#tableOfContentTitle;
 	/**
 	 * @type {string|undefined}
 	 */
 	#copyright;
 	/**
-	 * @type {{
-	 *   file: string;
-	 *   readMe: string;
-	 *   dir: string;
-	 *	}}
+	 * @type {string}
 	 */
 	// @ts-expect-error
-	#paths;
+	#readmePath;
 	/**
-	 * @type {string|undefined}
+	 * @type { string }
 	 */
-	#tableOfContentTitle = undefined;
+	#readme = Paths.diskAbsolute('./README.md');
 	/**
-	 * @param {import('chokidar/handler.js').EventName} _eventName
-	 * @param {string} path_
-	 * @param {Stats|undefined} stats
-	 * @returns {void}
+	 * @type { import('../typehints/AutoDocASOptions.mjs').AutoDocASOptions|undefined }
 	 */
-	#readMeListener = (_eventName, path_, stats) => {
-		path_ = Paths.normalize(path_);
-		this.#q.callback(path_, async ({ isLastOnQ }) => {
-			if (
-				/**  */
-				!isLastOnQ()
-			) {
-				return;
-			}
-			if (
-				/**  */
-				stats &&
-				stats.isFile() === false
-			) {
-				return;
-			}
-			const content = await readFile(path_, { encoding: Preferrence.encoding });
-			this.#readMESRCContent.value = content;
-		});
-	};
+	#assemblyScriptOptions;
 	/**
-	 * @type {Signal<Set<string>>}
+	 * @param {string} path
+	 * @returns {Promise<{isBeingHandled:boolean, content?: string}>}
+	 * - is being handled;
 	 */
-	#filePaths = LazyFactory(() => new Signal(new Set()));
-	/**
-	 * @type {Signal<string>}
-	 */
-	#readMESRCContent = LazyFactory(() => new Signal(''));
-	// @ts-expect-error
-	#generatedREADME_md = new Effect(async ({ subscribe, isLastCalled }) => {
-		const contentSRC = subscribe(this.#readMESRCContent).value ?? '';
-		const documentedFilePathsStructuredClone = structuredClone(subscribe(this.#filePaths).value);
-		if (
-			/**  */
-			!(await isLastCalled(100)) ||
-			!documentedFilePathsStructuredClone
-		) {
-			return;
+	checkReadmeFile = async (path) => {
+		const isREADMEPATH = IsSameFile(this.#readmePath, path);
+		if (!isREADMEPATH) {
+			return { isBeingHandled: false };
 		}
-		const rootPath = Paths.root;
-		const readmePath = join(rootPath, this.#paths.readMe);
-		const mjsFilePath = join(rootPath, this.#paths.file);
-		Console.info({
-			now: Date.now(),
-			[vivthJSautoDOC]: `generating content for '${Paths.normalize(readmePath)}' and '${Paths.normalize(mjsFilePath)}';`,
-		});
-		const res = await this.#generateFromSRC(contentSRC, documentedFilePathsStructuredClone);
-		if (
-			/**  */
-			!(await isLastCalled(100)) ||
-			res === undefined
-		) {
-			return;
-		}
-		const { readme, mjsFile } = res;
-		const [[, errorWriteReadme], [, errorWriteMjsFile]] = await Promise.all([
-			FileSafe.write(mjsFilePath, mjsFile, { encoding: Preferrence.encoding }),
-			FileSafe.write(readmePath, await prettier.format(readme, { parser: 'markdown' }), {
+		let content = '';
+		if (!(await FileSafe.exist(this.#readmePath))) {
+			await FileSafe.write(this.#readmePath, `README HEADER PLACEHOLDER`, {
 				encoding: Preferrence.encoding,
-			}),
-		]);
-		if (
-			/**  */
-			errorWriteMjsFile === undefined &&
-			errorWriteReadme === undefined
-		) {
-			Console.info({
-				now: Date.now(),
-				[vivthJSautoDOC]: `✅successfully generate '${Paths.normalize(mjsFilePath)}' and '${Paths.normalize(readmePath)}';`,
 			});
 		}
-		if (
-			/**  */
-			errorWriteReadme ||
-			errorWriteMjsFile
-		) {
-			if (
-				/**  */
-				errorWriteMjsFile
-			) {
-				Console.error({
-					now: Date.now(),
-					[vivthJSautoDOC]: `❌unable to generate '${Paths.normalize(mjsFilePath)}';`,
-					errorWriteMjsFile,
-				});
-			}
-			if (
-				/**  */
-				errorWriteReadme
-			) {
-				Console.error({
-					now: Date.now(),
-					[vivthJSautoDOC]: `❌unable to generate '${Paths.normalize(readmePath)}';`,
-					errorWriteReadme,
-				});
-			}
-			return;
+		const [res] = await TryAsync(async () => {
+			return await readFile(path, { encoding: Preferrence.encoding });
+		});
+		if (!!res) {
+			content = res;
 		}
-		if (
-			/**  */
-			!this.#onLastGeneratedCallback ||
-			!(await isLastCalled())
-		) {
-			return;
-		}
-		await this.#onLastGeneratedCallback({ documentedFilePathsStructuredClone });
-	}, this.#maxDebounceForGeneratingDocAndExport);
-	/**
-	 * @param {string} string
-	 * @returns {string}
-	 */
-	#generateJSDOCFromstring = (string) => {
-		return `\n/**\n * automatically generated by \`${vivthJSautoDOC}\`\n * @copyright\n${string.replace(
-			/^/gm,
-			' * ',
-		)}\n */\n`;
+		return { isBeingHandled: true, content };
 	};
 	/**
-	 * @param {string} contentSRC
-	 * @param {Set<string>} filepaths
+	 * @param {`.${string}`} extentionName
+	 * @param {string} path
+	 * @param {import('fs').Stats} [stats]
 	 * @returns {Promise<{
-	 * readme:string,mjsFile:string
+	 *     path: string;
+	 *     parsed: undefined;
+	 *     ext: `.${string}`;
+	 *     type: returnTypeStringType;
+	 * } | {
+	 *     path: string;
+	 *     parsed: parsedFileForDOC;
+	 *     ext: string;
+	 *     type: returnTypeStringType;
+	 * }>}
+	 */
+	#addAndChangesHandler = async (extentionName, path, stats) => {
+		const [checkCorrectBeforeParse, errorCorrectBeforeParse] = await TryAsync(async () => {
+			return await correctBeforeParse(path, Preferrence.encoding);
+		});
+		if (errorCorrectBeforeParse) {
+			Console.error({ errorCorrectBeforeParse }, { now: true });
+			throw '';
+		}
+		switch (checkCorrectBeforeParse) {
+			case 'shouldProceedNextCheck':
+				const parsed = new parsedFileForDOC(path, stats);
+				await parsed.parse();
+				return { ext: extentionName, parsed, path, type: 'handledJS' };
+			default:
+				throw '';
+		}
+	};
+	/**
+	 * @returns {Promise<void>}
+	 */
+	#writeREADMEDefaultSRC = async () => {
+		await this.#readmeSourceGetterSetter.set?.(`---\n---\n---\nREADME SRC PLACEHOLDER\n---\n---\n`);
+	};
+	#readmeSourceGetterSetter = new GetterSetter({
+		get: async () => {
+			return await readFile(this.#readmePath, { encoding: Preferrence.encoding });
+		},
+		/**
+		 * @param {string} content
+		 */
+		set: async (content) => {
+			await FileSafe.write(this.#readmePath, content, { encoding: Preferrence.encoding });
+		},
+	});
+
+	/**
+	 * @param { string } [exporter]
+	 * @param { string } [typedefString]
+	 * @returns { string }
+	 */
+	#generateSingularMJSExportAndType = (exporter, typedefString) => {
+		let content = '';
+		if (exporter) {
+			content += exporter ?? '';
+		}
+		if (exporter && typedefString) {
+			content += '\n';
+		}
+		if (typedefString) {
+			content += typedefString ?? '';
+		}
+		return content;
+	};
+
+	/**
+	 * @param { string[] } array
+	 * @returns { string[] }
+	 */
+	#cleanupArrayString = (array) => {
+		return array.filter((s) => s.trim() !== '');
+	};
+
+	/**
+	 * @param {[path: string, {
+	 *     path: string;
+	 *     parsed: undefined;
+	 *     ext: `.${string}`;
+	 *     type: returnTypeStringType;
+	 *     readme?: string;
+	 * } | {
+	 *     path: string;
+	 *     parsed: parsedFileForDOC;
+	 *     ext: string;
+	 *     type: returnTypeStringType;
+	 *     readme?: string;
+	 * }][]} array
+	 * @returns {Promise<{
+	 * 	readme:string,
+	 * 	platforms:{
+	 * 		node:string,
+	 * 		browser:string,
+	 * 		neutral:string,
+	 * 		unsupported:string,
+	 * 		all:string,
+	 * 	},
 	 * }|undefined>}
 	 */
-	#generateFromSRC = async (contentSRC, filepaths) => {
-		if (
-			/**  */
-			this.#tableOfContentTitle === undefined ||
-			this.#copyright === undefined
-		) {
+	#generateFromSRC = async (array) => {
+		const contentSRC = (await this.#readmeSourceGetterSetter.get?.()) ?? '';
+		if (this.#tableOfContentTitle === undefined || this.#copyright === undefined) {
 			return;
 		}
 		const tableID = this.#tableOfContentTitle.replace(/\s+/g, '-').toLowerCase();
+		/**
+		 * @type { string[] }
+		 */
 		const tableOfContent = [];
+		/**
+		 * @type { string[] }
+		 */
 		const apiDocuments = [];
-		const mjsMain = ['// @ts-check', this.#generateJSDOCFromstring(this.#copyright)];
-		const mjsTypes = [];
-		const sortedFilepaths = [...filepaths].sort((a, b) => a.localeCompare(b));
-		for await (const path_ of sortedFilepaths) {
-			const {
-				documented,
-				content,
-				hasValidExportObject,
-				path: { relative: relativePath },
-				baseName: { noExt },
-			} = (await this.#parsedFilesRef.get(path_)).value;
-			const trueContent = await content.string();
-			if (
-				/**  */
-				trueContent === undefined
-			) {
-				this.#filePaths.value.delete(path_);
-				continue;
-			}
-			const hasNoAutoDoc = /\/\*\*[\s\*]*?@noautodoc[\s\*]*?\*\//.test(trueContent);
-			if (
-				/**  */
-				hasValidExportObject
-			) {
-				mjsMain.push(
-					`export { ${noExt} } from '${
+		/**
+		 * @type { Array<string> }
+		 */
+		const all = [];
+		/**
+		 * @type { Array<string> }
+		 */
+		const node = [];
+		/**
+		 * @type { Array<string> }
+		 */
+		const browser = [];
+		/**
+		 * @type { Array<string> }
+		 */
+		const neutral = [];
+		/**
+		 * @type { Array<string> }
+		 */
+		const unsupported = [];
+
+		await Promise.all(
+			ForEach.array(array, async ([, { parsed }], i) => {
+				if (!parsed) {
+					return;
+				}
+				const {
+					documented,
+					content,
+					hasValidExportObject,
+					path: { relative: relativePath },
+					baseName: { noExt },
+					platform,
+				} = parsed;
+				const awaitedPlatform = await platform;
+				const trueContent = await content.string();
+				if (trueContent === undefined) {
+					return;
+				}
+				const hasNoAutoDoc = /\/\*\*[\s\*]*?@noautodoc[\s\*]*?\*\//.test(trueContent);
+				/**
+				 * @type { undefined|string }
+				 */
+				let comprehensiveExporter;
+				if (hasValidExportObject) {
+					comprehensiveExporter = `export { ${noExt} } from '${
 						relativePath.startsWith('.') ? relativePath : `./${relativePath}`
-					}';`,
-				);
-			}
-			/**
-			 * @type {string[]}
-			 */
-			const currentDescription = [];
-			const { readme, typedef } = documented;
-			const [typedefString, error] = await TryAsync(async () => {
-				if (
-					/**  */
-					hasValidExportObject
-				) {
-					throw 'has no valid export object';
+					}';`;
 				}
-				const result = await typedef();
-				return result;
-			});
-			if (
-				/**  */
-				error === undefined &&
-				typedefString
-			) {
-				mjsTypes.push(typedefString.module);
-				if (
-					/**  */
-					!hasNoAutoDoc
-				) {
-					const nameVarID = noExt.toLowerCase();
-					tableOfContent.push(`[${noExt}](#${nameVarID})`);
-					apiDocuments.push(
-						`<h2 id="${nameVarID}">${noExt}</h2>\n\n- jsdoc types:\n\n\`\`\`js\n${
-							typedefString.readme
-						}\n\`\`\`\n*) <sub>[go to ${this.#tableOfContentTitle}](#${tableID})</sub>\n\n---`,
+				/**
+				 * @type {string[]}
+				 */
+				const currentDescription = [];
+				const { readme, typedef } = documented;
+				const [typedefString] = await TryAsync(async () => {
+					if (hasValidExportObject) {
+						throw 'has no valid export object';
+					}
+					const result = await typedef();
+					return result;
+				});
+				/**
+				 * @type { undefined|string }
+				 */
+				let comprehensiveTypedefString;
+				if (typedefString) {
+					const typedefStringModule = typedefString.module;
+					comprehensiveTypedefString = typedefStringModule;
+					if (!hasNoAutoDoc) {
+						const nameVarID = noExt.toLowerCase();
+						tableOfContent[i] =
+							tableOfContent[i] ?? '' + `[${awaitedPlatform}.${noExt}](#${nameVarID})`;
+						apiDocuments[i] =
+							apiDocuments[i] ??
+							'' +
+								`<h2 id="${nameVarID}">${awaitedPlatform}.${noExt}</h2>\n\n- jsdoc types:\n\n\`\`\`js\n${
+									/** */
+									typedefString.readme.replace(/\[at\]/g, '@').replace(/\[blank\]/g, '[]')
+								}\n\`\`\`\n*) <sub>[go to ${this.#tableOfContentTitle}](#${tableID})</sub>\n\n---`;
+					}
+				}
+				if (!hasNoAutoDoc && hasValidExportObject) {
+					ForOfSync(
+						readme,
+						({
+							// fullDescription,
+							// instanceOrStatic,
+							// namedVar,
+							// typeOfVar,
+							parsedFullDescription,
+							reference,
+						}) => {
+							const { description, jsPreview } = parsedFullDescription;
+							currentDescription.push(
+								`\n#### reference: ${reference}\n${description}\n${jsPreview}`.replace(
+									/\[blank\]/g,
+									'',
+								),
+							);
+						},
 					);
+					const nameVarID = noExt.toLowerCase();
+					tableOfContent[i] =
+						tableOfContent[i] ?? '' + `[${awaitedPlatform}.${noExt}](#${noExt.toLowerCase()})`;
+					apiDocuments[i] =
+						apiDocuments[i] ??
+						'' +
+							`<h2 id="${nameVarID}">${awaitedPlatform}.${noExt}</h2>\n\n-current-description-to-replace-\n\n*) <sub>[go to ${
+								this.#tableOfContentTitle
+							}](#${tableID})</sub>\n\n---`.replace(
+								'-current-description-to-replace-',
+								currentDescription.join('\n'),
+							);
 				}
-			}
-			if (
-				/**  */
-				hasNoAutoDoc === false &&
-				hasValidExportObject
-			) {
-				ForOfSync(
-					readme,
-					({
-						// fullDescription,
-						// instanceOrStatic,
-						// namedVar,
-						// typeOfVar,
-						parsedFullDescription,
-						reference,
-					}) => {
-						const { description, jsPreview } = parsedFullDescription;
-						currentDescription.push(
-							`\n#### reference:${reference}\n${description}\n${jsPreview}`.replace(
-								/\[blank\]/g,
-								'',
-							),
-						);
-					},
+
+				const collectedExportContent = this.#generateSingularMJSExportAndType(
+					comprehensiveExporter,
+					comprehensiveTypedefString,
 				);
-				const nameVarID = noExt.toLowerCase();
-				tableOfContent.push(`[${noExt}](#${noExt.toLowerCase()})`);
-				apiDocuments.push(
-					`<h2 id="${nameVarID}">${noExt}</h2>\n\n-current-description-to-replace-\n\n*) <sub>[go to ${
-						this.#tableOfContentTitle
-					}](#${tableID})</sub>\n\n---`.replace(
-						'-current-description-to-replace-',
-						currentDescription.join('\n'),
-					),
-				);
-			}
-		}
+				if (collectedExportContent) {
+					all[i] = collectedExportContent;
+				}
+
+				switch (awaitedPlatform) {
+					case 'node':
+						{
+							if (collectedExportContent) {
+								node[i] = collectedExportContent;
+							}
+						}
+						break;
+					case 'browser':
+						{
+							if (collectedExportContent) {
+								browser[i] = collectedExportContent;
+							}
+						}
+						break;
+					case 'neutral':
+						{
+							if (collectedExportContent) {
+								neutral[i] = collectedExportContent;
+							}
+						}
+						break;
+					default:
+					case 'unsupported':
+						{
+							if (collectedExportContent) {
+								unsupported[i] = collectedExportContent;
+							}
+						}
+						break;
+				}
+			}),
+		);
 		const tableOfContentString = `<h2 id="${this.#tableOfContentTitle
 			.replace(/\s+/g, '-')
 			.toLowerCase()}">${
 			this.#tableOfContentTitle
 		}</h2>\n\n - -table-of-content-to-replace-\n\n---\n\n-api-document-to-replace-`
-			.replace('-table-of-content-to-replace-', tableOfContent.join('\n - '))
-			.replace('-api-document-to-replace-', apiDocuments.join('\n\n'));
+			.replace(
+				'-table-of-content-to-replace-',
+				this.#cleanupArrayString(tableOfContent).join('\n - '),
+			)
+			.replace('-api-document-to-replace-', this.#cleanupArrayString(apiDocuments).join('\n\n'));
+
+		const readme = `${contentSRC}\n\n---\n\n${tableOfContentString}`;
+
 		return {
-			mjsFile: [...mjsMain, ...mjsTypes].join('\n'),
-			readme: `${contentSRC}\n\n---\n\n${tableOfContentString}`,
-		};
-	};
-	#parsedFilesRef = LazyFactory(() => {
-		const prefix = 'parsedFiles:';
-		return {
-			/**
-			 * @param {string} path__
-			 * @returns {Promise<Signal<parsedFile>>}
-			 */
-			get: async (path__) => {
-				const dispatch = (await EventSignal.get(`${prefix}${path__}`)).dispatcher;
-				return dispatch;
-			},
-			/**
-			 * @param {string} path__
-			 * @returns {Promise<void>}
-			 */
-			unRef: async (path__) => {
-				const parsedFile = await this.#parsedFilesRef.get(`${prefix}${path__}`);
-				parsedFile.remove.ref();
+			readme,
+			platforms: {
+				all: this.#cleanupArrayString(all).join('\n'),
+				browser: this.#cleanupArrayString(browser).join('\n'),
+				neutral: this.#cleanupArrayString(neutral).join('\n'),
+				node: this.#cleanupArrayString(node).join('\n'),
+				unsupported: this.#cleanupArrayString(unsupported).join('\n'),
 			},
 		};
-	});
+	};
+
 	/**
-	 * @type {(eventName: 'add'|'change', path: string, stats?: import('fs').Stats) => Promise<void>}
+	 * @param {string} name
+	 * @param {boolean} absolutePath
+	 * @returns {string}
 	 */
-	#addHandler = async (_eventName, path__, _stats) => {
-		await TryAsync(async () => {
-			if (
-				//
-				!_stats?.isFile()
-			) {
-				return;
+	#generateExportPath = (name, absolutePath) => {
+		const rel = Paths.normalize(join(multiExportEntryPointsPath, `${name}.mjs`));
+		if (!absolutePath) {
+			if (!rel.startsWith('.')) {
+				return `./${rel}`;
 			}
-			const res = await correctBeforeParse(path__, 'utf-8');
-			switch (res) {
-				case 'shouldProceedNextCheck':
-					const dispatch = await this.#parsedFilesRef.get(path__);
-					dispatch.value = new parsedFile(path__, _stats, Preferrence.encoding);
-					this.#filePaths.subscribers.notify(async ({ signalInstance }) => {
-						await dispatch.value.parse();
-						dispatch.subscribers.notify();
-						Console.info({
-							now: Date.now(),
-							[vivthJSautoDOC]: `export and document '${Paths.normalize(path__)}';`,
-						});
-						signalInstance.value.add(path__);
-					});
-					break;
-				case 'waitForRewrite':
-				case 'doNotProcess':
-					break;
-			}
-		}).then(([, errorJSautoDOC]) => {
-			if (
-				/**  */
-				errorJSautoDOC === undefined
-			) {
-				return;
-			}
-			Console.error({
-				now: Date.now(),
-				errorJSautoDOC,
-			});
+			return rel;
+		}
+		return Paths.normalize(join(Paths.root, rel));
+	};
+
+	/**
+	 * @param {string} content
+	 * @returns {string}
+	 */
+	#generateExportMJSDOCFromstring = (content) => {
+		return `// @ts-check\n/**\n * automatically generated by \`JSautoDOC\`\n * @copyright\n${(
+			this.#copyright ?? ''
+		).replace(/^/gm, ' * ')}\n */\n${content}`;
+	};
+
+	/**
+	 * @param {string} name
+	 * @param {Object} [packageJSONObject]
+	 * @returns {void}
+	 */
+	#assignToPackageJSONExports = (name, packageJSONObject) => {
+		if (!packageJSONObject) {
+			return;
+		}
+		const relativePath = this.#generateExportPath(name, false);
+		if (name === 'all') {
+			Object.assign(packageJSONObject, { main: relativePath, module: relativePath });
+		}
+		Object.assign(packageJSONObject, {
+			exports: {
+				...// @ts-expect-error
+				(packageJSONObject.exports ?? {}),
+				[`.${Paths.normalizeForRoot(name)}`]: {
+					import: relativePath,
+					types: relativePath.replace('./', './generated/types/').replace(/\.mjs$/g, '.d.mts'),
+				},
+			},
 		});
 	};
+
 	/**
-	 * @type {(eventName: 'unlink', path: string, stats?: import('fs').Stats) => Promise<void>}
+	 * @param {{
+	 * 		all:string,
+	 * 		node:string,
+	 * 		browser:string,
+	 * 		neutral:string,
+	 * 		unsupported:string,
+	 * 	}} platforms
+	 * @param {BufferEncoding} encoding
+	 * @param {any} packageJSONObject
+	 * @param {'node'|'browser'|'neutral'|'unsupported'} name
+	 * @returns {ReturnType<typeof TryAsync<void>>}
 	 */
-	#removeHandler = async (eventName, path__, stats) => {
-		await TryAsync(async () => {
-			if (
-				/**  */
-				stats?.isFile()
-			) {
-				return true;
-			}
-			return false;
-		}).then(([, error]) => {
-			if (
-				/**  */
-				error === undefined
-			) {
+	#generatePlatformsHandler = (platforms, encoding, packageJSONObject, name) => {
+		return TryAsync(async () => {
+			const path = this.#generateExportPath(name, true);
+			if (!platforms[name]) {
+				const [, errorRemovingPath] = await FileSafe.rm(path);
+				if (errorRemovingPath) {
+					return;
+				}
+				Console.info(
+					{
+						JSautoDOC: `✅ Successfully deleting '${path}' for having no valid exports`,
+					},
+					{
+						now: true,
+					},
+				);
 				return;
 			}
-			this.#filePaths.subscribers.notify(async ({ signalInstance }) => {
-				Console.warn({ now: Date.now(), [eventName]: path__ });
-				signalInstance.value.delete(path__);
-				await this.#parsedFilesRef.unRef(path__);
+			const content = this.#generateExportMJSDOCFromstring(platforms[name]);
+			this.#assignToPackageJSONExports(name, packageJSONObject);
+			await FileSafe.write(path, content, {
+				encoding,
 			});
+			Console.info(
+				{
+					JSautoDOC: `✅ Successfully write '${path}'`,
+				},
+				{
+					now: true,
+				},
+			);
 		});
+	};
+
+	/**
+	 * @type {FSDirArchWatcher__["fullHandler"]}
+	 */
+	#fullHandler = async ({ array, map }) => {
+		const readmePath = this.#readme;
+		Console.info(
+			{
+				JSautoDOC: `generating content for '${Paths.normalize(readmePath)}'`,
+			},
+			{
+				now: true,
+			},
+		);
+		const res = await this.#generateFromSRC(array);
+		if (!res) {
+			return;
+		}
+		const { readme, platforms } = res;
+		const [packageJSONObject] = await this.#packageJSONHandler.read();
+		const encoding = Preferrence.encoding;
+		const [promises_] = ForOfSync(
+			['all', 'browser', 'node', 'neutral', 'unsupported'],
+			async (key) => {
+				await this.#generatePlatformsHandler(
+					platforms,
+					encoding,
+					packageJSONObject,
+					// @ts-expect-error
+					key,
+				);
+			},
+		);
+		const [[, errorWriteReadme]] = await Promise.all([
+			TryAsync(async () => {
+				return await FileSafe.write(
+					readmePath,
+					await prettier.format(readme, { parser: 'markdown' }),
+					{
+						encoding,
+					},
+				);
+			}),
+			...promises_,
+		]);
+		if (!!packageJSONObject) {
+			await this.#packageJSONHandler.write(packageJSONObject);
+		}
+		if (errorWriteReadme === undefined) {
+			Console.info(
+				{
+					JSautoDOC: `✅ Successfully generate '${Paths.normalize(readmePath)}';`,
+				},
+				{
+					now: true,
+				},
+			);
+		}
+		if (errorWriteReadme) {
+			Console.error(
+				{
+					JSautoDOC: `❌ Unable to generate '${Paths.normalize(readmePath)}';`,
+					errorWriteReadme,
+				},
+				{
+					now: true,
+				},
+			);
+			return;
+		}
+		if (!this.#onLastGeneratedCallback) {
+			return;
+		}
+		await this.#onLastGeneratedCallback({ map });
 	};
 }

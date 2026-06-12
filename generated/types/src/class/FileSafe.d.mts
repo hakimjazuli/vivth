@@ -9,21 +9,30 @@ export class FileSafe {
      * - uses `'node:fs/promises'.access` under the hood;
      * - also returning promise of result & error as value;
      * @param {string} filePath
-     * @returns {ReturnType<typeof TryAsync<true>>}
+     * @returns {Promise<boolean>}
      * @example
      * import { join } from 'node:path';
-     * import { FileSafe, Paths } from 'vivth';
+     * import { FileSafe } from 'vivth/node';
+     * import { Paths } from 'vivth/neutral';
      *
-     * const [isFileExist, error] = await FileSafe.exist(
+     * const isExist = await FileSafe.exist(
      * 	join(Paths.root, '/some/path.mjs'),
      * );
-     * if (!error) {
-     * 	// file exists
-     * } else {
-     * 	// file not exists
-     * }
      */
-    static exist: (filePath: string) => ReturnType<typeof TryAsync<true>>;
+    static exist: (filePath: string) => Promise<boolean>;
+    /**
+     * @param { Parameters<writeFile>[1] } string
+     * @returns { string }
+     */
+    static #normalize: (string: Parameters<typeof writeFile>[1]) => string;
+    /**
+     * @param {Parameters<FileSafe.write>[0]} outFile
+     * @param {Parameters<FileSafe.write>[1]} content
+     * @param {Parameters<FileSafe.write>[2]} [options]
+     * @param {Parameters<FileSafe.write>[3]} [checkFuzySame]
+     * @returns {Promise<boolean>}
+     */
+    static #validToOverWrite: (outFile: Parameters<(outFile: Parameters<typeof writeFile>[0], content: Parameters<typeof writeFile>[1], options?: Parameters<typeof writeFile>[2], checkFuzySame?: boolean) => ReturnType<typeof TryAsync<void>>>[0], content: Parameters<(outFile: Parameters<typeof writeFile>[0], content: Parameters<typeof writeFile>[1], options?: Parameters<typeof writeFile>[2], checkFuzySame?: boolean) => ReturnType<typeof TryAsync<void>>>[1], options?: Parameters<(outFile: Parameters<typeof writeFile>[0], content: Parameters<typeof writeFile>[1], options?: Parameters<typeof writeFile>[2], checkFuzySame?: boolean) => ReturnType<typeof TryAsync<void>>>[2], checkFuzySame?: Parameters<(outFile: Parameters<typeof writeFile>[0], content: Parameters<typeof writeFile>[1], options?: Parameters<typeof writeFile>[2], checkFuzySame?: boolean) => ReturnType<typeof TryAsync<void>>>[3]) => Promise<boolean>;
     /**
      * @description
      * - method to create file safely by recursively mkdir the dirname of the outFile;
@@ -31,10 +40,14 @@ export class FileSafe {
      * @param {Parameters<writeFile>[0]} outFile
      * @param {Parameters<writeFile>[1]} content
      * @param {Parameters<writeFile>[2]} [options]
+     * @param {boolean} [checkFuzySame]
+     * - true: check while normalize consecutive whitespace into singel white space;
+     * - false(default): check absolute value;
      * @returns {ReturnType<typeof TryAsync<void>>}
      * @example
      * import { join } from 'node:path';
-     * import { FileSafe, Paths } from 'vivth';
+     * import { FileSafe } from 'vivth/node';
+     * import { Paths } from 'vivth/neutral';
      *
      * const [, errorWrite] = await FileSafe.write(
      * 	join(Paths.root, '/some/path.mjs'),
@@ -42,7 +55,7 @@ export class FileSafe {
      * 	{ encoding: 'utf-8' }
      * );
      */
-    static write: (outFile: Parameters<typeof writeFile>[0], content: Parameters<typeof writeFile>[1], options?: Parameters<typeof writeFile>[2]) => ReturnType<typeof TryAsync<void>>;
+    static write: (outFile: Parameters<typeof writeFile>[0], content: Parameters<typeof writeFile>[1], options?: Parameters<typeof writeFile>[2], checkFuzySame?: boolean) => ReturnType<typeof TryAsync<void>>;
     /**
      * @description
      * - method to copy file/dir safely by recursively mkdir the dirname of the dest;
@@ -53,7 +66,8 @@ export class FileSafe {
      * @returns {ReturnType<typeof TryAsync<void>>}
      * @example
      * import { join } from 'node:path';
-     * import { FileSafe, Paths } from 'vivth';
+     * import { FileSafe } from 'vivth/node';
+     * import { Paths } from 'vivth/neutral';
      *
      * const [, errorWrite] = await FileSafe.copy(
      * 	join(Paths.root, '/some/path.mjs'),
@@ -71,7 +85,8 @@ export class FileSafe {
      * @returns {ReturnType<typeof TryAsync<void>>}
      * @example
      * import { join } from 'node:path';
-     * import { FileSafe, Paths } from 'vivth';
+     * import { FileSafe} from 'vivth/node';
+     * import { Paths } from 'vivth/neutral';
      *
      * const [, errorRename] = await FileSafe.rename(
      * 	join(Paths.root, 'some/path'),
@@ -97,14 +112,15 @@ export class FileSafe {
      * @returns {ReturnType<typeof TryAsync<string|undefined>>}
      * @example
      * import { join } from 'node:path';
-     * import { FileSafe, Paths } from 'vivth';
+     * import { FileSafe } from 'vivth/node';
+     * import { Paths } from 'vivth/neutral';
      *
      * const [str, errorMkDir] = await FileSafe.mkdir(join(Paths.root, '/some/path/example'));
      */
     static mkdir: (outDir: Parameters<typeof mkdir>[0]) => ReturnType<typeof TryAsync<string | undefined>>;
 }
-import { TryAsync } from '../function/TryAsync.mjs';
 import { writeFile } from 'node:fs/promises';
+import { TryAsync } from '../function/TryAsync.mjs';
 import { copyFile } from 'node:fs/promises';
 import { rename } from 'node:fs/promises';
 import { rm } from 'node:fs/promises';

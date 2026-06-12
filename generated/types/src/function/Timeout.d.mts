@@ -5,7 +5,7 @@
  * - in miliseconds;
  * @returns {Promise<void>}
  * @example
- * import { Timeout } from 'vivth';
+ * import { Timeout } from 'vivth/neutral';
  *
  * const test = async () => {
  *   // code0

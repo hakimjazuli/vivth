@@ -8,14 +8,26 @@ import { Console } from './Console.mjs';
 import { Derived } from './Derived.mjs';
 import { Effect } from './Effect.mjs';
 import { Paths } from './Paths.mjs';
-import { SafeExit } from './SafeExit.mjs';
 import { Signal } from './Signal.mjs';
+
+/**
+ * it supposed to be able to call on browser too
+ * ```js
+ * import { SafeExit } from './SafeExit.mjs';
+ * ```
+ * need to add cleaner for SafeExit.instance?.addCallback
+ */
+
+/**
+ * @typedef {import('../typehints/VivthCleanup.mjs').VivthCleanup} VivthCleanup
+ */
 
 /**
  * @description
  * - class helper to create `Worker` instance;
  * - before any `Worker` functionaily to be used, you need to setup it with `WorkerThread.setup` and `WorkerMainThread.setup` before runing anytyhing;
  * @template {WorkerThread<any, any>} WT
+ * @implements {VivthCleanup}
  */
 export class WorkerMainThread {
 	/**
@@ -52,7 +64,7 @@ export class WorkerMainThread {
 	 * ```
 	 * @example
 	 * import { Worker } from 'node:worker_threads';
-	 * import { WorkerMainThread } from 'vivth';
+	 * import { WorkerMainThread } from 'vivth/neutral';
 	 *
 	 * WorkerMainThread.setup({
 	 * 	workerClass: Worker,
@@ -104,7 +116,7 @@ export class WorkerMainThread {
 	 * @param {import('../bundler/adds/PathFSBundles.mjs').PathFSBundles} handler
 	 * @param {Omit<WorkerOptions|import('node:worker_threads').WorkerOptions, 'eval'|'type'>} options
 	 * @example
-	 * import { WorkerMainThread } from 'vivth';
+	 * import { WorkerMainThread } from 'vivth/neutral';
 	 *
 	 * export const myDoubleWorker = new WorkerMainThread(PathFSBundles.vivthBundles('./doubleWorkerThread.mjs'));
 	 */
@@ -144,11 +156,14 @@ export class WorkerMainThread {
 			/** */
 			error
 		) {
-			Console.error({
-				error,
-				pathValidator,
-				message: 'invalid pathValidator inputed to `WorkerMainThread`;',
-			});
+			Console.error(
+				{
+					error,
+					pathValidator,
+					message: 'invalid pathValidator inputed to `WorkerMainThread`;',
+				},
+				{ now: true },
+			);
 			return;
 		}
 		const resolvedPath = resolvedPath_;
@@ -158,7 +173,7 @@ export class WorkerMainThread {
 			/** */
 			!workerClass
 		) {
-			Console.error('invalid `Worker` inputed to `WorkerMainThread`;');
+			Console.error('invalid `Worker` inputed to `WorkerMainThread`;', { now: true });
 			return;
 		}
 		const [[key], errorCreatingWorker] = await Tries({
@@ -169,14 +184,10 @@ export class WorkerMainThread {
 				) {
 					throw 'not a browser';
 				}
-				const worker_ = (worker.#worker.value = new workerClass(
-					resolvedPath,
-					// @ts-expect-error
-					{
-						...options,
-						...WorkerMainThread.#options,
-					},
-				));
+				const worker_ = (worker.#worker.value = new workerClass(resolvedPath, {
+					...options,
+					...WorkerMainThread.#options,
+				}));
 				if (
 					/** */
 					'onmessage' in worker_ ===
@@ -185,34 +196,23 @@ export class WorkerMainThread {
 					throw 'not a browser';
 				}
 				worker_.onmessage = listener;
-				if (
-					/** */
-					SafeExit.instance
-				) {
-					SafeExit.instance.addCallback(async () => {
-						worker_.onmessage = null;
-					});
-				}
+				// SafeExit.instance?.addCallback(async () => {
+				// 	worker_.onmessage = null;
+				// });
 			},
 			nonBrowser: async () => {
-				const worker_ = (worker.#worker.value = new workerClass(
-					resolvedPath,
-					// @ts-expect-error
-					{ ...options, ...WorkerMainThread.#options },
-				));
+				const worker_ = (worker.#worker.value = new workerClass(resolvedPath, {
+					...options,
+					...WorkerMainThread.#options,
+				}));
 				if (
 					/** */
 					'addEventListener' in worker_
 				) {
 					worker_.addEventListener('message', listener);
-					if (
-						/** */
-						SafeExit.instance
-					) {
-						SafeExit.instance.addCallback(async () => {
-							worker_.removeEventListener('message', listener);
-						});
-					}
+					// SafeExit.instance?.addCallback(async () => {
+					// 	worker_.removeEventListener('message', listener);
+					// });
 					return;
 				}
 				if (
@@ -220,14 +220,9 @@ export class WorkerMainThread {
 					'addListener' in worker_
 				) {
 					worker_.addListener('message', listener);
-					if (
-						/** */
-						SafeExit.instance
-					) {
-						SafeExit.instance.addCallback(async () => {
-							worker_.removeListener('message', listener);
-						});
-					}
+					// SafeExit.instance?.addCallback(async () => {
+					// 	worker_.removeListener('message', listener);
+					// });
 					return;
 				}
 				throw 'not a standard non browser';
@@ -235,20 +230,14 @@ export class WorkerMainThread {
 		});
 		if (
 			/** */
-			key
+			!key
 		) {
-			if (
-				/** */
-				!SafeExit.instance
-			) {
-				return;
-			}
-			SafeExit.instance.addCallback(async () => {
-				worker.terminate();
-			});
+			Console.error({ errorCreatingWorker }, { now: true });
 			return;
 		}
-		Console.error({ errorCreatingWorker });
+		// SafeExit.instance?.addCallback(async () => {
+		// 	worker.terminate();
+		// });
 	}
 	/**
 	 * lazyly generated because node version need to await
@@ -275,9 +264,9 @@ export class WorkerMainThread {
 	/**
 	 * @description
 	 * - terminate all signals that are used on this instance;
-	 * @return {void}
+	 * @return {Promise<void>}
 	 */
-	terminate = () => {
+	vivthCleanup = async () => {
 		this.postMessage(closeWorkerThreadEventObject);
 		/**
 		 * this is more for browser, as most of this are automatically cleaned with `SafeExit`;
@@ -294,7 +283,7 @@ export class WorkerMainThread {
 	 * - result signal of the processed message;
 	 * @type {Derived<WorkerResult<WT["POST"]>>}
 	 * @example
-	 * import { Effect } from 'vivth';
+	 * import { Effect } from 'vivth/neutral';
 	 * import { myDoubleWorker } from './myDoubleWorker.mjs';
 	 *
 	 * const doubleReceiverSignal = myDoubleWorker.receiverSignal;

@@ -17,7 +17,7 @@ import { TryAsync } from './TryAsync.mjs';
  * - typehint according to your js flavor, so the function make setOfResult typed;
  * @returns {Promise<[Set<RETURNTYPE>, Set<Error>]>}
  * @example
- * import { ForOfAsync } from 'vivth';
+ * import { ForOfAsync } from 'vivth/neutral';
  *
  * await ForOfAsync(iterable, async(value, { prevError, breakEarly })=>{
  * 	// code
@@ -41,27 +41,18 @@ export async function ForOfAsync(iterable, handlerCallback) {
 		breakEarly_ = true;
 	};
 	for await (const value of iterable) {
-		if (
-			/**  */
-			breakEarly_
-		) {
+		if (breakEarly_) {
 			break;
 		}
 		const [result, error] = await TryAsync(
 			async () => await handlerCallback(value, { prevError, breakEarly }),
 		);
-		if (
-			/**  */
-			error
-		) {
+		if (error) {
 			prevError = error;
 			errors.add(error);
 			continue;
 		}
-		if (
-			/**  */
-			result === undefined
-		) {
+		if (result === undefined) {
 			continue;
 		}
 		results.add(result);

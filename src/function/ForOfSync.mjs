@@ -17,11 +17,22 @@ import { TrySync } from './TrySync.mjs';
  * - typehint according to your js flavor, so the function make setOfResult typed;
  * @returns {[Set<RETURNTYPE>, Set<Error>]}
  * @example
- * import { ForOfSync } from 'vivth';
+ * import { ForOfSync, TryAsync } from 'vivth/neutral';
  *
  * ForOfSync(iterable, (value, { prevError, breakEarly })=>{
  * 	// code
- * })
+ * });
+ *
+ * await Promise.all(ForOfSync([
+ * 	async()=>{
+ * 		// code to run pararelly
+ * 	},
+ * 	async()=>{
+ * 		// code to run pararelly
+ * 	},
+ * ], async(cb)=>{
+ * 	return await cb();
+ * })[0])
  */
 export function ForOfSync(iterable, handlerCallback) {
 	/**
@@ -41,25 +52,16 @@ export function ForOfSync(iterable, handlerCallback) {
 		breakEarly_ = true;
 	};
 	for (const value of iterable) {
-		if (
-			/**  */
-			breakEarly_
-		) {
+		if (breakEarly_) {
 			break;
 		}
 		const [result, error] = TrySync(() => handlerCallback(value, { prevError, breakEarly }));
-		if (
-			/**  */
-			error
-		) {
+		if (error) {
 			prevError = error;
 			errors.add(error);
 			continue;
 		}
-		if (
-			/**  */
-			result === undefined
-		) {
+		if (result === undefined) {
 			continue;
 		}
 		results.add(result);

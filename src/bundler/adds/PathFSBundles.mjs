@@ -14,16 +14,19 @@ export class PathFSBundles {
 	 * @description
 	 * @param {string} relativePath
 	 * - to the dirname of the file you are calling this method;
-	 * @param {{shouldNotInlcudes:string}} [options]
-	 * - `shouldNotInlcudes`:
+	 * @param {{shouldNotIncludes:string}} [options]
+	 * - `shouldNotIncludes`:
 	 * >- when this method receive non immediate string(declared on other file),
-	 * >- `shouldNotInlcudes` should be filled with the string like,
+	 * >- `shouldNotIncludes` should be filled with the string like,
 	 * >- `/${libname}/path/to/file/this/method/is/being/called.extname`;
 	 * @returns {PathFSBundles}
 	 * @example
-	 * import { PathFSBundles } from 'vivth';
+	 * // D://true/path/mypath.mjs
+	 * import { PathFSBundles } from 'vivth/node';
 	 *
-	 * PathFSBundles.vivthBundles('../src/entryPoint.mjs');
+	 * PathFSBundles.vivthBundles('../src/entryPoint.mjs', {
+	 * 	shouldNotIncludes: 'D://true/path/mypath.mjs',
+	 * });
 	 */
 	static vivthBundles = (relativePath, options) => {
 		return new PathFSBundles(relativePath, options);
@@ -38,26 +41,17 @@ export class PathFSBundles {
 			'/vivth/src/common/TracePath.mjs',
 			'/vivth/src/bundler/adds/PathFSBundles.mjs',
 		]);
-		if (
-			/**  */
-			options
-		) {
-			let { shouldNotInlcudes: traceShouldNotIncludes_ } = options;
+		if (options) {
+			let { shouldNotIncludes: traceShouldNotIncludes_ } = options;
 			traceShouldNotIncludes_ = traceShouldNotIncludes_.trim();
-			if (
-				/**  */
-				traceShouldNotIncludes_
-			) {
+			if (traceShouldNotIncludes_) {
 				shouldNotIncludes.add(traceShouldNotIncludes_);
 			}
 		}
 		this.#callerPath =
 			TracePath((filePath) => {
 				for (const shouldNotInclude_ of shouldNotIncludes) {
-					if (
-						/**  */
-						!filePath.includes(shouldNotInclude_)
-					) {
+					if (!filePath.includes(shouldNotInclude_)) {
 						continue;
 					}
 					return false;
@@ -87,9 +81,9 @@ export class PathFSBundles {
 	/**
 	 * @description
 	 * - depending on whether running on bundled or not;
-	 * - unBundled: absolute disk path of the file caller;
-	 * - bundled: `blankstring`;
 	 * @returns {string}
+	 * - unBundled: `absolutePath` on disk of the file caller;
+	 * - bundled: `blankString`;
 	 */
 	get callerPath() {
 		return this.#callerPath;

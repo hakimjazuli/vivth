@@ -27,7 +27,7 @@ export class WalkThrough {
 	 * @param {(value:VAL)=>void} callback
 	 * @returns {void}
 	 * @example
-	 * import { WalkThrough } from 'vivth';
+	 * import { WalkThrough } from 'vivth/neutral';
 	 *
 	 * WalkThrough.set(setOfSomething, (value) => {
 	 * 	// code
@@ -44,7 +44,7 @@ export class WalkThrough {
 	 * @param {(res:[key: KEY, value: VAL]) => void} callback
 	 * @returns {void}
 	 * @example
-	 * import { WalkThrough } from 'vivth';
+	 * import { WalkThrough } from 'vivth/neutral';
 	 *
 	 * WalkThrough.map(mapOfSomething, ([key, value]) => {
 	 * 	// code
@@ -61,7 +61,7 @@ export class WalkThrough {
 	 * @param {(res:[value: VAL, index: number]) => void} callback
 	 * @returns {void}
 	 * @example
-	 * import { WalkThrough } from 'vivth';
+	 * import { WalkThrough } from 'vivth/neutral';
 	 *
 	 * WalkThrough.array(arrayOfSomething, ([value, index]) => {
 	 * 	// code

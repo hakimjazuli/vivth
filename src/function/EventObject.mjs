@@ -9,7 +9,7 @@ import { EventNameSpace } from '../common/EventNameSpace.mjs';
  * @param {NAME} name
  * @returns {{[EventNameSpace]: NAME}}
  * @example
- * import { EventObject } from 'vivth';
+ * import { EventObject } from 'vivth/neutral';
  *
  * export const eventObjectPayload = EventObject('worker:exit');
  */

@@ -5,19 +5,33 @@ import { TryAsync } from '../function/TryAsync.mjs';
 import { Console } from './Console.mjs';
 
 /**
+ * @typedef { import('../typehints/VivthCleanup.mjs').VivthCleanup } VivthCleanup
+ */
+
+/**
  * @description
  * - class for `Queue` handling;
  * @template {AnyButUndefined} DEFINEDANY
+ * @implements {VivthCleanup}
  */
 export class QChannel {
+	vivthCleanup = async () => {
+		this.close();
+	};
 	/**
 	 * @param {string} name
 	 * - only used as helper for logging, and has nothing to do with runtime behaviour;
+	 * @param {boolean} [log]
 	 */
-	constructor(name) {
+	constructor(name, log = false) {
 		this.name = name;
+		this.#log = log;
 		this.open();
 	}
+	/**
+	 * @type {boolean}
+	 */
+	#log;
 	/**
 	 * @typedef {import('../typehints/AnyButUndefined.mjs').AnyButUndefined} AnyButUndefined
 	 * @typedef {import('../typehints/QCBReturn.mjs').QCBReturn} QCBReturn
@@ -30,7 +44,7 @@ export class QChannel {
 	 * @returns {typeof QChannel}
 	 * - usefull for Queue primitive on multiple library but single reference, like the Web by making the `Map` on `window` object;
 	 * @example
-	 * import { QChannel } from 'vivth';
+	 * import { QChannel } from 'vivth/neutral';
 	 *
 	 * const myMappedQref = (window['myMappedQref'] = new Map());
 	 * export const MyQClass = QChannel.setup(myMappedQref);
@@ -54,10 +68,7 @@ export class QChannel {
 		const existing = QChannel.#uniquePromiser.get(id);
 		const { promise, resolve } = Promise.withResolvers();
 		const context = {};
-		if (
-			/**  */
-			existing === undefined
-		) {
+		if (existing === undefined) {
 			QChannel.#uniquePromiser.set(id, [promise, context]);
 			await Promise.resolve();
 		} else {
@@ -66,17 +77,14 @@ export class QChannel {
 			QChannel.#uniquePromiser.set(id, [promise, context]);
 		}
 		const resume = () => {
-			resolve();
+			resolve(true);
 			QChannel.#uniquePromiser.delete(id);
 		};
 		return {
 			resume,
 			isLastOnQ: () => {
 				const res = QChannel.#uniquePromiser.get(id);
-				if (
-					/**  */
-					!res
-				) {
+				if (!res) {
 					return false;
 				}
 				const [, lastContext] = res;
@@ -149,10 +157,7 @@ export class QChannel {
 	 */
 	get #shouldRun() {
 		const shoulRun = this.#shouldRun_;
-		if (
-			/**  */
-			shoulRun === false
-		) {
+		if (!shoulRun) {
 			Console.warn({ qChannel_name: this.name, message: 'is closed' });
 		}
 		return shoulRun;
@@ -165,6 +170,9 @@ export class QChannel {
 	 */
 	close = () => {
 		this.#shouldRun_ = false;
+		if (!this.#log) {
+			return;
+		}
 		Console.info({ qChannel_name: this.name, message: 'closed' });
 	};
 	/**
@@ -175,6 +183,9 @@ export class QChannel {
 	 */
 	open = () => {
 		this.#shouldRun_ = true;
+		if (!this.#log) {
+			return;
+		}
 		Console.info({ qChannel_name: this.name, message: 'opened' });
 	};
 	/**
@@ -203,10 +214,7 @@ export class QChannel {
 	key = async (keyID) => {
 		const { resume } = await QChannel.#uniqueCB(this, this);
 		const mapped = this.#mapped;
-		if (
-			/**  */
-			mapped.has(keyID) === false
-		) {
+		if (!mapped.has(keyID)) {
 			mapped.set(keyID, {});
 		}
 		resume();

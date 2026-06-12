@@ -1,6 +1,7 @@
 // @ts-check
 
 import { EventNameSpace } from '../common/EventNameSpace.mjs';
+import { IsTypeOf } from './IsTypeOf.mjs';
 
 /**
  * @description
@@ -9,7 +10,7 @@ import { EventNameSpace } from '../common/EventNameSpace.mjs';
  * @param {Record<typeof EventNameSpace, string>} eventObject
  * @returns {boolean}
  * @example
- * import { EventCheck } from 'vivth';
+ * import { EventCheck } from 'vivth/neutral';
  * import { incomingMessage } from './some/where.mjs';
  *
  * const eventObjectPayload = EventObject('worker:exit');
@@ -22,7 +23,7 @@ import { EventNameSpace } from '../common/EventNameSpace.mjs';
 export function EventCheck(object, eventObject) {
 	return (
 		object &&
-		typeof object === 'object' &&
+		IsTypeOf(object, 'object') &&
 		EventNameSpace in object &&
 		object[EventNameSpace] === eventObject[EventNameSpace]
 	);

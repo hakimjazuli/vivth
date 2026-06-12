@@ -14,16 +14,19 @@ export class Derived extends Signal {
 	/**
 	 * @description
 	 * - Derived used [Signal](#signal) and [Effect](#effect) under the hood;
-	 * @param {(this: Derived<VALUE>,effectInstanceOptions:
-	 * Parameters<ConstructorParameters<typeof Effect>[0]>[0])
-	 * => Promise<VALUE>} derivedFunction
-	 * - use regullar function instead of arrow function when needed to throw early;
+	 * @param {(
+	 * 		effectInstanceOptions: Parameters<ConstructorParameters<typeof Effect>[0]>[0] &
+	 * 		{
+	 * 			dontUpdate:Derived<VALUE>["dontUpdate"]
+	 * 		}
+	 * 	) => Promise<Derived<VALUE>["dontUpdate"] | VALUE>
+	 * } derivedFunction
 	 * @param {ConstructorParameters<typeof Effect>[1]} [maxTimelapseBeingDebounced]
 	 * - prevent rapid changes from being unhandled more than the value;
 	 * - in miliseconds;
 	 * - default: `2_000`;
 	 * @example
-	 * import { Signal, Derived } from  'vivth';
+	 * import { Signal, Derived } from 'vivth/neutral';
 	 *
 	 * const count = new Signal(0);
 	 * const double = new Derived(async({
@@ -40,32 +43,29 @@ export class Derived extends Signal {
 	 */
 	constructor(derivedFunction, maxTimelapseBeingDebounced = undefined) {
 		super(undefined);
-		derivedFunction = derivedFunction.bind(this);
 		new Effect(async (options) => {
-			// @ts-expect-error
-			const currentValue = await derivedFunction(options);
-			if (
-				/**  */
-				currentValue === this.dontUpdate
-			) {
+			const currentValue = await derivedFunction(
+				Object.assign(options, { dontUpdate: this.dontUpdate }),
+			);
+			if (currentValue === this.dontUpdate) {
 				return;
 			}
+			// @ts-expect-error
 			super.value = currentValue;
 		}, maxTimelapseBeingDebounced);
 	}
 	/**
 	 * @description
 	 * - return this value to not to update the value of this instance, even when returning early;
-	 * >- can only be accessed when `derivedFunction` is declared as regullar function instead of arrow function;
-	 * @type {Object}
+	 * @type {Symbol}
 	 * @example
-	 * import { Signal, Derived } from  'vivth';
+	 * import { Signal, Derived } from 'vivth/neutral';
 	 *
 	 * const count = new Signal(0);
-	 * const double = new Derived(async function({
+	 * const double = new Derived(async({
 	 * 		subscribe,
 	 * 		isLastCalled,
-	 * 	}) {
+	 * 	}) => {
 	 * 		if(!(await isLastCalled(100))) {
 	 * 			return this.dontUpdate;
 	 * 		}
@@ -84,17 +84,17 @@ export class Derived extends Signal {
 	 * });
 	 *
 	 */
-	dontUpdate = Object.freeze({});
+	dontUpdate = Symbol('');
 	/**
 	 * @description
-	 * - the most recent value of the instance
+	 * - the most recent value of the instance;
 	 * - can be turn into reactive with Effect or Derived instantiation;
 	 * - value are allowed to be `undefined` and always be `undefined` at the instantiation time;
 	 * >- make sure to put a check before consuming(inside an `Effect`);
 	 * @returns {VALUE|undefined}
 	 * @override
 	 * @example
-	 * import { Signal, Derived, Effect } from 'vivth';
+	 * import { Signal, Derived, Effect } from 'vivth/neutral';
 	 *
 	 * const numberSignal = new Signal(0);
 	 * const doubleDerived = new Derived(async({ subscribe }) => {

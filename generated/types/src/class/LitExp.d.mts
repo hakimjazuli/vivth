@@ -50,7 +50,7 @@ export class LitExp<KEYS extends import("../typehints/LitExpKeyType.mjs").LitExp
      * - placement of `key` will determine the named capture group will be placed in the template literal;
      * - it is recomended to not end template literal with any of the `key`s as the regex detection might failed to detects the boundary of the end of matched string of that capture group;
      * @example
-     * import { LitExp } from 'vivth';
+     * import { LitExp } from 'vivth/neutral';
      *
      * (()=>{
      * 	const [liteal, errorPrep] = LitExp.prepare({
@@ -75,14 +75,14 @@ export class LitExp<KEYS extends import("../typehints/LitExpKeyType.mjs").LitExp
      * @param {TemplateStringsArray} strings
      * @returns {ReturnType<typeof TrySync<string[]>>}
      */
-    static "__#private@#processTemplate"<KEYS_1 extends import("../typehints/LitExpKeyType.mjs").LitExpKeyType>(instance_rules: KEYS_1, intance_values: (keyof KEYS_1)[], valueHandler: (value: keyof KEYS_1, regex: RegExp | false) => ReturnType<typeof TrySync<string>>, strings: TemplateStringsArray): ReturnType<typeof TrySync<string[]>>;
+    static #processTemplate<KEYS_1 extends import("../typehints/LitExpKeyType.mjs").LitExpKeyType>(instance_rules: KEYS_1, intance_values: (keyof KEYS_1)[], valueHandler: (value: keyof KEYS_1, regex: RegExp | false) => ReturnType<typeof TrySync<string>>, strings: TemplateStringsArray): ReturnType<typeof TrySync<string[]>>;
     /**
      * @template {LitExpKeyType} KEYS
      * @param {RegExp|false} regex
      * @param {keyof KEYS} value
      * @returns {ReturnType<typeof TrySync<string>>}
      */
-    static "__#private@#namedChapture"<KEYS_1 extends import("../typehints/LitExpKeyType.mjs").LitExpKeyType>(value: keyof KEYS_1, regex: RegExp | false): ReturnType<typeof TrySync<string>>;
+    static #namedChapture<KEYS_1 extends import("../typehints/LitExpKeyType.mjs").LitExpKeyType>(value: keyof KEYS_1, regex: RegExp | false): ReturnType<typeof TrySync<string>>;
     /**
      * @private
      * @param {KEYS} keys
@@ -102,7 +102,7 @@ export class LitExp<KEYS extends import("../typehints/LitExpKeyType.mjs").LitExp
          * @param {Partial<{ [K in keyof KEYS]?: string }>} overrides
          * @returns {string|undefined}
          * @example
-         * import { LitExp } from 'vivth';
+         * import { LitExp } from 'vivth/neutral';
          *
          * const [literal, errorPreparing] = LitExp.prepare({
          * 	myKey: false,
@@ -119,7 +119,7 @@ export class LitExp<KEYS extends import("../typehints/LitExpKeyType.mjs").LitExp
          */
         string: (overrides: Partial<{ [K in keyof KEYS]?: string; }>) => string | undefined;
     } & {
-        "vivth:unwrapLazy;": () => {
+        [x: symbol]: {
             /**
              * @instance make
              * @description
@@ -127,7 +127,7 @@ export class LitExp<KEYS extends import("../typehints/LitExpKeyType.mjs").LitExp
              * @param {Partial<{ [K in keyof KEYS]?: string }>} overrides
              * @returns {string|undefined}
              * @example
-             * import { LitExp } from 'vivth';
+             * import { LitExp } from 'vivth/neutral';
              *
              * const [literal, errorPreparing] = LitExp.prepare({
              * 	myKey: false,
@@ -169,7 +169,7 @@ export class LitExp<KEYS extends import("../typehints/LitExpKeyType.mjs").LitExp
          * regexp:RegExp}>>
          * }
          * @example
-         * import { LitExp } from 'vivth';
+         * import { LitExp } from 'vivth/neutral';
          *
          * const [literal, errorPreparing] = LitExp.prepare({
          * 	myKey: false,
@@ -213,7 +213,7 @@ export class LitExp<KEYS extends import("../typehints/LitExpKeyType.mjs").LitExp
          * @returns {ReturnType<typeof TrySync<import('../typehints/LitExpResultType.mjs').LitExpResultType<KEYS>>>
          * }
          * @example
-         * import { LitExp, Console } from 'vivth';
+         * import { LitExp, Console } from 'vivth/neutral';
          *
          * const [literal, errorPreparing] = LitExp.prepare({
          * 	myKey: false,
@@ -248,7 +248,7 @@ export class LitExp<KEYS extends import("../typehints/LitExpKeyType.mjs").LitExp
          */
         matchedAllAndGrouped: (string: Parameters<LitExp<KEYS>["evaluate"]["execGroups"]>[0], options: Omit<Parameters<LitExp<KEYS>["evaluate"]["execGroups"]>[1], "absoluteLeadAndFollowing">) => ReturnType<typeof TrySync<import("../typehints/LitExpResultType.mjs").LitExpResultType<KEYS>>>;
     } & {
-        "vivth:unwrapLazy;": () => {
+        [x: symbol]: {
             /**
              * @instance evaluate
              * @description
@@ -268,7 +268,7 @@ export class LitExp<KEYS extends import("../typehints/LitExpKeyType.mjs").LitExp
              * regexp:RegExp}>>
              * }
              * @example
-             * import { LitExp } from 'vivth';
+             * import { LitExp } from 'vivth/neutral';
              *
              * const [literal, errorPreparing] = LitExp.prepare({
              * 	myKey: false,
@@ -312,7 +312,7 @@ export class LitExp<KEYS extends import("../typehints/LitExpKeyType.mjs").LitExp
              * @returns {ReturnType<typeof TrySync<import('../typehints/LitExpResultType.mjs').LitExpResultType<KEYS>>>
              * }
              * @example
-             * import { LitExp, Console } from 'vivth';
+             * import { LitExp, Console } from 'vivth/neutral';
              *
              * const [literal, errorPreparing] = LitExp.prepare({
              * 	myKey: false,

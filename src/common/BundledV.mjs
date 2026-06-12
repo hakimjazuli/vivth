@@ -12,7 +12,7 @@ export class BundledV {
 	 * @readonly
 	 * @type {boolean}
 	 * @example
-	 * import { BundledV } from "vivth";
+	 * import { BundledV } from 'vivth/neutral';
 	 *
 	 * if(BundledV.isBundled){
 	 * 	// code
@@ -30,17 +30,14 @@ export class BundledV {
 	 * - must be filled for regexp detection;
 	 * @returns {void}
 	 * @example
-	 * import { BundledV } from "vivth";
+	 * import { BundledV } from 'vivth/neutral';
 	 *
 	 * BundledV.vivthUnBundledCodeBlock(() => {
 	 * 	// code
 	 * }, 'vivthUnBundledCodeBlock')
 	 */
 	static vivthUnBundledCodeBlock = (callback, _closing) => {
-		if (
-			/**  */
-			BundledV.isBundled
-		) {
+		if (BundledV.isBundled) {
 			return;
 		}
 		callback();

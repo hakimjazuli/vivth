@@ -11,7 +11,7 @@ export class PathFSFile {
      * @param {Parameters<typeof import('./PathFSBundles.mjs').PathFSBundles["vivthBundles"]>[1]} [options]
      * @returns {PathFSFile}
      * @example
-     * import { PathFSFile } from 'vivth';
+     * import { PathFSFile } from 'vivth/node';
      *
      * PathFSFile.vivthFile('../CompileAS.mjs');
      */

@@ -7,7 +7,7 @@
  * - fill manually to imediately add result to existing `Set` without expecting return;
  * @returns {Promise<Set<string>>}
  * @example
- * import { GetFilesFromDir } from "vivth";
+ * import { GetFilesFromDir } from 'vivth/node';
  *
  * const files = await GetFilesFromDir(join(Paths.root, '/dev/'), /[\s\S]\*[noblank]/); // without \[noblank]
  */

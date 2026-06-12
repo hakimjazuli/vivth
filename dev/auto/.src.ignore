@@ -1,0 +1,25 @@
+# D:/M/fdr/web/lib/vivth/.gitignore
+# D:/M/fdr/web/lib/vivth/.npmignore
+
+/node_modules/
+
+/dev-bun/
+
+**/*.as.ts
+**/*/test/
+/test/
+/deprecated/
+/.vscode/
+
+/proof-of-concept/
+# /src/web/
+.vivth
+
+/dist/
+/generated/types/proof-of-concept/
+
+# prevent vivth unready file to be uploaded 
+-*
+*.test.*
+
+/doesnotwork/

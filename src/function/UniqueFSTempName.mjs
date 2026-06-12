@@ -12,18 +12,22 @@ import { GetMaxFilenameLength } from './GetMaxFilenameLength.mjs';
  * - generate unique full path name to temp directory + 'vivth/${uniqueName}.tmp';
  * - filename length already calibrated for each os;
  * @param {string} path
+ * @param {string} [fileExtention]
  * @returns {string}
  */
-export function UniqueFSTempName(path) {
+export function UniqueFSTempName(path, fileExtention = '.tmp') {
+	if (!fileExtention.startsWith('.')) {
+		fileExtention = `.${fileExtention}`;
+	}
+	if (fileExtention !== '.tmp') {
+		fileExtention = `.tmp${fileExtention}`;
+	}
 	const hash = createHash('sha256').update(Paths.normalize(path)).digest('hex');
 	let tempPath = Paths.normalize(join(tmpdir(), 'vivth', `${hash}`));
-	const maxlen = GetMaxFilenameLength() - 4; // 4 for .tmp
-	if (
-		/**  */
-		maxlen < tempPath.length
-	) {
+	const maxlen = GetMaxFilenameLength() - fileExtention.length;
+	if (maxlen < tempPath.length) {
 		tempPath = tempPath.slice(0, maxlen);
 	}
-	tempPath = `${tempPath}.tmp`;
+	tempPath = `${tempPath}${fileExtention}`;
 	return tempPath;
 }

@@ -5,7 +5,7 @@
  * @param {...((currentvalue:VALUE)=>VALUE)} pipeFunctions
  * @returns {VALUE}
  * @example
- * import { PipeSync } from 'vivth';
+ * import { PipeSync } from 'vivth/neutral';
  *
  * const res = PipeSync(
  *  'intialValue', // res: "intialValue"

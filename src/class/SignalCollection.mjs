@@ -3,18 +3,28 @@
 import { ForInSync } from '../function/ForInSync.mjs';
 
 /**
+ * @typedef {import('../typehints/VivthCleanup.mjs').VivthCleanup} VivthCleanup
+ */
+
+/**
  * @description
  * - class helper for creating Collection of `Signals` for Object of Signals to be subscribed to(on `Effect`/`Derived`) collectively as signals;
  * >- uses as `Facade` Pattern;
  * @template {Record<string, import('./Signal.mjs').Signal<any>>} SIGNALS
+ * @implements {VivthCleanup}
  */
 export class SignalCollection {
+	vivthCleanup = async () => {
+		this.forInSignals((_key, signal) => {
+			signal.remove.ref();
+		});
+	};
 	/**
 	 * @description
 	 * - creates instance of `SignalCollection`, by referencing to named Signal;
 	 * @param {SIGNALS} signalsObject
 	 * @example
-	 * import { Signal, Derived, SignalCollection } from 'vivth';
+	 * import { Signal, Derived, SignalCollection } from 'vivth/neutral';
 	 *
 	 * const a = new Signal('a');
 	 * const b = new Signal('b');
@@ -37,7 +47,7 @@ export class SignalCollection {
 	 * @param {import('./Effect.mjs').Effect["options"]["subscribe"]} [subscribe]
 	 * @returns {SIGNALS}
 	 * @example
-	 * import { Signal, Derived, Effect, SignalCollection } from 'vivth';
+	 * import { Signal, Derived, Effect, SignalCollection } from 'vivth/neutral';
 	 *
 	 * const a = new Signal('a');
 	 * const b = new Signal('b');
@@ -70,10 +80,7 @@ export class SignalCollection {
 	 */
 	signals = (subscribe = undefined) => {
 		const signals = this.#signals;
-		if (
-			/**  */
-			subscribe
-		) {
+		if (subscribe) {
 			ForInSync(signals, (_key, signal) => {
 				subscribe(signal);
 			});
@@ -92,7 +99,7 @@ export class SignalCollection {
 	 * )=>void} callback
 	 * @returns {void}
 	 * @example
-	 * import { Signal, Derived, Effect, SignalCollection } from 'vivth';
+	 * import { Signal, Derived, Effect, SignalCollection } from 'vivth/neutral';
 	 *
 	 * const a = new Signal('a');
 	 * const b = new Signal('b');

@@ -6,7 +6,7 @@ import { TryAsync } from './TryAsync.mjs';
  * @description
  * - safe `Object` async iterator helper;
  * >- collect errors then returns it as Set<Error>;
- * @template {Record<string, any>} OBJECT
+ * @template {Record<string|number|symbol, any>} OBJECT
  * @template {any} RETURNTYPE
  * @param {OBJECT} object
  * @param {(
@@ -21,7 +21,7 @@ import { TryAsync } from './TryAsync.mjs';
  * - typehint according to your js flavor, so the function make setOfResult typed;
  * @returns {Promise<[Set<RETURNTYPE>, Set<Error>]>}
  * @example
- * import { ForInAsync } from 'vivth';
+ * import { ForInAsync } from 'vivth/neutral';
  *
  * const object = { A: 'a', B: 'b' };
  * const setOfError = await ForInAsync(
@@ -52,35 +52,22 @@ export async function ForInAsync(object, handlerCallback) {
 		breakEarly_ = true;
 	};
 	for (const key in object) {
-		if (
-			/**  */
-			breakEarly_
-		) {
+		if (breakEarly_) {
 			break;
 		}
 		const value = object[key];
-		if (
-			/**  */
-			!Object.hasOwn(object, key) ||
-			value === undefined
-		) {
+		if (!Object.hasOwn(object, key) || value === undefined) {
 			continue;
 		}
 		const [result, error] = await TryAsync(
 			async () => await handlerCallback(key, value, { prevError, breakEarly }),
 		);
-		if (
-			/**  */
-			error
-		) {
+		if (error) {
 			prevError = error;
 			errors.add(error);
 			continue;
 		}
-		if (
-			/**  */
-			result === undefined
-		) {
+		if (result === undefined) {
 			continue;
 		}
 		results.add(result);

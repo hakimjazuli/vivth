@@ -1,18 +1,22 @@
 /**
+ * @typedef { import('../typehints/VivthCleanup.mjs').VivthCleanup } VivthCleanup
+ */
+/**
  * @description
  * - class helper for `WorkerThread` creation;
  * - before any `Worker` functionaily to be used, you need to setup it with `WorkerThread.setup` and `WorkerMainThread.setup` before runing anytyhing;
  * @template RECEIVE
  * @template POST
+ * @implements {VivthCleanup}
  */
-export class WorkerThread<RECEIVE, POST> {
+export class WorkerThread<RECEIVE, POST> implements VivthCleanup {
     /**
      * @typedef {import('../typehints/QCBReturn.mjs').QCBReturn} QCBReturn
      */
     /**
      * @type {Parameters<typeof WorkerThread["setup"]>[0]|undefined}
      */
-    static "__#private@#refs": Parameters<(typeof WorkerThread)["setup"]>[0] | undefined;
+    static #refs: Parameters<(typeof WorkerThread)["setup"]>[0] | undefined;
     /**
      * @description
      * - need to be called and exported as new `WorkerThread` class reference;
@@ -25,8 +29,8 @@ export class WorkerThread<RECEIVE, POST> {
      * ```
      * @returns {typeof WorkerThread<RECEIVE, POST>}
      * @example
-     * import { WorkerThread } from 'vivth';
      * import { parentPort } from 'node:worker_threads';
+     * import { WorkerThread } from 'vivth/neutral';
      *
      * export const MyWorkerThreadRef = WorkerThread.setup({ parentPort });
      */
@@ -36,7 +40,7 @@ export class WorkerThread<RECEIVE, POST> {
     /**
      * @param {any} ev
      */
-    static "__#private@#isCloseWorkerEvent": (ev: any) => boolean;
+    static #isCloseWorkerEvent: (ev: any) => boolean;
     /**
      * @description
      * - instantiate via created class from `setup` static method;
@@ -57,6 +61,7 @@ export class WorkerThread<RECEIVE, POST> {
      * new MyWorkerThread(handler);
      */
     constructor(handler: WorkerThread<RECEIVE, POST>["handler"]);
+    vivthCleanup: () => Promise<void>;
     /**
      * @description
      * - type helper;
@@ -77,3 +82,4 @@ export class WorkerThread<RECEIVE, POST> {
     POST: POST;
     #private;
 }
+export type VivthCleanup = import("../typehints/VivthCleanup.mjs").VivthCleanup;

@@ -1,5 +1,6 @@
 // @ts-check
 
+import { IsTypeOf } from '../function/IsTypeOf.mjs';
 import { LazyFactory } from '../function/LazyFactory.mjs';
 import { Console } from './Console.mjs';
 import { DataLog } from './DataLog.mjs';
@@ -24,26 +25,20 @@ export class ListSignal extends Signal {
 	 * @returns {value is Array<Record<string, string>>} True if the first item is a valid string record or array is empty.
 	 */
 	static isValid(value) {
-		if (
-			/**  */
-			Array.isArray(value) === false
-		) {
+		if (!Array.isArray(value)) {
 			return false;
 		}
 		const first = value[0];
-		if (
-			/**  */
-			first === undefined
-		) {
+		if (first === undefined) {
 			// allow empty array
 			return true;
 		}
 		return (
 			first &&
-			typeof first === 'object' &&
+			IsTypeOf(first, 'object') &&
 			!Array.isArray(first) &&
 			Object.entries(first).every(
-				([key, val]) => typeof key === 'string' && typeof val === 'string',
+				([key, val]) => IsTypeOf(key, 'string') && IsTypeOf(val, 'string'),
 			)
 		);
 	}
@@ -54,7 +49,7 @@ export class ListSignal extends Signal {
 	 * @param {ConstructorParameters<typeof Signal<LISTARG[]>>[1]} [performanceChangesReport]
 	 * - the argument passed are `structuredClone` of the array;
 	 * @example
-	 * import { ListSignal } from 'vivth';
+	 * import { ListSignal } from 'vivth/neutral';
 	 *
 	 * const listExample = new ListSignal([
 	 *      {key1: "test1",},
@@ -91,8 +86,8 @@ export class ListSignal extends Signal {
 	/**
 	 * @description
 	 * - structuredClone of prev
-	 * @override
 	 * @type {LISTARG[]|undefined}
+	 * @override
 	 */
 	get prev() {
 		return structuredClone(super.prev);
@@ -102,10 +97,7 @@ export class ListSignal extends Signal {
 	 */
 	#notifyWithPerformanceChangesReport = () => {
 		this.subscribers.notify(async () => {
-			if (
-				/**  */
-				!this.#performanceChangesReport
-			) {
+			if (!this.#performanceChangesReport) {
 				return;
 			}
 			this.#performanceChangesReport(new DataLog(this.arrayMethods.structuredClone));
@@ -127,7 +119,7 @@ export class ListSignal extends Signal {
 			 * - use this getter instead of subscribing the `ListSignal` value;
 			 * >- as to not accidentally mutate the source value;
 			 * @example
-			 * import { ListSignal, Derived } from 'vivth';
+			 * import { ListSignal, Derived } from 'vivth/neutral';
 			 *
 			 * const myListSignal = new ListSignal([
 			 * 	{ key:'a', group:0 },
@@ -215,10 +207,7 @@ export class ListSignal extends Signal {
 			 */
 			splice: (start, deleteCount, ...listArg) => {
 				const end = start + deleteCount - 1;
-				if (
-					/**  */
-					this.#checkLength('splice', end) === false
-				) {
+				if (!this.#checkLength('splice', end)) {
 					return;
 				}
 				super.value.splice(start, deleteCount, ...listArg);
@@ -233,10 +222,7 @@ export class ListSignal extends Signal {
 			 * @returns {void}
 			 */
 			swap: (indexA, indexB) => {
-				if (
-					this.#checkLength('swap', indexA) === false ||
-					this.#checkLength('swap', indexB) === false
-				) {
+				if (!this.#checkLength('swap', indexA) || !this.#checkLength('swap', indexB)) {
 					return;
 				}
 				// @ts-expect-error
@@ -252,18 +238,12 @@ export class ListSignal extends Signal {
 			 * @returns {void}
 			 */
 			modify: (index, listArg) => {
-				if (
-					/**  */
-					this.#checkLength('modify', index) === false
-				) {
+				if (!this.#checkLength('modify', index)) {
 					return;
 				}
 				for (const key in listArg) {
 					const listArgKey = listArg[key];
-					if (
-						/**  */
-						listArgKey
-					) {
+					if (listArgKey) {
 						// @ts-expect-error
 						super.value[index][key] = listArgKey;
 					}
@@ -278,10 +258,7 @@ export class ListSignal extends Signal {
 			 * @returns {void}
 			 */
 			remove: (index) => {
-				if (
-					/**  */
-					this.#checkLength('remove', index) === false
-				) {
+				if (!this.#checkLength('remove', index)) {
 					return;
 				}
 				this.arrayMethods.splice(index, 1);
@@ -315,10 +292,7 @@ export class ListSignal extends Signal {
 	 */
 	#checkLength = (mode, end) => {
 		const dataLength = super.value.length;
-		if (
-			/**  */
-			end >= dataLength
-		) {
+		if (end >= dataLength) {
 			Console.error({
 				mode,
 				end,

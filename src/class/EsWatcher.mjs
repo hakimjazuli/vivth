@@ -5,10 +5,15 @@ import { SafeExit } from './SafeExit.mjs';
 import { TryAsync } from '../function/TryAsync.mjs';
 
 /**
+ * @typedef {import('../typehints/VivthCleanup.mjs').VivthCleanup} VivthCleanup
+ */
+
+/**
  * @description
  * - wrapper for `watcher` via `esbuild.context`;
  * - watcher cleanup is automatically registered to `SafeExit`;
  * @template {import('esbuild').BuildOptions} O
+ * @implements {VivthCleanup}
  */
 export class EsWatcher {
 	/**
@@ -16,7 +21,7 @@ export class EsWatcher {
 	 * @param {Partial<O>} buildOptions
 	 * @param {import('esbuild').WatchOptions} [watchOptions]
 	 * @example
-	 * import { EsWatcher } from 'vivth';
+	 * import { EsWatcher } from 'vivth/node';
 	 *
 	 * const { context, remove } = new EsWatcher({
 	 *  ...esbuildOptions,
@@ -29,25 +34,17 @@ export class EsWatcher {
 		));
 		context_.then(async (ctx) => {
 			await ctx.watch(watchOptions);
-			SafeExit.instance?.addCallback(this.#kill);
+			SafeExit.instance?.addCallback(this.vivthCleanup);
 		});
 	}
-	/**
-	 * @type {()=>Promise<void>}
-	 */
-	#kill = async () => {
-		const ctx = await this.ctx;
-		await Promise.all([TryAsync(ctx.cancel), TryAsync(ctx.dispose)]);
-	};
 
 	/**
-	 * @description
-	 * - manually and safely call `cancel` and `dispose` on `BuildContext`;
 	 * @type {()=>Promise<void>}
 	 */
-	remove = async () => {
-		SafeExit.instance?.removeCallback(this.#kill);
-		await this.#kill();
+	vivthCleanup = async () => {
+		SafeExit.instance?.removeCallback(this.vivthCleanup);
+		const { cancel, dispose } = await this.ctx;
+		await Promise.all([TryAsync(cancel), TryAsync(dispose)]);
 	};
 
 	/**

@@ -10,7 +10,7 @@ export class WalkThrough {
      * @param {(...any:any[])=>void} callback
      * @returns {void}
      */
-    static "__#private@#handler": (iterator: Iterator<any, any, any>, callback: (...any: any[]) => void) => void;
+    static #handler: (iterator: Iterator<any, any, any>, callback: (...any: any[]) => void) => void;
     /**
      * @description
      * - method helper to WalkThrough `Set`;
@@ -19,7 +19,7 @@ export class WalkThrough {
      * @param {(value:VAL)=>void} callback
      * @returns {void}
      * @example
-     * import { WalkThrough } from 'vivth';
+     * import { WalkThrough } from 'vivth/neutral';
      *
      * WalkThrough.set(setOfSomething, (value) => {
      * 	// code
@@ -34,7 +34,7 @@ export class WalkThrough {
      * @param {(res:[key: KEY, value: VAL]) => void} callback
      * @returns {void}
      * @example
-     * import { WalkThrough } from 'vivth';
+     * import { WalkThrough } from 'vivth/neutral';
      *
      * WalkThrough.map(mapOfSomething, ([key, value]) => {
      * 	// code
@@ -49,7 +49,7 @@ export class WalkThrough {
      * @param {(res:[value: VAL, index: number]) => void} callback
      * @returns {void}
      * @example
-     * import { WalkThrough } from 'vivth';
+     * import { WalkThrough } from 'vivth/neutral';
      *
      * WalkThrough.array(arrayOfSomething, ([value, index]) => {
      * 	// code

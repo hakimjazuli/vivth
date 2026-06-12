@@ -1,24 +1,17 @@
 /**
  * @description
  * - function helper to object registrar;
+ * @template {any[]} ARGS
  * @template {any} OBJ
- * @param {(any:OBJ)=>void} registrarCallback
- * @returns {(obj:OBJ)=>OBJ}
+ * @param {(...args:ARGS)=>OBJ} registrarCallback
+ * @returns {Parameters<typeof ObjectRegistrar<ARGS, OBJ>>[0]}
  * @example
- * import { ObjectRegistrar, Signal, ForOfSync } from 'vivth';
+ * import { ObjectRegistrar, Signal, ForOfSync } from 'vivth/neutral';
  *
- * const setOfDCCB = new Set();
- * const registrar = (obj)=>{
- * 	setOfDCCB.add(obj);
- * }
- * const cleanup = () => ForOfSync(setOfDCCB, (signal) => {
- * 	signal.remove.ref()
+ * const autoCleanedUpSignal = ObjectRegistrar(()=>{
+ *
  * })
  *
- * const autoCleanedUpSignal = ObjectRegistrar(registrar);
- * const mySignal = autoCleanedUpSignal(new Signal(1));
- *
- * // somewhere else
- * cleanup();
+ * const mySignal = autoCleanedUpSignal(1);
  */
-export function ObjectRegistrar<OBJ extends unknown>(registrarCallback: (any: OBJ) => void): (obj: OBJ) => OBJ;
+export function ObjectRegistrar<ARGS extends any[], OBJ extends unknown>(registrarCallback: (...args: ARGS) => OBJ): Parameters<typeof ObjectRegistrar<ARGS, OBJ>>[0];

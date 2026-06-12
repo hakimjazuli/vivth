@@ -6,7 +6,7 @@
  * @param {()=>Promise<RESULT>} asyncFunction_
  * @returns {Promise<[RESULT,undefined]|[undefined,Error]>}
  * @example
- * import { TryAsync } from 'vivth';
+ * import { TryAsync } from 'vivth/neutral';
  *
  * let [res, error] = await TryAsync(async () => {
  * 	return await fetch('./someAPI/Path');

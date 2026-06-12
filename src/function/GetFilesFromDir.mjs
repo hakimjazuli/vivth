@@ -6,6 +6,7 @@ import { readdir } from 'node:fs/promises';
 import { TryAsync } from './TryAsync.mjs';
 import { Console } from '../class/Console.mjs';
 import { Paths } from '../class/Paths.mjs';
+import { ForOfSync } from './ForOfSync.mjs';
 
 /**
  * @description
@@ -16,7 +17,7 @@ import { Paths } from '../class/Paths.mjs';
  * - fill manually to imediately add result to existing `Set` without expecting return;
  * @returns {Promise<Set<string>>}
  * @example
- * import { GetFilesFromDir } from "vivth";
+ * import { GetFilesFromDir } from 'vivth/node';
  *
  * const files = await GetFilesFromDir(join(Paths.root, '/dev/'), /[\s\S]\*[noblank]/); // without \[noblank]
  */
@@ -24,37 +25,25 @@ export async function GetFilesFromDir(dirAbsolutePath, pathRule, fileNames = new
 	const [entries, errorReadDir] = await TryAsync(async () => {
 		return await readdir(dirAbsolutePath, { withFileTypes: true });
 	});
-	if (
-		/**  */
-		errorReadDir
-	) {
-		Console.error({ errorReadDir });
+	if (errorReadDir) {
+		Console.error({ errorReadDir }, { now: true });
 		return fileNames;
 	}
 	await Promise.all(
-		entries.map(async (entry) => {
+		ForOfSync(entries, async (entry) => {
 			const fullPath = join(dirAbsolutePath, entry.name);
-			if (
-				/**  */
-				!pathRule.test(fullPath)
-			) {
+			if (!pathRule.test(fullPath)) {
 				return;
 			}
-			if (
-				/**  */
-				entry.isFile()
-			) {
+			if (entry.isFile()) {
 				fileNames.add(Paths.normalize(fullPath));
 				return;
 			}
-			if (
-				/**  */
-				!entry.isDirectory()
-			) {
+			if (!entry.isDirectory()) {
 				return;
 			}
 			await GetFilesFromDir(fullPath, pathRule, fileNames);
-		}),
+		})[0],
 	);
 	return fileNames;
 }

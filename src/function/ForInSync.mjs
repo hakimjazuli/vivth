@@ -6,7 +6,7 @@ import { TrySync } from './TrySync.mjs';
  * @description
  * - safe `Object` iterator helper;
  * >- collect errors then returns it as Set<Error>;
- * @template {Record<string, any>} OBJECT
+ * @template {Record<string|number|symbol, any>} OBJECT
  * @template {any} RETURNTYPE
  * @param {OBJECT} object
  * @param {(
@@ -21,7 +21,7 @@ import { TrySync } from './TrySync.mjs';
  * - typehint according to your js flavor, so the function make setOfResult typed;
  * @returns {[Set<RETURNTYPE>, Set<Error>]}
  * @example
- * import { ForInSync } from 'vivth';
+ * import { ForInSync } from 'vivth/neutral';
  *
  * const object = { A: 'a', B: 'b' };
  * const [setOfResult , setOfError] = ForInSync(

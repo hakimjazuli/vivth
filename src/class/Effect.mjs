@@ -1,6 +1,5 @@
 // @ts-check
 
-import { unwrapLazy } from '../common/lazie.mjs';
 import { WalkThrough } from './WalkThrough.mjs';
 import { LazyFactory } from '../function/LazyFactory.mjs';
 import { Timeout } from '../function/Timeout.mjs';
@@ -8,7 +7,12 @@ import { TryAsync } from '../function/TryAsync.mjs';
 import { Console } from './Console.mjs';
 import { Signal } from './Signal.mjs';
 import { ForInSync } from '../function/ForInSync.mjs';
-
+import { FactoryKey } from '../common/FactoryKey.mjs';
+import { IsInstanceOf } from '../function/IsInstanceOf.mjs';
+import { ForOfSync } from '../function/ForOfSync.mjs';
+/**
+ * @typedef { import('../typehints/VivthCleanup.mjs').VivthCleanup } VivthCleanup
+ */
 /**
  * @type {Map<Effect, Set<Signal<any>>>}
  */
@@ -22,24 +26,30 @@ export const mapOfEffects = new Map();
  * >- it is using passed <b>subscribe</b> named `arg0` options as subscriber;
  * >- doesn't block other queues during first run;
  * >- can dynamically subscribes to signal, even on conditionals, that are not run during first run;
+ * @implements {VivthCleanup}
  */
 export class Effect {
+	vivthCleanup = async () => {
+		this.options.removeEffect();
+	};
 	/**
 	 * @description
-	 * @param {( arg0:
-	 * Omit<Effect["options"],
-	 * typeof unwrapLazy>
-	 * ) =>
-	 * Promise<void>} effect
+	 * @param {(
+	 * 		arg0: Effect["options"]
+	 * 	) => Promise<void>
+	 * } effect
 	 * @param {number} [maxTimelapseBeingDebounced]
 	 * - prevent rapid changes from being unhandled more than the value;
 	 * - in miliseconds;
 	 * - default: `2_000`;
 	 * @example
-	 * import { Signal, Derived, Effect, Console } from  'vivth';
+	 * import { Signal, Derived, Effect, Console } from 'vivth/neutral';
 	 *
 	 * const count = new Signal(0);
-	 * const double = new Derived(async({$}) => $(count).value \* 2); // double listen to count changes
+	 *
+	 * // double listen to count changes
+	 * const double = new Derived(async({subscribe}) => subscribe(count).value \* 2);
+	 *
 	 * new Effect(async ({
 	 * 			subscribe, // : registrar callback for this effect instance, immediately return the signal instance
 	 * 			removeEffect, // : disable this effect instance from reacting to dependency changes;
@@ -73,23 +83,23 @@ export class Effect {
 			 * @param {SIGV} signalInstance
 			 * @returns {SIGV}
 			 * @example
-			 * import { Signal, Effect } from 'vivth';
+			 * import { Signal, Effect } from 'vivth/neutral';
 			 *
 			 * const signal1 = new Signal(0);
 			 * const signal2 = new Signal(true);
+			 * const signal3 = new Signal(true);
 			 * const effect = new Effect(async ({ subscribe }) => {
-			 * 	subscribe(Signal1).value;
+			 * 	const signal1Value = subscribe(signal1).value;
+			 * 	if(signal1Value % 2){
+			 * 		// only subscribe to signal3, on conditional block
+			 * 		const signal3Value = subscribe(signal3).value;
+			 * 	}
 			 * })
 			 * effect.options.subscribe(signal2);
 			 */
 			subscribe: (signalInstance) => {
-				if (
-					/**  */
-					signalInstance instanceof Signal ===
-					false
-				) {
-					// @ts-expect-error
-					signalInstance = signalInstance[unwrapLazy]();
+				if (!IsInstanceOf(signalInstance, Signal)) {
+					signalInstance = signalInstance[FactoryKey];
 				}
 				signalInstance.subscribers.setOf.add(this_);
 				return signalInstance;
@@ -97,10 +107,34 @@ export class Effect {
 			/**
 			 * @instance options
 			 * @description
+			 * - the same with `.options.subscribe`, but for batches subscription;
+			 * - ideal for first run which to add signal to subscription on main condition;
+			 * - normally it's passed as argument to constructor, however it is also accessible from `options` property;
+			 * @template {ReadonlyArray<any>} T
+			 * @param {T} signalInstances
+			 * @returns {T}
+			 * @example
+			 * import { Signal, Effect } from 'vivth/neutral';
+			 *
+			 * const signal1 = new Signal(0);
+			 * const signal2 = new Signal(true);
+			 * const effect = new Effect(async ({ subscribes }) => {
+			 * 	const [{value: signal1Value}, {value: signal2Value}]= subscribes([signal1, signal2]);
+			 * })
+			 */
+			subscribes: (signalInstances) => {
+				ForOfSync(signalInstances, (signal) => {
+					this.options.subscribe(signal).value;
+				});
+				return signalInstances;
+			},
+			/**
+			 * @instance options
+			 * @description
 			 * - normally it's passed as argument to constructor, however it is also accessible from `options` property;
 			 * @type {()=>void}
 			 * @example
-			 * import { Effect } from 'vivth';
+			 * import { Effect } from 'vivth/neutral';
 			 *
 			 * const effect = new Effect(async ({removeEffect}) => {
 			 * 	if(someCondition){
@@ -113,10 +147,7 @@ export class Effect {
 			 */
 			removeEffect: () => {
 				const setOfSignal = mapOfEffects.get(this);
-				if (
-					/**  */
-					!setOfSignal
-				) {
+				if (!setOfSignal) {
 					return;
 				}
 				WalkThrough.set(setOfSignal, (signalInstance) => {
@@ -132,7 +163,7 @@ export class Effect {
 			 * @param {Signal<any>} signalInstance
 			 * @returns {void}
 			 * @example
-			 * import { Effect, Signal } from 'vivth';
+			 * import { Effect, Signal } from 'vivth/neutral';
 			 *
 			 * const count = new Signal(0);
 			 * const effect = new Effect(async ({ subscribe }) => {
@@ -145,17 +176,11 @@ export class Effect {
 			removeSignal: (signalInstance) => {
 				signalInstance.subscribers.setOf.delete(this);
 				const setOfSignal = mapOfEffects.get(this);
-				if (
-					/**  */
-					!setOfSignal
-				) {
+				if (!setOfSignal) {
 					return;
 				}
 				setOfSignal.delete(signalInstance);
-				if (
-					/**  */
-					setOfSignal.size
-				) {
+				if (setOfSignal.size) {
 					return;
 				}
 				mapOfEffects.delete(this);
@@ -167,7 +192,7 @@ export class Effect {
 			 * @param {import('./SignalCollection.mjs').SignalCollection<Record<string, Signal<any>>>} collectionInstance
 			 * @returns {void}
 			 * @example
-			 * import { Signal, Derived, Effect, SignalCollection } from 'vivth';
+			 * import { Signal, Derived, Effect, SignalCollection } from 'vivth/neutral';
 			 *
 			 * const a = new Signal('a');
 			 * const b = new Signal('b');
@@ -204,7 +229,7 @@ export class Effect {
 			 * - if it's operation such as `fetch`, you can just leave it blank;
 			 * @example
 			 *
-			 * import { Effect } from 'vivth';
+			 * import { Effect } from 'vivth/neutral';
 			 *
 			 * const effect = new Effect(async ({ isLastCalled }) => {
 			 * 	if (!(await isLastCalled(100))) {
@@ -224,29 +249,17 @@ export class Effect {
 				let isRealyEnforced = false;
 				return async (timeoutMS = 0) => {
 					const firstTimeDebounced = this_.#firstTimeDebounced;
-					if (
-						/**  */
-						isRealyEnforced
-					) {
+					if (isRealyEnforced) {
 						return true;
 					}
-					if (
-						/**  */
-						timeoutMS
-					) {
+					if (timeoutMS) {
 						await Timeout(timeoutMS);
 					}
-					if (
-						/**  */
-						!(await this_.#shallowCurrentCheck(current))
-					) {
+					if (!(await this_.#shallowCurrentCheck(current))) {
 						return false;
 					}
 					const [isLast, isEnforced] = await this_.#deepCurrentCheck(current, firstTimeDebounced);
-					if (
-						/**  */
-						isEnforced
-					) {
+					if (isEnforced) {
 						isRealyEnforced = true;
 						this_.#promiser(current);
 					}
@@ -263,7 +276,7 @@ export class Effect {
 		const { promise, resolve } = Promise.withResolvers();
 		this.#promise = promise;
 		const cleanupCallback = () => {
-			resolve();
+			resolve(true);
 			this.#promise = undefined;
 			Effect.#mapCurrentCleanupCallback.delete(current);
 		};
@@ -281,18 +294,13 @@ export class Effect {
 	 * @type {WeakMap<Object, ()=>void>}
 	 */
 	static #mapCurrentCleanupCallback = new WeakMap();
-	/**
-	 * @typedef {import('../common/lazie.mjs').unwrapLazy} unwrapLazy
-	 */
+
 	/**
 	 * @type {number|undefined}
 	 */
 	#firstTimeDebounced_ = undefined;
 	get #firstTimeDebounced() {
-		if (
-			/**  */
-			!this.#firstTimeDebounced_
-		) {
+		if (!this.#firstTimeDebounced_) {
 			this.#firstTimeDebounced_ = Date.now();
 		}
 		return this.#firstTimeDebounced_;
@@ -306,10 +314,7 @@ export class Effect {
 	 * @returns {boolean}
 	 */
 	#shallowerCurrentCheck_ = (current) => {
-		if (
-			/**  */
-			this.#current === current
-		) {
+		if (this.#current === current) {
 			return true;
 		}
 		this.#firstTimeDebounced_ = undefined;
@@ -320,21 +325,12 @@ export class Effect {
 	 * @returns {Promise<boolean>}
 	 */
 	#shallowCurrentCheck = async (current) => {
-		if (
-			/**  */
-			!this.#shallowerCurrentCheck_(current)
-		) {
+		if (!this.#shallowerCurrentCheck_(current)) {
 			return false;
 		}
-		if (
-			/**  */
-			this.#promise
-		) {
+		if (this.#promise) {
 			await this.#promise;
-			if (
-				/**  */
-				!this.#shallowerCurrentCheck_(current)
-			) {
+			if (!this.#shallowerCurrentCheck_(current)) {
 				return false;
 			}
 		}
@@ -349,20 +345,14 @@ export class Effect {
 		const elapsed = Date.now() - chacedFirstTimeDebounced;
 		let isLast;
 		let isEnforced;
-		if (
-			/**  */
-			elapsed >= this.#maxTimelapseBeingDebounced
-		) {
+		if (elapsed >= this.#maxTimelapseBeingDebounced) {
 			isLast = true;
 			isEnforced = true;
 		} else {
 			isLast = current === this.#current;
 			isEnforced = false;
 		}
-		if (
-			/**  */
-			isLast
-		) {
+		if (isLast) {
 			this.#firstTimeDebounced_ = undefined;
 		}
 		return [isLast, isEnforced];
@@ -376,7 +366,7 @@ export class Effect {
 	 * - normally is to let to be automatically run when dependency signals changes, however it's also accessible as instance method;
 	 * @type {()=>void}
 	 * @example
-	 * import { Effect } from 'vivth';
+	 * import { Effect } from 'vivth/neutral';
 	 *
 	 * const effect = new Effect(async ()=>{
 	 * 	// code
@@ -387,22 +377,20 @@ export class Effect {
 		const current = {};
 		TryAsync(async () => {
 			if (
-				/**  */
-
 				//
 				!mapOfEffects.has(this)
 			) {
 				this.options.removeEffect();
 				return;
 			}
-			const options = this.options[unwrapLazy]();
+			const options = this.options[FactoryKey];
+			if (!options) {
+				return;
+			}
 			this.#current = current;
 			await this.#effect(options);
 		}).then(([, error]) => {
-			if (
-				/**  */
-				error
-			) {
+			if (error) {
 				Console.error(error);
 			}
 			Effect.#mapCurrentCleanupCallback.get(current)?.(); // technically this line is a mock finally block

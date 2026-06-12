@@ -9,7 +9,7 @@ export class EnvSignal<VALUE> {
      * - create `EnvSignal` instance;
      * @param {VALUE} initialValue
      * @example
-     * import { EnvSignal } from 'vivth';
+     * import { EnvSignal } from 'vivth/neutral';
      *
      * export const myEnv = new EnvSignal(true);
      */
@@ -19,7 +19,7 @@ export class EnvSignal<VALUE> {
      * - exposed property to listen to;
      * @type {Derived<VALUE>}
      * @example
-     * import { EnvSignal, Effect } from 'vivth';
+     * import { EnvSignal, Effect } from 'vivth/neutral';
      *
      * export const myEnv = new EnvSignal(true);
      * new Effect(async ({ subscribe }) => {
@@ -35,7 +35,7 @@ export class EnvSignal<VALUE> {
      * @param {VALUE} correctedValue
      * @returns {void}
      * @example
-     * import { EnvSignal } from 'vivth';
+     * import { EnvSignal } from 'vivth/neutral';
      *
      * export const myEnv = new EnvSignal(true);
      *

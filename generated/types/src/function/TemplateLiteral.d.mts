@@ -2,13 +2,14 @@
  * @description
  * - function helper to create template literal with valueHandler to handle each values;
  * @template {any} INPUTTYPE
+ * @template {string|Promise<string>} RET
  * @param {import('../typehints/TemplateLiteralValueHandler.mjs').TemplateLiteralValueHandler<INPUTTYPE>} valueHandler
- * @param {(result:string)=>(string|Promise<string>)} [postProcess]
+ * @param {(result:string)=>(RET)} [postProcess]
  * @returns {(strings:TemplateStringsArray,
  * ...values:(INPUTTYPE)[])=>
- * ReturnType<Parameters<typeof TemplateLiteral>[0]>}
+ * RET}
  * @example
- * import { TemplateLiteral } form 'vivth';
+ * import { TemplateLiteral } from 'vivth/neutral';
  *
  * export const html = TemplateLiteral(
  *  ({ ...datas }) => `my string`,
@@ -19,4 +20,4 @@
  * html`<div>${`<button>innerButton</button>`}</div>`;
  * // this will set innerHTML of body to '<div><button>innerButton</button></div>'
  */
-export function TemplateLiteral<INPUTTYPE extends unknown>(valueHandler: import("../typehints/TemplateLiteralValueHandler.mjs").TemplateLiteralValueHandler<INPUTTYPE>, postProcess?: (result: string) => (string | Promise<string>)): (strings: TemplateStringsArray, ...values: (INPUTTYPE)[]) => ReturnType<Parameters<typeof TemplateLiteral>[0]>;
+export function TemplateLiteral<INPUTTYPE extends unknown, RET extends string | Promise<string>>(valueHandler: import("../typehints/TemplateLiteralValueHandler.mjs").TemplateLiteralValueHandler<INPUTTYPE>, postProcess?: (result: string) => (RET)): (strings: TemplateStringsArray, ...values: (INPUTTYPE)[]) => RET;

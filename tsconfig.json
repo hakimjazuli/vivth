@@ -1,39 +1,44 @@
 {
-	"compilerOptions": {
-		"allowJs": true,
-		"checkJs": false,
-		// "checkJs": true,
-
-		"declaration": true,
-		"emitDeclarationOnly": true,
-		"outDir": "./generated/types",
-		"esModuleInterop": true,
-		"removeComments": false,
-
-		"lib": [
-			//
-			"ESNext"
-			// "DOM"
-		],
-		"target": "ESNext",
-		"module": "Preserve",
-		"moduleDetection": "force",
-
-		"moduleResolution": "bundler",
-		"allowImportingTsExtensions": true,
-		"verbatimModuleSyntax": true,
-		"noEmit": false,
-
-		"strict": true,
-		"skipLibCheck": true,
-		"noFallthroughCasesInSwitch": true,
-		"noUncheckedIndexedAccess": true,
-		"noImplicitOverride": true,
-
-		"noUnusedLocals": true,
-		"noUnusedParameters": true,
-		"noPropertyAccessFromIndexSignature": false
-	},
-	"include": ["./index.mjs", "./src", "proof-of-concept/UndoRedo.mjs"],
-	"exclude": ["**/*.js", "**/*.as.ts", "**/*.wasm"]
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": false,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "outDir": "./generated/types",
+    "esModuleInterop": true,
+    "removeComments": false,
+    "lib": [
+      "ESNext"
+    ],
+    "types": [
+      "node"
+    ],
+    "target": "esnext",
+    "module": "Preserve",
+    "moduleDetection": "force",
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "noEmit": false,
+    "strict": true,
+    "skipLibCheck": true,
+    "noFallthroughCasesInSwitch": true,
+    "allowUnreachableCode": false,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noPropertyAccessFromIndexSignature": false
+  },
+  "skipDefaultLibCheck": true,
+  "include": [
+    "./generated/vivth/exports",
+    "./src"
+  ],
+  "exclude": [
+    "./node_modules/**/*",
+    "**/*.js",
+    "**/*.as.ts",
+    "**/*.wasm"
+  ]
 }

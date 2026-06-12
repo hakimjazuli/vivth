@@ -7,7 +7,7 @@
  * @param {number} traceIndex
  * @returns {string}
  * @example
- * import { Trace, Console } from 'vivth';
+ * import { Trace, Console } from 'vivth/neutral';
  *
  * Console.log(Trace(3)); // "D://test.mjs:3:13"
  */

@@ -15,7 +15,7 @@
  * ```
  * @returns {string}
  * @example
- * import { Base64URL } from 'vivth'
+ * import { Base64URL } from 'vivth/neutral';
  *
  * import fileString from './fileString.mjs';
  *

@@ -5,7 +5,7 @@
  * @param {Record<typeof EventNameSpace, string>} eventObject
  * @returns {boolean}
  * @example
- * import { EventCheck } from 'vivth';
+ * import { EventCheck } from 'vivth/neutral';
  * import { incomingMessage } from './some/where.mjs';
  *
  * const eventObjectPayload = EventObject('worker:exit');

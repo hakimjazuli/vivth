@@ -14,15 +14,12 @@ npm i vivth
   underlying framework;
 - `vivth` are leaning to `esm(.mjs)+jsdoc` first;
   > - some functionality "might need" work around if you are using other than `esm+jsdoc`;
-  > - `CompileJS`, `ESBundler` expose `format` option for some leeway for `commonJS`;
-- completely `JSruntime` agnostic:
-  > - instead of `vivth` trying to guess, all runtime specific API should be provided by dev;
 - contains helpers to help you write data driven javascript program, including:
-  > - collections of extremely ⚡ performant `signal` classes;
+  > - collections of ⚡ performant `signal` classes;
   >   > - `vivth` deliberately take away `auto-subscription`:
   >   >   > - and introducing more imperative way of subsrciption yet still simple enough, which in
-  >   >   >   turn, it completely removes total code blocking on previously needed auto subsrciption
-  >   >   >   process on first run;
+  >   >   >   turn, it completely removes abstraction performance headsup on previously needed auto
+  >   >   >   subsrciption process on first run;
   >   >   > - and also make previously unthinkable dynamic subscription on conditionals that runs
   >   >   >   outside first run, now completely possible;
   > - collections of `queue-helper` classes;
@@ -32,12 +29,10 @@ npm i vivth
   > - opionated `bundler`:
   >   > - abstracted via `esbuild`;
   > - opionated `compiler`;
-  >   > - abstracted via `pkg`, `deno`, and `bun`;
-- when using runtime that doesn't provide specific common modules golbally(like `Deno`), dev should
-  import it statically from `node:${module_name}`, example:
-  ```js
-  import process from 'node:process';
-  ```
+  >   > - abstracted via `bun`;
+- core `dependency`:
+  > - `bunJS`(hard mandatory);
+  > - `nodeJS`(checks for compatibility if you need to run things in node instead of bun);
 
 ---
 
@@ -59,4 +54,7 @@ npm i vivth
   > - [EnvMode](#envmode) are now independent from whether it's bundled or not, and need to be
   >   separately declared;
   > - add mechanism for `Effect` callback to run periodically when under heavy calls;
-  > - move all logic for `FSInline` to [FSasar](#fsasar)
+  > - move all logic for `FSInline` to [FSasar](#fsasar);
+  > - modify [JSautoDoc](#jsautodoc) for `multi-exports`, as to prevent runtime to run incorrect
+  >   platform module due to importing from `libName` still walktrhough all of listed exports
+  >   regardless if it's being imported or not;

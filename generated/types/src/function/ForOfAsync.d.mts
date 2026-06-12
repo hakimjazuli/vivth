@@ -13,7 +13,7 @@
  * - typehint according to your js flavor, so the function make setOfResult typed;
  * @returns {Promise<[Set<RETURNTYPE>, Set<Error>]>}
  * @example
- * import { ForOfAsync } from 'vivth';
+ * import { ForOfAsync } from 'vivth/neutral';
  *
  * await ForOfAsync(iterable, async(value, { prevError, breakEarly })=>{
  * 	// code

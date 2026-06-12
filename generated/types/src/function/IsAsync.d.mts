@@ -4,7 +4,7 @@
  * @param {(...any:any)=>(any|Promise<any>)} functionReference
  * @returns {boolean}
  * @example
- * import { IsAsync } from 'vivth';
+ * import { IsAsync } from 'vivth/neutral';
  *
  * const a = function (params) {
  * 	// code

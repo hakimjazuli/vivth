@@ -3,14 +3,14 @@
  * - class helper for `vivth` `Bundled` values;
  */
 export class BundledV {
-    static "__#private@#isBundled": boolean;
+    static #isBundled: boolean;
     /**
      * @description
      * - readonly value of whether the script run after being bundled with `vivth` or not;
      * @readonly
      * @type {boolean}
      * @example
-     * import { BundledV } from "vivth";
+     * import { BundledV } from 'vivth/neutral';
      *
      * if(BundledV.isBundled){
      * 	// code
@@ -26,7 +26,7 @@ export class BundledV {
      * - must be filled for regexp detection;
      * @returns {void}
      * @example
-     * import { BundledV } from "vivth";
+     * import { BundledV } from 'vivth/neutral';
      *
      * BundledV.vivthUnBundledCodeBlock(() => {
      * 	// code

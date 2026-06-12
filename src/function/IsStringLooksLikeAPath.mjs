@@ -6,7 +6,7 @@
  * @param {string} spec
  * @returns {boolean}
  * @example
- * import { IsStringLooksLikeAPath } from "vivth";
+ * import { IsStringLooksLikeAPath } from 'vivth/neutral';
  *
  * looksLikePath("./foo.mjs"); // true
  * looksLikePath("../bar.ts"); // true

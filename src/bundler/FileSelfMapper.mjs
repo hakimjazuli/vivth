@@ -1,6 +1,6 @@
 // @ts-check
 
-import { dirname, extname, join, relative } from 'node:path';
+import { dirname, extname, relative } from 'node:path';
 import { readFile } from 'node:fs/promises';
 
 import { watch } from 'chokidar';
@@ -20,20 +20,24 @@ import { UniqueFSTempName } from '../function/UniqueFSTempName.mjs';
 import { EsWatcher } from '../class/EsWatcher.mjs';
 import { TrySync } from '../function/TrySync.mjs';
 import { onEndEsBuildErrorLogger } from './adds/onEndEsBuildErrorLogger.mjs';
+import { Preferrence } from '../common/Preferrence.mjs';
+import { LazyFactory } from '../function/LazyFactory.mjs';
+
+/**
+ * @typedef {import('../typehints/VivthCleanup.mjs').VivthCleanup} VivthCleanup
+ */
 
 /**
  * @description
- * - this Class require `esbuild` to be installed, example using npm:
- * ```shell
- * npm install esbuild
- * ```
  * - each file can define it's own `targetPaths` inline by adding comment then fullpath on the begining of the file:
+ * >- `mjs`;
  * ```js
  * // D://my/path/something.mjs
  * // D://my/path/something-else.mjs
  *
  * console.log('hello');
  * ```
+ * >- `scss`;
  * ```scss
  * /*[blank] D://my/path/something.css *[blank]/
  *
@@ -43,203 +47,189 @@ import { onEndEsBuildErrorLogger } from './adds/onEndEsBuildErrorLogger.mjs';
  * 	background-color: $somecolor;
  * }
  * ```
- * -files extention:
- * >- `js`/`ts` files will compiled with esbuild cli, using `option.esbuild` as argument;
- * >- `sass`/`scss` it will be compiled to css first;
- * >- other than those files, they will just copied to `targetPaths`;
+ * >- `.ignore`;
+ * ```.ignore
+ * # D:/my/project/root/.gitignore
+ * # D:/my/project/root/.npmignore
+ *
+ * /dev/
+ * ```
+ * - files extention:
+ * >- `js`/`ts` files will be compiled with `vivth/node.EsWathcer`, using `option.esbuild` as argument;
+ * >- `sass`/`scss` it will be compiled to `css` first;
+ * >- other than those files, they will be just copied to `targetPaths`;
+ * - for runtime example see file `/dev/auto/` on source code;
+ * @implements {VivthCleanup}
  */
 export class FileSelfMapper {
 	/**
-	 * @type {QChannel<string>}
-	 */
-	#q;
-
-	/**
-	 * @type { string }
-	 */
-	static #consoleID = 'vivth.FileSelfMapper';
-	/**
-	 * @type { Map<string, ()=>Promise<void>> }
-	 */
-	static #releaseCallbackPerPath = new Map();
-	/**
-	 * @param { string } path
-	 * @returns { boolean }
-	 */
-	static #hasReleaseCallback = (path) => {
-		return FileSelfMapper.#releaseCallbackPerPath.has(path);
-	};
-	/**
-	 * @param { string } path
-	 * @param { ()=>Promise<void> } callback
-	 * @param { boolean } registerToSafeExit
-	 * @returns { void }
-	 */
-	static #registerReleaseCallback = (path, callback, registerToSafeExit = true) => {
-		FileSelfMapper.#releaseCallbackPerPath.set(path, callback);
-		if (
-			/**  */
-			!registerToSafeExit
-		) {
-			return;
-		}
-		SafeExit.instance?.addCallback(callback);
-	};
-	/**
-	 * @param { string } path
-	 * @returns { Promise<void> }
-	 */
-	static #runReleaseCallback = async (path) => {
-		const releaseCallback = FileSelfMapper.#releaseCallbackPerPath.get(path);
-		if (
-			/** conditionalDescription */
-			!releaseCallback
-		) {
-			return;
-		}
-		await releaseCallback();
-		FileSelfMapper.#releaseCallbackPerPath.delete(path);
-		SafeExit.instance?.removeCallback(releaseCallback);
-	};
-	/**
-	 * @type { Set<string> }
-	 */
-	static #tempPaths = new Set();
-
-	/**
-	 * @type { ()=>Promise<void> }
-	 */
-	static #clearUpTempPath = async () => {
-		const [promisedRM] = ForOfSync(FileSelfMapper.#tempPaths, async (tempPath) => {
-			const [, errorRM] = await FileSafe.rm(tempPath);
-			if (
-				/** conditionalDescription */
-				!errorRM
-			) {
-				return;
-			}
-			Console.error({ errorRM });
-		});
-		await Promise.all(promisedRM);
-	};
-
-	/**
 	 * @description
-	 * @param {string} relativeWatchPathToRoot
+	 * @param {string} watchPath
+	 * - `relative`(to `Paths.root`) OR `absolute`, both are accepted;
 	 * @param {Object} options
 	 * @param {Omit<Parameters<import('esbuild')["context"]>[0], "write"|"minify"|"format"|"mainFields"|"outfile"|"bundle">} [options.esbuild]
 	 * - `logLimit`: default = `3`;
 	 * - `outFile`: auto determined by comment line on top level of each files;
 	 * - `minify`: determined by file `relativePath`(to dirname of `watchpath`) name included `.min.`;
 	 * - `format`: determined by file `relativePath`(to dirname of `watchpath`) name included `.esm.` or `.iife.`;
-	 * - `mainFields`: determined by file externtion if `.cjs` -> `main,module` else `module,main`;
+	 * - `mainFields`: `module,main`;
 	 * - `bundle`: automatically added by `vivth.FileSelfMapper`;
 	 * - `write`: automatically added by `vivth.FileSelfMapper`;
 	 * @param {boolean} [options.deleteTempFilesAfterExit]
+	 * @param {(path:{mapTo:string, src:string}, content:string)=>(string|false)} [options.postProcessDirectCopy]
+	 * - works for:
+	 * >- `.js`;
+	 * >- anything that are not `sass` and `module js/ts`;
+	 * - return `false` to exclude `target` from mapping;
 	 * @example
-	 * import { FileSelfMapper } from 'vivth';
+	 * import { FileSelfMapper } from 'vivth/node';
 	 *
 	 * new FileSelfMapper('../ssg-assets/', {
 	 * 	esbuild: {},
 	 * 	// deleteTempFilesAfterExit: true,
 	 * });
 	 */
-	constructor(relativeWatchPathToRoot, options) {
-		SafeExit.instance?.addCallback(FileSelfMapper.#clearUpTempPath);
-		const watcherFullPath = Paths.normalize(join(Paths.root, relativeWatchPathToRoot));
+	constructor(watchPath, options) {
+		SafeExit.instance?.addCallback(this.vivthCleanup);
+		const watcherFullPath = Paths.diskAbsolute(watchPath);
 		const watcher = watch(watcherFullPath, { ignoreInitial: false });
-		/**
-		 * @type { QChannel<string> }
-		 */
-		const q = (this.#q = new QChannel('FileSelfMapper'));
-		watcher.addListener('all', (eventName, path, stats) => {
+		watcher.addListener('all', async (eventName, path, stats) => {
 			path = Paths.normalize(path);
-			q.callback(path, async ({ isLastOnQ }) => {
-				if (
-					/** conditionalDescription */
-					!isLastOnQ()
-				) {
-					return;
-				}
-				switch (eventName) {
-					case 'add':
-					case 'change':
-						break;
-					case 'unlink':
-					case 'error':
-						await FileSelfMapper.#runReleaseCallback(path);
-						return;
-					default:
-						return;
-				}
-
-				if (
-					/**  */
-					FileSelfMapper.#hasReleaseCallback(path) ||
-					!stats ||
-					!stats.isFile()
-				) {
-					return;
-				}
-				const extension = extname(path);
-				if (
-					/**  */
-					extension !== '.scss' &&
-					extension !== '.sass' &&
-					extension !== '.mjs' &&
-					extension !== '.mts' &&
-					extension !== '.ts' &&
-					extension !== '.cjs'
-				) {
-					await FileSelfMapper.#writeCommon(path);
-					return;
-				}
-				if (
-					/**  */
-					extension === '.scss' ||
-					extension === '.sass'
-				) {
-					await FileSelfMapper.#bundleSCSS(path);
-					return;
-				}
-				await this.#bundleJS(extension, watcherFullPath, path, options);
-			}).then(([, errorWatcherListener]) => {
-				if (
-					/**  */
-					!errorWatcherListener
-				) {
-					return;
-				}
-				Console.error({
-					now: Date.now(),
-					errorWatcherListener,
-				});
+			const [, errorWatcherListener] = await this.#q.callback(path, async ({ isLastOnQ }) => {
+				await this.#listenerQ(isLastOnQ, eventName, path, watcherFullPath, options, stats);
 			});
+			if (!errorWatcherListener) {
+				return;
+			}
+			Console.error(
+				{
+					errorWatcherListener,
+				},
+				{
+					now: true,
+				},
+			);
 		});
 	}
+	/**
+	 * @type {QChannel<string>}
+	 */
+	#q = LazyFactory(() => new QChannel('FileSelfMapper'));
+	/**
+	 * @type { Map<string, ()=>Promise<void>> }
+	 */
+	#releaseCallbackPerPath = new Map();
+
+	vivthCleanup = async () => {
+		SafeExit.instance?.removeCallback(this.vivthCleanup);
+		await Promise.all(
+			ForOfSync(this.#releaseCallbackPerPath, async ([path]) => {
+				await this.#runCleanupOfSpecificPath(path);
+			})[0],
+		);
+	};
 
 	/**
 	 * @param { string } path
 	 * @returns { Promise<void> }
 	 */
-	static #writeCommon = async (path) => {
+	#runCleanupOfSpecificPath = async (path) => {
+		const releaseCallback = this.#releaseCallbackPerPath.get(path);
+		if (!releaseCallback) {
+			return;
+		}
+		await releaseCallback();
+		this.#releaseCallbackPerPath.delete(path);
+	};
+
+	/**
+	 *
+	 * @param {() => boolean} isLastOnQ
+	 * @param {import('chokidar/handler.js').EventName} eventName
+	 * @param {string} path
+	 * @param {string} watcherFullPath
+	 * @param {ConstructorParameters<typeof FileSelfMapper>[1]} options
+	 * @param {import('node:fs').Stats} [stats]
+	 * @returns
+	 */
+	#listenerQ = async (isLastOnQ, eventName, path, watcherFullPath, options, stats) => {
+		if (!isLastOnQ()) {
+			return;
+		}
+		switch (eventName) {
+			case 'add':
+			case 'change':
+				break;
+			case 'unlink':
+			case 'error':
+				await this.#runCleanupOfSpecificPath(path);
+				return;
+			default:
+				return;
+		}
+
+		if (this.#releaseCallbackPerPath.has(path) || !stats || !stats.isFile()) {
+			return;
+		}
+		const extension = extname(path);
+		if (
+			extension !== '.scss' &&
+			extension !== '.sass' &&
+			extension !== '.mjs' &&
+			extension !== '.mts' &&
+			extension !== '.ts'
+		) {
+			await FileSelfMapper.#writeCommon(path, options.postProcessDirectCopy);
+			return;
+		}
+		if (extension === '.scss' || extension === '.sass') {
+			await FileSelfMapper.#bundleSCSS(path);
+			return;
+		}
+		await this.#bundleJS(watcherFullPath, path, options);
+	};
+	/**
+	 * @param { string } path
+	 * @param { (path:{mapTo:string, src:string}, content:string)=>(string|false) } [postprosess]
+	 * @returns { Promise<void> }
+	 */
+	static #writeCommon = async (path, postprosess) => {
 		const { content, targetPaths } = await FileSelfMapper.#getTargetPath(path);
 		const [promiseWrite] = ForOfSync(targetPaths, async (target) => {
-			const [, errorWriteCommonFile] = await FileSafe.write(target, content);
-			if (
-				/**  */
-				errorWriteCommonFile
-			) {
-				Console.error({
-					now: Date.now(),
-					errorWriteCommonFile,
-				});
+			/**
+			 * @type {string|false}
+			 */
+			let trueContent;
+			if (postprosess) {
+				trueContent = postprosess({ mapTo: target, src: path }, content);
+			} else {
+				trueContent = content;
+			}
+			if (trueContent === false) {
 				return;
 			}
-			Console.info({
-				now: Date.now(),
-				[FileSelfMapper.#consoleID]: `✅ Succeed write '${path}' 👉 '${Paths.normalize(target)}';`,
+			const [, errorWriteCommonFile] = await FileSafe.write(target, trueContent, {
+				encoding: Preferrence.encoding,
 			});
+			if (errorWriteCommonFile) {
+				Console.error(
+					{
+						errorWriteCommonFile,
+					},
+					{
+						now: true,
+					},
+				);
+				return;
+			}
+			Console.info(
+				{
+					[FileSelfMapper.name]: `✅ Succeed write '${path}' 👉 '${Paths.normalize(target)}';`,
+				},
+				{
+					now: true,
+				},
+			);
 		});
 		await Promise.all(promiseWrite);
 	};
@@ -252,56 +242,48 @@ export class FileSelfMapper {
 		const { targetPaths } = await FileSelfMapper.#getTargetPath(path);
 		const result = (await compileAsync(path, { style: 'compressed' })).css;
 		const promisedWrite = ForOfSync(targetPaths, async (target) => {
-			const [, errorWriteCSS] = await FileSafe.write(target, result);
-			if (
-				/**  */
-				errorWriteCSS
-			) {
-				Console.error({
-					now: Date.now(),
-					errorWriteCSS,
-				});
+			const [, errorWriteCSS] = await FileSafe.write(target, result, {
+				encoding: Preferrence.encoding,
+			});
+			if (errorWriteCSS) {
+				Console.error(
+					{
+						errorWriteCSS,
+					},
+					{
+						now: true,
+					},
+				);
 				return;
 			}
-			Console.info({
-				now: Date.now(),
-				[FileSelfMapper.#consoleID]: `✅ Succeed convert '${path}' 👉 '${target}';`,
-			});
+			Console.info(
+				{
+					[FileSelfMapper.name]: `✅ Succeed convert '${path}' 👉 '${target}';`,
+				},
+				{
+					now: true,
+				},
+			);
 		});
 		await Promise.all(promisedWrite);
 	};
 
 	/**
-	 * @param { ".mjs" | ".mts" | ".ts" | ".cjs" } extension
 	 * @param { string } watcherFullPath
 	 * @param { string } path
 	 * @param { ConstructorParameters<typeof FileSelfMapper>[1]} options
 	 * @returns { Promise<void> }
 	 */
-	#bundleJS = async (
-		extension,
-		watcherFullPath,
-		path,
-		{ esbuild = {}, deleteTempFilesAfterExit = false },
-	) => {
-		if (
-			/**  */
-			esbuild.platform === 'browser'
-		) {
+	#bundleJS = async (watcherFullPath, path, { esbuild = {}, deleteTempFilesAfterExit = false }) => {
+		if (esbuild.platform === 'browser') {
 			esbuild.external = Array.from(FileSelfMapper.#createBrowserExternals(esbuild.external ?? []));
 		}
 		Object.assign(esbuild, {
-			mainFields: [
-				extension === '.cjs' ? 'main' : 'module',
-				extension === '.cjs' ? 'module' : 'main',
-			],
+			mainFields: ['module', 'main'],
 		});
 		const relativePath = FileSelfMapper.#getRelative(watcherFullPath, path);
 		Object.assign(esbuild, { minify: relativePath.includes('.min.') });
-		if (
-			/**  */
-			relativePath.includes('.iife.')
-		) {
+		if (relativePath.includes('.iife.')) {
 			Object.assign(esbuild, { format: 'iife' });
 		} else {
 			Object.assign(esbuild, { format: 'esm' });
@@ -321,12 +303,9 @@ export class FileSelfMapper {
 					...esbuild.banner,
 				},
 				plugins: [
-					CreateESPlugin('FileSafeMapperWatch', (build) => {
-						build.onEnd(({ errors }) => {
-							if (
-								/**  */
-								errors.length
-							) {
+					CreateESPlugin('FileSafeMapperWatch', ({ onEnd }) => {
+						onEnd(({ errors }) => {
+							if (errors.length) {
 								onEndEsBuildErrorLogger(errors);
 								return;
 							}
@@ -338,25 +317,27 @@ export class FileSelfMapper {
 				],
 			});
 		});
-		if (
-			/**  */
-			errorEsbuildContext
-		) {
-			Console.error({ errorEsbuildContext });
+		if (errorEsbuildContext) {
+			Console.error(
+				{ errorEsbuildContext },
+				{
+					now: true,
+				},
+			);
 			return;
 		}
 
-		FileSelfMapper.#registerReleaseCallback(path, async () => {
-			if (
-				/**  */
-				!deleteTempFilesAfterExit
-			) {
-				return;
-			}
-			await FileSafe.rm(tempPath);
+		this.#releaseCallbackPerPath.set(path, async () => {
+			await Promise.all([
+				TryAsync(eswatcherInstance.vivthCleanup),
+				TryAsync(async () => {
+					if (!deleteTempFilesAfterExit) {
+						return;
+					}
+					await FileSafe.rm(tempPath);
+				}),
+			]);
 		});
-
-		FileSelfMapper.#registerReleaseCallback(path, eswatcherInstance.remove, false);
 	};
 
 	/**
@@ -368,6 +349,75 @@ export class FileSelfMapper {
 	};
 
 	/**
+	 * @param {()=>boolean} isLastOnQ
+	 * @param {string} path
+	 * @param {string} tempPath
+	 * @param {string} target
+	 * @returns {Promise<void>}
+	 */
+	static #onJSDependencyChanges1 = async (isLastOnQ, path, tempPath, target) => {
+		if (!isLastOnQ()) {
+			return;
+		}
+		const [content, errorGetTempPath] = await TryAsync(async () => {
+			return await readFile(tempPath, { encoding: Preferrence.encoding });
+		});
+		if (errorGetTempPath) {
+			Console.error(
+				{
+					errorGetTempPath,
+				},
+				{
+					now: true,
+				},
+			);
+			return;
+		}
+		const [, errorWriteJS] = await FileSafe.write(target, content, {
+			encoding: Preferrence.encoding,
+		});
+		if (errorWriteJS) {
+			Console.error(
+				{
+					errorWriteJS,
+				},
+				{
+					now: true,
+				},
+			);
+			return;
+		}
+		Console.info(
+			{
+				[FileSelfMapper.name]: `✅ Build succeed: '${path}' 👉 '${target}'`,
+			},
+			{
+				now: true,
+			},
+		);
+	};
+	/**
+	 * @param {()=>boolean} isLastOnQ
+	 * @param {string} path
+	 * @param {string} tempPath
+	 * @param {QChannel<string>} q
+	 * @returns {Promise<void>}
+	 */
+	static #onJSDependencyChanges0 = async (isLastOnQ, path, tempPath, q) => {
+		if (!isLastOnQ()) {
+			return;
+		}
+		const { targetPaths } = await FileSelfMapper.#getTargetPath(path);
+		await Promise.all(
+			ForOfSync(targetPaths, async (target) => {
+				q.callback(target, async ({ isLastOnQ }) => {
+					await FileSelfMapper.#onJSDependencyChanges1(isLastOnQ, path, tempPath, target);
+				});
+			})[0],
+		);
+	};
+
+	/**
 	 * @param {string} tempPath
 	 * @param {string} path
 	 * @param {QChannel<string>} q
@@ -375,51 +425,7 @@ export class FileSelfMapper {
 	 */
 	static #onJSDependencyChanges = async (tempPath, path, q) => {
 		q.callback(path, async ({ isLastOnQ }) => {
-			if (
-				/**  */
-				!isLastOnQ()
-			) {
-				return;
-			}
-			const { targetPaths } = await FileSelfMapper.#getTargetPath(path);
-			ForOfSync(targetPaths, async (target) => {
-				q.callback(target, async ({ isLastOnQ }) => {
-					if (
-						/**  */
-						!isLastOnQ()
-					) {
-						return;
-					}
-					const [content, errorGetTempPath] = await TryAsync(async () => {
-						return await readFile(tempPath, { encoding: 'utf-8' });
-					});
-					if (
-						/**  */
-						errorGetTempPath
-					) {
-						Console.error({
-							now: Date.now(),
-							errorGetTempPath,
-						});
-						return;
-					}
-					const [, errorWriteJS] = await FileSafe.write(target, content);
-					if (
-						/**  */
-						errorWriteJS
-					) {
-						Console.error({
-							now: Date.now(),
-							errorWriteJS,
-						});
-						return;
-					}
-					Console.info({
-						now: Date.now(),
-						[FileSelfMapper.#consoleID]: `✅ Build succeed: '${path}' 👉 '${target}'`,
-					});
-				});
-			});
+			await FileSelfMapper.#onJSDependencyChanges0(isLastOnQ, path, tempPath, q);
 		});
 	};
 
@@ -431,7 +437,7 @@ export class FileSelfMapper {
 	 * }> }
 	 */
 	static #getTargetPath = async (path) => {
-		const raw = await readFile(path, 'utf8');
+		let raw = await readFile(path, 'utf8');
 		const perLines = raw.split(/\r?\n/);
 		const perLinesCode = structuredClone(perLines);
 		/**
@@ -440,43 +446,28 @@ export class FileSelfMapper {
 		const targetPaths = new Set();
 		for (let i = 0; i < perLines.length; i++) {
 			const lineData = perLines[i];
-			if (
-				/**  */
-				!lineData
-			) {
+			if (!lineData) {
 				continue;
 			}
 			const commentRegexForPath =
 				/<!--\s*(.*?)\s*-->|\/\/\/?\s*(.*?)\s*$|\/\*{1,2}!\s*([\s\S]*?)\s*\*\/|\/\*{1,2}\s*([\s\S]*?)\s*\*\/|#\s*(.*?)\s*$|--\s*(.*?)\s*$|;\s*(.*?)\s*$/g;
 			const m = commentRegexForPath.exec(lineData);
-			if (
-				/**  */
-				m === null
-			) {
+			if (m === null) {
 				break;
 			}
 			const [group] = m.slice(1).filter(Boolean);
-			if (
-				/**  */
-				!group
-			) {
+			if (!group) {
 				break;
 			}
 			const candidate = group.trim();
-			if (
-				/**  */
-				!/^(?:[A-Za-z]:[\\/]|[\\/]|\.{1,2}[\\/])?[A-Za-z0-9._\\/-]+$/g.test(candidate)
-			) {
+			if (!/^(?:[A-Za-z]:[\\/]|[\\/]|\.{1,2}[\\/])?[A-Za-z0-9._\\/-]+$/g.test(candidate)) {
 				break;
 			}
-			if (
-				/**  */
-				!candidate
-			) {
+			if (!candidate) {
 				break;
 			}
 			perLinesCode[i] = '';
-			targetPaths.add(candidate);
+			targetPaths.add(Paths.normalize(candidate));
 		}
 
 		return {

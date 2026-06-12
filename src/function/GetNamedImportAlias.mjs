@@ -10,7 +10,7 @@
  * @param {string} packageName
  * @returns {string|undefined}
  * @example
- * import { GetNamedImportAlias } from 'vivth';
+ * import { GetNamedImportAlias } from 'vivth/neutral';
  *
  * const checkNoAlias = `
  * import { something } from 'packageName';
@@ -27,11 +27,7 @@ export function GetNamedImportAlias(content, moduleName, packageName) {
 		'g',
 	);
 	const matched = checkIfImportingFromVivthRegex.exec(content);
-	if (
-		/**  */
-		!matched ||
-		!matched.groups
-	) {
+	if (!matched || !matched.groups) {
 		return;
 	}
 	const { imported, alias } = matched.groups;

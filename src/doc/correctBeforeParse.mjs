@@ -14,56 +14,6 @@ import { Preferrence } from '../common/Preferrence.mjs';
  */
 
 /**
- * @param {string} path
- * @param {BufferEncoding} [encoding]
- * @returns {Promise<RetType>}
- */
-export const correctBeforeParse = async (path, encoding = Preferrence.encoding) => {
-	const validExportName = basename(path).split('.')[0] ?? '';
-	const firstLetter = validExportName[0];
-	const isStartWithCapital = firstLetter?.toUpperCase() === firstLetter;
-	if (
-		/**  */
-		validExportName === '' ||
-		isStartWithCapital === false
-	) {
-		return 'doNotProcess';
-	}
-	const content = (await readFile(path, { encoding })).toString();
-	const [resFunctionCheck, errorFunctionCheck] = await checkIsFunction(
-		content,
-		validExportName,
-		path,
-		encoding,
-	);
-	if (
-		/**  */
-		errorFunctionCheck
-	) {
-		return 'doNotProcess';
-	}
-	if (
-		/**  */
-		resFunctionCheck === 'waitForRewrite'
-	) {
-		return 'waitForRewrite';
-	}
-	const [resClassCheck, errorClassCheck] = await checkIsClass(
-		content,
-		validExportName,
-		path,
-		encoding,
-	);
-	if (
-		/**  */
-		errorClassCheck
-	) {
-		return 'doNotProcess';
-	}
-	return resClassCheck;
-};
-
-/**
  * @type {(content:string,
  * validExportName:string,
  * ...options:Parameters<correctBeforeParse>)=>
@@ -77,19 +27,19 @@ const checkIsFunction = async (content, validExportName, path, encoding) => {
 		);
 		const matches = content.matchAll(regexConst).toArray()[0];
 		const useConst = regexConst.test(content);
-		if (
-			/**  */
-			useConst &&
-			matches
-		) {
+		if (useConst && matches) {
 			const [fullString, parameters] = matches;
 			const declaratorReplaceMent = `export function ${validExportName}(${parameters})`;
 			const newContent = content.replace(fullString, declaratorReplaceMent);
 			await Timeout(100); // to wait for pretify on autoSave;
 			await writeFile(path, newContent, { encoding });
-			Console.info({
-				vivthJSAutoDoc: `successfully modify '${path}' exported function to regullar function declaration, for correct type emition;`,
-			});
+			Console.info(
+				`successfully modify '${path}' exported function to regullar function declaration, for correct type emition;`,
+
+				{
+					now: true,
+				},
+			);
 			return 'waitForRewrite';
 		}
 		return 'shouldProceedNextCheck';
@@ -109,10 +59,7 @@ const checkIsClass = async (content, validExportName, path, encoding) => {
 		 */
 		async () => {
 			const isAClassRegex = new RegExp(`export\\s+class\\s+${validExportName}`, 'g');
-			if (
-				/**  */
-				isAClassRegex.test(content) === false
-			) {
+			if (!isAClassRegex.test(content)) {
 				return 'shouldProceedNextCheck';
 			}
 			let rewrite = false;
@@ -131,18 +78,12 @@ const checkIsClass = async (content, validExportName, path, encoding) => {
 						'g',
 					);
 					const [checkContent] = content.matchAll(check).toArray();
-					if (
-						/**  */
-						checkContent === undefined
-					) {
+					if (checkContent === undefined) {
 						return;
 					}
 					const fullCaptured = checkContent[0];
 					const grouped = checkContent.groups;
-					if (
-						/**  */
-						grouped === undefined
-					) {
+					if (grouped === undefined) {
 						return;
 					}
 					const { opening, funcname, async_, parameters } = grouped;
@@ -152,18 +93,56 @@ const checkIsClass = async (content, validExportName, path, encoding) => {
 					}${funcname}(${parameters})`;
 					content = content.replace(fullCaptured, modifiedFuncDeclaration);
 				});
-			if (
-				/**  */
-				rewrite
-			) {
+			if (rewrite) {
 				await Timeout(100); // to wait for pretify on autoSave;
 				await writeFile(path, content, { encoding });
-				Console.info({
-					vivthJSAutoDoc: `successfully modify '${path}' class/instance method(s), that has generic template, for correct type emition;`,
-				});
+				Console.info(
+					`successfully modify '${path}' class/instance method(s), that has generic template, for correct type emition;`,
+
+					{
+						now: true,
+					},
+				);
 				return 'waitForRewrite';
 			}
 			return 'shouldProceedNextCheck';
 		},
 	);
+};
+
+/**
+ * @param {string} path
+ * @param {BufferEncoding} [encoding]
+ * @returns {Promise<RetType>}
+ */
+export const correctBeforeParse = async (path, encoding = Preferrence.encoding) => {
+	const validExportName = basename(path).split('.')[0] ?? '';
+	const firstLetter = validExportName[0];
+	const isStartWithCapital = firstLetter?.toUpperCase() === firstLetter;
+	if (validExportName === '' || !isStartWithCapital) {
+		return 'doNotProcess';
+	}
+	const content = (await readFile(path, { encoding })).toString();
+	const [resFunctionCheck, errorFunctionCheck] = await checkIsFunction(
+		content,
+		validExportName,
+		path,
+		encoding,
+	);
+	if (errorFunctionCheck) {
+		return 'doNotProcess';
+	}
+	if (resFunctionCheck === 'waitForRewrite') {
+		return 'waitForRewrite';
+	}
+	const [resClassCheck, errorClassCheck] = await checkIsClass(
+		content,
+		validExportName,
+		path,
+		encoding,
+	);
+	if (errorClassCheck) {
+		return 'doNotProcess';
+	}
+	return resClassCheck;
 };

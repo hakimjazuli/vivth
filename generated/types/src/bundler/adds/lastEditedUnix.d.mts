@@ -1,1 +1,5 @@
-export function lastEditedUnix(fullPath: any): Promise<number>;
+/**
+ * @param {any} fullPath
+ * @returns {Promise<number>}
+ */
+export function LastEditedUnix(fullPath: any): Promise<number>;

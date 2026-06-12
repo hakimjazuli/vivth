@@ -8,7 +8,7 @@
  * @param {string} packageName
  * @returns {string|undefined}
  * @example
- * import { GetNamedImportAlias } from 'vivth';
+ * import { GetNamedImportAlias } from 'vivth/neutral';
  *
  * const checkNoAlias = `
  * import { something } from 'packageName';

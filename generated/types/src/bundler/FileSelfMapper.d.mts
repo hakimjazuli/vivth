@@ -1,16 +1,17 @@
 /**
+ * @typedef {import('../typehints/VivthCleanup.mjs').VivthCleanup} VivthCleanup
+ */
+/**
  * @description
- * - this Class require `esbuild` to be installed, example using npm:
- * ```shell
- * npm install esbuild
- * ```
  * - each file can define it's own `targetPaths` inline by adding comment then fullpath on the begining of the file:
+ * >- `mjs`;
  * ```js
  * // D://my/path/something.mjs
  * // D://my/path/something-else.mjs
  *
  * console.log('hello');
  * ```
+ * >- `scss`;
  * ```scss
  * /*[blank] D://my/path/something.css *[blank]/
  *
@@ -20,67 +21,63 @@
  * 	background-color: $somecolor;
  * }
  * ```
- * -files extention:
- * >- `js`/`ts` files will compiled with esbuild cli, using `option.esbuild` as argument;
- * >- `sass`/`scss` it will be compiled to css first;
- * >- other than those files, they will just copied to `targetPaths`;
+ * >- `.ignore`;
+ * ```.ignore
+ * # D:/my/project/root/.gitignore
+ * # D:/my/project/root/.npmignore
+ *
+ * /dev/
+ * ```
+ * - files extention:
+ * >- `js`/`ts` files will be compiled with `vivth/node.EsWathcer`, using `option.esbuild` as argument;
+ * >- `sass`/`scss` it will be compiled to `css` first;
+ * >- other than those files, they will be just copied to `targetPaths`;
+ * - for runtime example see file `/dev/auto/` on source code;
+ * @implements {VivthCleanup}
  */
-export class FileSelfMapper {
-    /**
-     * @type { string }
-     */
-    static "__#private@#consoleID": string;
-    /**
-     * @type { Map<string, ()=>Promise<void>> }
-     */
-    static "__#private@#releaseCallbackPerPath": Map<string, () => Promise<void>>;
+export class FileSelfMapper implements VivthCleanup {
     /**
      * @param { string } path
-     * @returns { boolean }
+     * @param { (path:{mapTo:string, src:string}, content:string)=>(string|false) } [postprosess]
+     * @returns { Promise<void> }
      */
-    static "__#private@#hasReleaseCallback": (path: string) => boolean;
-    /**
-     * @param { string } path
-     * @param { ()=>Promise<void> } callback
-     * @param { boolean } registerToSafeExit
-     * @returns { void }
-     */
-    static "__#private@#registerReleaseCallback": (path: string, callback: () => Promise<void>, registerToSafeExit?: boolean) => void;
+    static #writeCommon: (path: string, postprosess?: (path: {
+        mapTo: string;
+        src: string;
+    }, content: string) => (string | false)) => Promise<void>;
     /**
      * @param { string } path
      * @returns { Promise<void> }
      */
-    static "__#private@#runReleaseCallback": (path: string) => Promise<void>;
-    /**
-     * @type { Set<string> }
-     */
-    static "__#private@#tempPaths": Set<string>;
-    /**
-     * @type { ()=>Promise<void> }
-     */
-    static "__#private@#clearUpTempPath": () => Promise<void>;
-    /**
-     * @param { string } path
-     * @returns { Promise<void> }
-     */
-    static "__#private@#writeCommon": (path: string) => Promise<void>;
-    /**
-     * @param { string } path
-     * @returns { Promise<void> }
-     */
-    static "__#private@#bundleSCSS": (path: string) => Promise<void>;
+    static #bundleSCSS: (path: string) => Promise<void>;
     /**
      * @param {string[]} esbuildExternal
      * @returns {Set<string>}
      */
-    static "__#private@#createBrowserExternals": (esbuildExternal: string[]) => Set<string>;
+    static #createBrowserExternals: (esbuildExternal: string[]) => Set<string>;
+    /**
+     * @param {()=>boolean} isLastOnQ
+     * @param {string} path
+     * @param {string} tempPath
+     * @param {string} target
+     * @returns {Promise<void>}
+     */
+    static #onJSDependencyChanges1: (isLastOnQ: () => boolean, path: string, tempPath: string, target: string) => Promise<void>;
+    /**
+     * @param {()=>boolean} isLastOnQ
+     * @param {string} path
+     * @param {string} tempPath
+     * @param {QChannel<string>} q
+     * @returns {Promise<void>}
+     */
+    static #onJSDependencyChanges0: (isLastOnQ: () => boolean, path: string, tempPath: string, q: QChannel<string>) => Promise<void>;
     /**
      * @param {string} tempPath
      * @param {string} path
      * @param {QChannel<string>} q
      * @returns {Promise<void>}
      */
-    static "__#private@#onJSDependencyChanges": (tempPath: string, path: string, q: QChannel<string>) => Promise<void>;
+    static #onJSDependencyChanges: (tempPath: string, path: string, q: QChannel<string>) => Promise<void>;
     /**
      * @param { string } path
      * @returns { Promise<{
@@ -88,7 +85,7 @@ export class FileSelfMapper {
      * 	content: string,
      * }> }
      */
-    static "__#private@#getTargetPath": (path: string) => Promise<{
+    static #getTargetPath: (path: string) => Promise<{
         targetPaths: Set<string>;
         content: string;
     }>;
@@ -97,32 +94,44 @@ export class FileSelfMapper {
      * @param {string} path
      * @returns { string }
      */
-    static "__#private@#getRelative": (watcherFullPath: string, path: string) => string;
+    static #getRelative: (watcherFullPath: string, path: string) => string;
     /**
      * @description
-     * @param {string} relativeWatchPathToRoot
+     * @param {string} watchPath
+     * - `relative`(to `Paths.root`) OR `absolute`, both are accepted;
      * @param {Object} options
      * @param {Omit<Parameters<import('esbuild')["context"]>[0], "write"|"minify"|"format"|"mainFields"|"outfile"|"bundle">} [options.esbuild]
      * - `logLimit`: default = `3`;
      * - `outFile`: auto determined by comment line on top level of each files;
      * - `minify`: determined by file `relativePath`(to dirname of `watchpath`) name included `.min.`;
      * - `format`: determined by file `relativePath`(to dirname of `watchpath`) name included `.esm.` or `.iife.`;
-     * - `mainFields`: determined by file externtion if `.cjs` -> `main,module` else `module,main`;
+     * - `mainFields`: `module,main`;
      * - `bundle`: automatically added by `vivth.FileSelfMapper`;
      * - `write`: automatically added by `vivth.FileSelfMapper`;
      * @param {boolean} [options.deleteTempFilesAfterExit]
+     * @param {(path:{mapTo:string, src:string}, content:string)=>(string|false)} [options.postProcessDirectCopy]
+     * - works for:
+     * >- `.js`;
+     * >- anything that are not `sass` and `module js/ts`;
+     * - return `false` to exclude `target` from mapping;
      * @example
-     * import { FileSelfMapper } from 'vivth';
+     * import { FileSelfMapper } from 'vivth/node';
      *
      * new FileSelfMapper('../ssg-assets/', {
      * 	esbuild: {},
      * 	// deleteTempFilesAfterExit: true,
      * });
      */
-    constructor(relativeWatchPathToRoot: string, options: {
+    constructor(watchPath: string, options: {
         esbuild?: Omit<import("esbuild").SameShape<import("esbuild").BuildOptions, import("esbuild").BuildOptions>, "bundle" | "outfile" | "mainFields" | "write" | "format" | "minify"> | undefined;
         deleteTempFilesAfterExit?: boolean | undefined;
+        postProcessDirectCopy?: ((path: {
+            mapTo: string;
+            src: string;
+        }, content: string) => (string | false)) | undefined;
     });
+    vivthCleanup: () => Promise<void>;
     #private;
 }
+export type VivthCleanup = import("../typehints/VivthCleanup.mjs").VivthCleanup;
 import { QChannel } from '../class/QChannel.mjs';

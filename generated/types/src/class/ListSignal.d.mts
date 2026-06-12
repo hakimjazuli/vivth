@@ -24,7 +24,7 @@ export class ListSignal<LISTARG extends import("../typehints/ListArg.mjs").ListA
      * @param {ConstructorParameters<typeof Signal<LISTARG[]>>[1]} [performanceChangesReport]
      * - the argument passed are `structuredClone` of the array;
      * @example
-     * import { ListSignal } from 'vivth';
+     * import { ListSignal } from 'vivth/neutral';
      *
      * const listExample = new ListSignal([
      *      {key1: "test1",},
@@ -47,7 +47,7 @@ export class ListSignal<LISTARG extends import("../typehints/ListArg.mjs").ListA
          * - use this getter instead of subscribing the `ListSignal` value;
          * >- as to not accidentally mutate the source value;
          * @example
-         * import { ListSignal, Derived } from 'vivth';
+         * import { ListSignal, Derived } from 'vivth/neutral';
          *
          * const myListSignal = new ListSignal([
          * 	{ key:'a', group:0 },
@@ -159,7 +159,7 @@ export class ListSignal<LISTARG extends import("../typehints/ListArg.mjs").ListA
          */
         pop: () => void;
     } & {
-        "vivth:unwrapLazy;": () => {
+        [x: symbol]: {
             /**
              * @instance arrayMethods
              * @description
@@ -169,7 +169,7 @@ export class ListSignal<LISTARG extends import("../typehints/ListArg.mjs").ListA
              * - use this getter instead of subscribing the `ListSignal` value;
              * >- as to not accidentally mutate the source value;
              * @example
-             * import { ListSignal, Derived } from 'vivth';
+             * import { ListSignal, Derived } from 'vivth/neutral';
              *
              * const myListSignal = new ListSignal([
              * 	{ key:'a', group:0 },

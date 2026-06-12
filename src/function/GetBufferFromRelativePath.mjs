@@ -12,14 +12,14 @@ import { PathFSFile } from '../bundler/adds/PathFSFile.mjs';
  * - relative path from the caller;
  * @returns {ReturnType<typeof FSasar.file>}
  * @example
- * import { GetContentFromRelativePath } from "vivth";
+ * import { GetContentFromRelativePath } from 'vivth/node';
  *
  * await GetContentFromRelativePath('../doc/parsedFile.mjs', 'utf-8');
  */
 export async function GetBufferFromRelativePath(relativePath) {
 	return await FSasar.file(
 		PathFSFile.vivthFile(relativePath, {
-			shouldNotInlcudes: '/vivth/src/function/GetContentFromRelativePath.mjs',
-		})
+			shouldNotIncludes: '/vivth/src/function/GetContentFromRelativePath.mjs',
+		}),
 	);
 }

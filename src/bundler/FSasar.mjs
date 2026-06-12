@@ -20,6 +20,7 @@ import { PathFSFile } from './adds/PathFSFile.mjs';
  * - use only if you are planning to use [CompileJS](#compilejs);
  * >- the class static methods don't obfuscate target file;
  * >- don't embed any sensitive content using this methods of `CompileJS`;
+ * >- it's better to place it on `.env`;
  */
 export class FSasar {
 	/**
@@ -27,24 +28,20 @@ export class FSasar {
 	 */
 	/**
 	 * @description
-	 * - get file buffer from relative path;
 	 * @param {PathFSFile} pathFSFPathFSFileInstance
 	 * @returns {Promise<Buffer<ArrayBufferLike>>}
 	 * @example
-	 * import { FSasar, PathFSFile } from "vivth";
+	 * import { FSasar, PathFSFile } from 'vivth/node';
 	 *
-	 * const fileBuffer = await FSasar.file(PathFSFile.vivthFile('../function/myModule.mjs'));
+	 * const fileBuffer = await FSasar.file(PathFSFile.vivth[blank]File('../function/myModule.mjs'));
 	 */
 	static async file(pathFSFPathFSFileInstance) {
 		const [buffer, errorFileNotFound] = await TryAsync(async () => {
 			const buf = await readFile(join(Paths.root, pathFSFPathFSFileInstance.path));
 			return Buffer.from(buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength));
 		});
-		if (
-			/**  */
-			errorFileNotFound
-		) {
-			Console.error({ errorFileNotFound });
+		if (errorFileNotFound) {
+			Console.error({ errorFileNotFound }, { now: true });
 			return emptyBufferValue();
 		}
 		return buffer;
@@ -59,7 +56,7 @@ export class FSasar {
 	 * }}
 	 * - forEachFiles are looped async without awaiting any iterations;
 	 * @example
-	 * import { FSasar, PathFSDir } from "vivth";
+	 * import { FSasar, PathFSDir } from 'vivth/node';
 	 *
 	 * const { forEachFiles, getFile } = FSasar.dir(PathFSDir.vivthDir('../function/', /[\s\S]\*[noblank]/)); // without `[noblank]`;
 	 * forEachFiles(async ({ inputRelative, asar }) => {
@@ -86,14 +83,12 @@ export class FSasar {
 					(path_) => relative(dirname(pathFSDirInstance.callerPath), path_),
 					(path_) => Paths.normalize(path_),
 				);
-				if (
-					/**  */
-					!path_.match(pathFSDirInstance.rule)
-				) {
+				if (!path_.match(pathFSDirInstance.rule)) {
 					return emptyBufferValue();
 				}
+
 				return FSasar.file(
-					PathFSFile.vivthFile(path_, { shouldNotInlcudes: '/vivth/src/bundler/FSasar.mjs' }),
+					PathFSFile.vivthFile(path_, { shouldNotIncludes: '/vivth/src/bundler/FSasar.mjs' }),
 				);
 			},
 		};

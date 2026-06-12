@@ -1,16 +1,20 @@
 /**
+ * @typedef {import('../typehints/VivthCleanup.mjs').VivthCleanup} VivthCleanup
+ */
+/**
  * @description
  * - class helper for creating Collection of `Signals` for Object of Signals to be subscribed to(on `Effect`/`Derived`) collectively as signals;
  * >- uses as `Facade` Pattern;
  * @template {Record<string, import('./Signal.mjs').Signal<any>>} SIGNALS
+ * @implements {VivthCleanup}
  */
-export class SignalCollection<SIGNALS extends Record<string, import("./Signal.mjs").Signal<any>>> {
+export class SignalCollection<SIGNALS extends Record<string, import("./Signal.mjs").Signal<any>>> implements VivthCleanup {
     /**
      * @description
      * - creates instance of `SignalCollection`, by referencing to named Signal;
      * @param {SIGNALS} signalsObject
      * @example
-     * import { Signal, Derived, SignalCollection } from 'vivth';
+     * import { Signal, Derived, SignalCollection } from 'vivth/neutral';
      *
      * const a = new Signal('a');
      * const b = new Signal('b');
@@ -21,13 +25,14 @@ export class SignalCollection<SIGNALS extends Record<string, import("./Signal.mj
      * const f = new SignalCollection({ a, c });
      */
     constructor(signalsObject: SIGNALS);
+    vivthCleanup: () => Promise<void>;
     /**
      * @description
      * - accessor for signals, to be subscribed to;
      * @param {import('./Effect.mjs').Effect["options"]["subscribe"]} [subscribe]
      * @returns {SIGNALS}
      * @example
-     * import { Signal, Derived, Effect, SignalCollection } from 'vivth';
+     * import { Signal, Derived, Effect, SignalCollection } from 'vivth/neutral';
      *
      * const a = new Signal('a');
      * const b = new Signal('b');
@@ -71,7 +76,7 @@ export class SignalCollection<SIGNALS extends Record<string, import("./Signal.mj
      * )=>void} callback
      * @returns {void}
      * @example
-     * import { Signal, Derived, Effect, SignalCollection } from 'vivth';
+     * import { Signal, Derived, Effect, SignalCollection } from 'vivth/neutral';
      *
      * const a = new Signal('a');
      * const b = new Signal('b');
@@ -88,3 +93,4 @@ export class SignalCollection<SIGNALS extends Record<string, import("./Signal.mj
     forInSignals<K extends keyof SIGNALS>(callback: (key: K, signal: SIGNALS[K]) => void): void;
     #private;
 }
+export type VivthCleanup = import("../typehints/VivthCleanup.mjs").VivthCleanup;

@@ -6,6 +6,7 @@
  * - use only if you are planning to use [CompileJS](#compilejs);
  * >- the class static methods don't obfuscate target file;
  * >- don't embed any sensitive content using this methods of `CompileJS`;
+ * >- it's better to place it on `.env`;
  */
 export class FSasar {
     /**
@@ -13,13 +14,12 @@ export class FSasar {
      */
     /**
      * @description
-     * - get file buffer from relative path;
      * @param {PathFSFile} pathFSFPathFSFileInstance
      * @returns {Promise<Buffer<ArrayBufferLike>>}
      * @example
-     * import { FSasar, PathFSFile } from "vivth";
+     * import { FSasar, PathFSFile } from 'vivth/node';
      *
-     * const fileBuffer = await FSasar.file(PathFSFile.vivthFile('../function/myModule.mjs'));
+     * const fileBuffer = await FSasar.file(PathFSFile.vivth[blank]File('../function/myModule.mjs'));
      */
     static file(pathFSFPathFSFileInstance: PathFSFile): Promise<Buffer<ArrayBufferLike>>;
     /**
@@ -32,7 +32,7 @@ export class FSasar {
      * }}
      * - forEachFiles are looped async without awaiting any iterations;
      * @example
-     * import { FSasar, PathFSDir } from "vivth";
+     * import { FSasar, PathFSDir } from 'vivth/node';
      *
      * const { forEachFiles, getFile } = FSasar.dir(PathFSDir.vivthDir('../function/', /[\s\S]\*[noblank]/)); // without `[noblank]`;
      * forEachFiles(async ({ inputRelative, asar }) => {

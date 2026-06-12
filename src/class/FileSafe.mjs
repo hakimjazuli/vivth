@@ -1,10 +1,10 @@
 // @ts-check
 
-import { writeFile, mkdir, copyFile, rename, rm, access } from 'node:fs/promises';
+import { writeFile, mkdir, copyFile, rename, rm, readFile, stat } from 'node:fs/promises';
 import { dirname } from 'node:path';
-import { constants } from 'node:fs';
 
 import { TryAsync } from '../function/TryAsync.mjs';
+import { Console } from './Console.mjs';
 
 /**
  * @description
@@ -17,26 +17,56 @@ export class FileSafe {
 	 * - uses `'node:fs/promises'.access` under the hood;
 	 * - also returning promise of result & error as value;
 	 * @param {string} filePath
-	 * @returns {ReturnType<typeof TryAsync<true>>}
+	 * @returns {Promise<boolean>}
 	 * @example
 	 * import { join } from 'node:path';
-	 * import { FileSafe, Paths } from 'vivth';
+	 * import { FileSafe } from 'vivth/node';
+	 * import { Paths } from 'vivth/neutral';
 	 *
-	 * const [isFileExist, error] = await FileSafe.exist(
+	 * const isExist = await FileSafe.exist(
 	 * 	join(Paths.root, '/some/path.mjs'),
 	 * );
-	 * if (!error) {
-	 * 	// file exists
-	 * } else {
-	 * 	// file not exists
-	 * }
 	 */
 	static exist = async (filePath) => {
-		// @ts-expect-error
-		return await TryAsync(async () => {
-			await access(filePath, constants.F_OK);
-			return true;
+		const [, error] = await TryAsync(async () => {
+			const stats = await stat(filePath);
+			// Optional: verification that it is a file, not a directory
+			return stats.isFile() || stats.isDirectory();
 		});
+		return !error;
+	};
+	/**
+	 * @param { Parameters<writeFile>[1] } string
+	 * @returns { string }
+	 */
+	static #normalize = (string) => {
+		return string.toString().replace(/\s+/, ' ');
+	};
+	/**
+	 * @param {Parameters<FileSafe.write>[0]} outFile
+	 * @param {Parameters<FileSafe.write>[1]} content
+	 * @param {Parameters<FileSafe.write>[2]} [options]
+	 * @param {Parameters<FileSafe.write>[3]} [checkFuzySame]
+	 * @returns {Promise<boolean>}
+	 */
+	static #validToOverWrite = async (outFile, content, options, checkFuzySame = true) => {
+		const [isExist, [isSame]] = await Promise.all([
+			FileSafe.exist(outFile.toString()),
+			TryAsync(async () => {
+				if (!checkFuzySame) {
+					// code
+					return (await readFile(outFile.toString(), options)) === content;
+				}
+				return (
+					FileSafe.#normalize(await readFile(outFile.toString(), options)) ===
+					FileSafe.#normalize(content)
+				);
+			}),
+		]);
+		if (isExist && isSame) {
+			return false;
+		}
+		return true;
 	};
 	/**
 	 * @description
@@ -45,10 +75,14 @@ export class FileSafe {
 	 * @param {Parameters<writeFile>[0]} outFile
 	 * @param {Parameters<writeFile>[1]} content
 	 * @param {Parameters<writeFile>[2]} [options]
+	 * @param {boolean} [checkFuzySame]
+	 * - true: check while normalize consecutive whitespace into singel white space;
+	 * - false(default): check absolute value;
 	 * @returns {ReturnType<typeof TryAsync<void>>}
 	 * @example
 	 * import { join } from 'node:path';
-	 * import { FileSafe, Paths } from 'vivth';
+	 * import { FileSafe } from 'vivth/node';
+	 * import { Paths } from 'vivth/neutral';
 	 *
 	 * const [, errorWrite] = await FileSafe.write(
 	 * 	join(Paths.root, '/some/path.mjs'),
@@ -56,16 +90,24 @@ export class FileSafe {
 	 * 	{ encoding: 'utf-8' }
 	 * );
 	 */
-	static write = async (outFile, content, options) => {
+	static write = async (outFile, content, options, checkFuzySame = true) => {
 		return await TryAsync(async () => {
 			const [, errorMkDir] = await FileSafe.mkdir(dirname(outFile.toString()));
-			if (
-				/**  */
-				errorMkDir
-			) {
+			if (errorMkDir) {
 				throw `error mkdir, "${dirname(outFile.toString())}"`;
 			}
-			return writeFile(outFile, content, options);
+			if (!(await FileSafe.#validToOverWrite(outFile, content, options, checkFuzySame))) {
+				Console.warn(
+					{
+						[FileSafe.name]: `write file '${outFile}' is canceled, old file are ${checkFuzySame ? 'almost ' : ''}identical`,
+					},
+					{
+						now: true,
+					},
+				);
+				return;
+			}
+			return await writeFile(outFile, content, options);
 		});
 	};
 	/**
@@ -78,7 +120,8 @@ export class FileSafe {
 	 * @returns {ReturnType<typeof TryAsync<void>>}
 	 * @example
 	 * import { join } from 'node:path';
-	 * import { FileSafe, Paths } from 'vivth';
+	 * import { FileSafe } from 'vivth/node';
+	 * import { Paths } from 'vivth/neutral';
 	 *
 	 * const [, errorWrite] = await FileSafe.copy(
 	 * 	join(Paths.root, '/some/path.mjs'),
@@ -90,10 +133,7 @@ export class FileSafe {
 		return await TryAsync(async () => {
 			const dest_ = destinationFile.toString();
 			const [, errorMkDir] = await FileSafe.mkdir(dirname(dest_));
-			if (
-				/**  */
-				errorMkDir
-			) {
+			if (errorMkDir) {
 				throw `error mkdir, "${dirname(dest_)}"`;
 			}
 			return await copyFile(sourceFile, destinationFile, mode);
@@ -108,7 +148,8 @@ export class FileSafe {
 	 * @returns {ReturnType<typeof TryAsync<void>>}
 	 * @example
 	 * import { join } from 'node:path';
-	 * import { FileSafe, Paths } from 'vivth';
+	 * import { FileSafe} from 'vivth/node';
+	 * import { Paths } from 'vivth/neutral';
 	 *
 	 * const [, errorRename] = await FileSafe.rename(
 	 * 	join(Paths.root, 'some/path'),
@@ -119,10 +160,7 @@ export class FileSafe {
 		return await TryAsync(async () => {
 			const dest_ = newPath.toString();
 			const [, errorMkDir] = await FileSafe.mkdir(dirname(dest_));
-			if (
-				/**  */
-				errorMkDir
-			) {
+			if (errorMkDir) {
 				throw `error mkdir, "${dirname(dest_)}"`;
 			}
 			return await rename(oldPath, newPath);
@@ -150,7 +188,8 @@ export class FileSafe {
 	 * @returns {ReturnType<typeof TryAsync<string|undefined>>}
 	 * @example
 	 * import { join } from 'node:path';
-	 * import { FileSafe, Paths } from 'vivth';
+	 * import { FileSafe } from 'vivth/node';
+	 * import { Paths } from 'vivth/neutral';
 	 *
 	 * const [str, errorMkDir] = await FileSafe.mkdir(join(Paths.root, '/some/path/example'));
 	 */

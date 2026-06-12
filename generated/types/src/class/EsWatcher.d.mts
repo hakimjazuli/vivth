@@ -1,16 +1,20 @@
 /**
+ * @typedef {import('../typehints/VivthCleanup.mjs').VivthCleanup} VivthCleanup
+ */
+/**
  * @description
  * - wrapper for `watcher` via `esbuild.context`;
  * - watcher cleanup is automatically registered to `SafeExit`;
  * @template {import('esbuild').BuildOptions} O
+ * @implements {VivthCleanup}
  */
-export class EsWatcher<O extends import("esbuild").BuildOptions> {
+export class EsWatcher<O extends import("esbuild").BuildOptions> implements VivthCleanup {
     /**
      * @description
      * @param {Partial<O>} buildOptions
      * @param {import('esbuild').WatchOptions} [watchOptions]
      * @example
-     * import { EsWatcher } from 'vivth';
+     * import { EsWatcher } from 'vivth/node';
      *
      * const { context, remove } = new EsWatcher({
      *  ...esbuildOptions,
@@ -24,11 +28,9 @@ export class EsWatcher<O extends import("esbuild").BuildOptions> {
      */
     ctx: Promise<import("esbuild").BuildContext<O>>;
     /**
-     * @description
-     * - manually and safely call `cancel` and `dispose` on `BuildContext`;
      * @type {()=>Promise<void>}
      */
-    remove: () => Promise<void>;
+    vivthCleanup: () => Promise<void>;
     rebuild: () => Promise<import("esbuild").BuildResult<O>>;
-    #private;
 }
+export type VivthCleanup = import("../typehints/VivthCleanup.mjs").VivthCleanup;

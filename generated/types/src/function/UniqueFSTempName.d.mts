@@ -3,6 +3,7 @@
  * - generate unique full path name to temp directory + 'vivth/${uniqueName}.tmp';
  * - filename length already calibrated for each os;
  * @param {string} path
+ * @param {string} [fileExtention]
  * @returns {string}
  */
-export function UniqueFSTempName(path: string): string;
+export function UniqueFSTempName(path: string, fileExtention?: string): string;

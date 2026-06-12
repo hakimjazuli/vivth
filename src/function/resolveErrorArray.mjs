@@ -5,10 +5,7 @@
  * @returns {[undefined, Error]}
  */
 export const resolveErrorArray = (unknown) => {
-	if (
-		/**  */
-		unknown instanceof Error
-	) {
+	if (unknown instanceof Error) {
 		return [undefined, unknown];
 	}
 	let message;

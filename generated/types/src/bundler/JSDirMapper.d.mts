@@ -1,36 +1,62 @@
 /**
+ * @typedef {import('../typehints/VivthCleanup.mjs').VivthCleanup} VivthCleanup
+ */
+/**
+ * @import {Stats} from 'node:fs'
+ * @import {EventName} from 'chokidar/handler.js'
+ * @import {Plugin,BuildOptions} from 'esbuild'
+ */
+/**
  * @description
  * - class helper for one to one Mapping JS files;
  * - only bundles `.mts` AND `.mjs` in the `path.watch` directory, extension restriction to module as to enforce:
  * >- `esm` style input;
  * >- to not confuse IDE and esbuild resolver of extensionless static import;
- * @template {import('esbuild').BuildOptions} O
+ * @template {BuildOptions} OPT
+ * @implements {VivthCleanup}
  */
-export class JSDirMapper<O extends import("esbuild").BuildOptions> {
-    static "__#private@#consoleID": string;
+export class JSDirMapper<OPT extends BuildOptions> implements VivthCleanup {
     /**
      * @param {string} path
      * @returns {string}
      */
-    static "__#private@#correctEndpointExt": (path: string) => string;
+    static #correctEndpointExt: (path: string) => string;
     /**
      * @description
      * @param {Object} path
-     * - relative from project root;
-     * - only bundles `.mts` AND `.mjs`:
-     * >- `.wasm`: will be copied as is;
-     * >- `.as.ts` will be dealt accordingly based on `options.asTsToMjsHandler`;
+     * - `relative`(to `Paths.root`) OR `absolute`, both are accepted;
+     * - handles:
+     * >- `.mts`,`.mjs`: bundled;
+     * >- `.css`: minified;
+     * >-`.scss`, `sass`: two step bundling;
+     * >>- bundle to `.s.css` at source path;
+     * >>- write to `.s.css` on target path;
+     * >- `.as.ts` and it's companion `js` will be dealt accordingly based on `options.asTsToMjsHandler`;
+     * >>- `.ts` and `.js` that are not `.wasm` related are ignored;
+     * >- everything else will be copied as is;
      * @param {string} path.watch
      * - watch this path for changes;
      * @param {string} path.mapTo
      * - bundles to this path
+     * @param {(
+     * 		arg0:
+     * 			{
+     * 				source:string;
+     * 				target:string;
+     * 				eventName:EventName;
+     * 			}
+     * 	)=>Promise<{
+     * 		shouldProcessDefault:
+     * 			boolean|{selfCleanup:()=>Promise<void>};
+     * 	}>
+     * } [path.filter]
+     * - handler trap before sending it to
      * @param {Object} options
      * @param {Object} options.esbuild
-     * @param {Omit<ConstructorParameters<typeof EsWatcher<O>>[0],
+     * @param {Omit<ConstructorParameters<typeof EsWatcher<OPT>>[0],
      * 	"entryPoints"|
      * 	"outFile"|
      * 	"write"|
-     * 	"loader"|
      * 	"format"|
      * 	"bundle"|
      * 	"logLevel"|
@@ -40,29 +66,26 @@ export class JSDirMapper<O extends import("esbuild").BuildOptions> {
      * - `entryPoints`: auto filled with `path.watch` + filepath;
      * - `outFile`: auto filled with `path.mapTo` + filepath(suffixed with `.mjs`);
      * - `write`: auto filled by `vivth.JSDirMapper`;
-     * - `loader`: auto filled by `vivth.JSDirMapper` depended on file extname;
      * - `mainFields`: auto filled by `vivth.JSDirMapper`, ['module', 'main'];
      * - `format`: auto filled by `vivth.JSDirMapper`, always `esm`;
      * - `bundle`: auto filled by `vivth.JSDirMapper`, always `true`;
      * - `logLevel`: auto filled by `vivth.JSDirMapper`;
-     * @param {ConstructorParameters<typeof EsWatcher<O>>[1]} [options.esbuild.watchOption]
+     * @param {ConstructorParameters<typeof EsWatcher<OPT>>[1]} [options.esbuild.watchOption]
      * @param {Parameters<typeof TsToMjs>[1]} [options.asTsToMjsHandler]
      * - argument[1] used for `.as.ts` extention(assemblyscript to `.wasm` + `.mjs` loader):
      * >- handled via `vivth.TsToMjs`;
      * >- preferably to be isolated on a single folder;
+     * - when falsy -> ignore `.as.ts`;
      * @example
      * import process from 'node:process';
      *
-     * import { SafeExit, Paths, JSDirMapper } from '../index.mjs';
+     * import { SafeExit, Paths, JSDirMapper } from 'vivth/node';
      *
      * new Paths({
      * 	root: process.env.INIT_CWD ?? process.cwd(),
      * });
      *
-     * new SafeExit({
-     * 	eventNames: ['SIGINT', 'SIGTERM'],
-     * 	terminator: () => process.exit(0),
-     * });
+     * new SafeExit('SIGINT', 'SIGTERM');
      *
      * new JSDirMapper(
      * 	{
@@ -72,22 +95,34 @@ export class JSDirMapper<O extends import("esbuild").BuildOptions> {
      * 	{
      * 		esbuild: { buildOptions: { platform: 'browser' } },
      * 		asTsToMjsHandler: { assemblyScriptOptions: {} },
-     * 		// `assemblyScriptOptions` must be truthy to handle `.as.ts`
      * 	},
      * );
      *
      */
-    constructor({ mapTo, watch }: {
+    constructor({ mapTo, watch, filter }: {
         watch: string;
         mapTo: string;
+        filter?: ((arg0: {
+            source: string;
+            target: string;
+            eventName: EventName;
+        }) => Promise<{
+            shouldProcessDefault: boolean | {
+                selfCleanup: () => Promise<void>;
+            };
+        }>) | undefined;
     }, { esbuild, asTsToMjsHandler }: {
         esbuild: {
-            buildOptions: Omit<ConstructorParameters<typeof EsWatcher<O>>[0], "entryPoints" | "outFile" | "write" | "loader" | "format" | "bundle" | "logLevel" | "mainFields">;
-            watchOption?: ConstructorParameters<typeof EsWatcher<O>>[1];
+            buildOptions: Omit<ConstructorParameters<typeof EsWatcher<OPT>>[0], "entryPoints" | "outFile" | "write" | "format" | "bundle" | "logLevel" | "mainFields">;
+            watchOption?: ConstructorParameters<typeof EsWatcher<OPT>>[1];
         };
         asTsToMjsHandler?: Parameters<typeof TsToMjs>[1];
     });
+    vivthCleanup: () => Promise<void>;
     #private;
 }
+export type VivthCleanup = import("../typehints/VivthCleanup.mjs").VivthCleanup;
+import type { BuildOptions } from 'esbuild';
+import type { EventName } from 'chokidar/handler.js';
 import { EsWatcher } from '../class/EsWatcher.mjs';
 import { TsToMjs } from '../function/TsToMjs.mjs';

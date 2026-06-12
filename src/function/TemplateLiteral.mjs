@@ -6,13 +6,14 @@ import { IsAsync } from './IsAsync.mjs';
  * @description
  * - function helper to create template literal with valueHandler to handle each values;
  * @template {any} INPUTTYPE
+ * @template {string|Promise<string>} RET
  * @param {import('../typehints/TemplateLiteralValueHandler.mjs').TemplateLiteralValueHandler<INPUTTYPE>} valueHandler
- * @param {(result:string)=>(string|Promise<string>)} [postProcess]
+ * @param {(result:string)=>(RET)} [postProcess]
  * @returns {(strings:TemplateStringsArray,
  * ...values:(INPUTTYPE)[])=>
- * ReturnType<Parameters<typeof TemplateLiteral>[0]>}
+ * RET}
  * @example
- * import { TemplateLiteral } form 'vivth';
+ * import { TemplateLiteral } from 'vivth/neutral';
  *
  * export const html = TemplateLiteral(
  *  ({ ...datas }) => `my string`,
@@ -24,24 +25,16 @@ import { IsAsync } from './IsAsync.mjs';
  * // this will set innerHTML of body to '<div><button>innerButton</button></div>'
  */
 export function TemplateLiteral(valueHandler, postProcess = undefined) {
-	if (
-		/**  */
-		IsAsync(valueHandler)
-	) {
+	if (IsAsync(valueHandler)) {
+		// @ts-expect-error
 		return async (templateStringsArray, ...valuesArrays) => {
 			const result = [];
 			const inputLength = templateStringsArray.length;
 			for (let index = 0; index < templateStringsArray.length; index++) {
 				result.push(templateStringsArray[index]);
-				if (
-					/**  */
-					index < valuesArrays.length
-				) {
+				if (index < valuesArrays.length) {
 					const currentValue = valuesArrays[index];
-					if (
-						/**  */
-						currentValue === undefined
-					) {
+					if (currentValue === undefined) {
 						continue;
 					}
 					result.push(
@@ -56,29 +49,21 @@ export function TemplateLiteral(valueHandler, postProcess = undefined) {
 				}
 			}
 			const resTrue = result.join('');
-			if (
-				/**  */
-				!postProcess
-			) {
+			if (!postProcess) {
 				return resTrue;
 			}
 			return await postProcess(resTrue);
 		};
 	}
+	// @ts-expect-error
 	return (templateStringsArray, ...valuesArrays) => {
 		const result = [];
 		const inputLength = templateStringsArray.length;
 		for (let index = 0; index < templateStringsArray.length; index++) {
 			result.push(templateStringsArray[index]);
-			if (
-				/**  */
-				index < valuesArrays.length
-			) {
+			if (index < valuesArrays.length) {
 				const currentValue = valuesArrays[index];
-				if (
-					/**  */
-					currentValue === undefined
-				) {
+				if (currentValue === undefined) {
 					continue;
 				}
 				result.push(
@@ -93,10 +78,7 @@ export function TemplateLiteral(valueHandler, postProcess = undefined) {
 			}
 		}
 		const resTrue = result.join('');
-		if (
-			/**  */
-			!postProcess
-		) {
+		if (!postProcess) {
 			return resTrue;
 		}
 		return postProcess(resTrue);

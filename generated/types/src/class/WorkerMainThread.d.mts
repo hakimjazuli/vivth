@@ -1,10 +1,21 @@
 /**
+ * it supposed to be able to call on browser too
+ * ```js
+ * import { SafeExit } from './SafeExit.mjs';
+ * ```
+ * need to add cleaner for SafeExit.instance?.addCallback
+ */
+/**
+ * @typedef {import('../typehints/VivthCleanup.mjs').VivthCleanup} VivthCleanup
+ */
+/**
  * @description
  * - class helper to create `Worker` instance;
  * - before any `Worker` functionaily to be used, you need to setup it with `WorkerThread.setup` and `WorkerMainThread.setup` before runing anytyhing;
  * @template {WorkerThread<any, any>} WT
+ * @implements {VivthCleanup}
  */
-export class WorkerMainThread<WT extends import("./WorkerThread.mjs").WorkerThread<any, any>> {
+export class WorkerMainThread<WT extends import("./WorkerThread.mjs").WorkerThread<any, any>> implements VivthCleanup {
     /**
      * @template POST
      * @typedef {import('./WorkerResult.mjs').WorkerResult<POST>} WorkerResult
@@ -17,7 +28,7 @@ export class WorkerMainThread<WT extends import("./WorkerThread.mjs").WorkerThre
     /**
      * @type {boolean}
      */
-    static "__#private@#isRegistered": boolean;
+    static #isRegistered: boolean;
     /**
      * @description
      * - need to be called first, before any `WorkerMainThread` instantiation:
@@ -39,7 +50,7 @@ export class WorkerMainThread<WT extends import("./WorkerThread.mjs").WorkerThre
      * ```
      * @example
      * import { Worker } from 'node:worker_threads';
-     * import { WorkerMainThread } from 'vivth';
+     * import { WorkerMainThread } from 'vivth/neutral';
      *
      * WorkerMainThread.setup({
      * 	workerClass: Worker,
@@ -76,7 +87,7 @@ export class WorkerMainThread<WT extends import("./WorkerThread.mjs").WorkerThre
         worker: string;
         root: string;
     }) => Promise<string>;
-    static "__#private@#options": import("node:worker_threads").WorkerOptions & {
+    static #options: import("node:worker_threads").WorkerOptions & {
         type?: "module";
     };
     /**
@@ -88,14 +99,14 @@ export class WorkerMainThread<WT extends import("./WorkerThread.mjs").WorkerThre
      * @param {(any:any)=>void} listener
      * @returns {Promise<void>}
      */
-    static "__#private@#workerFilehandler"<WT_1 extends import("./WorkerThread.mjs").WorkerThread<any, any>>(handler: string, options: WorkerOptions | import("node:worker_threads").WorkerOptions, worker: WorkerMainThread<WT_1>, listener: (any: any) => void): Promise<void>;
+    static #workerFilehandler<WT_1 extends import("./WorkerThread.mjs").WorkerThread<any, any>>(handler: string, options: WorkerOptions | import("node:worker_threads").WorkerOptions, worker: WorkerMainThread<WT_1>, listener: (any: any) => void): Promise<void>;
     /**
      * @description
      * - create Worker_instance;
      * @param {import('../bundler/adds/PathFSBundles.mjs').PathFSBundles} handler
      * @param {Omit<WorkerOptions|import('node:worker_threads').WorkerOptions, 'eval'|'type'>} options
      * @example
-     * import { WorkerMainThread } from 'vivth';
+     * import { WorkerMainThread } from 'vivth/neutral';
      *
      * export const myDoubleWorker = new WorkerMainThread(PathFSBundles.vivthBundles('./doubleWorkerThread.mjs'));
      */
@@ -103,15 +114,15 @@ export class WorkerMainThread<WT extends import("./WorkerThread.mjs").WorkerThre
     /**
      * @description
      * - terminate all signals that are used on this instance;
-     * @return {void}
+     * @return {Promise<void>}
      */
-    terminate: () => void;
+    vivthCleanup: () => Promise<void>;
     /**
      * @description
      * - result signal of the processed message;
      * @type {Derived<WorkerResult<WT["POST"]>>}
      * @example
-     * import { Effect } from 'vivth';
+     * import { Effect } from 'vivth/neutral';
      * import { myDoubleWorker } from './myDoubleWorker.mjs';
      *
      * const doubleReceiverSignal = myDoubleWorker.receiverSignal;
@@ -133,4 +144,5 @@ export class WorkerMainThread<WT extends import("./WorkerThread.mjs").WorkerThre
     postMessage: (event: WT["RECEIVE"]) => void;
     #private;
 }
+export type VivthCleanup = import("../typehints/VivthCleanup.mjs").VivthCleanup;
 import { Derived } from './Derived.mjs';

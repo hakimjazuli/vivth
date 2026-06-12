@@ -1,39 +1,34 @@
 /**
+ * @typedef {import('../typehints/VivthCleanup.mjs').VivthCleanup} VivthCleanup
+ */
+/**
  * @description
- * - this class is extends `Signal`;
+ * - this class extends `Signal`;
  * - `ForSignal_instance.runCleanUp` still needs to be manually called, when cleaning up this instance;
  * @template {any} TYPE
+ * @implements {VivthCleanup}
  * @extends {Signal<Array<TYPE|undefined>>}
  */
-export class ForSignal<TYPE extends unknown> extends Signal<(TYPE | undefined)[]> {
+export class ForSignal<TYPE extends unknown> extends Signal<(TYPE | undefined)[]> implements VivthCleanup {
     /**
      * @description
      * @param {(
-     * this: ForSignal<TYPE>,
-     * arg:{
-     *  index:number,
-     *  value:{
-     * 		value:TYPE,
-     * 		isValueDefined:true,
-     * 	}|{
-     * 		value:undefined,
-     * 		isValueDefined:false,
-     * 	},
-     *  prev:{
-     * 		prev:TYPE,
-     * 		isPrevDefined:true,
-     * 	}|{
-     * 		prev:undefined,
-     * 		isPrevDefined:false,
-     * 	},
-     * })=>void} loopCallback
+     *	this: ForSignal<TYPE>,
+     *	arg:{
+     *		index:number,
+     *		value:{ value:TYPE, isValueDefined:true, }|
+     *			{ value:undefined, isValueDefined:false, },
+     *		prev:{ prev:TYPE, isPrevDefined:true, }|
+     * 			{ prev:undefined, isPrevDefined:false, },
+     * 	})=>void
+     * } loopCallback
      * - the diffence of `current` and `prev` or `isValueDefined` and `isPrevDefined` can be used for sideEffect, such as;
      * >- `adding/removing/modifiying` `childNode`s on a parent element;
      * >- `adding/removing/modifiying` `Signal` instances;
      * @param {()=>void} [additionalCleanUp]
      * - additional callback to be run when runCleanUp is called;
      * @example
-     * import { ForSignal } from 'vivth';
+     * import { ForSignal } from 'vivth/neutral';
      *
      * const myLoop = new ForSignal(
      * 	function ({ index, value: {value, isValueDefined}, prev:{ prev, isPrevDefined} }) {
@@ -62,12 +57,7 @@ export class ForSignal<TYPE extends unknown> extends Signal<(TYPE | undefined)[]
             isPrevDefined: false;
         };
     }) => void, additionalCleanUp?: () => void);
-    /**
-     * @description
-     * - need to be manually called when disposing/cleaning up this instance;
-     * @type {()=>void}
-     */
-    runCleanUp: () => void;
     #private;
 }
+export type VivthCleanup = import("../typehints/VivthCleanup.mjs").VivthCleanup;
 import { Signal } from './Signal.mjs';

@@ -10,7 +10,6 @@ import { Paths } from '../class/Paths.mjs';
 import { TryAsync } from './TryAsync.mjs';
 import { FileSafe } from '../class/FileSafe.mjs';
 import { Preferrence } from '../common/Preferrence.mjs';
-import { vivthJSautoDOC } from '../doc/JSautoDOC.mjs';
 import { CompileAS } from '../bundler/CompileAS.mjs';
 import { ForOfSync } from './ForOfSync.mjs';
 import { PipeSync } from './PipeSync.mjs';
@@ -23,9 +22,10 @@ const suffixForUniversal = '_ASUniversal';
  * - turn `.mts`||`.ts` file into `.mjs`, no bundling, just traspilation;
  * - on certain circumstance where `.mjs` result needed to be typed, you need to manually add `jsdoc`;
  * >- uses `"at"preserve` to register `jsdoc`;
+ * >- at [at]\[blank\]typedef, import itself.mts pointing to the same exported object to fully type it in mjs(which `vivth` used to generate exports);
  * - auto compile and typehint `.as.ts` to `.wasm`;
- * @param {string} path_
- * - relative path from `Paths.root`;
+ * @param {string} path
+ * - `relative`(to `Paths.root`) OR `absolute`, both are accepted;
  * @param {Object} [options]
  * @param {string} [options.overrideOutputDir]
  * - default: write conversion to same directory;
@@ -35,34 +35,21 @@ const suffixForUniversal = '_ASUniversal';
  * @param {import('../typehints/AutoDocASOptions.mjs').AutoDocASOptions} [options.assemblyScriptOptions]
  * @returns {Promise<void>}
  * @example
- * import { TsToMjs } from 'vivth';
+ * import { TsToMjs } from 'vivth/node';
  *
  * await TsToMjs('./myFile.mts', { encoding: 'utf-8', overrideOutputDir: './other/dir' });
  */
 export async function TsToMjs(
-	path_,
+	path,
 	{
 		overrideOutputDir = undefined,
 		encoding = Preferrence.encoding,
 		assemblyScriptOptions = undefined,
 	} = {},
 ) {
-	const rootPath = Paths.normalize(Paths.root);
-	if (
-		/**  */
-		Paths.normalize(path_).startsWith(rootPath) === false
-	) {
-		path_ = Paths.normalize(join(rootPath, path_));
-	}
-	if (
-		/**  */
-		path_.endsWith('.as.ts')
-	) {
-		if (
-			/**  */
-			basename(path_).startsWith('-') ||
-			!assemblyScriptOptions
-		) {
+	path = Paths.diskAbsolute(path);
+	if (path.endsWith('.as.ts')) {
+		if (basename(path).startsWith('-') || !assemblyScriptOptions) {
 			return;
 		}
 
@@ -72,44 +59,32 @@ export async function TsToMjs(
 				ASAPIOptions = undefined,
 				generateFSasarImporter = false,
 			} = assemblyScriptOptions;
-			path_ = Paths.normalize(path_);
-			const pathNoExt = path_.replace(/.as.ts$/, '');
+			path = Paths.normalize(path);
+			const pathNoExt = path.replace(/.as.ts$/, '');
 			const wasmPath = `${pathNoExt}.wasm`;
-			const { error } = await CompileAS(
-				[path_, '--outFile', wasmPath, '--bindings', 'esm', ...ASArgv],
+			const { error: errorCompileAS } = await CompileAS(
+				[path, '--outFile', wasmPath, '--bindings', 'esm', ...ASArgv],
 				ASAPIOptions,
 			);
-			if (
-				/**  */
-				error
-			) {
-				throw error;
+			if (errorCompileAS) {
+				throw { errorCompileAS };
 			}
-			if (
-				/**  */
-				generateFSasarImporter
-			) {
+			if (generateFSasarImporter) {
 				const handler = [
 					/**
 					 * @param {string} path
 					 * @returns {string}
 					 */
-					(path) => relative(dirname(path_), path),
+					(path) => relative(dirname(path), path),
 					/**
 					 * @param {string} path
 					 * @returns {string}
 					 */
 					(path) => {
-						if (
-							/**  */
-							!pathNoExt.includes('/vivth/src/')
-						) {
-							return 'vivth';
+						if (!pathNoExt.includes('/vivth/src/')) {
+							return 'vivth/all';
 						}
-						if (
-							/**  */
-							path.startsWith('.')
-						) {
+						if (path.startsWith('.')) {
 							return Paths.normalize(path);
 						}
 						return Paths.normalize(`./${path}`);
@@ -122,10 +97,7 @@ export async function TsToMjs(
 				const res = [];
 				for (let i = 0; i < paths__.length; i++) {
 					const path_ = paths__[i];
-					if (
-						/**  */
-						!path_
-					) {
+					if (!path_) {
 						continue;
 					}
 					res.push(PipeSync(join(Paths.root, path_), ...handler));
@@ -154,55 +126,62 @@ export const ${mjsNoExt} = ( import_ = {} ) => InstantiateAssemblyScript(PathFSF
 `.replace('-description-', 'description'),
 					{ encoding: Preferrence.encoding },
 				);
-				if (
-					/**  */
-					errorWrite
-				) {
-					Console.error({
-						[vivthJSautoDOC]: `❌error generate FSInline Importer '${mjsPath}'`,
-						errorWrite,
-					});
+				if (errorWrite) {
+					Console.error(
+						{
+							[TsToMjs.name]: `❌error generate FSInline Importer '${mjsPath}'`,
+							errorWrite,
+						},
+						{
+							now: true,
+						},
+					);
 					return;
 				}
-				Console.info({
-					[vivthJSautoDOC]: `✅successfully generate FSInline Importer '${mjsPath}'`,
-				});
+				Console.info(
+					{
+						[TsToMjs.name]: `✅successfully generate FSInline Importer '${mjsPath}'`,
+					},
+					{
+						now: true,
+					},
+				);
 			}
-			Console.info({
-				[vivthJSautoDOC]: `✅successfully compiles '${path_}'`,
-			});
+			Console.info(
+				{
+					[TsToMjs.name]: `✅successfully compiles '${path}'`,
+				},
+				{
+					now: true,
+				},
+			);
 		});
-		if (
-			/**  */
-			errorCompilingAssemblyScript
-		) {
-			Console.error({ errorCompilingAssemblyScript });
+		if (errorCompilingAssemblyScript) {
+			Console.error({ errorCompilingAssemblyScript }, { now: true });
 		}
 		return;
 	}
-	const ext = extname(path_);
+	const ext = extname(path);
 	if (
-		/**  */
+		/** */
 		ext === '.js' &&
-		(await FileSafe.exist(path_.replace(/.js$/, '.as.ts')))[0]
+		(await FileSafe.exist(path.replace(/.js$/, '.as.ts')))
 	) {
 		const [content, errorReadFile] = await TryAsync(async () => {
-			return (await readFile(path_)).toString(Preferrence.encoding);
+			return (await readFile(path)).toString(Preferrence.encoding);
 		});
-		if (
-			/**  */
-			errorReadFile
-		) {
-			Console.error({ errorReadFile });
+		if (errorReadFile) {
+			Console.error({ errorReadFile }, { now: true });
 			return;
 		}
 		const regex = /export\s+const\s+({[\s\S]*?})\s*=\s*await/g;
 		const matches = content.matchAll(regex).toArray();
-		ForOfSync(matches, (match) => {
-			const match1 = match[1];
-			const trueContent = `// @ts-check
+		await Promise.all(
+			ForOfSync(matches, async (match) => {
+				const match1 = match[1];
+				const trueContent = `// @ts-check
 
-import ${match1} from './${basename(path_)}';
+import ${match1} from './${basename(path)}';
 
 /**
  * @-description-
@@ -210,30 +189,26 @@ import ${match1} from './${basename(path_)}';
  * >- \`browser\` runtime;
  * >- \`nodeJS\` compatible runtime;
  */
-export const ${basename(path_.replace(/.js$/, suffixForUniversal))} = ${match1};
+export const ${basename(path.replace(/.js$/, suffixForUniversal))} = ${match1};
 `.replace('-description-', 'description');
-			FileSafe.write(path_.replace(/.js$/, `${suffixForUniversal}.mjs`), trueContent, {
-				encoding: Preferrence.encoding,
-			});
-		});
+				await FileSafe.write(path.replace(/.js$/, `${suffixForUniversal}.mjs`), trueContent, {
+					encoding: Preferrence.encoding,
+				});
+			})[0],
+		);
 		return;
 	}
 	if (
-		/**  */
-
-		(ext === '.ts' && (await FileSafe.exist(path_.replace(/.ts$/, '.as.ts')))[0]) ||
+		(ext === '.ts' && (await FileSafe.exist(path.replace(/.ts$/, '.as.ts')))) ||
 		(ext !== '.ts' && ext !== '.mts')
 	) {
 		return;
 	}
 	const [content, errorReadFile] = await TryAsync(async () => {
-		return await readFile(path_, { encoding });
+		return await readFile(path, { encoding });
 	});
-	if (
-		/**  */
-		errorReadFile
-	) {
-		Console.error({ errorReadFile });
+	if (errorReadFile) {
+		Console.error({ errorReadFile }, { now: true });
 		return;
 	}
 	const [result, transformError] = await TryAsync(async () => {
@@ -245,22 +220,15 @@ export const ${basename(path_.replace(/.js$/, suffixForUniversal))} = ${match1};
 			legalComments: 'inline',
 		});
 	});
-	if (
-		/**  */
-		transformError ||
-		result === undefined
-	) {
-		Console.error({ transformError });
+	if (transformError || result === undefined) {
+		Console.error({ transformError }, { now: true });
 		return;
 	}
-	const outputDir = overrideOutputDir ? join(rootPath, overrideOutputDir) : dirname(path_);
-	const outputPath = join(outputDir, basename(path_).replace(new RegExp(`${ext}$`), '.mjs'));
+	const outputDir = !!overrideOutputDir ? Paths.diskAbsolute(overrideOutputDir) : dirname(path);
+	const outputPath = join(outputDir, basename(path).replace(new RegExp(`${ext}$`), '.mjs'));
 	const [, writeError] = await FileSafe.write(outputPath, result.code, { encoding });
-	if (
-		/**  */
-		writeError === undefined
-	) {
+	if (writeError === undefined) {
 		return;
 	}
-	Console.error({ writeError });
+	Console.error({ writeError }, { now: true });
 }

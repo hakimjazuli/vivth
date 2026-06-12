@@ -2,6 +2,7 @@
 
 import { LazyFactory } from '../function/LazyFactory.mjs';
 import { TrySync } from '../function/TrySync.mjs';
+import { Console } from './Console.mjs';
 
 /**
  * @description
@@ -58,7 +59,7 @@ export class LitExp {
 	 * - placement of `key` will determine the named capture group will be placed in the template literal;
 	 * - it is recomended to not end template literal with any of the `key`s as the regex detection might failed to detects the boundary of the end of matched string of that capture group;
 	 * @example
-	 * import { LitExp } from 'vivth';
+	 * import { LitExp } from 'vivth/neutral';
 	 *
 	 * (()=>{
 	 * 	const [liteal, errorPrep] = LitExp.prepare({
@@ -78,7 +79,6 @@ export class LitExp {
 		return TrySync(() => {
 			for (const key in keysAndDefaultValuePair) {
 				if (
-					/**  */
 					!Object.hasOwn(keysAndDefaultValuePair, key) ||
 					keysAndDefaultValuePair[key] === undefined
 				) {
@@ -86,10 +86,7 @@ export class LitExp {
 				}
 				const regex = keysAndDefaultValuePair[key];
 				const capture = !regex ? `[\\s\\S]*?` : regex.source;
-				if (
-					/**  */
-					capture.match(/\(\<\w+\>[\s\S]*?\)/g)
-				) {
+				if (capture.match(/\(\<\w+\>[\s\S]*?\)/g)) {
 					throw Error('trying to add named capture');
 				}
 			}
@@ -138,39 +135,19 @@ export class LitExp {
 			const stringsLength = strings.length;
 			for (let i = 0; i < stringsLength; i++) {
 				const string = strings[i];
-				if (
-					/**  */
-					string === undefined
-				) {
+				if (string === undefined) {
 					throw 'string undefined';
 				}
-				if (
-					/**  */
-					i + 1 == stringsLength &&
-					string === ''
-				) {
-					result.push('(?:\\s+?|;|,|$|\/\/|\())');
-				} else {
+				if (i + 1 !== stringsLength || string !== '') {
 					result.push(LitExp.escape(string));
 				}
-				if (
-					/**  */
-					i < values.length
-				) {
+				if (i < values.length) {
 					const value = values[i];
-					if (
-						/**  */
-						value === undefined ||
-						instance_rules[value] === undefined
-					) {
+					if (value === undefined || instance_rules[value] === undefined) {
 						continue;
 					}
 					const [valueHandled, errorValue] = valueHandler(value, instance_rules[value]);
-					if (
-						/**  */
-						errorValue ||
-						valueHandled === ''
-					) {
+					if (errorValue || valueHandled === '') {
 						throw errorValue;
 					}
 					result.push(valueHandled);
@@ -219,6 +196,7 @@ export class LitExp {
 			);
 		});
 	};
+
 	/**
 	 * @param {Parameters<LitExp<KEYS>["evaluate"]["matchedAllAndGrouped"]>[1]} options
 	 * @returns {ReturnType<typeof TrySync<RegExp>>}
@@ -270,7 +248,7 @@ export class LitExp {
 			 * @param {Partial<{ [K in keyof KEYS]?: string }>} overrides
 			 * @returns {string|undefined}
 			 * @example
-			 * import { LitExp } from 'vivth';
+			 * import { LitExp } from 'vivth/neutral';
 			 *
 			 * const [literal, errorPreparing] = LitExp.prepare({
 			 * 	myKey: false,
@@ -298,10 +276,7 @@ export class LitExp {
 						},
 						this_.#templateStringArray,
 					);
-					if (
-						/** */
-						error
-					) {
+					if (error) {
 						throw error;
 					}
 					return res.join('');
@@ -321,7 +296,7 @@ export class LitExp {
 	 */
 	static #namedChapture(value, regex) {
 		return TrySync(() => {
-			const capture = regex === false ? `[\\s\\S]*?` : regex.source;
+			const capture = !regex ? `[\\s\\S]*?` : regex.source;
 			return `(?<${value.toString()}>${capture})`;
 		});
 	}
@@ -355,7 +330,7 @@ export class LitExp {
 			 * regexp:RegExp}>>
 			 * }
 			 * @example
-			 * import { LitExp } from 'vivth';
+			 * import { LitExp } from 'vivth/neutral';
 			 *
 			 * const [literal, errorPreparing] = LitExp.prepare({
 			 * 	myKey: false,
@@ -383,26 +358,19 @@ export class LitExp {
 				// @ts-expect-error
 				return TrySync(() => {
 					const [regexp, error] = this_.#regExp(options);
-					if (
-						/** */
-						error
-					) {
+					if (error) {
 						throw error;
 					}
 					const execResult = regexp.exec(string);
-					if (
-						/** */
-						execResult === null
-					) {
-						return undefined;
+					if (execResult === null) {
+						const error = { string, regexp, message: 'execResult should not be null', execResult };
+						Console.error(error);
+						throw error;
 					}
 					const whole = execResult[1];
 					const named = execResult?.groups;
 					const result = { named, whole };
-					if (
-						/** */
-						named === undefined
-					) {
+					if (named === undefined) {
 						throw JSON.stringify({
 							regexpSource: regexp.source,
 							message: 'no match is found',
@@ -421,7 +389,7 @@ export class LitExp {
 			 * @returns {ReturnType<typeof TrySync<import('../typehints/LitExpResultType.mjs').LitExpResultType<KEYS>>>
 			 * }
 			 * @example
-			 * import { LitExp, Console } from 'vivth';
+			 * import { LitExp, Console } from 'vivth/neutral';
 			 *
 			 * const [literal, errorPreparing] = LitExp.prepare({
 			 * 	myKey: false,
@@ -457,10 +425,7 @@ export class LitExp {
 			matchedAllAndGrouped: (string, options) => {
 				return TrySync(() => {
 					const [regexp, error] = this.#regexToMatchAll(options);
-					if (
-						/**  */
-						error
-					) {
+					if (error) {
 						throw error;
 					}
 					/**
@@ -477,10 +442,7 @@ export class LitExp {
 					const result = { named, whole };
 					const matchedAll = string.matchAll(regexp);
 					for (const match of matchedAll) {
-						if (
-							/**  */
-							match.groups === undefined
-						) {
+						if (match.groups === undefined) {
 							throw JSON.stringify({
 								regexpSource: regexp.source,
 								message: 'no match is found',

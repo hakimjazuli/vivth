@@ -1,21 +1,20 @@
 // @ts-check
 
 import process from 'node:process';
+import { spawn } from 'node:child_process';
 
 import { TryAsync } from '../function/TryAsync.mjs';
-import { TrySync } from '../function/TrySync.mjs';
 import { WalkThrough } from './WalkThrough.mjs';
 import { Console } from './Console.mjs';
-import { Effect, mapOfEffects } from './Effect.mjs';
-import { EnvSignal } from './EnvSignal.mjs';
+import { mapOfEffects } from './Effect.mjs';
 import { setOFSignals } from './Signal.mjs';
 import { ForOfSync } from '../function/ForOfSync.mjs';
-import { ForOfAsync } from '../function/ForOfAsync.mjs';
-
-/**
- * @type {Set<()=>Promise<void>>}
- */
-export const safeCleanUpCBs = new Set();
+import { QChannel } from './QChannel.mjs';
+import { Paths } from './Paths.mjs';
+import { FileSafe } from './FileSafe.mjs';
+import { UniqueFSTempName } from '../function/UniqueFSTempName.mjs';
+import { Preferrence } from '../common/Preferrence.mjs';
+import { join } from 'node:path';
 
 /**
  * @description
@@ -25,96 +24,167 @@ export const safeCleanUpCBs = new Set();
  */
 export class SafeExit {
 	/**
+	 * @type {QChannel<any>}
+	 */
+	#q = new QChannel('SafeExit');
+	/**
 	 * @description
 	 * - only accessible after instantiation;
 	 * @type {SafeExit|undefined}
 	 */
 	static instance;
 	/**
+	 * @type {Set<()=>Promise<void>>}
+	 */
+	safeCleanUpCBs = new Set();
+	/**
 	 * @description
-	 * @param {Object} options
-	 * @param {[string, ...string[]]} options.eventNames
-	 * - eventNames are blank by default, you need to manually name them all;
-	 * - 'exit' will be omited, as it might cause async callbacks failed to execute;
+	 * @param {...NodeJS.Signals} eventNames
+	 * - `beforeExit` is auto included;
 	 * - example:
 	 * ```js
-	 *  ['SIGINT', 'SIGTERM']
-	 * ```
-	 * @param {()=>void} options.terminator
-	 * - standard, process must be imported statically from 'node:process':
-	 * ```js
-	 * () => process.exit(0),
+	 *  ['SIGINT', 'SIGTERM'] // both are automatically added
 	 * ```
 	 * @example
 	 * import process from 'node:process';
-	 * import { SafeExit, Console } from 'vivth';
+	 * import { SafeExit } from 'vivth/node';
 	 *
-	 * new SafeExit({
-	 * 	eventNames: ['SIGINT', 'SIGTERM', ...eventNames],
-	 * 	terminator : () => process.exit(0),
-	 * });
+	 * new SafeExit('SIGINT', 'SIGTERM', ...eventNames);
 	 */
-	constructor({ eventNames, terminator }) {
-		if (
-			/**  */
-			SafeExit.instance instanceof SafeExit
-		) {
+	constructor(...eventNames) {
+		if (SafeExit.instance instanceof SafeExit) {
 			return SafeExit.instance;
 		}
 		SafeExit.instance = this;
-		this.#exit = terminator;
 		this.#register(eventNames);
 	}
+
 	/**
-	 * @description
-	 * - optional exit event registration, by listening to it inside an `Effect`;
-	 * - when the value is `true`, meaning program is exitting;
-	 * @type {EnvSignal<boolean>}
+	 * @type {  undefined|import('node:child_process').ChildProcess }
 	 */
-	exiting = new EnvSignal(false);
+	#childProcessHelper;
+
 	/**
-	 * @param {ConstructorParameters<typeof SafeExit>[0]["eventNames"]} eventNames
-	 * @returns {void}
+	 * @type {Parameters<QChannel<any>["callback"]>[1]}
 	 */
-	#register = (eventNames) => {
-		SafeExit.instance?.exiting.env.value;
-		ForOfSync(eventNames, (eventName) => {
-			if (
+	#mitigationQ = async ({ isLastOnQ }) => {
+		if (
+			/**  */
+			!!this.#childProcessHelper ||
+			!isLastOnQ()
+		) {
+			return;
+		}
+		const tempPath = UniqueFSTempName(
+			Paths.diskAbsolute(join(Paths.root, '/vivth/src/safeExit-guard-with-bun.mjs')),
+			'.mjs',
+		);
+
+		await FileSafe.write(
+			tempPath,
+			`import process from "node:process";process.title="close this terminal to emit 'SIGTERM' to main process at '${Paths.normalize(Paths.root)}'";`,
+			{ encoding: Preferrence.encoding },
+		);
+		const proc = spawn(
+			'bun',
+			[
 				/**  */
-				eventName.toLowerCase() === 'exit'
-			) {
-				return;
-			}
-			this.#listener(eventName);
+				'--watch',
+				tempPath,
+			],
+			{
+				cwd: Paths.root,
+				stdio: 'ignore',
+				detached: true,
+			},
+		);
+		this.#childProcessHelper = proc;
+		SafeExit.instance?.addCallback(async () => {
+			proc.kill('SIGTERM');
+		});
+		process.once('exit', () => {
+			proc.kill('SIGTERM');
+		});
+		ForOfSync(['exit', 'close'], (eventName) => {
+			proc.once(eventName, () => {
+				process.emit('SIGTERM');
+				proc.kill('SIGTERM');
+			});
 		});
 	};
-	static triggerExit = () => {
-		SafeExit.instance?.exiting.correction(true);
+	#exitMitigation = () => {
+		this.#q.callback(this.#mitigationQ, this.#mitigationQ);
 	};
+
+	/**
+	 * @param {...ConstructorParameters<typeof SafeExit>[0][]} eventNames
+	 * @returns {void}
+	 */
+	#register = (eventNames = []) => {
+		eventNames.push(
+			/**
+			 * - `beforeExit` is necessary as sometimes `bun` might not listen to SIGNAL;
+			 * - and then somehow `exit` is already called;
+			 */
+			// @ts-expect-error
+			'beforeExit',
+			'SIGINT',
+			'SIGTERM',
+		);
+		const setOfEvents = new Set(eventNames);
+		setOfEvents.delete(
+			// @ts-expect-error
+			'exit',
+		);
+		ForOfSync(setOfEvents, (eventName) => {
+			this.#createListener(eventName);
+		});
+	};
+	#hasExited = false;
 	/**
 	 * @type {(eventName:string)=>void}
 	 */
-	#listener = (eventName) => {
-		process.once(eventName, function () {
-			Console.log({ 'vivth.SafeExit': `safe exit via "${eventName}"` });
-			SafeExit.triggerExit();
+	#createListener = (eventName) => {
+		process.once(eventName, async () => {
+			const [, errorCleanup] = await this.#q.callback(
+				this.#createListener,
+				async ({ isLastOnQ }) => {
+					if (!isLastOnQ() || this.#hasExited) {
+						return;
+					}
+					this.#hasExited = true;
+					await this.#cleanup(eventName);
+				},
+			);
+			if (!errorCleanup) {
+				return;
+			}
+			Console.error({ errorCleanup }, { now: true });
 		});
 	};
 	/**
 	 * @description
-	 * - optional exit event registration;
-	 * - the callbacks will be called when exiting;
-	 * @param {()=>(Promise<void>)} cb
+	 * - `SafeExit` ${eventName}.Callback registration;
+	 * - `onEventName` all callbacks are called simultanousely using `await Promise.all`;
+	 * >- for sequential event you need to put them in a single callback;
+	 * @param {()=>(Promise<void>)} safeExitCallback
+	 * @returns {{removeCallback:()=>void}}
 	 * @example
-	 * import { SafeExit } from 'vivth';
+	 * import { SafeExit } from 'vivth/node';
 	 *
 	 * const exitCallback = async () => {
 	 * 	// code
 	 * }
 	 * SafeExit.instance.addCallback(exitCallback);
 	 */
-	addCallback = (cb) => {
-		safeCleanUpCBs.add(cb);
+	addCallback = (safeExitCallback) => {
+		this.#exitMitigation();
+		this.safeCleanUpCBs.add(safeExitCallback);
+		return {
+			removeCallback: () => {
+				this.removeCallback(safeExitCallback);
+			},
+		};
 	};
 	/**
 	 * @description
@@ -122,7 +192,7 @@ export class SafeExit {
 	 * - the callbacks will be removed from registered via `addCallback` exiting;
 	 * @param {()=>(Promise<void>)} cb
 	 * @example
-	 * import { SafeExit } from 'vivth';
+	 * import { SafeExit } from 'vivth/node';
 	 *
 	 * const exitCallback () => {
 	 * 	// code
@@ -132,45 +202,39 @@ export class SafeExit {
 	 * SafeExit.instance.removeCallback(exitCallback);
 	 */
 	removeCallback = (cb) => {
-		safeCleanUpCBs.delete(cb);
+		this.safeCleanUpCBs.delete(cb);
 	};
+	triggerExit = async () => {
+		await this.#cleanup('vivth/node.SafeExit.instance.triggerExit');
+	};
+
 	/**
-	 * @type {()=>void}
+	 * @param {string} eventName
+	 * @returns {Promise<void>}
 	 */
-	#exit = () => {};
-	// @ts-expect-error
-	#autoCleanUp = new Effect(async ({ subscribe }) => {
-		if (
-			/**  */
-			!subscribe(this.exiting.env).value
-		) {
-			return;
+	#cleanup = async (eventName) => {
+		Console.log({ SafeExit: `called by '${eventName}'` }, { now: true });
+		if (this.#childProcessHelper) {
+			this.#childProcessHelper.kill('SIGTERM');
+			Console.info('force closing bun terminal helper', { now: true });
 		}
-		await ForOfAsync(safeCleanUpCBs, async (cleanup) => {
-			const [, error] = await TryAsync(async () => {
-				await cleanup();
-			});
-			if (
-				/**  */
-				error === undefined
-			) {
-				return;
-			}
-			Console.warn(error);
-		});
+		await Promise.all(
+			ForOfSync(this.safeCleanUpCBs, async (cleanup) => {
+				const [, error] = await TryAsync(async () => {
+					await cleanup();
+				});
+				if (error === undefined) {
+					return;
+				}
+				Console.warn(error);
+			})[0],
+		);
 		WalkThrough.set(setOFSignals, (signal) => {
 			signal.remove.ref();
 		});
 		WalkThrough.map(mapOfEffects, ([effect, _]) => {
 			effect.options.removeEffect();
 		});
-		const [, errorExitting] = TrySync(this.#exit);
-		if (
-			/**  */
-			errorExitting === undefined
-		) {
-			return;
-		}
-		Console.error({ errorExitting });
-	}, 10);
+		process.exit(0);
+	};
 }

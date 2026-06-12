@@ -1,8 +1,4 @@
 /**
- * @type {Set<()=>Promise<void>>}
- */
-export const safeCleanUpCBs: Set<() => Promise<void>>;
-/**
  * @description
  * - class helper for describing how to Safely Response on exit events
  * - singleton;
@@ -15,63 +11,50 @@ export class SafeExit {
      * @type {SafeExit|undefined}
      */
     static instance: SafeExit | undefined;
-    static triggerExit: () => void;
     /**
      * @description
-     * @param {Object} options
-     * @param {[string, ...string[]]} options.eventNames
-     * - eventNames are blank by default, you need to manually name them all;
-     * - 'exit' will be omited, as it might cause async callbacks failed to execute;
+     * @param {...NodeJS.Signals} eventNames
+     * - `beforeExit` is auto included;
      * - example:
      * ```js
-     *  ['SIGINT', 'SIGTERM']
-     * ```
-     * @param {()=>void} options.terminator
-     * - standard, process must be imported statically from 'node:process':
-     * ```js
-     * () => process.exit(0),
+     *  ['SIGINT', 'SIGTERM'] // both are automatically added
      * ```
      * @example
      * import process from 'node:process';
-     * import { SafeExit, Console } from 'vivth';
+     * import { SafeExit } from 'vivth/node';
      *
-     * new SafeExit({
-     * 	eventNames: ['SIGINT', 'SIGTERM', ...eventNames],
-     * 	terminator : () => process.exit(0),
-     * });
+     * new SafeExit('SIGINT', 'SIGTERM', ...eventNames);
      */
-    constructor({ eventNames, terminator }: {
-        eventNames: [string, ...string[]];
-        terminator: () => void;
-    });
+    constructor(...eventNames: NodeJS.Signals[]);
+    /**
+     * @type {Set<()=>Promise<void>>}
+     */
+    safeCleanUpCBs: Set<() => Promise<void>>;
     /**
      * @description
-     * - optional exit event registration, by listening to it inside an `Effect`;
-     * - when the value is `true`, meaning program is exitting;
-     * @type {EnvSignal<boolean>}
-     */
-    exiting: EnvSignal<boolean>;
-    /**
-     * @description
-     * - optional exit event registration;
-     * - the callbacks will be called when exiting;
-     * @param {()=>(Promise<void>)} cb
+     * - `SafeExit` ${eventName}.Callback registration;
+     * - `onEventName` all callbacks are called simultanousely using `await Promise.all`;
+     * >- for sequential event you need to put them in a single callback;
+     * @param {()=>(Promise<void>)} safeExitCallback
+     * @returns {{removeCallback:()=>void}}
      * @example
-     * import { SafeExit } from 'vivth';
+     * import { SafeExit } from 'vivth/node';
      *
      * const exitCallback = async () => {
      * 	// code
      * }
      * SafeExit.instance.addCallback(exitCallback);
      */
-    addCallback: (cb: () => (Promise<void>)) => void;
+    addCallback: (safeExitCallback: () => (Promise<void>)) => {
+        removeCallback: () => void;
+    };
     /**
      * @description
      * - optional exit event removal;
      * - the callbacks will be removed from registered via `addCallback` exiting;
      * @param {()=>(Promise<void>)} cb
      * @example
-     * import { SafeExit } from 'vivth';
+     * import { SafeExit } from 'vivth/node';
      *
      * const exitCallback () => {
      * 	// code
@@ -81,6 +64,6 @@ export class SafeExit {
      * SafeExit.instance.removeCallback(exitCallback);
      */
     removeCallback: (cb: () => (Promise<void>)) => void;
+    triggerExit: () => Promise<void>;
     #private;
 }
-import { EnvSignal } from './EnvSignal.mjs';

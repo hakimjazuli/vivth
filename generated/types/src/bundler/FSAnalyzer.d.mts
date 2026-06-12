@@ -13,7 +13,6 @@ export class FSAnalyzer {
      * - to be used on bundled content;
      * @param {string} entryPoint
      * @param {string} content
-     * @param {'cjs'|'esm'} format
      * @param {Object} asarConfig
      * @param {Parameters<createPackageFromFiles>[3]} [asarConfig.InputMetadata]
      * @param {Parameters<createPackageFromFiles>[4]} [asarConfig.options]
@@ -22,18 +21,19 @@ export class FSAnalyzer {
      * @example
      * import { readFile } from 'node:fs/promises';
      *
-     * import { FSInlineAnalyzer } from 'vivth';
+     * import { FSAnalyzer } from 'vivth/node';
+     * import { Preferrence } from 'vivth/neutral';
      *
-     * const filePath = join(Paths.root,'README.md'); // assuming Paths is already instantiated once;
-     * const [resultFinalContent, errorFinalContent] = await FSInlineAnalyzer.finalContent(
+     * const filePath = 'README.md';
+     * const [resultFinalContent, errorFinalContent] = await FSAnalyzer.finalContent(
      * 	filePath,
-     * 	await readFile(filePath, {encoding: 'utf-8'}),
+     * 	await readFile(filePath, {encoding: Preferrence.encoding}),
      * 	'esm',
      * 	{},
      * 	...args
      * );
      */
-    static finalContent: (entryPoint: string, content: string, format: "cjs" | "esm", asarConfig: {
+    static finalContent: (entryPoint: string, content: string, asarConfig: {
         InputMetadata?: Parameters<typeof createPackageFromFiles>[3];
         options?: Parameters<typeof createPackageFromFiles>[4];
     }, bundledJSFilePath: string) => ReturnType<typeof TryAsync<string>>;
@@ -42,16 +42,15 @@ export class FSAnalyzer {
      * @param {string} str
      * @returns {RegExp}
      */
-    static "__#private@#hydrateRegex": (str: string) => RegExp;
+    static #hydrateRegex: (str: string) => RegExp;
     /**
      * @param {string} rootPath
-     * @param {Parameters<typeof FSAnalyzer["finalContent"]>[2]} format
      * @param {string} content
-     * @param {Parameters<typeof FSAnalyzer["finalContent"]>[3]} asarConfig
+     * @param {Parameters<typeof FSAnalyzer["finalContent"]>[2]} asarConfig
      * @param {string} bundledJSFile
      * @returns {Promise<void>}
      */
-    static "__#private@#analyze_asarFile": (rootPath: string, format: Parameters<(typeof FSAnalyzer)["finalContent"]>[2], content: string, asarConfig: Parameters<(typeof FSAnalyzer)["finalContent"]>[3], bundledJSFile: string) => Promise<void>;
+    static #analyze_asarFile: (rootPath: string, content: string, asarConfig: Parameters<(typeof FSAnalyzer)["finalContent"]>[2], bundledJSFile: string) => Promise<void>;
 }
 import { TryAsync } from '../function/TryAsync.mjs';
 type createPackageFromFiles = typeof import("@electron/asar")["createPackageFromFiles"];

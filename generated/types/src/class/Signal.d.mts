@@ -1,4 +1,7 @@
 /**
+ * @typedef { import('../typehints/VivthCleanup.mjs').VivthCleanup } VivthCleanup
+ */
+/**
  * @type {Set<Signal<any>>}
  */
 export const setOFSignals: Set<Signal<any>>;
@@ -6,12 +9,15 @@ export const setOFSignals: Set<Signal<any>>;
  * @description
  * - a class for creating effect to signals;
  * @template VALUE
+ * @implements {VivthCleanup}
  */
-export class Signal<VALUE> {
+export class Signal<VALUE> implements VivthCleanup {
     /**
      * @param {Signal<any>} signalInstance
+     * @param {(error:Error|undefined)=>void} [afterCompletion]
+     * @returns {Promise<void>}
      */
-    static "__#private@#notify": (signalInstance: Signal<any>) => void;
+    static #notify: (signalInstance: Signal<any>, afterCompletion?: (error: Error | undefined) => void) => Promise<void>;
     /**
      * @description
      * - create a `Signal`;
@@ -20,11 +26,12 @@ export class Signal<VALUE> {
      * - callback independent from effect;
      * >- it will always be called when there's value change;
      * @example
-     * import { Signal, Effect } from  'vivth';
+     * import { Signal, Effect } from 'vivth/neutral';
      *
      * const count = new Signal(0);
      */
     constructor(value: VALUE, performanceChangesReport?: (data: DataLog<VALUE>) => void);
+    vivthCleanup: () => Promise<void>;
     /**
      * @description
      * - subsrcibers reference of this instance;
@@ -42,9 +49,10 @@ export class Signal<VALUE> {
          * @description
          * - manually notify on non primitive value or value that have depths;
          * @param {(options:{signalInstance:Signal<VALUE>})=>Promise<void>} [callback]
-         * @returns {void}
+         * @param {(error:Error|undefined)=>Promise<void>} [afterCompletion]
+         * @returns {Promise<void>}
          * @example
-         * import { Signal } from 'vivth';
+         * import { Signal } from 'vivth/neutral';
          *
          * // for deep signal like array or object you can:
          * const arraySignal = new Signal([1,2]);
@@ -60,9 +68,9 @@ export class Signal<VALUE> {
          */
         notify: (callback?: (options: {
             signalInstance: Signal<VALUE>;
-        }) => Promise<void>) => void;
+        }) => Promise<void>, afterCompletion?: (error: Error | undefined) => Promise<void>) => Promise<void>;
     } & {
-        "vivth:unwrapLazy;": () => {
+        [x: symbol]: {
             /**
              * @instance subscribers
              * @description
@@ -75,9 +83,10 @@ export class Signal<VALUE> {
              * @description
              * - manually notify on non primitive value or value that have depths;
              * @param {(options:{signalInstance:Signal<VALUE>})=>Promise<void>} [callback]
-             * @returns {void}
+             * @param {(error:Error|undefined)=>Promise<void>} [afterCompletion]
+             * @returns {Promise<void>}
              * @example
-             * import { Signal } from 'vivth';
+             * import { Signal } from 'vivth/neutral';
              *
              * // for deep signal like array or object you can:
              * const arraySignal = new Signal([1,2]);
@@ -93,7 +102,7 @@ export class Signal<VALUE> {
              */
             notify: (callback?: (options: {
                 signalInstance: Signal<VALUE>;
-            }) => Promise<void>) => void;
+            }) => Promise<void>, afterCompletion?: (error: Error | undefined) => Promise<void>) => Promise<void>;
         };
     };
     /**
@@ -124,7 +133,7 @@ export class Signal<VALUE> {
          */
         ref: () => void;
     } & {
-        "vivth:unwrapLazy;": () => {
+        [x: symbol]: {
             /**
              * @instance remove
              * @description
@@ -160,7 +169,7 @@ export class Signal<VALUE> {
      * - assign new value then automatically notify all subscribers;
      * @type {VALUE}
      * @example
-     * import { Signal } from  'vivth';
+     * import { Signal } from 'vivth/neutral';
      *
      * const count = new Signal(0);
      * count.value++;
@@ -173,7 +182,7 @@ export class Signal<VALUE> {
      * - value after change;
      * @returns {VALUE}
      * @example
-     * import { Signal, Effect, Derived } from  'vivth';
+     * import { Signal, Effect, Derived } from 'vivth/neutral';
      *
      * const count = new Signal(0);
      * count.value; // not reactive
@@ -188,5 +197,6 @@ export class Signal<VALUE> {
     get value(): VALUE;
     #private;
 }
+export type VivthCleanup = import("../typehints/VivthCleanup.mjs").VivthCleanup;
 import { Effect } from './Effect.mjs';
 import { DataLog } from './DataLog.mjs';

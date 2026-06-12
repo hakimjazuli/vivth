@@ -13,7 +13,7 @@ import { FSasar } from '../bundler/FSasar.mjs';
  * @param {Parameters<import('../typehints/AssemblyScriptLoaderInstantiate.mjs').AssemblyScriptLoaderInstantiate<RESULTTYPE>>[1]} [imports]
  * @returns {Promise<import('../typehints/AssemblyScriptExportsType.mjs').AssemblyScriptExportsType<RESULTTYPE>>}
  * @example
- * import { PathFSFile, InstantiateAssemblyScript } from "vivth";
+ * import { PathFSFile, InstantiateAssemblyScript } from 'vivth/node';
  *
  * InstantiateAssemblyScript(PathFSFile.vivthFile('../function/myAsm.wasm'));;
  */

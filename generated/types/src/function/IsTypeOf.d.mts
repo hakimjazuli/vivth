@@ -1,25 +1,26 @@
 /**
+ * Map of 'typeof' string results to their actual TypeScript types.
+ * Using a constant object allows for type-safe extraction without
+ * manual conditional mapping.
+ */
+declare const TypeMap: {
+    string: string;
+    number: number;
+    boolean: boolean;
+    object: {};
+    function: () => void;
+    undefined: undefined;
+    symbol: symbol;
+    bigint: bigint;
+};
+/**
+ * @preserve
  * @description
  * A type-safe `typeof` helper.
- * @template {any} O
- * @param {O} object
- * @param {"string" | "number" | "boolean" | "object" | "function" | "undefined" | "symbol" | "bigint"} type
- * @returns {boolean}
- * @example
- * import { IsinstanceOf, Signal, Effect } from 'vivth';
- *
- * const a ='hei';
- * IsTypeOf(a, 'string'); // true
- * IsTypeOf(a, 'number'); // false
- *
- * // but why not
- * if(!(typeof a === 'number')){
- *  //
- * };
- *
- * // here's why
- * if(!IsTypeOf(a, 'string')){
- *  //
- * };
+ * @template {keyof typeof TypeMap} K
+ * @param {unknown} object - The value to check.
+ * @param {K} type - The type string to compare against.
+ * @returns {object is typeof TypeMap[K]} - Returns true if the type matches, narrowing the type.
  */
-export function IsTypeOf<O extends unknown>(object: O, type: "string" | "number" | "boolean" | "object" | "function" | "undefined" | "symbol" | "bigint"): boolean;
+export declare function IsTypeOf<K extends keyof typeof TypeMap>(object: unknown, type: K): object is (typeof TypeMap)[K];
+export {};

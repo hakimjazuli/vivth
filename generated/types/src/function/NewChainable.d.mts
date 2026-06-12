@@ -1,31 +1,35 @@
 /**
  * @description
- * - Wraps a target object in a chainable.
+ * - Wraps a target object in a chainable;
  * - example:
  * ```html
  * <canvas id="myCanvas" width="400" height="400"></canvas>
  * ```
  * - chain call are synchronous without awaiting;
  * >- if the method are async, it could cause race condition;
- * @template {object} T
- * @param {T} ctx
- * @returns {import("../typehints/ChainableType.mjs").ChainableType<T>}
+ * @template {object} OBJ
+ * @param {OBJ} ctx
+ * @returns {import("../typehints/ChainableType.mjs").ChainableType<OBJ>}
  * @example
- * import { NewChainable } from "vivth";
+ * import { NewChainable, TrySync } from 'vivth/neutral';
  *
- * (()=>{
- * const canvas = document.getElementById("myCanvas");
+ * TrySync(()=>{
+ * const canvas = document.getElementById('myCanvas');
  * if (!canvas) {
  * 	return;
  * }
- * // Now you can chain:
- * NewChainable(canvas.getContext("2d"))
+ *
+ * const ctx2D = canvas.getContext('2d');
+ *
+ * // instead of repeating call method from `ctx2D`, you can:
+ * NewChainable(ctx2D)
  * 	.beginPath()
  * 	.moveTo(50, 50)
  * 	.lineTo(200, 50)
  * 	.lineTo(200, 200)
  * 	.closePath()
  * 	.stroke();
- * })()
+ * 	// .this to get ctx2D reference;
+ * })
  */
-export function NewChainable<T extends object>(ctx: T): import("../typehints/ChainableType.mjs").ChainableType<T>;
+export function NewChainable<OBJ extends object>(ctx: OBJ): import("../typehints/ChainableType.mjs").ChainableType<OBJ>;

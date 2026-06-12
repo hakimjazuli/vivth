@@ -3,11 +3,11 @@
 /**
  * @description
  * - create getter setter in one place;
- * @template {any} T
- * @template {(...any:any[])=>T} TG
- * @template {(...any:any[])=>void} TS
+ * @template {any} RET
+ * @template {((...any:any[])=>RET)} TG
+ * @template {((...any:any[])=>void)} TS
  * @example
- * import { GetterSetter } from 'vivth';
+ * import { GetterSetter } from 'vivth/neutral';
  *
  * const localA = new GetterSetter({
  * 	get:() => {
@@ -19,13 +19,13 @@
  * });
  * localA.get(); // null;
  * localA.set('my new value');
- * localA.get();
+ * localA.get(); // 'my new value'
  */
 export class GetterSetter {
 	/**
 	 * @param {Object} options
-	 * @param {TG} [options.get]
-	 * @param {TS} [options.set]
+	 * @param {TG|undefined} [options.get]
+	 * @param {TS|undefined} [options.set]
 	 */
 	constructor({ get, set }) {
 		this.get = get;

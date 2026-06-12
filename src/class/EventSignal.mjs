@@ -6,21 +6,29 @@ import { QChannel } from './QChannel.mjs';
 import { Signal } from './Signal.mjs';
 
 /**
+ * @typedef { import('../typehints/VivthCleanup.mjs').VivthCleanup } VivthCleanup
+ */
+
+/**
  * @description
  * - Signal implementation for `CustomEvent`, to dispatch and listen;
  * - it's based on string as key, so it can be listened/dispatched even without direct instance reference;
  * @template {any} TYPE
+ * @implements {VivthCleanup}
  */
 export class EventSignal {
+	vivthCleanup = async () => {
+		this.remove.ref();
+	};
+	/**
+	 * @type {QChannel<string>}
+	 */
+	static #q = LazyFactory(() => new QChannel('EventSignal'));
 	/**
 	 * - `Map` of `EventSignal`, using the `stringName` of the `EventSignal_instance` as `key`;
 	 * @type {Map<string, EventSignal<any>>}
 	 */
 	static #map = new Map();
-	/**
-	 * @type {QChannel<string>}
-	 */
-	static #qChannelEventSignal = LazyFactory(() => new QChannel('EventSignal'));
 	/**
 	 * @description
 	 * - the constructor it self is set to `private`;
@@ -29,7 +37,7 @@ export class EventSignal {
 	 * @param {string} stringName
 	 * @returns {Promise<EventSignal<any>>}
 	 * @example
-	 * import { EventSignal, Trace } from 'vivth';
+	 * import { EventSignal, Trace } from 'vivth/neutral';
 	 *
 	 * const myEventSignal = await EventSignal.get('dataEvent');
 	 * // recommendation
@@ -38,12 +46,9 @@ export class EventSignal {
 	 * }
 	 */
 	static get = async (stringName) => {
-		const { resume } = await EventSignal.#qChannelEventSignal.key(stringName);
+		const { resume } = await EventSignal.#q.key(stringName);
 		const mapped = EventSignal.#map;
-		if (
-			/**  */
-			!mapped.has(stringName)
-		) {
+		if (!mapped.has(stringName)) {
 			let instance = new EventSignal(stringName);
 			mapped.set(stringName, instance);
 		}
@@ -69,7 +74,7 @@ export class EventSignal {
 	 * - is `lazily` created;
 	 * @type {Signal<TYPE>}
 	 * @example
-	 * import { EventSignal, Effect, Console } from 'vivth';
+	 * import { EventSignal, Effect, Console } from 'vivth/neutral';
 	 *
 	 * const myEventSignal = await EventSignal.get('dataEvent', false);
 	 *
@@ -91,7 +96,7 @@ export class EventSignal {
 	 * - is `lazily` created along with `dispatch`, if `listen` is accessed first, then `dispatch` will also be created automatically;
 	 * @type {Derived<TYPE>}
 	 * @example
-	 * import { EventSignal, Effect, Console } from 'vivth';
+	 * import { EventSignal, Effect, Console } from 'vivth/neutral';
 	 *
 	 * const myEventSignal = await EventSignal.get('dataEvent', false);
 	 *
@@ -122,7 +127,7 @@ export class EventSignal {
 		 * @param {import('./Effect.mjs').Effect} effectInstance
 		 * @returns {void}
 		 * @example
-		 * import { EventSignal } from 'vivth';
+		 * import { EventSignal } from 'vivth/neutral';
 		 *
 		 * EventSignal.remove.subscriber('yourEventSignalName', myEffectInstance);
 		 */
@@ -142,7 +147,7 @@ export class EventSignal {
 		 * @param {string} name
 		 * @returns {void}
 		 * @example
-		 * import { EventSignal } from 'vivth';
+		 * import { EventSignal } from 'vivth/neutral';
 		 *
 		 * EventSignal.remove.allSubscribers('yourEventSignalName');
 		 */
@@ -158,7 +163,7 @@ export class EventSignal {
 		 * @param {string} name
 		 * @returns {void}
 		 * @example
-		 * import { EventSignal } from 'vivth';
+		 * import { EventSignal } from 'vivth/neutral';
 		 *
 		 * EventSignal.remove.refs('yourEventSignalName');
 		 */
@@ -176,7 +181,7 @@ export class EventSignal {
 		 * @param {import('./Effect.mjs').Effect} effectInstance
 		 * @returns {void}
 		 * @example
-		 * import { EventSignal, Effect, Console } from 'vivth';
+		 * import { EventSignal, Effect, Console } from 'vivth/neutral';
 		 *
 		 * const myEventSignal = await EventSignal.get('dataEvent', false);
 		 *
@@ -201,7 +206,7 @@ export class EventSignal {
 		 * - remove allSubscribers from the `EventSignal_instance`;
 		 * @type  {()=>void}
 		 * @example
-		 * import { EventSignal, Effect, Console } from 'vivth';
+		 * import { EventSignal, Effect, Console } from 'vivth/neutral';
 		 *
 		 * const myEventSignal = await EventSignal.get('dataEvent', false);
 		 *
@@ -222,7 +227,7 @@ export class EventSignal {
 		 * - remove reference of the `proxySignals` of the `EventSignal_instance`;
 		 * @type {()=>void}
 		 * @example
-		 * import { EventSignal, Effect, Console } from 'vivth';
+		 * import { EventSignal, Effect, Console } from 'vivth/neutral';
 		 *
 		 * const myEventSignal = await EventSignal.get('dataEvent', false);
 		 *

@@ -10,13 +10,13 @@
  * @param {(this:PARENT)=>OBJECT} object
  * @param {Object} [options]
  * @param {boolean} [options.lazy]
- * @return {OBJECT}
+ * @return {ReturnType<typeof TrySync<OBJECT>>}
  * @example
- * import { CreateImmutable } from 'vivth';
+ * import { CreateImmutable } from 'vivth/neutral';
  *
  * const mappedObject = new Map();
  *
- * CreateImmutable(window, 'mySharedObject', {
+ * const [object, errorCreatingImmutable] = CreateImmutable(window, 'mySharedObject', {
  * 	setMap(name_, value) => {
  * 		mappedObject.set(name_, value)
  * 	},
@@ -25,4 +25,5 @@
  */
 export function CreateImmutable<PARENT extends Object, OBJECT extends Object>(parent: PARENT, keyName: string, object: (this: PARENT) => OBJECT, { lazy }?: {
     lazy?: boolean | undefined;
-}): OBJECT;
+}): ReturnType<typeof TrySync<OBJECT>>;
+import { TrySync } from './TrySync.mjs';

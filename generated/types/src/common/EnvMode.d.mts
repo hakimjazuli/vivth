@@ -10,14 +10,14 @@ export class EnvMode {
     /**
      * @type {Signal<EnvModeType>}
      */
-    static "__#private@#mode": Signal<EnvModeType>;
+    static #mode: Signal<EnvModeType>;
     /**
      * @description
      * - `Derived` wrapper of whether is in `dev` mode or `prod` not;
      * >- for listener only;
      * @type {Derived<EnvModeType>}
      * @example
-     * import { EnvMode, Effect } from 'vivth';
+     * import { EnvMode, Effect } from 'vivth/neutral';
      *
      * console.log(EnvMode.mode.value); // default: 'dev'
      *
@@ -35,7 +35,7 @@ export class EnvMode {
      * @param {EnvModeType} mode
      * @returns {void}
      * @example
-     * import { EnvMode } from 'vivth';
+     * import { EnvMode } from 'vivth/neutral';
      *
      * EnvMode.enforce('dev'); // OR
      * EnvMode.enforce('prod');
@@ -44,13 +44,13 @@ export class EnvMode {
     /**
      * @type {Signal<Map<string,Awaited<ReturnType<typeof TryAsync<boolean>>>>>}
      */
-    static "__#private@#notifications": Signal<Map<string, Awaited<ReturnType<typeof TryAsync<boolean>>>>>;
+    static #notifications: Signal<Map<string, Awaited<ReturnType<typeof TryAsync<boolean>>>>>;
     /**
      * @type {DevTestCB}
      */
-    static "__#private@#test": DevTestCB;
-    static "__#private@#effectForCheck": Effect & {
-        "vivth:unwrapLazy;": () => Effect;
+    static #test: DevTestCB;
+    static #effectForCheck: Effect & {
+        [FactoryKey]: FACTORY;
     };
     /**
      * @description
@@ -76,3 +76,4 @@ import { Signal } from '../class/Signal.mjs';
 import { Derived } from '../class/Derived.mjs';
 import { TryAsync } from '../function/TryAsync.mjs';
 import { Effect } from '../class/Effect.mjs';
+import { FactoryKey } from './FactoryKey.mjs';

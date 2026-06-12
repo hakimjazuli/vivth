@@ -9,7 +9,7 @@ import { Transform } from 'node:stream';
  * @param {string} content
  * @returns {Transform}
  * @example
- * import { CreateTransform } from 'vivht';
+ * import { CreateTransform } from 'vivth/node';
  *
  * // asar input context:
  * const transform = (filePath) => {

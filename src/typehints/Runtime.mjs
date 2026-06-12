@@ -2,5 +2,5 @@
 
 /**
  * - for popular runtimes check;
- * @typedef {'node' | 'bun' | 'deno' | 'browser' | 'unknown'} Runtime
+ * @typedef {'node' | 'bun' | 'browser' | 'unknown'} Runtime
  */

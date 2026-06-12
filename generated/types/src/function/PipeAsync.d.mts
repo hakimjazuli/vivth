@@ -7,7 +7,7 @@
  * @param {...((currentvalue:VALUE)=>VALUE|Promise<VALUE>)} pipeFunctions
  * @returns {Promise<VALUE>}
  * @example
- * import { PipeAsync } from 'vivth';
+ * import { PipeAsync } from 'vivth/neutral';
  *
  * const res = await PipeAsync(
  *  'intialValue', // res: Promise<"intialValue">

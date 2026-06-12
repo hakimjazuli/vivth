@@ -1,6 +1,7 @@
 // @ts-check
 
 import { Console } from '../class/Console.mjs';
+import { IsTypeOf } from './IsTypeOf.mjs';
 import { LazyFactory } from './LazyFactory.mjs';
 import { TrySync } from './TrySync.mjs';
 
@@ -16,13 +17,13 @@ import { TrySync } from './TrySync.mjs';
  * @param {(this:PARENT)=>OBJECT} object
  * @param {Object} [options]
  * @param {boolean} [options.lazy]
- * @return {OBJECT}
+ * @return {ReturnType<typeof TrySync<OBJECT>>}
  * @example
- * import { CreateImmutable } from 'vivth';
+ * import { CreateImmutable } from 'vivth/neutral';
  *
  * const mappedObject = new Map();
  *
- * CreateImmutable(window, 'mySharedObject', {
+ * const [object, errorCreatingImmutable] = CreateImmutable(window, 'mySharedObject', {
  * 	setMap(name_, value) => {
  * 		mappedObject.set(name_, value)
  * 	},
@@ -30,50 +31,42 @@ import { TrySync } from './TrySync.mjs';
  * })
  */
 export function CreateImmutable(parent, keyName, object, { lazy = true } = {}) {
-	if (
-		/**  */
-		parent === undefined ||
-		typeof parent !== 'object'
-	) {
-		const error = {
-			object,
-			parent,
-			keyName,
-			message: 'Invalid parent object provided to `CreateImmutable`;',
-		};
-		Console.error(error);
-		throw Error(JSON.stringify(error));
-	}
-	let [, error] = TrySync(() => {
-		Object.defineProperty(parent, keyName, {
-			value: lazy ? LazyFactory(() => object.call(parent)) : object.call(parent),
-			writable: false,
-			configurable: false,
-			enumerable: false,
+	return TrySync(() => {
+		if (parent === undefined || !IsTypeOf(parent, 'object')) {
+			const error = {
+				object,
+				parent,
+				keyName,
+				message: 'Invalid parent object provided to `CreateImmutable`;',
+			};
+			Console.error(error);
+			throw Error(JSON.stringify(error));
+		}
+		let [, error] = TrySync(() => {
+			Object.defineProperty(parent, keyName, {
+				value: lazy ? LazyFactory(() => object.call(parent)) : object.call(parent),
+				writable: false,
+				configurable: false,
+				enumerable: false,
+			});
 		});
+		if (error) {
+			[, error] = TrySync(() => {
+				// @ts-expect-error
+				parent[keyName] = lazy ? LazyFactory(() => object.call(parent)) : object.call(parent);
+			});
+		}
+		if (error) {
+			const error = {
+				parent,
+				message: `"${keyName}" already defined on the "parent"`,
+				// @ts-expect-error
+				realValue: parent[keyName],
+			};
+			Console.warn(error);
+			throw JSON.stringify(error);
+		}
+		// @ts-expect-error
+		return parent[keyName];
 	});
-	if (
-		/**  */
-		error
-	) {
-		[, error] = TrySync(() => {
-			// @ts-expect-error
-			parent[keyName] = lazy ? LazyFactory(() => object.call(parent)) : object.call(parent);
-		});
-	}
-	if (
-		/**  */
-		error
-	) {
-		const error = {
-			parent,
-			message: `"${keyName}" already defined on the "parent"`,
-			// @ts-expect-error
-			realValue: parent[keyName],
-		};
-		Console.warn(error);
-		throw JSON.stringify(error);
-	}
-	// @ts-expect-error
-	return parent[keyName];
 }

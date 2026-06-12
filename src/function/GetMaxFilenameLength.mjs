@@ -11,20 +11,15 @@ const fallbacklenght = 255;
 
 /**
  * @description
- * Get OS-specific max filename length.
- * On POSIX: fs.constants.NAME_MAX
- * On Windows: 255 (per component, unless long paths enabled)
+ * - Get OS-specific max filename length;
+ * - On POSIX: fs.constants.NAME_MAX;
+ * - On Windows: 255 (per component, unless long paths enabled);
+ * - used internally to validate name length for [`UniqueFSTempName`](#uniquefstempname);
  * @returns {number}
  */
 export function GetMaxFilenameLength() {
-	if (
-		/**  */
-		length === undefined
-	) {
-		if (
-			/**  */
-			process.platform === 'win32'
-		) {
+	if (length === undefined) {
+		if (process.platform === 'win32') {
 			length = fallbacklenght; // fallback if undefined
 		} else {
 			length =

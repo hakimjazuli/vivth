@@ -9,6 +9,10 @@ import { Effect, mapOfEffects } from './Effect.mjs';
 import { DataLog } from './DataLog.mjs';
 
 /**
+ * @typedef { import('../typehints/VivthCleanup.mjs').VivthCleanup } VivthCleanup
+ */
+
+/**
  * @type {Set<Signal<any>>}
  */
 export const setOFSignals = new Set();
@@ -17,8 +21,12 @@ export const setOFSignals = new Set();
  * @description
  * - a class for creating effect to signals;
  * @template VALUE
+ * @implements {VivthCleanup}
  */
 export class Signal {
+	vivthCleanup = async () => {
+		this.remove.ref();
+	};
 	/**
 	 * @description
 	 * - create a `Signal`;
@@ -27,7 +35,7 @@ export class Signal {
 	 * - callback independent from effect;
 	 * >- it will always be called when there's value change;
 	 * @example
-	 * import { Signal, Effect } from  'vivth';
+	 * import { Signal, Effect } from 'vivth/neutral';
 	 *
 	 * const count = new Signal(0);
 	 */
@@ -57,9 +65,10 @@ export class Signal {
 		 * @description
 		 * - manually notify on non primitive value or value that have depths;
 		 * @param {(options:{signalInstance:Signal<VALUE>})=>Promise<void>} [callback]
-		 * @returns {void}
+		 * @param {(error:Error|undefined)=>Promise<void>} [afterCompletion]
+		 * @returns {Promise<void>}
 		 * @example
-		 * import { Signal } from 'vivth';
+		 * import { Signal } from 'vivth/neutral';
 		 *
 		 * // for deep signal like array or object you can:
 		 * const arraySignal = new Signal([1,2]);
@@ -73,44 +82,41 @@ export class Signal {
 		 * 	signalInstance.value['d'] = 'testd';
 		 * });
 		 */
-		notify: (callback = undefined) => {
-			if (
-				/**  */
-				this.#performanceChangesReport
-			) {
+		notify: async (callback = undefined, afterCompletion = undefined) => {
+			if (this.#performanceChangesReport) {
 				this.#performanceChangesReport(new DataLog(this.#value));
 			}
-			if (
-				/**  */
-				callback === undefined
-			) {
-				Signal.#notify(this);
+			if (callback === undefined) {
+				await Signal.#notify(this, afterCompletion);
 				return;
 			}
-			TryAsync(async () => {
+			const [, errorRunningCallback] = await TryAsync(async () => {
 				await callback({ signalInstance: this });
-			}).then(([, error]) => {
-				if (
-					/**  */
-					error
-				) {
-					Console.error({ message: 'unable to run callback', callback, error });
-					return;
-				}
-				Signal.#notify(this);
 			});
+			if (errorRunningCallback) {
+				Console.error({ errorRunningCallback });
+				return;
+			}
+			await Signal.#notify(this, afterCompletion);
 		},
 	}));
 	/**
 	 * @param {Signal<any>} signalInstance
+	 * @param {(error:Error|undefined)=>void} [afterCompletion]
+	 * @returns {Promise<void>}
 	 */
-	static #notify = (signalInstance) => {
-		const [, error] = TrySync(() => {
+	static #notify = async (
+		signalInstance,
+		afterCompletion = async (error) => {
+			if (error === undefined) {
+				return;
+			}
+			Console.error(error);
+		},
+	) => {
+		const [, errorRunningWalkThrough] = TrySync(() => {
 			WalkThrough.set(signalInstance.subscribers.setOf, (effectInstance) => {
-				if (
-					/**  */
-					!mapOfEffects.has(effectInstance)
-				) {
+				if (!mapOfEffects.has(effectInstance)) {
 					effectInstance.options.removeSignal(signalInstance);
 					return;
 				}
@@ -120,13 +126,7 @@ export class Signal {
 				effectInstance.run();
 			});
 		});
-		if (
-			/**  */
-			error === undefined
-		) {
-			return;
-		}
-		Console.error(error);
+		afterCompletion(errorRunningWalkThrough);
 	};
 	/**
 	 * @description
@@ -192,7 +192,7 @@ export class Signal {
 	 * - value after change;
 	 * @returns {VALUE}
 	 * @example
-	 * import { Signal, Effect, Derived } from  'vivth';
+	 * import { Signal, Effect, Derived } from 'vivth/neutral';
 	 *
 	 * const count = new Signal(0);
 	 * count.value; // not reactive
@@ -212,7 +212,7 @@ export class Signal {
 	 * - assign new value then automatically notify all subscribers;
 	 * @type {VALUE}
 	 * @example
-	 * import { Signal } from  'vivth';
+	 * import { Signal } from 'vivth/neutral';
 	 *
 	 * const count = new Signal(0);
 	 * count.value++;
@@ -220,10 +220,7 @@ export class Signal {
 	 * count.value = 9;
 	 */
 	set value(newValue) {
-		if (
-			/**  */
-			this.#value === newValue
-		) {
+		if (this.#value === newValue) {
 			return;
 		}
 		this.#prev = this.#value;

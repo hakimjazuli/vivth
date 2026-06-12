@@ -7,7 +7,7 @@
  * @param {...((currentvalue:VALUE)=>VALUE)} pipeFunctions
  * @returns {VALUE}
  * @example
- * import { PipeSync } from 'vivth';
+ * import { PipeSync } from 'vivth/neutral';
  *
  * const res = PipeSync(
  *  'intialValue', // res: "intialValue"
@@ -19,10 +19,7 @@
 export function PipeSync(intialValue, ...pipeFunctions) {
 	for (let i = 0; i < pipeFunctions.length; i++) {
 		const function_ = pipeFunctions[i];
-		if (
-			/**  */
-			!function_
-		) {
+		if (!function_) {
 			continue;
 		}
 		intialValue = function_(intialValue);
