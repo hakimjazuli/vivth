@@ -4,9 +4,7 @@
  * - this function is returned by static method `.define`;
  * >- bind it with static property;
  * - uses `lit-html` under the hood;
- * @template {(new (...args: any[]) => HTMLElement & {
- * 		props?: Record<string, keyof TypeMap|(new (...args:any[])=>any)>;
- * 	}) & {
+ * @template {(new (...args: any[]) => HTMLElement) & {
  *  tagName: string;
  * 	extendIs: string;
  *  observedAttributes?: readonly string[];
@@ -22,9 +20,9 @@
  * 				>
  * 			: undefined;
  * 		props?: {[K in keyof NonNullable<BASE_CONSTRUCTOR["props"]>]:
- * 			NonNullable<BASE_CONSTRUCTOR["props"][K]> extends string
+ * 			NonNullable<BASE_CONSTRUCTOR["props"]>[K] extends keyof TypeMap
  * 				? TypeMap[NonNullable<BASE_CONSTRUCTOR["props"]>[K]]
- * 				: InstanceType<NonNullable<BASE_CONSTRUCTOR["props"][K]>>
+ * 				: InstanceType<NonNullable<BASE_CONSTRUCTOR["props"]>[K]>
  * 		};
  * 		children?:(slotName:Record<ArrayToKeys<BASE_CONSTRUCTOR['namedSlots']>, string>)=>TemplateResult;
  * 		renderOptions?:RenderOptions;
@@ -35,9 +33,7 @@
  * static createElement = this.define(...args);
  * //
  */
-export function WC_createElement_bind<BASE_CONSTRUCTOR extends (new (...args: any[]) => HTMLElement & {
-    props?: Record<string, keyof TypeMap | (new (...args: any[]) => any)>;
-}) & {
+export function WC_createElement_bind<BASE_CONSTRUCTOR extends (new (...args: any[]) => HTMLElement) & {
     tagName: string;
     extendIs: string;
     observedAttributes?: readonly string[];
@@ -45,7 +41,7 @@ export function WC_createElement_bind<BASE_CONSTRUCTOR extends (new (...args: an
     props?: Record<string, keyof TypeMap | (new (...args: any[]) => any)>;
 }>({ tagName, extendIs, namedSlots }: BASE_CONSTRUCTOR): (param?: {
     attrs?: BASE_CONSTRUCTOR["observedAttributes"] extends readonly string[] ? Partial<Record<ArrayToKeys<BASE_CONSTRUCTOR["observedAttributes"]>, string>> : undefined;
-    props?: { [K in keyof NonNullable<BASE_CONSTRUCTOR["props"]>]: NonNullable<BASE_CONSTRUCTOR["props"][K]> extends string ? TypeMap[NonNullable<BASE_CONSTRUCTOR["props"]>[K]] : InstanceType<NonNullable<BASE_CONSTRUCTOR["props"][K]>>; };
+    props?: { [K in keyof NonNullable<BASE_CONSTRUCTOR["props"]>]: NonNullable<BASE_CONSTRUCTOR["props"]>[K] extends keyof TypeMap ? TypeMap[NonNullable<BASE_CONSTRUCTOR["props"]>[K]] : InstanceType<NonNullable<BASE_CONSTRUCTOR["props"]>[K]>; };
     children?: (slotName: Record<ArrayToKeys<BASE_CONSTRUCTOR["namedSlots"]>, string>) => TemplateResult;
     renderOptions?: RenderOptions;
 }) => InstanceType<BASE_CONSTRUCTOR>;

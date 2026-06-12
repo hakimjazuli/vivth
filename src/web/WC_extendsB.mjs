@@ -50,7 +50,7 @@ import { WC_createNamedSlot } from './bindings/WC_createNamedSlot.mjs';
  * 				:never>,
  * 			string>
  * 		>):void;
- * 		props?: STANDARD["props"];
+ * 		props: NonNullable<NonNullable<Parameters<ReturnType<typeof WC_createElement_bind<CREATEARGS>>>[0]>["props"]>;
  *    adoptedCallback():void;
  *    connectedCallback():void;
  *    disonnectedCallback():void;
@@ -83,7 +83,8 @@ import { WC_createNamedSlot } from './bindings/WC_createNamedSlot.mjs';
  *  	namedSlots: STANDARD["namedSlots"];
  *  	observedAttributes: STANDARD["observedAttributes"];
  * 		createNamedSlot: typeof WC_createNamedSlot<STANDARD>;
- * 		define:<TAG extends string, CLASSREF extends CREATEARGS>
+ * 		props?: STANDARD["props"];
+ * 		define:<TAG extends string, CLASSREF extends RET>
  * 			(
  * 				tagName:WC_TagName_type<TAG>,
  * 				classRef:CLASSREF,
@@ -101,6 +102,8 @@ export function WC_extendsB(Base, staticMember = /** @type {any} */ ({})) {
 		static observedAttributes = observedAttributes;
 
 		/**
+		 * @description
+		 * - props objects from define -> createElement;
 		 * @type {STANDARD["props"]}
 		 */
 		props = {};

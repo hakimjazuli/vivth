@@ -1,6 +1,6 @@
 // @ts-check
 
-import { Signal } from '../class/Signal.mjs';
+// import { Signal } from '../class/Signal.mjs';
 import { WalkThrough } from '../class/WalkThrough.mjs';
 import { ForInSync } from '../function/ForInSync.mjs';
 import { ForOfSync } from '../function/ForOfSync.mjs';
@@ -51,7 +51,7 @@ import { WC_createNamedSlot } from './bindings/WC_createNamedSlot.mjs';
  * 				:never>,
  * 			string>
  * 		>):void;
- *  	props: STANDARD["props"];
+ * 		props: NonNullable<NonNullable<Parameters<ReturnType<typeof WC_createElement_bind<CREATEARGS>>>[0]>["props"]>;
  *    adoptedCallback():void;
  *    connectedCallback():void;
  *    disonnectedCallback():void;
@@ -82,6 +82,7 @@ import { WC_createNamedSlot } from './bindings/WC_createNamedSlot.mjs';
  *  	namedSlots: STANDARD["namedSlots"];
  *  	observedAttributes: STANDARD["observedAttributes"];
  * 		createNamedSlot: typeof WC_createNamedSlot<STANDARD>;
+ * 		props?: STANDARD["props"];
  * 		define:<TAG extends string, CLASSREF extends CREATEARGS>
  * 			(
  * 				tagName:WC_TagName_type<TAG>,
@@ -104,7 +105,9 @@ export function WC_extendsA(Base, staticMember = /** @type {any} */ ({})) {
 		static observedAttributes = observedAttributes;
 
 		/**
-		 * @type {STANDARD["props"]|undefined}
+		 * @description
+		 * - props objects from define -> createElement;
+		 * @type {STANDARD["props"]}
 		 */
 		props = {};
 
@@ -308,20 +311,20 @@ export function WC_extendsA(Base, staticMember = /** @type {any} */ ({})) {
 	return /** @type {RET} */ (/** @type {unknown} */ (MyClass));
 }
 
-class e extends WC_extendsA(HTMLElement, {
-	namedSlots: /** @type {const} */ (['a', 'b']),
-	props: {
-		a: 'string',
-		/**  @type {typeof Signal<string[]>}  */
-		k: Signal,
-	},
-}) {
-	static create = this.define('a-a', this);
-	constructor() {
-		super();
-		this.props.k.length;
-	}
-}
-e.create({
-	props: { a: '0', k: new Signal(['']) },
-});
+// class e extends WC_extendsA(HTMLElement, {
+// 	namedSlots: /** @type {const} */ (['a', 'b']),
+// 	props: {
+// 		a: 'string',
+// 		/**  @type {typeof Signal<string[]>}  */
+// 		k: Signal,
+// 	},
+// }) {
+// 	static create = this.define('a-a', this);
+// 	constructor() {
+// 		super();
+// 		this.props.k.length;
+// 	}
+// }
+// e.create({
+// 	props: { a: '0', k: new Signal(['']) },
+// });

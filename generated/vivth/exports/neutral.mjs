@@ -189,4 +189,5 @@ export { IsInViewPortSignal } from '../../../src/web/signals/IsInViewPortSignal.
 export { ObserverSignal } from '../../../src/web/signals/ObserverSignal.mjs';
 export { WC_litRef } from '../../../src/web/signals/WC_litRef.mjs';
 export { WC_loopedSiblingsRef } from '../../../src/web/signals/WC_loopedSiblingsRef.mjs';
+export { WC_extendsA } from '../../../src/web/WC_extendsA.mjs';
 export { WC_extendsB } from '../../../src/web/WC_extendsB.mjs';

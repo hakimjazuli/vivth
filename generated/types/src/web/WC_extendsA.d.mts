@@ -41,7 +41,7 @@
  * 				:never>,
  * 			string>
  * 		>):void;
- *  	props: STANDARD["props"];
+ * 		props: NonNullable<NonNullable<Parameters<ReturnType<typeof WC_createElement_bind<CREATEARGS>>>[0]>["props"]>;
  *    adoptedCallback():void;
  *    connectedCallback():void;
  *    disonnectedCallback():void;
@@ -72,6 +72,7 @@
  *  	namedSlots: STANDARD["namedSlots"];
  *  	observedAttributes: STANDARD["observedAttributes"];
  * 		createNamedSlot: typeof WC_createNamedSlot<STANDARD>;
+ * 		props?: STANDARD["props"];
  * 		define:<TAG extends string, CLASSREF extends CREATEARGS>
  * 			(
  * 				tagName:WC_TagName_type<TAG>,
@@ -102,7 +103,7 @@ export function WC_extendsA<BASE_CONSTRUCTOR extends new (...args: any[]) => HTM
     props?: STANDARD["props"];
 }, RET extends (new (...args: any[]) => InstanceType<BASE_CONSTRUCTOR> & {
     setObservedAttributes(attributes: Partial<Record<ArrayToKeys<STANDARD["observedAttributes"] extends readonly string[] ? STANDARD["observedAttributes"] : never>, string>>): void;
-    props: STANDARD["props"];
+    props: NonNullable<NonNullable<Parameters<ReturnType<typeof WC_createElement_bind<CREATEARGS>>>[0]>["props"]>;
     adoptedCallback(): void;
     connectedCallback(): void;
     disonnectedCallback(): void;
@@ -124,10 +125,11 @@ export function WC_extendsA<BASE_CONSTRUCTOR extends new (...args: any[]) => HTM
     namedSlots: STANDARD["namedSlots"];
     observedAttributes: STANDARD["observedAttributes"];
     createNamedSlot: typeof WC_createNamedSlot<STANDARD>;
+    props?: STANDARD["props"];
     define: <TAG extends string, CLASSREF extends CREATEARGS>(tagName: WC_TagName_type<TAG>, classRef: CLASSREF, elementDefinitionOptions?: ElementDefinitionOptions) => ReturnType<typeof WC_createElement_bind<CLASSREF>>;
 }>(Base: BASE_CONSTRUCTOR, staticMember?: STANDARD): RET;
 export type TypeMap = typeof import("../function/IsTypeOf.mjs").TypeMap;
 import type { ArrayToKeys } from '../typehints/ArrayToKeys.mjs';
+import { WC_createElement_bind } from './bindings/WC_createElement_bind.mjs';
 import { WC_createNamedSlot } from './bindings/WC_createNamedSlot.mjs';
 import type { WC_TagName_type } from './common/WC_TagName_type.mjs';
-import { WC_createElement_bind } from './bindings/WC_createElement_bind.mjs';

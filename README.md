@@ -203,7 +203,7 @@ npm i vivth
 - [neutral.ObserverSignal](#observersignal)
 - [neutral.WC_litRef](#wc_litref)
 - [neutral.WC_loopedSiblingsRef](#wc_loopedsiblingsref)
-- [browser.WC_extendsA](#wc_extendsa)
+- [neutral.WC_extendsA](#wc_extendsa)
 - [neutral.WC_extendsB](#wc_extendsb)
 
 ---
@@ -6691,9 +6691,7 @@ const esWatcherInstance = this.registerObjectWithAutoCleanup(
 
 ```js
 /**
- * @template {(new (...args: any[]) => HTMLElement & {
- * 		props?: Record<string, keyof TypeMap|(new (...args:any[])=>any)>;
- * 	}) & {
+ * @template {(new (...args: any[]) => HTMLElement) & {
  *  tagName: string;
  * 	extendIs: string;
  *  observedAttributes?: readonly string[];
@@ -6709,9 +6707,9 @@ const esWatcherInstance = this.registerObjectWithAutoCleanup(
  * 				>
  * 			: undefined;
  * 		props?: {[K in keyof NonNullable<BASE_CONSTRUCTOR["props"]>]:
- * 			NonNullable<BASE_CONSTRUCTOR["props"][K]> extends string
+ * 			NonNullable<BASE_CONSTRUCTOR["props"]>[K] extends keyof TypeMap
  * 				? TypeMap[NonNullable<BASE_CONSTRUCTOR["props"]>[K]]
- * 				: InstanceType<NonNullable<BASE_CONSTRUCTOR["props"][K]>>
+ * 				: InstanceType<NonNullable<BASE_CONSTRUCTOR["props"]>[K]>
  * 		};
  * 		children?:(slotName:Record<ArrayToKeys<BASE_CONSTRUCTOR['namedSlots']>, string>)=>TemplateResult;
  * 		renderOptions?:RenderOptions;
@@ -7277,7 +7275,7 @@ text.nodeValue = "hello world";
 
 ---
 
-<h2 id="wc_extendsa">browser.WC_extendsA</h2>
+<h2 id="wc_extendsa">neutral.WC_extendsA</h2>
 
 #### reference: `WC_extendsA`
 
@@ -7320,7 +7318,7 @@ text.nodeValue = "hello world";
  * 				:never>,
  * 			string>
  * 		>):void;
- *  	props: STANDARD["props"];
+ * 		props: NonNullable<NonNullable<Parameters<ReturnType<typeof WC_createElement_bind<CREATEARGS>>>[0]>["props"]>;
  *    adoptedCallback():void;
  *    connectedCallback():void;
  *    disonnectedCallback():void;
@@ -7351,6 +7349,7 @@ text.nodeValue = "hello world";
  *  	namedSlots: STANDARD["namedSlots"];
  *  	observedAttributes: STANDARD["observedAttributes"];
  * 		createNamedSlot: typeof WC_createNamedSlot<STANDARD>;
+ * 		props?: STANDARD["props"];
  * 		define:<TAG extends string, CLASSREF extends CREATEARGS>
  * 			(
  * 				tagName:WC_TagName_type<TAG>,
@@ -7371,6 +7370,16 @@ text.nodeValue = "hello world";
  export MyWebComponent extends WC_extendsA(HTMLElement, {...options}){
  	static create = this.define('my-webcomponent');
  }
+```
+
+#### reference: `WC_extendsA_instance.props`
+
+- props objects from define -> createElement;
+
+```js
+/**
+ * @type {STANDARD["props"]}
+ */
 ```
 
 #### reference: `WC_extendsA_instance.ON`
@@ -7494,7 +7503,7 @@ text.nodeValue = "hello world";
  * 				:never>,
  * 			string>
  * 		>):void;
- * 		props?: STANDARD["props"];
+ * 		props: NonNullable<NonNullable<Parameters<ReturnType<typeof WC_createElement_bind<CREATEARGS>>>[0]>["props"]>;
  *    adoptedCallback():void;
  *    connectedCallback():void;
  *    disonnectedCallback():void;
@@ -7527,7 +7536,8 @@ text.nodeValue = "hello world";
  *  	namedSlots: STANDARD["namedSlots"];
  *  	observedAttributes: STANDARD["observedAttributes"];
  * 		createNamedSlot: typeof WC_createNamedSlot<STANDARD>;
- * 		define:<TAG extends string, CLASSREF extends CREATEARGS>
+ * 		props?: STANDARD["props"];
+ * 		define:<TAG extends string, CLASSREF extends RET>
  * 			(
  * 				tagName:WC_TagName_type<TAG>,
  * 				classRef:CLASSREF,
@@ -7538,6 +7548,16 @@ text.nodeValue = "hello world";
  * @param {BASE_CONSTRUCTOR} Base
  * @param {STANDARD} [staticMember]
  * @returns {RET}
+ */
+```
+
+#### reference: `WC_extendsB_instance.props`
+
+- props objects from define -> createElement;
+
+```js
+/**
+ * @type {STANDARD["props"]}
  */
 ```
 

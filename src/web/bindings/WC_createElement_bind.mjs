@@ -33,9 +33,7 @@ const getChildrenData = (namedSlots, childrenDataArgsPlaceholder) => {
  * - this function is returned by static method `.define`;
  * >- bind it with static property;
  * - uses `lit-html` under the hood;
- * @template {(new (...args: any[]) => HTMLElement & {
- * 		props?: Record<string, keyof TypeMap|(new (...args:any[])=>any)>;
- * 	}) & {
+ * @template {(new (...args: any[]) => HTMLElement) & {
  *  tagName: string;
  * 	extendIs: string;
  *  observedAttributes?: readonly string[];
@@ -51,9 +49,9 @@ const getChildrenData = (namedSlots, childrenDataArgsPlaceholder) => {
  * 				>
  * 			: undefined;
  * 		props?: {[K in keyof NonNullable<BASE_CONSTRUCTOR["props"]>]:
- * 			NonNullable<BASE_CONSTRUCTOR["props"][K]> extends string
+ * 			NonNullable<BASE_CONSTRUCTOR["props"]>[K] extends keyof TypeMap
  * 				? TypeMap[NonNullable<BASE_CONSTRUCTOR["props"]>[K]]
- * 				: InstanceType<NonNullable<BASE_CONSTRUCTOR["props"][K]>>
+ * 				: InstanceType<NonNullable<BASE_CONSTRUCTOR["props"]>[K]>
  * 		};
  * 		children?:(slotName:Record<ArrayToKeys<BASE_CONSTRUCTOR['namedSlots']>, string>)=>TemplateResult;
  * 		renderOptions?:RenderOptions;
