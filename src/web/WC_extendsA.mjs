@@ -56,7 +56,7 @@ import { WC_createNamedSlot } from './bindings/WC_createNamedSlot.mjs';
  *    connectedCallback():void;
  *    disonnectedCallback():void;
  * 		attributeChangedCallback(name:ArrayToKeys<STANDARD["observedAttributes"]extends readonly string[]?STANDARD["observedAttributes"]:never>, oldValue:string|null, newValue:string|null): void;
- * 		ON:<OBJ extends any & {
+ * 		ON:<OBJ extends Record<any, any> & {
  * 				onConnected?: NonNullable<Parameters<InstanceType<RET>["ON"]>[1]>["connected"];
  * 				onDisconnected?: NonNullable<Parameters<InstanceType<RET>["ON"]>[1]>["disconnected"];
  * 				onAdopted?: NonNullable<Parameters<InstanceType<RET>["ON"]>[1]>["adopted"];
@@ -123,7 +123,7 @@ export function WC_extendsA(Base, staticMember = /** @type {any} */ ({})) {
 		/**
 		 * @description
 		 * - wrapper helper to handle returned to be assigned property on `WebComponent` lifecycle callbacks;
-		 * @template {Object} OBJ
+		 * @template {Record<any, any>} OBJ
 		 * @param {OBJ & {
 		 * 	onConnected?: NonNullable<Parameters<InstanceType<RET>["ON"]>[1]>["connected"];
 		 * 	onDisconnected?: NonNullable<Parameters<InstanceType<RET>["ON"]>[1]>["disconnected"];

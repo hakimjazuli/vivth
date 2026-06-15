@@ -79,6 +79,7 @@ export { LazyFactory } from "../../../src/function/LazyFactory.mjs";
 export { MonkeyPatch } from "../../../src/function/MonkeyPatch.mjs";
 export { NewAnimationTimeline } from "../../../src/function/NewAnimationTimeline.mjs";
 export { NewChainable } from "../../../src/function/NewChainable.mjs";
+export { NewDynamicsExport } from "../../../src/function/NewDynamicsExport.mjs";
 export { NewObjectWrapper } from "../../../src/function/NewObjectWrapper.mjs";
 export { ObjectRegistrar } from "../../../src/function/ObjectRegistrar.mjs";
 export { ParseSQLFile } from "../../../src/function/ParseSQLFile.mjs";
@@ -108,6 +109,8 @@ export { IsInViewPortSignal } from "../../../src/web/signals/IsInViewPortSignal.
 export { ObserverSignal } from "../../../src/web/signals/ObserverSignal.mjs";
 export { WC_litRef } from "../../../src/web/signals/WC_litRef.mjs";
 export { WC_loopedSiblingsRef } from "../../../src/web/signals/WC_loopedSiblingsRef.mjs";
+export { ViteAddDynamics } from "../../../src/web/ViteAddDynamics.mjs";
+export { ViteGetAllHTMLFile } from "../../../src/web/ViteGetAllHTMLFile.mjs";
 export { WC_extendsA } from "../../../src/web/WC_extendsA.mjs";
 export { WC_extendsB } from "../../../src/web/WC_extendsB.mjs";
 export type AnyButUndefined = import("../../../src/typehints/AnyButUndefined.mjs").AnyButUndefined;

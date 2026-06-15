@@ -46,7 +46,7 @@
  *    connectedCallback():void;
  *    disonnectedCallback():void;
  * 		attributeChangedCallback(name:ArrayToKeys<STANDARD["observedAttributes"]extends readonly string[]?STANDARD["observedAttributes"]:never>, oldValue:string|null, newValue:string|null): void;
- * 		ON:<OBJ extends any & {
+ * 		ON:<OBJ extends Record<any, any> & {
  * 				onConnected?: NonNullable<Parameters<InstanceType<RET>["ON"]>[1]>["connected"];
  * 				onDisconnected?: NonNullable<Parameters<InstanceType<RET>["ON"]>[1]>["disconnected"];
  * 				onAdopted?: NonNullable<Parameters<InstanceType<RET>["ON"]>[1]>["adopted"];
@@ -108,7 +108,7 @@ export function WC_extendsA<BASE_CONSTRUCTOR extends new (...args: any[]) => HTM
     connectedCallback(): void;
     disonnectedCallback(): void;
     attributeChangedCallback(name: ArrayToKeys<STANDARD["observedAttributes"] extends readonly string[] ? STANDARD["observedAttributes"] : never>, oldValue: string | null, newValue: string | null): void;
-    ON: <OBJ extends any & {
+    ON: <OBJ extends Record<any, any> & {
         onConnected?: NonNullable<Parameters<InstanceType<RET>["ON"]>[1]>["connected"];
         onDisconnected?: NonNullable<Parameters<InstanceType<RET>["ON"]>[1]>["disconnected"];
         onAdopted?: NonNullable<Parameters<InstanceType<RET>["ON"]>[1]>["adopted"];

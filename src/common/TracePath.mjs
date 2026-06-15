@@ -26,7 +26,6 @@ function fileURLToPath(url) {
 	}
 	return pathname.replace(/\//g, '\\');
 }
-const thisPath = Paths.normalize(fileURLToPath(import.meta.url));
 
 /**
  * @param {string} match
@@ -37,7 +36,10 @@ const tracePathSameFileFilter = (match, importMetaURL) => {
 	const newPath = [letter, path_].join(':');
 	return IsSameFile(newPath, importMetaURL);
 };
-
+/**
+ * @type {string}
+ */
+let thisPath;
 /**
  * @description
  * - get stack trace path that matched with truthy filterCallback;
@@ -69,6 +71,9 @@ export function TracePath(filterCallback) {
 	 * @type {Parameters<typeof TracePath>[0]}
 	 */
 	const trueFilterCallback = (match) => {
+		if (!thisPath) {
+			thisPath = Paths.normalize(fileURLToPath(import.meta.url));
+		}
 		return filterCallback(match) && !tracePathSameFileFilter(match, thisPath);
 	};
 	for (let i = 0; i < stacks.length; i++) {

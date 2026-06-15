@@ -56,7 +56,7 @@ export class BrowserDirMapper implements VivthCleanup {
      * - `FSDirArchWatcher` instance;
      * @type {FSDirArchWatcher<any>|undefined}
      */
-    dirWatcher: FSDirArchWatcher<any> | undefined;
+    dynamicDirWatcher: FSDirArchWatcher<any> | undefined;
     /**
      * @description
      * - `JSDirMapper` instance;

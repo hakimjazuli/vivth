@@ -144,6 +144,7 @@ npm i vivth
 - [neutral.MonkeyPatch](#monkeypatch)
 - [neutral.NewAnimationTimeline](#newanimationtimeline)
 - [neutral.NewChainable](#newchainable)
+- [node.NewDynamicsExport](#newdynamicsexport)
 - [neutral.NewObjectWrapper](#newobjectwrapper)
 - [neutral.ObjectRegistrar](#objectregistrar)
 - [node.ParseSQLFile](#parsesqlfile)
@@ -203,6 +204,8 @@ npm i vivth
 - [neutral.ObserverSignal](#observersignal)
 - [neutral.WC_litRef](#wc_litref)
 - [neutral.WC_loopedSiblingsRef](#wc_loopedsiblingsref)
+- [node.ViteAddDynamics](#viteadddynamics)
+- [node.ViteGetAllHTMLFile](#vitegetallhtmlfile)
 - [neutral.WC_extendsA](#wc_extendsa)
 - [neutral.WC_extendsB](#wc_extendsb)
 
@@ -5513,6 +5516,40 @@ TrySync(() => {
 
 ---
 
+<h2 id="newdynamicsexport">node.NewDynamicsExport</h2>
+
+#### reference: `NewDynamicsExport`
+
+generate generator watcher to `Dynamics`;
+
+1. `./dynamics`: directory;
+2. `./dynamics/**/*`(except 3)): watched source for 3);
+3. `./dynamics/Dynamics.mjs`: collection of `modules`|`css`|`commonFile`(with `mimeTypes`);
+
+- this module assumes [Paths](#paths) to be already instantiated;
+
+```js
+/**
+ * @param {Object} options
+ * @param {string} options.rootPath
+ * - relative path to pseudo root;
+ * @param {number} [options.debounce]
+ * @param {boolean} [options.useFetchForAssets]
+ * - default: `true`;
+ * >- non js file will be `fetch`ed;
+ * - `false`;
+ * >- will use `import` instead;
+ * >- useful for vite Plugin;
+ * @param {import('chokidar').ChokidarOptions} [options.chokidarOptions]
+ * @param {(normalizedPath:string)=>boolean} [options.eachFilter]
+ * @returns {ReturnType<typeof TryAsync<FSDirArchWatcher<{ handler: string; mime: string | false; lastEditedUnixValue: number; }>>>}
+ */
+```
+
+\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+---
+
 <h2 id="newobjectwrapper">neutral.NewObjectWrapper</h2>
 
 #### reference: `NewObjectWrapper`
@@ -6900,7 +6937,7 @@ new BrowserDirMapper(
 );
 ```
 
-#### reference: `BrowserDirMapper_instance.dirWatcher`
+#### reference: `BrowserDirMapper_instance.dynamicDirWatcher`
 
 - `FSDirArchWatcher` instance;
 
@@ -7275,6 +7312,42 @@ text.nodeValue = "hello world";
 
 ---
 
+<h2 id="viteadddynamics">node.ViteAddDynamics</h2>
+
+#### reference: `ViteAddDynamics`
+
+- `vite.rollup/down` plugin abstraction for [NewDynamicsExport](#newdynamicsexport);
+
+```js
+/**
+ * @param {Parameters<typeof NewDynamicsExport>} args
+ * @returns {import('vite').PluginOption}
+ */
+```
+
+\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+---
+
+<h2 id="vitegetallhtmlfile">node.ViteGetAllHTMLFile</h2>
+
+#### reference: `ViteGetAllHTMLFile`
+
+- Automatically discovers HTML files in a directory and maps them to input keys;
+- [Paths](#paths) needs to be instantiated;
+
+```js
+/**
+ * @param {string} dirPath - The absolute or relative path to the directory to scan.
+ * @param {string} distPath - The distribution folder name to exclude.
+ * @returns {import('vite').PluginOption}
+ */
+```
+
+\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+---
+
 <h2 id="wc_extendsa">neutral.WC_extendsA</h2>
 
 #### reference: `WC_extendsA`
@@ -7323,7 +7396,7 @@ text.nodeValue = "hello world";
  *    connectedCallback():void;
  *    disonnectedCallback():void;
  * 		attributeChangedCallback(name:ArrayToKeys<STANDARD["observedAttributes"]extends readonly string[]?STANDARD["observedAttributes"]:never>, oldValue:string|null, newValue:string|null): void;
- * 		ON:<OBJ extends any & {
+ * 		ON:<OBJ extends Record<any, any> & {
  * 				onConnected?: NonNullable<Parameters<InstanceType<RET>["ON"]>[1]>["connected"];
  * 				onDisconnected?: NonNullable<Parameters<InstanceType<RET>["ON"]>[1]>["disconnected"];
  * 				onAdopted?: NonNullable<Parameters<InstanceType<RET>["ON"]>[1]>["adopted"];
@@ -7388,7 +7461,7 @@ text.nodeValue = "hello world";
 
 ```js
 /**
- * @template {Object} OBJ
+ * @template {Record<any, any>} OBJ
  * @param {OBJ & {
  * 	onConnected?: NonNullable<Parameters<InstanceType<RET>["ON"]>[1]>["connected"];
  * 	onDisconnected?: NonNullable<Parameters<InstanceType<RET>["ON"]>[1]>["disconnected"];
@@ -7508,7 +7581,7 @@ text.nodeValue = "hello world";
  *    connectedCallback():void;
  *    disonnectedCallback():void;
  * 		attributeChangedCallback(name:ArrayToKeys<STANDARD["observedAttributes"]extends readonly string[]?STANDARD["observedAttributes"]:never>, oldValue:string|null, newValue:string|null): void;
- * 		ON:<OBJ extends any & {
+ * 		ON:<OBJ extends Record<any, any> & {
  * 				onConnected?: NonNullable<Parameters<InstanceType<RET>["ON"]>[1]>["connected"];
  * 				onConnectedMove?: NonNullable<Parameters<InstanceType<RET>["ON"]>[1]>["connectedMove"];
  * 				onDisconnected?: NonNullable<Parameters<InstanceType<RET>["ON"]>[1]>["disconnected"];
@@ -7567,7 +7640,7 @@ text.nodeValue = "hello world";
 
 ```js
 /**
- * @template {Object} OBJ
+ * @template {Record<any, any>} OBJ
  * @param {OBJ & {
  * 	onConnected?: NonNullable<Parameters<InstanceType<RET>["ON"]>[1]>["connected"];
  * 	onConnectedMove?: NonNullable<Parameters<InstanceType<RET>["ON"]>[1]>["connectedMove"];
