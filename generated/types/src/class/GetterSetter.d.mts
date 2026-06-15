@@ -21,20 +21,18 @@
  */
 export class GetterSetter<RET extends unknown, TG extends ((...any: any[]) => RET), TS extends ((...any: any[]) => void)> {
     /**
-     * @param {Object} options
-     * @param {TG|undefined} [options.get]
-     * @param {TS|undefined} [options.set]
+     * @param {{ get?: TG, set?: TS }} options
      */
     constructor({ get, set }: {
-        get?: TG | undefined;
-        set?: TS | undefined;
+        get?: TG;
+        set?: TS;
     });
     /**
-     * @type {TG|undefined}
+     * @type {ConstructorParameters<typeof GetterSetter<RET,TG,TS>>[0]["get"]}
      */
-    get: TG | undefined;
+    get: ConstructorParameters<typeof GetterSetter<RET, TG, TS>>[0]["get"];
     /**
-     * @type {TS|undefined}
+     * @type {ConstructorParameters<typeof GetterSetter<RET,TG,TS>>[0]["set"]}
      */
-    set: TS | undefined;
+    set: ConstructorParameters<typeof GetterSetter<RET, TG, TS>>[0]["set"];
 }

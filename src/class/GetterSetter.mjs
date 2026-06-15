@@ -23,20 +23,18 @@
  */
 export class GetterSetter {
 	/**
-	 * @param {Object} options
-	 * @param {TG|undefined} [options.get]
-	 * @param {TS|undefined} [options.set]
+	 * @param {{ get?: TG, set?: TS }} options
 	 */
 	constructor({ get, set }) {
 		this.get = get;
 		this.set = set;
 	}
 	/**
-	 * @type {TG|undefined}
+	 * @type {ConstructorParameters<typeof GetterSetter<RET,TG,TS>>[0]["get"]}
 	 */
 	get;
 	/**
-	 * @type {TS|undefined}
+	 * @type {ConstructorParameters<typeof GetterSetter<RET,TG,TS>>[0]["set"]}
 	 */
 	set;
 }
