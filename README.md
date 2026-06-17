@@ -42,8 +42,8 @@ npm i vivth
 
   > - beta release;
   > - checking edge cases;
-  > - stable API, the exposed API access are highly unlikely to changes, only the underlying code
-  >   might changes for improving performance;
+  > - <strike>stable API, the exposed API access are highly unlikely to changes, only the underlying
+  >   code might changes for improving performance</strike>;
 
 - `1.3.x:beta`:
   > - type should now fully fixed, even with strict ts check;
