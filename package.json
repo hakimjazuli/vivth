@@ -1,80 +1,80 @@
 {
-	"name": "vivth",
-	"version": "1.5.0",
-	"description": "library primitives",
-	"devDependencies": {
-		"@types/bun": "^1.3.3",
-		"typescript": "^6.0.3",
-		"concurrently": "^9.2.1",
-		"vite": "^8.0.16",
-		"vivth": "link:vivth"
-	},
-	"dependencies": {
-		"@assemblyscript/loader": "^0.28.17",
-		"@electron/asar": "^4.2.0",
-		"@types/mime-types": "^3.0.1",
-		"assemblyscript": "^0.28.17",
-		"chokidar": "^5.0.0",
-		"domino": "^2.1.7",
-		"esbuild": "^0.28.0",
-		"import-without-cache": "^0.4.0",
-		"lit-html": "^3.3.3",
-		"mime-types": "^3.0.2",
-		"path-unified": "^0.2.0",
-		"prettier": "^3.8.3",
-		"sass": "^1.99.0",
-		"strip-json-comments": "^5.0.3"
-	},
-	"peerDependencies": {},
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/hakimjazuli/vivth.git"
-	},
-	"keywords": [
-		"simple",
-		"primitive",
-		"collection of modules",
-		"signal",
-		"data driven"
-	],
-	"author": "hakim_jazuli",
-	"license": "MIT",
-	"bugs": {
-		"url": "https://github.com/hakimjazuli/vivth/issues"
-	},
-	"homepage": "https://github.com/hakimjazuli/vivth#readme",
-	"scripts": {
-		"dev": "concurrently 'bun dev-a' 'bun t-w'",
-		"dev-a": "bun ./dev/auto-doc.mjs",
-		"t-w": "tsc --watch",
-		"test-bundle": "bun ./test/bundle.mjs",
-		"test-": "bun ./test/test_.mjs",
-		"test-dirmapper": "bun ./test/dirmapper.mjs",
-		"test-browser-dirmapper": "bun ./test/browserDirMapper/test.mjs"
-	},
-	"sideEffects": false,
-	"main": "./generated/vivth/exports/all.mjs",
-	"module": "./generated/vivth/exports/all.mjs",
-	"exports": {
-		"./node": {
-			"import": "./generated/vivth/exports/node.mjs",
-			"types": "./generated/types/generated/vivth/exports/node.d.mts"
-		},
-		"./neutral": {
-			"import": "./generated/vivth/exports/neutral.mjs",
-			"types": "./generated/types/generated/vivth/exports/neutral.d.mts"
-		},
-		"./all": {
-			"import": "./generated/vivth/exports/all.mjs",
-			"types": "./generated/types/generated/vivth/exports/all.d.mts"
-		},
-		"./unsupported": {
-			"import": "./generated/vivth/exports/unsupported.mjs",
-			"types": "./generated/types/generated/vivth/exports/unsupported.d.mts"
-		},
-		"./browser": {
-			"import": "./generated/vivth/exports/browser.mjs",
-			"types": "./generated/types/generated/vivth/exports/browser.d.mts"
-		}
-	}
+  "name": "vivth",
+  "version": "1.5.0",
+  "description": "library primitives",
+  "devDependencies": {
+    "@types/bun": "^1.3.3",
+    "typescript": "^6.0.3",
+    "concurrently": "^9.2.1",
+    "vite": "^8.0.16",
+    "vivth": "link:vivth"
+  },
+  "dependencies": {
+    "@assemblyscript/loader": "^0.28.17",
+    "@electron/asar": "^4.2.0",
+    "@types/mime-types": "^3.0.1",
+    "assemblyscript": "^0.28.17",
+    "chokidar": "^5.0.0",
+    "domino": "^2.1.7",
+    "esbuild": "^0.28.0",
+    "import-without-cache": "^0.4.0",
+    "lit-html": "^3.3.3",
+    "mime-types": "^3.0.2",
+    "path-unified": "^0.2.0",
+    "prettier": "^3.8.3",
+    "sass": "^1.99.0",
+    "strip-json-comments": "^5.0.3"
+  },
+  "peerDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hakimjazuli/vivth.git"
+  },
+  "keywords": [
+    "simple",
+    "primitive",
+    "collection of modules",
+    "signal",
+    "data driven"
+  ],
+  "author": "hakim_jazuli",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/hakimjazuli/vivth/issues"
+  },
+  "homepage": "https://github.com/hakimjazuli/vivth#readme",
+  "scripts": {
+    "dev": "concurrently 'bun dev-a' 'bun t-w'",
+    "dev-a": "bun ./dev/auto-doc.mjs",
+    "t-w": "tsc --watch",
+    "test-bundle": "bun ./test/bundle.mjs",
+    "test-": "bun ./test/test_.mjs",
+    "test-dirmapper": "bun ./test/dirmapper.mjs",
+    "test-browser-dirmapper": "bun ./test/browserDirMapper/test.mjs"
+  },
+  "sideEffects": false,
+  "main": "./generated/vivth/exports/all.mjs",
+  "module": "./generated/vivth/exports/all.mjs",
+  "exports": {
+    "./node": {
+      "import": "./generated/vivth/exports/node.mjs",
+      "types": "./generated/types/generated/vivth/exports/node.d.mts"
+    },
+    "./neutral": {
+      "import": "./generated/vivth/exports/neutral.mjs",
+      "types": "./generated/types/generated/vivth/exports/neutral.d.mts"
+    },
+    "./all": {
+      "import": "./generated/vivth/exports/all.mjs",
+      "types": "./generated/types/generated/vivth/exports/all.d.mts"
+    },
+    "./unsupported": {
+      "import": "./generated/vivth/exports/unsupported.mjs",
+      "types": "./generated/types/generated/vivth/exports/unsupported.d.mts"
+    },
+    "./browser": {
+      "import": "./generated/vivth/exports/browser.mjs",
+      "types": "./generated/types/generated/vivth/exports/browser.d.mts"
+    }
+  }
 }

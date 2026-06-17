@@ -23,3 +23,6 @@
 *.test.*
 
 /doesnotwork/
+
+# ALWAYS INCLUDE THE README
+!README.md
