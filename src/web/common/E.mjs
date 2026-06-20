@@ -4,7 +4,7 @@ import { Effect } from '../../class/Effect.mjs';
 import { Signal } from '../../class/Signal.mjs';
 import { WalkThrough } from '../../class/WalkThrough.mjs';
 import { ForInSync } from '../../function/ForInSync.mjs';
-import { IsTypeOf } from '../../function/IsTypeOf.mts';
+import { IsTypeOf } from '../../function/IsTypeOf.mjs';
 
 /**
  * @param {Element} element
