@@ -215,6 +215,7 @@ export { CSS } from '../../../src/web/common/CSS.mjs';
 export { E } from '../../../src/web/common/E.mjs';
 export { NewStyleSheetAsync } from '../../../src/web/common/NewStyleSheetAsync.mjs';
 export { NewStyleSheetSync } from '../../../src/web/common/NewStyleSheetSync.mjs';
+export { WC_DefineCustomElement } from '../../../src/web/common/WC_DefineCustomElement.mjs';
 /**
  * @template {string} TAG
  * @typedef {import('../../../src/web/common/WC_TagName_type.mjs').WC_TagName_type<TAG>} WC_TagName_type

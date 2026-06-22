@@ -30,12 +30,10 @@ const getChildrenData = (namedSlots, childrenDataArgsPlaceholder) => {
 /**
  * @description
  * - typesafe factory generator for creating element of `WC_extendsA`/`WC_extendsB` class;
- * - this function is returned by static method `.define`;
- * >- bind it with static property;
  * - uses `lit-html` under the hood;
  * @template {(new (...args: any[]) => HTMLElement) & {
  *  tagName: string;
- * 	extendIs: string;
+ * 	extendIsValue: string;
  *  observedAttributes?: readonly string[];
  *  namedSlots?: readonly string[];
  * 	props?: Record<string, keyof TypeMap|(new (...args:any[])=>any)>;
@@ -58,11 +56,8 @@ const getChildrenData = (namedSlots, childrenDataArgsPlaceholder) => {
  * 	},
  * )=>InstanceType<BASE_CONSTRUCTOR>}
  * @example
- * // webcomponent context via `WC_extends`
- * static createElement = this.define(...args);
- * //
  */
-export function WC_createElement_bind({ tagName, extendIs, namedSlots = [] }) {
+export function WC_createElement_bind({ tagName, extendIsValue, namedSlots = [] }) {
 	/**
 	 * @type {Record<string, string>|undefined}
 	 */
@@ -72,13 +67,13 @@ export function WC_createElement_bind({ tagName, extendIs, namedSlots = [] }) {
 		 * @type {InstanceType<BASE_CONSTRUCTOR>}
 		 */
 		let element;
-		if (!extendIs) {
+		if (!extendIsValue) {
 			// @ts-expect-error
 			element = document.createElement(tagName);
 		} else {
 			// @ts-expect-error
 			element = document.createElement(tagName, {
-				is: extendIs,
+				is: extendIsValue,
 			});
 		}
 		if (attrs) {

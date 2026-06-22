@@ -67,6 +67,7 @@ export { CSS } from "../../../src/web/common/CSS.mjs";
 export { E } from "../../../src/web/common/E.mjs";
 export { NewStyleSheetAsync } from "../../../src/web/common/NewStyleSheetAsync.mjs";
 export { NewStyleSheetSync } from "../../../src/web/common/NewStyleSheetSync.mjs";
+export { WC_DefineCustomElement } from "../../../src/web/common/WC_DefineCustomElement.mjs";
 export { IsInViewPortSignal } from "../../../src/web/signals/IsInViewPortSignal.mjs";
 export { ObserverSignal } from "../../../src/web/signals/ObserverSignal.mjs";
 export { WC_litRef } from "../../../src/web/signals/WC_litRef.mjs";

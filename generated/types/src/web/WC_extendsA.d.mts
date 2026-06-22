@@ -29,7 +29,7 @@
  * }} STANDARD
  * @template {(BASE_CONSTRUCTOR) & {
  * 	tagName: string;
- * 	extendIs: string;
+ * 	extendIsValue: string;
  * 	observedAttributes?: STANDARD["observedAttributes"];
  * 	namedSlots?: STANDARD["namedSlots"];
  * 	props?: STANDARD["props"];
@@ -68,7 +68,7 @@
  * 			})=>OBJ;
  *  }) & {
  * 		tagName:string;
- * 		extendIs:string;
+ * 		extendIsValue:string;
  *  	namedSlots: STANDARD["namedSlots"];
  *  	observedAttributes: STANDARD["observedAttributes"];
  * 		createNamedSlot: typeof WC_createNamedSlot<STANDARD>;
@@ -86,7 +86,9 @@
  * @returns {RET}
  * @example
  * export MyWebComponent extends WC_extendsA(HTMLElement, {...options}){
- * 	static create = this.define('my-webcomponent');
+ * 	static create = WC_DefineCustomElement('my-webcomponent', this);
+ * 	// you can skip the defining with WC_DefineCustomElement if the class are meant to be extended abstract;
+ * 	// or if you want to opt out from using `lit-html` template;
  * }
  */
 export function WC_extendsA<BASE_CONSTRUCTOR extends new (...args: any[]) => HTMLElement, STANDARD extends {
@@ -97,7 +99,7 @@ export function WC_extendsA<BASE_CONSTRUCTOR extends new (...args: any[]) => HTM
     props?: Record<string, keyof TypeMap | (new (...args: any[]) => any)>;
 }, CREATEARGS extends (BASE_CONSTRUCTOR) & {
     tagName: string;
-    extendIs: string;
+    extendIsValue: string;
     observedAttributes?: STANDARD["observedAttributes"];
     namedSlots?: STANDARD["namedSlots"];
     props?: STANDARD["props"];
@@ -121,7 +123,7 @@ export function WC_extendsA<BASE_CONSTRUCTOR extends new (...args: any[]) => HTM
     }) => OBJ;
 }) & {
     tagName: string;
-    extendIs: string;
+    extendIsValue: string;
     namedSlots: STANDARD["namedSlots"];
     observedAttributes: STANDARD["observedAttributes"];
     createNamedSlot: typeof WC_createNamedSlot<STANDARD>;

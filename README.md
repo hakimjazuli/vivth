@@ -198,6 +198,7 @@ npm i vivth
 - [neutral.E](#e)
 - [neutral.NewStyleSheetAsync](#newstylesheetasync)
 - [neutral.NewStyleSheetSync](#newstylesheetsync)
+- [neutral.WC_DefineCustomElement](#wc_definecustomelement)
 - [neutral.WC_TagName_type](#wc_tagname_type)
 - [neutral.EnsureValidTag](#ensurevalidtag)
 - [neutral.IsInViewPortSignal](#isinviewportsignal)
@@ -6722,15 +6723,13 @@ const esWatcherInstance = this.registerObjectWithAutoCleanup(
 #### reference: `WC_createElement_bind`
 
 - typesafe factory generator for creating element of `WC_extendsA`/`WC_extendsB` class;
-- this function is returned by static method `.define`;
-  > - bind it with static property;
 - uses `lit-html` under the hood;
 
 ```js
 /**
  * @template {(new (...args: any[]) => HTMLElement) & {
  *  tagName: string;
- * 	extendIs: string;
+ * 	extendIsValue: string;
  *  observedAttributes?: readonly string[];
  *  namedSlots?: readonly string[];
  * 	props?: Record<string, keyof TypeMap|(new (...args:any[])=>any)>;
@@ -6758,9 +6757,7 @@ const esWatcherInstance = this.registerObjectWithAutoCleanup(
 - <i>example</i>:
 
 ```js
- // webcomponent context via `WC_extends`
- static createElement = this.define(...args);
- //
+
 ```
 
 \*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
@@ -7103,6 +7100,43 @@ text.nodeValue = "hello world";
 
 ---
 
+<h2 id="wc_definecustomelement">neutral.WC_DefineCustomElement</h2>
+
+#### reference: `WC_DefineCustomElement`
+
+- helper funtion for wecomponent instantiator;
+- it uses WC_createElement_bind, which uses `lit-html`;
+- alternatively, if you want to create a baseline component that are not to be , you can just
+
+```js
+/**
+ * @template {new (...args: any[]) => HTMLElement} BASE_CONSTRUCTOR
+ * @template {{
+ * 	class?:string;
+ * 	style?:string;
+ *  observedAttributes?: readonly string[];
+ *  namedSlots?: readonly string[];
+ * 	props?: Record<string, keyof TypeMap|(new (...args:any[])=>any)>;
+ * }} STANDARD
+ * @template {(BASE_CONSTRUCTOR) & {
+ * 	tagName: string;
+ * 	extendIsValue: string;
+ * 	observedAttributes?: STANDARD["observedAttributes"];
+ * 	namedSlots?: STANDARD["namedSlots"];
+ * 	props?: STANDARD["props"];
+ * }} CREATEARGS
+ * @template {string} TAG
+ * @param {WC_TagName_type<TAG>} tagName
+ * @param {CREATEARGS} classRef
+ * @param {ElementDefinitionOptions} elementDefinitionOptions
+ * @returns {ReturnType<typeof WC_createElement_bind<CREATEARGS>>}
+ */
+```
+
+\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+---
+
 <h2 id="wc_tagname_type">neutral.WC_TagName_type</h2>
 
 - jsdoc types:
@@ -7379,7 +7413,7 @@ text.nodeValue = "hello world";
  * }} STANDARD
  * @template {(BASE_CONSTRUCTOR) & {
  * 	tagName: string;
- * 	extendIs: string;
+ * 	extendIsValue: string;
  * 	observedAttributes?: STANDARD["observedAttributes"];
  * 	namedSlots?: STANDARD["namedSlots"];
  * 	props?: STANDARD["props"];
@@ -7418,7 +7452,7 @@ text.nodeValue = "hello world";
  * 			})=>OBJ;
  *  }) & {
  * 		tagName:string;
- * 		extendIs:string;
+ * 		extendIsValue:string;
  *  	namedSlots: STANDARD["namedSlots"];
  *  	observedAttributes: STANDARD["observedAttributes"];
  * 		createNamedSlot: typeof WC_createNamedSlot<STANDARD>;
@@ -7441,7 +7475,9 @@ text.nodeValue = "hello world";
 
 ```js
  export MyWebComponent extends WC_extendsA(HTMLElement, {...options}){
- 	static create = this.define('my-webcomponent');
+ 	static create = WC_DefineCustomElement('my-webcomponent', this);
+ 	// you can skip the defining with WC_DefineCustomElement if the class are meant to be extended abstract;
+ 	// or if you want to opt out from using `lit-html` template;
  }
 ```
 
@@ -7564,7 +7600,7 @@ text.nodeValue = "hello world";
  * }} STANDARD
  * @template {(BASE_CONSTRUCTOR) & {
  * 	tagName: string;
- * 	extendIs: string;
+ * 	extendIsValue: string;
  * 	observedAttributes?: STANDARD["observedAttributes"];
  * 	namedSlots?: STANDARD["namedSlots"];
  * 	props?: STANDARD["props"];
@@ -7605,7 +7641,7 @@ text.nodeValue = "hello world";
  * 			})=>OBJ;
  *  }) & {
  * 		tagName:string;
- * 		extendIs:string;
+ * 		extendIsValue:string;
  *  	namedSlots: STANDARD["namedSlots"];
  *  	observedAttributes: STANDARD["observedAttributes"];
  * 		createNamedSlot: typeof WC_createNamedSlot<STANDARD>;
@@ -7622,6 +7658,16 @@ text.nodeValue = "hello world";
  * @param {STANDARD} [staticMember]
  * @returns {RET}
  */
+```
+
+- <i>example</i>:
+
+```js
+ export MyWebComponent extends WC_extendsA(HTMLElement, {...options}){
+ 	static create = WC_DefineCustomElement('my-webcomponent', this);
+ 	// you can skip the defining if the class are meant to be extended abstract;
+ 	// or if you want to opt out from using `lit-html` template;
+ }
 ```
 
 #### reference: `WC_extendsB_instance.props`

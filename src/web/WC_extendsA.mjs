@@ -39,7 +39,7 @@ import { WC_createNamedSlot } from './bindings/WC_createNamedSlot.mjs';
  * }} STANDARD
  * @template {(BASE_CONSTRUCTOR) & {
  * 	tagName: string;
- * 	extendIs: string;
+ * 	extendIsValue: string;
  * 	observedAttributes?: STANDARD["observedAttributes"];
  * 	namedSlots?: STANDARD["namedSlots"];
  * 	props?: STANDARD["props"];
@@ -78,7 +78,7 @@ import { WC_createNamedSlot } from './bindings/WC_createNamedSlot.mjs';
  * 			})=>OBJ;
  *  }) & {
  * 		tagName:string;
- * 		extendIs:string;
+ * 		extendIsValue:string;
  *  	namedSlots: STANDARD["namedSlots"];
  *  	observedAttributes: STANDARD["observedAttributes"];
  * 		createNamedSlot: typeof WC_createNamedSlot<STANDARD>;
@@ -96,7 +96,9 @@ import { WC_createNamedSlot } from './bindings/WC_createNamedSlot.mjs';
  * @returns {RET}
  * @example
  * export MyWebComponent extends WC_extendsA(HTMLElement, {...options}){
- * 	static create = this.define('my-webcomponent');
+ * 	static create = WC_DefineCustomElement('my-webcomponent', this);
+ * 	// you can skip the defining with WC_DefineCustomElement if the class are meant to be extended abstract;
+ * 	// or if you want to opt out from using `lit-html` template;
  * }
  */
 export function WC_extendsA(Base, staticMember = /** @type {any} */ ({})) {
