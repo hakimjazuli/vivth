@@ -3924,9 +3924,9 @@ f.forInSignals((key, signal) => {
 
 #### reference: `WalkThrough`
 
-- collection of static `methods` to walktrhough things, instead of regular looping;
-- usefull to iterator that might be modified during iteration;
-- mostlikely to be less performant, but with better result clarity;
+- collection of static `methods` to walkthrough things, instead of regular looping;
+- useful for iterators that might be modified during iteration;
+- most likely to be less performant, but with better result clarity;
 
 #### reference: `WalkThrough.set`
 
@@ -3936,7 +3936,7 @@ f.forInSignals((key, signal) => {
 /**
  * @template VAL
  * @param {Set<VAL>} setInstance
- * @param {(value:VAL)=>void} callback
+ * @param {(value: VAL) => void} callback
  * @returns {void}
  */
 ```
@@ -3958,7 +3958,7 @@ WalkThrough.set(setOfSomething, (value) => {
 /**
  * @template KEY, VAL
  * @param {Map<KEY, VAL>} mapInstance
- * @param {(res:[key: KEY, value: VAL]) => void} callback
+ * @param {(entry: [key: KEY, value: VAL]) => void} callback
  * @returns {void}
  */
 ```
@@ -3980,7 +3980,7 @@ WalkThrough.map(mapOfSomething, ([key, value]) => {
 /**
  * @template VAL
  * @param {VAL[]} arrayInstance
- * @param {(res:[value: VAL, index: number]) => void} callback
+ * @param {(entry: [index: number, value: VAL]) => void} callback
  * @returns {void}
  */
 ```
@@ -3989,7 +3989,7 @@ WalkThrough.map(mapOfSomething, ([key, value]) => {
 
 ```js
 import { WalkThrough } from "vivth/neutral";
-WalkThrough.array(arrayOfSomething, ([value, index]) => {
+WalkThrough.array(arrayOfSomething, ([index, value]) => {
   // code
 });
 ```
