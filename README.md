@@ -4722,7 +4722,7 @@ Console.log(
  * @param {string} [options.copyright]
  * @param {string} [options.tableOfContentTitle]
  * @param {number} [options.maxDebounceForGeneratingDocAndExport]
- * - default `10_000`;
+ * - default `1_000`;
  * @param {import('chokidar').ChokidarOptions} [options.chokidarOptions]
  * - ChokidarOptions;
  * @param {import('../typehints/AutoDocASOptions.mjs').AutoDocASOptions} [options.assemblyScriptOptions]

@@ -41,7 +41,7 @@ export class Derived extends Signal {
 	 *
 	 * count.value++;
 	 */
-	constructor(derivedFunction, maxTimelapseBeingDebounced = undefined) {
+	constructor(derivedFunction, maxTimelapseBeingDebounced = 2_000) {
 		super(undefined);
 		new Effect(async (options) => {
 			const currentValue = await derivedFunction(

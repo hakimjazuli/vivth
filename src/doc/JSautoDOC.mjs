@@ -106,7 +106,7 @@ export class JSautoDOC {
 	 * @param {string} [options.copyright]
 	 * @param {string} [options.tableOfContentTitle]
 	 * @param {number} [options.maxDebounceForGeneratingDocAndExport]
-	 * - default `10_000`;
+	 * - default `1_000`;
 	 * @param {import('chokidar').ChokidarOptions} [options.chokidarOptions]
 	 * - ChokidarOptions;
 	 * @param {import('../typehints/AutoDocASOptions.mjs').AutoDocASOptions} [options.assemblyScriptOptions]
@@ -148,7 +148,7 @@ export class JSautoDOC {
 		onLastGeneratedCallback = undefined,
 		tableOfContentTitle = 'exported-api-and-type-list',
 		copyright = '',
-		maxDebounceForGeneratingDocAndExport = 10_000,
+		maxDebounceForGeneratingDocAndExport = 1_000,
 		assemblyScriptOptions = undefined,
 		chokidarOptions = undefined,
 		jstsconfigs = undefined,
