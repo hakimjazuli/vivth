@@ -20,7 +20,9 @@ export const cleanPreserveTypedef = (sourceCode) => {
 
 	return sourceCode.replace(jsDocRegex, (fullMatch, commentContent) => {
 		if (commentContent.includes('@preserve')) {
-			return fullMatch.replace(/@\[blank\]typedef/gi, '@typedef');
+			return fullMatch
+				.replace(/@\[blank\]typedef/gi, '@typedef')
+				.replace(/\s+\*\s*\@preserve/g, '');
 		}
 		return fullMatch;
 	});

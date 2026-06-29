@@ -1,5 +1,4 @@
 /**
- * @preserve
  * @description
  * - type helper to create decorator;
  * >- matches argument with host method;

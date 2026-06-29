@@ -6229,7 +6229,6 @@ const esWatcherInstance = this.registerObjectWithAutoCleanup(
 
 ````js
 /**
- * @preserve
  * @description
  * - extract unique string from ArrayString[];
  * - Takes an array/tuple type and returns a unique UNION of its elements.
@@ -6366,7 +6365,6 @@ const esWatcherInstance = this.registerObjectWithAutoCleanup(
 
 ```js
 /**
- * @preserve
  * @description
  * - type helper to create decorator;
  * >- matches argument with host method;
@@ -6386,7 +6384,6 @@ const esWatcherInstance = this.registerObjectWithAutoCleanup(
 
 ```js
 /**
- * @preserve
  * @description
  * - type helper to create decorator for monkeypatching class/instance method;
  * >- matches argument with host method;
@@ -6541,7 +6538,6 @@ const esWatcherInstance = this.registerObjectWithAutoCleanup(
 
 ```js
 /**
- * @preserve
  * @description
  * - Drop the first N parameters from METHOD and return the rest;
  * @template {(...args: any[]) => any} METHOD
@@ -7105,7 +7101,6 @@ text.nodeValue = "hello world";
 
 ```js
 /**
- * @preserve
  * @description
  * Validates whether a string follows the strict custom-element layout:
  * - Must contain a hyphen (-)
@@ -7126,7 +7121,6 @@ text.nodeValue = "hello world";
 
 ```js
 /**
- * @preserve
  * @template {string} T
  * @typedef {import('../../../src/web/EnsureValidTag.mts').EnsureValidTag<T>} EnsureValidTag
  */

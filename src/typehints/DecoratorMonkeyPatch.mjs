@@ -1,5 +1,4 @@
 /**
- * @preserve
  * @description
  * - type helper to create decorator for monkeypatching class/instance method;
  * >- matches argument with host method;

@@ -1,5 +1,4 @@
 /**
- * @preserve
  * @description
  * Validates whether a string follows the strict custom-element layout:
  * - Must contain a hyphen (-)

@@ -1,5 +1,4 @@
 /**
- * @preserve
  * @description
  * - extract unique string from ArrayString[];
  * - Takes an array/tuple type and returns a unique UNION of its elements.

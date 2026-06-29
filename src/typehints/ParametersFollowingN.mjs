@@ -1,5 +1,4 @@
 /**
- * @preserve
  * @description
  * - Drop the first N parameters from METHOD and return the rest;
  * @template {(...args: any[]) => any} METHOD
