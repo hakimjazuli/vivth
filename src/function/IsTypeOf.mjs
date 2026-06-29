@@ -10,13 +10,10 @@ const TypeMap = {
   bigint: 0n
 };
 /**
- * @preserve
  * @description
  * A type-safe `typeof` helper.
  * @template {keyof typeof TypeMap} K
- * @param {unknown} object - The value to check.
- * @param {K} type - The type string to compare against.
- * @returns {object is typeof TypeMap[K]} - Returns true if the type matches, narrowing the type.
+ * @typedef {import('./IsTypeOf.mts').IsTypeOf<K>} IsTypeOf
  */
 function IsTypeOf(object, type) {
   return typeof object === type;

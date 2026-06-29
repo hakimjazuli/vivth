@@ -18,8 +18,6 @@ export declare const TypeMap: {
  * @description
  * A type-safe `typeof` helper.
  * @template {keyof typeof TypeMap} K
- * @param {unknown} object - The value to check.
- * @param {K} type - The type string to compare against.
- * @returns {object is typeof TypeMap[K]} - Returns true if the type matches, narrowing the type.
+ * @[blank]typedef {import('./IsTypeOf.mts').IsTypeOf<K>} IsTypeOf
  */
 export declare function IsTypeOf<K extends keyof typeof TypeMap>(object: unknown, type: K): object is (typeof TypeMap)[K];
