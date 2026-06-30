@@ -209,11 +209,11 @@ export class FileSelfMapper {
 		const { content: originalContent, targetPaths } = await FileSelfMapper.#getTargetPath(path);
 		let newContent = originalContent;
 		const resDocument = createDocument(originalContent);
-		const handledScripts = resDocument.querySelectorAll(`script`);
+		const handledScripts = Array.from(resDocument.querySelectorAll(`script`));
 		await Promise.all(
 			ForOfSync(handledScripts, async (scriptElement) => {
-				const hasMinifyTrue = scriptElement.getAttribute('minify') === 'true';
-				const hasTypeModule = scriptElement.getAttribute('type') === 'module';
+				const hasMinifyTrue = (scriptElement.getAttribute('minify') ?? '') === 'true';
+				const hasTypeModule = (scriptElement.getAttribute('type') ?? '') === 'module';
 				if (!hasMinifyTrue && !hasTypeModule) {
 					return;
 				}
@@ -239,7 +239,6 @@ export class FileSelfMapper {
 					});
 					return;
 				}
-
 				const minified = res.outputFiles[0]?.text.trim();
 				newContent = newContent.replace(
 					inner,
@@ -257,7 +256,7 @@ export class FileSelfMapper {
 				const [, errorWriteHTML] = await FileSafe.write(
 					target,
 					(!!processedContent ? processedContent : newContent).replace(
-						/\s*vivth-file-self-mapper\="[\s\S]*?"\s*/g,
+						/\s*minify\="[\s\S]*?"\s*/g,
 						'',
 					),
 					{
