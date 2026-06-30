@@ -59,6 +59,9 @@ import { LazyFactory } from '../function/LazyFactory.mjs';
  * - files extention:
  * >- `js`/`ts` files will be compiled with `vivth/node.EsWathcer`, using `option.esbuild` as argument;
  * >- `sass`/`scss` it will be compiled to `css` first;
+ * >- `html` will be checked for `script`;
+ * >>- has `[type="module]"`: will be processed as `esm`;
+ * >>- has `[minify="true"]`: will be minified;
  * >- other than those files, they will be just copied to `targetPaths`;
  * - for runtime example see file `/dev/auto/` on source code;
  * @implements {VivthCleanup}
@@ -206,15 +209,14 @@ export class FileSelfMapper {
 		const { content: originalContent, targetPaths } = await FileSelfMapper.#getTargetPath(path);
 		let newContent = originalContent;
 		const resDocument = createDocument(originalContent);
-		const fileSelfMapperAttribute = 'vivth-file-self-mapper';
-		const handledScripts = resDocument.querySelectorAll(`script[${fileSelfMapperAttribute}]`);
+		const handledScripts = resDocument.querySelectorAll(`script`);
 		await Promise.all(
 			ForOfSync(handledScripts, async (scriptElement) => {
-				const directionsString = scriptElement.getAttribute(fileSelfMapperAttribute);
-				scriptElement.removeAttribute(fileSelfMapperAttribute);
-				if (!directionsString) return;
-				const directions = new Set(directionsString.split(';'));
-				const hasMin = directions.has('min');
+				const hasMinifyTrue = scriptElement.getAttribute('minify') === 'true';
+				const hasTypeModule = scriptElement.getAttribute('type') === 'module';
+				if (!hasMinifyTrue && !hasTypeModule) {
+					return;
+				}
 				const inner = scriptElement.innerHTML;
 				const res = await build({
 					write: false,
@@ -225,12 +227,8 @@ export class FileSelfMapper {
 					},
 					bundle: false,
 					logLevel: 'silent',
-					minify: hasMin,
-					format: directions.has('iife')
-						? 'iife'
-						: scriptElement.getAttribute('type') === 'module'
-							? 'esm'
-							: undefined,
+					minify: hasMinifyTrue,
+					format: hasTypeModule ? 'esm' : undefined,
 				});
 				if (res.errors.length) {
 					Console.error({
@@ -242,7 +240,7 @@ export class FileSelfMapper {
 					return;
 				}
 
-				const minified = res.outputFiles[0]?.text;
+				const minified = res.outputFiles[0]?.text.trim();
 				newContent = newContent.replace(
 					inner,
 					// @ts-expect-error

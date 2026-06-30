@@ -770,6 +770,9 @@ body {
 - files extention:
   > - `js`/`ts` files will be compiled with `vivth/node.EsWathcer`, using `option.esbuild` as argument;
   > - `sass`/`scss` it will be compiled to `css` first;
+  > - `html` will be checked for `script`;
+  >   > - has `[type="module]"`: will be processed as `esm`;
+  >   > - has `[minify="true"]`: will be minified;
   > - other than those files, they will be just copied to `targetPaths`;
 - for runtime example see file `/dev/auto/` on source code;
 
