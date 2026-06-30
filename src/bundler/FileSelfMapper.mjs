@@ -3,8 +3,10 @@
 import { dirname, extname, relative } from 'node:path';
 import { readFile } from 'node:fs/promises';
 
+import { build } from 'esbuild';
 import { watch } from 'chokidar';
 import { compileAsync } from 'sass';
+import { createDocument } from 'domino';
 
 import { Paths } from '../class/Paths.mjs';
 import { QChannel } from '../class/QChannel.mjs';
@@ -92,8 +94,8 @@ export class FileSelfMapper {
 	constructor(watchPath, options) {
 		SafeExit.instance?.addCallback(this.vivthCleanup);
 		const watcherFullPath = Paths.diskAbsolute(watchPath);
-		const watcher = watch(watcherFullPath, { ignoreInitial: false });
-		watcher.addListener('all', async (eventName, path, stats) => {
+		this.#watcher = watch(watcherFullPath, { ignoreInitial: false });
+		this.#watcher.addListener('all', async (eventName, path, stats) => {
 			path = Paths.normalize(path);
 			const [, errorWatcherListener] = await this.#q.callback(path, async ({ isLastOnQ }) => {
 				await this.#listenerQ(isLastOnQ, eventName, path, watcherFullPath, options, stats);
@@ -111,6 +113,7 @@ export class FileSelfMapper {
 			);
 		});
 	}
+	#watcher;
 	/**
 	 * @type {QChannel<string>}
 	 */
@@ -127,6 +130,8 @@ export class FileSelfMapper {
 				await this.#runCleanupOfSpecificPath(path);
 			})[0],
 		);
+		this.#watcher.removeAllListeners();
+		this.#watcher.close();
 	};
 
 	/**
@@ -172,6 +177,10 @@ export class FileSelfMapper {
 			return;
 		}
 		const extension = extname(path);
+		if (extension === '.html') {
+			await FileSelfMapper.#writeHTML(path, options.postProcessDirectCopy);
+			return;
+		}
 		if (
 			extension !== '.scss' &&
 			extension !== '.sass' &&
@@ -188,6 +197,84 @@ export class FileSelfMapper {
 		}
 		await this.#bundleJS(watcherFullPath, path, options);
 	};
+	/**
+	 * @param { string } path
+	 * @param { (path:{mapTo:string, src:string}, content:string)=>(string|false) } [postprosess]
+	 * @returns { Promise<void> }
+	 */
+	static #writeHTML = async (path, postprosess) => {
+		const { content: originalContent, targetPaths } = await FileSelfMapper.#getTargetPath(path);
+		let newContent = originalContent;
+		const resDocument = createDocument(originalContent);
+		const fileSelfMapperAttribute = 'vivth-file-self-mapper';
+		const handledScripts = resDocument.querySelectorAll(`script[${fileSelfMapperAttribute}]`);
+		await Promise.all(
+			ForOfSync(handledScripts, async (scriptElement) => {
+				const directionsString = scriptElement.getAttribute(fileSelfMapperAttribute);
+				scriptElement.removeAttribute(fileSelfMapperAttribute);
+				if (!directionsString) return;
+				const directions = new Set(directionsString.split(';'));
+				const hasMin = directions.has('min');
+				const inner = scriptElement.innerHTML;
+				const res = await build({
+					write: false,
+					stdin: {
+						contents: inner,
+						loader: 'js',
+						resolveDir: dirname(path),
+					},
+					bundle: false,
+					logLevel: 'silent',
+					minify: hasMin,
+					format: directions.has('iife')
+						? 'iife'
+						: scriptElement.getAttribute('type') === 'module'
+							? 'esm'
+							: undefined,
+				});
+				if (res.errors.length) {
+					Console.error({
+						errorBuildingInlineScript: {
+							outer: scriptElement.outerHTML,
+							message: 'failed to build using esbuild.build',
+						},
+					});
+					return;
+				}
+
+				const minified = res.outputFiles[0]?.text;
+				newContent = newContent.replace(
+					inner,
+					// @ts-expect-error
+					minified,
+				);
+			})[0],
+		);
+		await Promise.all(
+			ForOfSync(targetPaths, async (target) => {
+				let processedContent;
+				if (postprosess) {
+					postprosess({ mapTo: target, src: path }, newContent);
+				}
+				const [, errorWriteHTML] = await FileSafe.write(
+					target,
+					(!!processedContent ? processedContent : newContent).replace(
+						/\s*vivth-file-self-mapper\="[\s\S]*?"\s*/g,
+						'',
+					),
+					{
+						encoding: Preferrence.encoding,
+					},
+				);
+				if (errorWriteHTML) {
+					Console.error({ errorWriteHTML }, { now: true });
+					return;
+				}
+				Console.info(`✅ Successfully map:'${path}' to:'${target}'`, { now: true });
+			})[0],
+		);
+	};
+
 	/**
 	 * @param { string } path
 	 * @param { (path:{mapTo:string, src:string}, content:string)=>(string|false) } [postprosess]

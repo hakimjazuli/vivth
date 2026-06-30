@@ -333,22 +333,7 @@ export class VivthyNeinth {
 	);
 
 	/**
-	 * @description
 	 * @type {Set<()=>Promise<void>>}
-	 * @example
-	 * import { watch } from "chokidar";
-	 *
-	 * /// on VivthyNeinth arg callback scope
-	 * const { onCleanups } = this;
-	 * const watcher = watch('/src/');
-	 * watcher.addListener('all', (...args)=>{
-	 * 	// listener code;
-	 * });
-	 * onCleanups.add(async()=>{
-	 *	watcher.removeAllListeners();
-	 *	watcher.close();
-	 * })
-	 * ///
 	 */
 	#onCleanups = new Set();
 

@@ -41,6 +41,15 @@ export class FileSelfMapper implements VivthCleanup {
      * @param { (path:{mapTo:string, src:string}, content:string)=>(string|false) } [postprosess]
      * @returns { Promise<void> }
      */
+    static #writeHTML: (path: string, postprosess?: (path: {
+        mapTo: string;
+        src: string;
+    }, content: string) => (string | false)) => Promise<void>;
+    /**
+     * @param { string } path
+     * @param { (path:{mapTo:string, src:string}, content:string)=>(string|false) } [postprosess]
+     * @returns { Promise<void> }
+     */
     static #writeCommon: (path: string, postprosess?: (path: {
         mapTo: string;
         src: string;

@@ -115,7 +115,6 @@ export class IsInViewPortSignal extends Signal {
 		);
 	}
 	/**
-	 *
 	 * @param {boolean} newValue
 	 */
 	#setSuperValue(newValue) {

@@ -5383,9 +5383,7 @@ A type-safe `typeof` helper.
 ```js
 /**
  * @template {keyof typeof TypeMap} K
- * @param {unknown} object - The value to check.
- * @param {K} type - The type string to compare against.
- * @returns {object is typeof TypeMap[K]} - Returns true if the type matches, narrowing the type.
+ * @typedef {import('./IsTypeOf.mts').IsTypeOf<K>} IsTypeOf
  */
 ```
 
@@ -6113,48 +6111,33 @@ const effer = newDerived(async ({ subscribe }) => {
 
 #### reference: `VivthyNeinth_instance.onMutate`
 
+- manually registering object celeanup;
+
 ```js
 /**
- * @type {Set<()=>Promise<void>>}
+ * @param {()=>Promise<void>} callback
+ * @returns {void}
  */
 ```
 
 - <i>example</i>:
 
 ```js
- import { watch } from "chokidar";
-  /// on VivthyNeinth arg callback scope
- const { onCleanups } = this;
- const watcher = watch('/src/');
- watcher.addListener('all', (...args)=>{
- 	// listener code;
- });
- onCleanups.add(async()=>{
- watcher.removeAllListeners();
- watcher.close();
- })
- ///
-	/ 	#onCleanups = new Set();  	/
-   @description
- - manually registering object celeanup;
- @param {()=>Promise<void>} callback
- @returns {void}
- @example
- import { watch } from 'chokidar';
-  /// on VivthyNeinth export callback scope
- const watcher = watch('D://my/dir/path');
- // preferably to declare the cleanup right bellow it's object creation;
- // set 'I__the_developer__have_provided_onFileMutations_cleanupCallbacks_for_every_long_running_object_in_this_file' to false if you might want to save before full cleanup is written;
- this.onMutate(async () => {
- 	watcher.removeAllListeners();
- 	watcher.close();
- });
-  watcher.addListener('all', (eventName, path, stats) => {
- 	//
- })
- ///
- // alternative: use vivth `modules` that returns object that implements `VivthCleanup`;
- // and call uses `registerObjectWithAutoCleanup`;
+import { watch } from "chokidar";
+/// on VivthyNeinth export callback scope
+const watcher = watch("D://my/dir/path");
+// preferably to declare the cleanup right bellow it's object creation;
+// set 'I__the_developer__have_provided_onFileMutations_cleanupCallbacks_for_every_long_running_object_in_this_file' to false if you might want to save before full cleanup is written;
+this.onMutate(async () => {
+  watcher.removeAllListeners();
+  watcher.close();
+});
+watcher.addListener("all", (eventName, path, stats) => {
+  //
+});
+///
+// alternative: use vivth `modules` that returns object that implements `VivthCleanup`;
+// and call uses `registerObjectWithAutoCleanup`;
 ```
 
 #### reference: `VivthyNeinth_instance.onExit`
