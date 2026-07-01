@@ -774,6 +774,7 @@ body {
   >   > - has `[type="module]"`: will be processed as `esm`;
   >   > - has `[minify="true"]`: will be minified;
   > - other than those files, they will be just copied to `targetPaths`;
+- avoid forbidden filename characters and problematic one such as curly/square/normal-braces, that might be used for file pointing cli;
 - for runtime example see file `/dev/auto/` on source code;
 
 ```js

@@ -63,6 +63,7 @@ import { LazyFactory } from '../function/LazyFactory.mjs';
  * >>- has `[type="module]"`: will be processed as `esm`;
  * >>- has `[minify="true"]`: will be minified;
  * >- other than those files, they will be just copied to `targetPaths`;
+ * - avoid forbidden filename characters and problematic one such as curly/square/normal-braces, that might be used for file pointing cli;
  * - for runtime example see file `/dev/auto/` on source code;
  * @implements {VivthCleanup}
  */
@@ -267,7 +268,7 @@ export class FileSelfMapper {
 					Console.error({ errorWriteHTML }, { now: true });
 					return;
 				}
-				Console.info(`✅ Successfully map:'${path}' to:'${target}'`, { now: true });
+				Console.info(`✅ Successfully map:'${path}' 👉:'${target}'`, { now: true });
 			})[0],
 		);
 	};
@@ -543,15 +544,20 @@ export class FileSelfMapper {
 			if (!group) {
 				break;
 			}
-			const candidate = group.trim();
-			if (!/^(?:[A-Za-z]:[\\/]|[\\/]|\.{1,2}[\\/])?[A-Za-z0-9._\\/-]+$/g.test(candidate)) {
-				break;
-			}
-			if (!candidate) {
+			const pathCandidate = group.trim();
+			if (
+				!pathCandidate ||
+				!/^(?:[A-Za-z]:[\\/]|[\\/]|\.{1,2}[\\/])?[A-Za-z0-9._\\/-]+$/g.test(pathCandidate)
+			) {
+				Console.error({
+					pathCandidate,
+					message: 'pathCandidate invalid for testRegex',
+					testRegex: /^(?:[A-Za-z]:[\\/]|[\\/]|\.{1,2}[\\/])?[A-Za-z0-9._\\/-]+$/g,
+				});
 				break;
 			}
 			perLinesCode[i] = '';
-			targetPaths.add(Paths.normalize(candidate));
+			targetPaths.add(Paths.normalize(pathCandidate));
 		}
 
 		return {
