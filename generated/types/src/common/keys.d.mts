@@ -1,1 +1,1 @@
-export const keys_vivthGenereteDir: ".vivth";
+export declare const keys_vivthGenereteDir = ".vivth";

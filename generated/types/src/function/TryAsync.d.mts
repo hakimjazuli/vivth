@@ -19,4 +19,4 @@
  * 	return await res.json();
  * })
  */
-export function TryAsync<RESULT>(asyncFunction_: () => Promise<RESULT>): Promise<[RESULT, undefined] | [undefined, Error]>;
+export declare function TryAsync<RESULT>(asyncFunction_: () => Promise<RESULT>): Promise<[RESULT, undefined] | [undefined, Error]>;

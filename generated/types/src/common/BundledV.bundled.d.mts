@@ -1,3 +1,3 @@
-export class BundledV {
+export declare class BundledV {
     static get isBundled(): boolean;
 }

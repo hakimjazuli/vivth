@@ -47,6 +47,6 @@
  * 	},
  * });
  */
-export function Tries<KEY extends string, RETURNTYPE, RecordTryType extends Record<KEY, (err: {
+export declare function Tries<KEY extends string, RETURNTYPE, RecordTryType extends Record<KEY, (err: {
     prevError: undefined | Error;
 }) => Promise<RETURNTYPE>>>(tryRecord: RecordTryType): Promise<[[keyof RecordTryType, RETURNTYPE], undefined] | [[undefined, undefined], Set<Error>]>;

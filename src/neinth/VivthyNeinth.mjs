@@ -222,7 +222,6 @@ export class VivthyNeinth {
 	 * >- usefull for treating `VivthyNeinth` instance as global signal;
 	 * >- you can accidentally ;
 	 * @param {EXPORT|undefined} newExportValue
-	 * @returns {void}
 	 * @example
 	 */
 	set exportedValue(newExportValue) {
@@ -321,13 +320,14 @@ export class VivthyNeinth {
 		/**
 		 * @template {ConstructorParameters<typeof Derived>[0]} CB
 		 * @param {CB} callback
-		 * @returns {Derived<ReturnType<CB|undefined>>}
+		 * @returns {Derived<ReturnType<CB>>}
 		 */
 		(callback) => {
 			const derivedInstance = new Derived(callback);
 			this.onMutate(async () => {
 				derivedInstance.remove.ref();
 			});
+			// @ts-expect-error
 			return derivedInstance;
 		},
 	);

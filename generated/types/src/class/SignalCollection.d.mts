@@ -1,3 +1,4 @@
+export type VivthCleanup = import('../typehints/VivthCleanup.mjs').VivthCleanup;
 /**
  * @typedef {import('../typehints/VivthCleanup.mjs').VivthCleanup} VivthCleanup
  */
@@ -8,7 +9,9 @@
  * @template {Record<string, import('./Signal.mjs').Signal<any>>} SIGNALS
  * @implements {VivthCleanup}
  */
-export class SignalCollection<SIGNALS extends Record<string, import("./Signal.mjs").Signal<any>>> implements VivthCleanup {
+export declare class SignalCollection<SIGNALS extends Record<string, import('./Signal.mjs').Signal<any>>> implements VivthCleanup {
+    #private;
+    vivthCleanup: () => Promise<void>;
     /**
      * @description
      * - creates instance of `SignalCollection`, by referencing to named Signal;
@@ -25,7 +28,6 @@ export class SignalCollection<SIGNALS extends Record<string, import("./Signal.mj
      * const f = new SignalCollection({ a, c });
      */
     constructor(signalsObject: SIGNALS);
-    vivthCleanup: () => Promise<void>;
     /**
      * @description
      * - accessor for signals, to be subscribed to;
@@ -63,7 +65,7 @@ export class SignalCollection<SIGNALS extends Record<string, import("./Signal.mj
      * 	// return something;
      * });
      */
-    signals: (subscribe?: import("./Effect.mjs").Effect["options"]["subscribe"]) => SIGNALS;
+    signals: (subscribe?: import('./Effect.mjs').Effect["options"]["subscribe"]) => SIGNALS;
     /**
      * @description
      * - is looping synchronously;
@@ -91,6 +93,4 @@ export class SignalCollection<SIGNALS extends Record<string, import("./Signal.mj
      * })
      */
     forInSignals<K extends keyof SIGNALS>(callback: (key: K, signal: SIGNALS[K]) => void): void;
-    #private;
 }
-export type VivthCleanup = import("../typehints/VivthCleanup.mjs").VivthCleanup;

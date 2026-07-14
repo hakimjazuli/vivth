@@ -1,3 +1,5 @@
+import { build } from 'esbuild';
+import { TryAsync } from '../function/TryAsync.mjs';
 /**
  * @description
  * - opinionated bundler for limited extensions using esbuild;
@@ -10,7 +12,7 @@
  * @param {'.mts'|'.ts'|'.mjs'} options.extension
  * - supported extension;
  * @param {boolean} [options.withBinHeader]
- * @param {Omit<Parameters<build>[0],
+ * @param {Omit<Parameters<typeof build>[0],
  * 'entryPoints'|'bundle'|'write'|'sourcemap'|'outdir'|'splitting'|'format'>
  * } [esbuildOptions]
  * - assume `esm`;
@@ -28,11 +30,9 @@
  * 	...esbuildOptions,
  * });
  */
-export function EsBundler({ content, extension, root, withBinHeader }: {
+export declare function EsBundler({ content, extension, root, withBinHeader }: {
     content: string;
     root: string;
-    extension: ".mts" | ".ts" | ".mjs";
-    withBinHeader?: boolean | undefined;
-}, esbuildOptions?: Omit<Parameters<typeof build>[0], "entryPoints" | "bundle" | "write" | "sourcemap" | "outdir" | "splitting" | "format">): ReturnType<typeof TryAsync<string>>;
-import { build } from 'esbuild';
-import { TryAsync } from '../function/TryAsync.mjs';
+    extension: '.mts' | '.ts' | '.mjs';
+    withBinHeader?: boolean;
+}, esbuildOptions?: Omit<Parameters<typeof build>[0], 'entryPoints' | 'bundle' | 'write' | 'sourcemap' | 'outdir' | 'splitting' | 'format'>): ReturnType<typeof TryAsync<string>>;

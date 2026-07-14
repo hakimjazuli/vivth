@@ -18,4 +18,4 @@
  * 	external: Array.from(BrowserExternals),
  * });
  */
-export const BrowserExternals: Set<string>;
+export declare const BrowserExternals: Set<string>;

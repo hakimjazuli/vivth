@@ -1,4 +1,5 @@
-export class PathFSFile {
+export declare class PathFSFile {
+    #private;
     /**
      * @param {string} relativePath
      * @param {{shouldNotIncludes:string}} [options]
@@ -21,5 +22,4 @@ export class PathFSFile {
      * @returns {string}
      */
     get callerPath(): string;
-    #private;
 }

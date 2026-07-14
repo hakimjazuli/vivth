@@ -14,4 +14,4 @@
  *  (val) => `${val}:3` // res: "intialValue:1:2:3"
  * );
  */
-export function PipeSync<VALUE extends unknown>(intialValue: VALUE, ...pipeFunctions: ((currentvalue: VALUE) => VALUE)[]): VALUE;
+export declare function PipeSync<VALUE extends any>(intialValue: VALUE, ...pipeFunctions: ((currentvalue: VALUE) => VALUE)[]): VALUE;

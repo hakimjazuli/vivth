@@ -10,4 +10,4 @@
  *
  * await GetModuleEsbuildPlatform('./myModule.mjs'); // 'node'; caused of lookupA;
  */
-export function GetModuleEsbuildPlatform(path: string): Promise<"browser" | "node" | "neutral" | "unsupported">;
+export declare function GetModuleEsbuildPlatform(path: string): Promise<'browser' | 'node' | 'neutral' | 'unsupported'>;

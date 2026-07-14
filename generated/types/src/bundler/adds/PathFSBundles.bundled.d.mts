@@ -1,4 +1,5 @@
-export class PathFSBundles {
+export declare class PathFSBundles {
+    #private;
     /**
      * @param {string} relativePath
      * @param {{shouldNotIncludes:string}} [options]
@@ -21,5 +22,4 @@ export class PathFSBundles {
      * @returns {string}
      */
     get callerPath(): string;
-    #private;
 }

@@ -1,3 +1,10 @@
+import { CreateESPlugin } from '../CreateESPlugin.mjs';
+/**
+ * @param {string} filePath
+ * @param {string} originalContent_
+ * @returns {string}
+ */
+export declare const commonContentFixesBundled: (filePath: string, originalContent_: string) => string;
 /**
  * @description
  * - generate `esbuild.Plugin` for changing unbundled time file into runtime file;
@@ -8,12 +15,10 @@
  * >- removes `BundledV.vivthUnBundledCodeBlock` code block;
  * @param {string} includedInPath
  * - is generalized path, you can freely uses forward or backward slash;
- * @returns {ReturnType<CreateESPlugin>}
+ * @returns {ReturnType<typeof CreateESPlugin>}
  * @example
  * import { ToBundledJSPlugin } from 'vivth/node';
  *
  * export const myBundledPlugin = ToBundledJSPlugin('/myProjectName/src/');
  */
-export function ToBundledJSPlugin(includedInPath: string): ReturnType<typeof CreateESPlugin>;
-export function commonContentFixesBundled(filePath: string, originalContent_: string): string;
-import { CreateESPlugin } from '../CreateESPlugin.mjs';
+export declare function ToBundledJSPlugin(includedInPath: string): ReturnType<typeof CreateESPlugin>;

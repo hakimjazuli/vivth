@@ -1,3 +1,5 @@
+import { Signal } from './Signal.mjs';
+export type VivthCleanup = import('../typehints/VivthCleanup.mjs').VivthCleanup;
 /**
  * @typedef {import('../typehints/VivthCleanup.mjs').VivthCleanup} VivthCleanup
  */
@@ -28,12 +30,27 @@
  * 	// handle ready state here;
  * })
  */
-export class AwaitSignal<VALUE extends unknown, ARGS extends any[]> extends Signal<Error | VALUE | Promise<VALUE>> implements VivthCleanup {
+export declare class AwaitSignal<VALUE extends any, ARGS extends any[]> extends Signal<VALUE | Promise<VALUE> | Error> implements VivthCleanup {
+    #private;
+    /**
+     * @override
+     */
+    vivthCleanup: () => Promise<void>;
     /**
      * @param {(...args:ARGS)=>Promise<VALUE>} callback
      * @param {ARGS} firstCallArguments
      */
     constructor(callback: (...args: ARGS) => Promise<VALUE>, ...firstCallArguments: ARGS);
+    /**
+     * @override
+     * @param {VALUE|Promise<VALUE>|Error} _newValue
+     */
+    set value(_newValue: VALUE | Promise<VALUE> | Error);
+    /**
+     * @override
+     * @returns {VALUE|Promise<VALUE>|Error}
+     */
+    get value(): VALUE | Promise<VALUE> | Error;
     retryCount: number;
     /**
      * @param {number} maxRetries
@@ -42,7 +59,4 @@ export class AwaitSignal<VALUE extends unknown, ARGS extends any[]> extends Sign
      * - integer of retryCount;
      */
     retry: (maxRetries: number, ...args: ARGS) => void;
-    #private;
 }
-export type VivthCleanup = import("../typehints/VivthCleanup.mjs").VivthCleanup;
-import { Signal } from './Signal.mjs';

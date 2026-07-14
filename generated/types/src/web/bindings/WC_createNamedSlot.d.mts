@@ -1,3 +1,5 @@
+import type { TemplateResult } from 'lit-html';
+import type { ArrayToKeys } from '../../typehints/ArrayToKeys.mts';
 /**
  * @import {TemplateResult} from 'lit-html'
  * @import {ArrayToKeys} from '../../typehints/ArrayToKeys.mts'
@@ -19,8 +21,6 @@
  * this.createNamedSlot(...args);
  * //
  */
-export function WC_createNamedSlot<NAMEDSLOTS extends {
+export declare function WC_createNamedSlot<NAMEDSLOTS extends {
     namedSlots?: readonly string[];
 }>(name: ArrayToKeys<NAMEDSLOTS["namedSlots"] extends readonly string[] ? NAMEDSLOTS["namedSlots"] : never>, defaultNode?: TemplateResult): TemplateResult;
-import type { ArrayToKeys } from '../../typehints/ArrayToKeys.mts';
-import type { TemplateResult } from 'lit-html';

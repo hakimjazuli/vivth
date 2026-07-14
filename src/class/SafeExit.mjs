@@ -117,7 +117,7 @@ export class SafeExit {
 	};
 
 	/**
-	 * @param {...ConstructorParameters<typeof SafeExit>[0][]} eventNames
+	 * @param {...ConstructorParameters<typeof SafeExit>[0]} eventNames
 	 * @returns {void}
 	 */
 	#register = (eventNames = []) => {

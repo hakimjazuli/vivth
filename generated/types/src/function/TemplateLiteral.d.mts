@@ -20,4 +20,4 @@
  * html`<div>${`<button>innerButton</button>`}</div>`;
  * // this will set innerHTML of body to '<div><button>innerButton</button></div>'
  */
-export function TemplateLiteral<INPUTTYPE extends unknown, RET extends string | Promise<string>>(valueHandler: import("../typehints/TemplateLiteralValueHandler.mjs").TemplateLiteralValueHandler<INPUTTYPE>, postProcess?: (result: string) => (RET)): (strings: TemplateStringsArray, ...values: (INPUTTYPE)[]) => RET;
+export declare function TemplateLiteral<INPUTTYPE extends any, RET extends string | Promise<string>>(valueHandler: import('../typehints/TemplateLiteralValueHandler.mjs').TemplateLiteralValueHandler<INPUTTYPE>, postProcess?: (result: string) => (RET)): (strings: TemplateStringsArray, ...values: (INPUTTYPE)[]) => RET;

@@ -19,7 +19,7 @@
  * localA.set('my new value');
  * localA.get(); // 'my new value'
  */
-export class GetterSetter<RET extends unknown, TG extends ((...any: any[]) => RET), TS extends ((...any: any[]) => void)> {
+export declare class GetterSetter<RET extends any, TG extends ((...any: any[]) => RET), TS extends ((...any: any[]) => void)> {
     /**
      * @param {{ get?: TG, set?: TS }} options
      */

@@ -33,4 +33,4 @@
  * // OR
  * myInstance[FactoryKey] // forcefully call factory generator;
  */
-export function LazyFactory<FACTORY>(factory: () => FACTORY): FACTORY & {};
+export declare function LazyFactory<FACTORY>(factory: () => FACTORY): FACTORY & {};

@@ -16,9 +16,9 @@
  * >- `compilerOptions.allowJs`: true;
  * >- `compilerOptions.checkJs`: false;
  * >- should excludes: `.js`, `.as.ts`, `.wasm`;
- * @param {Parameters<import('assemblyscript/asc')["main"]>} args
+ * @param {Parameters<typeof import('assemblyscript/asc')["main"]>} args
  * - as of `vivth@1.5.x`, `arg0` type `string[]` produce more stable results than `CompilerOptions`;
- * @returns {ReturnType<import('assemblyscript/asc')["main"]>}
+ * @returns {ReturnType<typeof import('assemblyscript/asc')["main"]>}
  * @example
  * import { CompileAS } from 'vivth/node';
  *
@@ -27,4 +27,4 @@
  * 	ASAPIOptions
  * );
  */
-export function CompileAS(argv: string[] | import("assemblyscript/asc").CompilerOptions, options?: import("assemblyscript/asc").APIOptions | undefined): ReturnType<typeof import("assemblyscript/asc")["main"]>;
+export declare function CompileAS(...args: Parameters<typeof import('assemblyscript/asc')["main"]>): ReturnType<typeof import('assemblyscript/asc')["main"]>;

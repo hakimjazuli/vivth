@@ -11,4 +11,4 @@
  *
  * Console.log(Trace(3)); // "D://test.mjs:3:13"
  */
-export function Trace(traceIndex: number): string;
+export declare function Trace(traceIndex: number): string;

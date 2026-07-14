@@ -3,4 +3,4 @@
  * - string typehinting value for unbundled only code;
  * @type {'vivthUnBundledCodeBlock'}
  */
-export const VivthUnBundledCodeBlock: "vivthUnBundledCodeBlock";
+export declare const VivthUnBundledCodeBlock: 'vivthUnBundledCodeBlock';

@@ -130,7 +130,7 @@ export class IsInViewPortSignal extends Signal {
 		return super.value;
 	}
 	/**
-	 * @returns {boolean}
+	 * @type {boolean}
 	 * @override
 	 */
 	set value(_) {

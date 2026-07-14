@@ -1,3 +1,5 @@
+export type QCBReturn = import('../typehints/QCBReturn.mjs').QCBReturn;
+export type VivthCleanup = import('../typehints/VivthCleanup.mjs').VivthCleanup;
 /**
  * @typedef { import('../typehints/VivthCleanup.mjs').VivthCleanup } VivthCleanup
  */
@@ -9,20 +11,15 @@
  * @template POST
  * @implements {VivthCleanup}
  */
-export class WorkerThread<RECEIVE, POST> implements VivthCleanup {
-    /**
-     * @typedef {import('../typehints/QCBReturn.mjs').QCBReturn} QCBReturn
-     */
-    /**
-     * @type {Parameters<typeof WorkerThread["setup"]>[0]|undefined}
-     */
-    static #refs: Parameters<(typeof WorkerThread)["setup"]>[0] | undefined;
+export declare class WorkerThread<RECEIVE, POST> implements VivthCleanup {
+    #private;
+    vivthCleanup: () => Promise<void>;
     /**
      * @description
      * - need to be called and exported as new `WorkerThread` class reference;
      * @template RECEIVE
      * @template POST
-     * @param {{parentPort:import('node:worker_threads')["parentPort"]}} refs
+     * @param {{parentPort:typeof import('node:worker_threads')["parentPort"]}} refs
      * -example:
      * ```js
      * import { parentPort } from 'node:worker_threads';
@@ -34,13 +31,9 @@ export class WorkerThread<RECEIVE, POST> implements VivthCleanup {
      *
      * export const MyWorkerThreadRef = WorkerThread.setup({ parentPort });
      */
-    static setup<RECEIVE_1, POST_1>(refs: {
-        parentPort: typeof import("node:worker_threads")["parentPort"];
-    }): typeof WorkerThread<RECEIVE_1, POST_1>;
-    /**
-     * @param {any} ev
-     */
-    static #isCloseWorkerEvent: (ev: any) => boolean;
+    static setup<RECEIVE, POST>(refs: {
+        parentPort: typeof import('node:worker_threads')["parentPort"];
+    }): typeof WorkerThread<RECEIVE, POST>;
     /**
      * @description
      * - instantiate via created class from `setup` static method;
@@ -61,13 +54,12 @@ export class WorkerThread<RECEIVE, POST> implements VivthCleanup {
      * new MyWorkerThread(handler);
      */
     constructor(handler: WorkerThread<RECEIVE, POST>["handler"]);
-    vivthCleanup: () => Promise<void>;
     /**
      * @description
      * - type helper;
      * @type {(ev: RECEIVE, isLastOnQ:QCBReturn["isLastOnQ"]) => Promise<POST>}
      */
-    handler: (ev: RECEIVE, isLastOnQ: () => boolean) => Promise<POST>;
+    handler: (ev: RECEIVE, isLastOnQ: QCBReturn["isLastOnQ"]) => Promise<POST>;
     /**
      * @description
      * - helper type, hold no actual value;
@@ -80,6 +72,4 @@ export class WorkerThread<RECEIVE, POST> implements VivthCleanup {
      * @type {POST}
      */
     POST: POST;
-    #private;
 }
-export type VivthCleanup = import("../typehints/VivthCleanup.mjs").VivthCleanup;

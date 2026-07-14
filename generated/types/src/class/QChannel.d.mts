@@ -1,3 +1,8 @@
+import { TryAsync } from '../function/TryAsync.mjs';
+export type AnyButUndefined = import('../typehints/AnyButUndefined.mjs').AnyButUndefined;
+export type QCBReturn = import('../typehints/QCBReturn.mjs').QCBReturn;
+export type QCBFIFOReturn = import('../typehints/QCBFIFOReturn.mjs').QCBFIFOReturn;
+export type VivthCleanup = import('../typehints/VivthCleanup.mjs').VivthCleanup;
 /**
  * @typedef { import('../typehints/VivthCleanup.mjs').VivthCleanup } VivthCleanup
  */
@@ -7,7 +12,16 @@
  * @template {AnyButUndefined} DEFINEDANY
  * @implements {VivthCleanup}
  */
-export class QChannel<DEFINEDANY extends import("../typehints/AnyButUndefined.mjs").AnyButUndefined> implements VivthCleanup {
+export declare class QChannel<DEFINEDANY extends AnyButUndefined> implements VivthCleanup {
+    #private;
+    name: string;
+    vivthCleanup: () => Promise<void>;
+    /**
+     * @param {string} name
+     * - only used as helper for logging, and has nothing to do with runtime behaviour;
+     * @param {boolean} [log]
+     */
+    constructor(name: string, log?: boolean);
     /**
      * @typedef {import('../typehints/AnyButUndefined.mjs').AnyButUndefined} AnyButUndefined
      * @typedef {import('../typehints/QCBReturn.mjs').QCBReturn} QCBReturn
@@ -25,19 +39,7 @@ export class QChannel<DEFINEDANY extends import("../typehints/AnyButUndefined.mj
      * const myMappedQref = (window['myMappedQref'] = new Map());
      * export const MyQClass = QChannel.setup(myMappedQref);
      */
-    static setup: (uniqueMap: Map<import("../typehints/AnyButUndefined.mjs").AnyButUndefined, [Promise<any>, {}]>) => typeof QChannel;
-    /**
-     * @type {Map<AnyButUndefined, [Promise<any>, {}]>}
-     */
-    static #uniquePromiser: Map<import("../typehints/AnyButUndefined.mjs").AnyButUndefined, [Promise<any>, {}]>;
-    /**
-     * - ensures that each id has only one task running at a time.
-     * - calls with the same id will wait for the previous call to finish.
-     * @param {AnyButUndefined} id
-     * @param {QChannel<any>} instance
-     * @returns {Promise<QCBReturn>} Resolves when it's safe to proceed for the given id, returning a cleanup function
-     */
-    static #uniqueCB: (id: import("../typehints/AnyButUndefined.mjs").AnyButUndefined, instance: QChannel<any>) => Promise<import("../typehints/QCBReturn.mjs").QCBReturn>;
+    static setup: (uniqueMap: Map<AnyButUndefined, [Promise<any>, {}]>) => typeof QChannel;
     /**
      * @description
      * - first in first out handler
@@ -53,7 +55,7 @@ export class QChannel<DEFINEDANY extends import("../typehints/AnyButUndefined.mj
          * // blocks all `FIFO` called using this method and QChannel.fifoCallback;
          * resume();
          */
-        key: () => Promise<import("../typehints/QCBFIFOReturn.mjs").QCBFIFOReturn>;
+        key: () => Promise<QCBFIFOReturn>;
         /**
          * @static fifo
          * @description
@@ -66,7 +68,11 @@ export class QChannel<DEFINEDANY extends import("../typehints/AnyButUndefined.mj
          * 	// code
          * })
          */
-        callback: <RESULT>(asyncCallback: () => Promise<RESULT>) => ReturnType<typeof TryAsync<RESULT>>;
+        callback: <RESULT>(
+        /**
+         * @type {()=>Promise<RESULT>}
+         */
+        asyncCallback: () => Promise<RESULT>) => ReturnType<typeof TryAsync<RESULT>>;
     } & {
         [x: symbol]: {
             /**
@@ -79,7 +85,7 @@ export class QChannel<DEFINEDANY extends import("../typehints/AnyButUndefined.mj
              * // blocks all `FIFO` called using this method and QChannel.fifoCallback;
              * resume();
              */
-            key: () => Promise<import("../typehints/QCBFIFOReturn.mjs").QCBFIFOReturn>;
+            key: () => Promise<QCBFIFOReturn>;
             /**
              * @static fifo
              * @description
@@ -92,17 +98,13 @@ export class QChannel<DEFINEDANY extends import("../typehints/AnyButUndefined.mj
              * 	// code
              * })
              */
-            callback: <RESULT>(asyncCallback: () => Promise<RESULT>) => ReturnType<typeof TryAsync<RESULT>>;
+            callback: <RESULT>(
+            /**
+             * @type {()=>Promise<RESULT>}
+             */
+            asyncCallback: () => Promise<RESULT>) => ReturnType<typeof TryAsync<RESULT>>;
         };
     };
-    /**
-     * @param {string} name
-     * - only used as helper for logging, and has nothing to do with runtime behaviour;
-     * @param {boolean} [log]
-     */
-    constructor(name: string, log?: boolean);
-    vivthCleanup: () => Promise<void>;
-    name: string;
     /**
      * @description
      * - disable queue;
@@ -140,7 +142,7 @@ export class QChannel<DEFINEDANY extends import("../typehints/AnyButUndefined.mj
      * }
      * handler();
      */
-    key: (keyID: DEFINEDANY) => Promise<import("../typehints/QCBReturn.mjs").QCBReturn>;
+    key: (keyID: DEFINEDANY) => Promise<QCBReturn>;
     /**
      * @description
      * - `callbackBlock` with error as value:
@@ -163,8 +165,5 @@ export class QChannel<DEFINEDANY extends import("../typehints/AnyButUndefined.mj
      * 	// return result
      * })
      */
-    callback<RESULT>(keyID: DEFINEDANY, asyncCallback: (options: Omit<import("../typehints/QCBReturn.mjs").QCBReturn, "resume">) => Promise<RESULT>): ReturnType<typeof TryAsync<RESULT>>;
-    #private;
+    callback<RESULT>(keyID: DEFINEDANY, asyncCallback: (options: Omit<QCBReturn, "resume">) => Promise<RESULT>): ReturnType<typeof TryAsync<RESULT>>;
 }
-export type VivthCleanup = import("../typehints/VivthCleanup.mjs").VivthCleanup;
-import { TryAsync } from '../function/TryAsync.mjs';

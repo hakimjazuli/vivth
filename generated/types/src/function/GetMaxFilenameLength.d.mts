@@ -6,4 +6,4 @@
  * - used internally to validate name length for [`UniqueFSTempName`](#uniquefstempname);
  * @returns {number}
  */
-export function GetMaxFilenameLength(): number;
+export declare function GetMaxFilenameLength(): number;

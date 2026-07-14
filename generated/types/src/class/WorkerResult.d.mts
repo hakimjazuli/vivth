@@ -4,7 +4,7 @@
  * - uses error as value instead;
  * @template POST
  */
-export class WorkerResult<POST> {
+export declare class WorkerResult<POST> {
     /**
      * @param {POST} data
      * @param {Error|string|undefined} error

@@ -1,1 +1,5 @@
-export function resolveJSDependencyPath(jspath: string): Promise<boolean>;
+/**
+ * @param {string} jspath
+ * @returns {Promise<boolean>}
+ */
+export declare const resolveJSDependencyPath: (jspath: string) => Promise<boolean>;

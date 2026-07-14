@@ -1,3 +1,7 @@
 export type ConsoleAdditionalSettingType = {
-    now?: boolean | undefined;
+    now?: boolean;
 };
+/**
+ * @typedef {Object} ConsoleAdditionalSettingType
+ * @property {boolean} [now]
+ */

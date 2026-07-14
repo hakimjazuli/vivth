@@ -1,2 +1,11 @@
-export type StylePropRefType<STRTYPE extends string> = ReturnType<typeof WC_StyleProp_bind>;
 import type { WC_StyleProp_bind } from '../web/bindings/WC_StyleProp_bind.mjs';
+export type StylePropRefType<STRTYPE extends string> = ReturnType<typeof WC_StyleProp_bind<STRTYPE>>;
+/**
+ * @import {WC_StyleProp_bind} from '../web/bindings/WC_StyleProp_bind.mjs'
+ */
+/**
+ * @description
+ * - typehelper to constrict [StyleRef](#styleref) values;
+ * @template {string} STRTYPE
+ * @typedef {ReturnType<typeof WC_StyleProp_bind<STRTYPE>>} StylePropRefType
+ */

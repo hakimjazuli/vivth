@@ -1,3 +1,4 @@
+import { TryAsync } from './TryAsync.mjs';
 /**
  * @description
  * - parse then generate file right next to said sql file;
@@ -14,7 +15,7 @@
  * >- `sql` string: basename + 'SQL';
  * @returns {ReturnType<typeof TryAsync<boolean>>}
  */
-export function ParseSQLFile(path: string, fileGenerator?: (arg0: {
+export declare function ParseSQLFile(path: string, fileGenerator?: (arg0: {
     input: Record<string, string>;
     output: Record<string, string>;
     sqlString: string;
@@ -22,4 +23,3 @@ export function ParseSQLFile(path: string, fileGenerator?: (arg0: {
     ext: string;
     content: string;
 }): ReturnType<typeof TryAsync<boolean>>;
-import { TryAsync } from './TryAsync.mjs';

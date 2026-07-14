@@ -36,17 +36,17 @@ export class FileSafe {
 		return !error;
 	};
 	/**
-	 * @param { Parameters<writeFile>[1] } string
+	 * @param { Parameters<typeof writeFile>[1] } string
 	 * @returns { string }
 	 */
 	static #normalize = (string) => {
 		return string.toString().replace(/\s+/, ' ');
 	};
 	/**
-	 * @param {Parameters<FileSafe.write>[0]} outFile
-	 * @param {Parameters<FileSafe.write>[1]} content
-	 * @param {Parameters<FileSafe.write>[2]} [options]
-	 * @param {Parameters<FileSafe.write>[3]} [checkFuzySame]
+	 * @param {Parameters<typeof FileSafe.write>[0]} outFile
+	 * @param {Parameters<typeof FileSafe.write>[1]} content
+	 * @param {Parameters<typeof FileSafe.write>[2]} [options]
+	 * @param {Parameters<typeof FileSafe.write>[3]} [checkFuzySame]
 	 * @returns {Promise<boolean>}
 	 */
 	static #validToOverWrite = async (outFile, content, options, checkFuzySame = true) => {
@@ -72,9 +72,9 @@ export class FileSafe {
 	 * @description
 	 * - method to create file safely by recursively mkdir the dirname of the outFile;
 	 * - also returning promise of result & error as value;
-	 * @param {Parameters<writeFile>[0]} outFile
-	 * @param {Parameters<writeFile>[1]} content
-	 * @param {Parameters<writeFile>[2]} [options]
+	 * @param {Parameters<typeof writeFile>[0]} outFile
+	 * @param {Parameters<typeof writeFile>[1]} content
+	 * @param {Parameters<typeof writeFile>[2]} [options]
 	 * @param {boolean} [checkFuzySame]
 	 * - true: check while normalize consecutive whitespace into singel white space;
 	 * - false(default): check absolute value;
@@ -170,8 +170,8 @@ export class FileSafe {
 	 * @description
 	 * - function to remove dir and file;
 	 * - also returning promise of result & error as value;
-	 * @param {Parameters<rm>[0]} path
-	 * @param {Parameters<rm>[1]} [rmOptions]
+	 * @param {Parameters<typeof rm>[0]} path
+	 * @param {Parameters<typeof rm>[1]} [rmOptions]
 	 * @returns {ReturnType<typeof TryAsync<void>>}
 	 */
 	static rm = async (path, rmOptions) => {
@@ -183,7 +183,7 @@ export class FileSafe {
 	 * @description
 	 * - create directory recursively;
 	 * - also returning promise of result & error as value;
-	 * @param {Parameters<mkdir>[0]} outDir
+	 * @param {Parameters<typeof mkdir>[0]} outDir
 	 * - absolute path
 	 * @returns {ReturnType<typeof TryAsync<string|undefined>>}
 	 * @example

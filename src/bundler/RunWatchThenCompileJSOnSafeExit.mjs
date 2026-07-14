@@ -12,7 +12,7 @@ import { SafeExit } from '../class/SafeExit.mjs';
 
 /**
  * @param {import('node:child_process').ChildProcess} proc
- * @param {Parameters<RunWatchThenCompileJSOnSafeExit>[0]["compileJSargs"]} compileJSargs
+ * @param {Parameters<typeof RunWatchThenCompileJSOnSafeExit>[0]["compileJSargs"]} compileJSargs
  * @param {string} entryPoint
  * @param {string} outDir
  * @param {boolean} showLog

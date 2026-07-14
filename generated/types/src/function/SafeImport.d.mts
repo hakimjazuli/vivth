@@ -18,4 +18,4 @@
  * // add type with: import('vivth/neutral').SafeImportReturnType<import('./something.mjs')>
  * const [importedModule, errorSafeImport] = await SafeImport('/absolute/path/from/Paths.root/something.mjs');
  */
-export function SafeImport<T extends unknown>(path: string): ReturnType<typeof import("./TryAsync.mjs").TryAsync<T>>;
+export declare function SafeImport<T extends any>(path: string): ReturnType<typeof import('./TryAsync.mjs').TryAsync<T>>;

@@ -13,4 +13,4 @@
  * looksLikePath("react"); // false
  * looksLikePath("node:path"); // false
  */
-export function IsStringLooksLikeAPath(spec: string): boolean;
+export declare function IsStringLooksLikeAPath(spec: string): boolean;

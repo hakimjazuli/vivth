@@ -2,7 +2,8 @@
  * @description
  * - type helper to create ref custom style `property`;
  */
-export class WC_StyleProp_bind {
+export declare class WC_StyleProp_bind {
+    #private;
     /**
      * @description
      * @param {HTMLElement} element
@@ -29,7 +30,7 @@ export class WC_StyleProp_bind {
     /**
      * @param  {import('../../typehints/ParametersFollowingN.mts').ParametersFollowingN<CSSStyleDeclaration["setProperty"], 1>} args
      */
-    set: (...args: import("../../typehints/ParametersFollowingN.mts").ParametersFollowingN<CSSStyleDeclaration["setProperty"], 1>) => void;
+    set: (...args: import('../../typehints/ParametersFollowingN.mts').ParametersFollowingN<CSSStyleDeclaration["setProperty"], 1>) => void;
     /**
      * @returns {string|void}
      */
@@ -38,5 +39,4 @@ export class WC_StyleProp_bind {
      * @returns {string|void}
      */
     get priority(): string | void;
-    #private;
 }

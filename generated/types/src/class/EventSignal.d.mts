@@ -1,3 +1,6 @@
+import { Derived } from './Derived.mjs';
+import { Signal } from './Signal.mjs';
+export type VivthCleanup = import('../typehints/VivthCleanup.mjs').VivthCleanup;
 /**
  * @typedef { import('../typehints/VivthCleanup.mjs').VivthCleanup } VivthCleanup
  */
@@ -8,16 +11,9 @@
  * @template {any} TYPE
  * @implements {VivthCleanup}
  */
-export class EventSignal<TYPE extends unknown> implements VivthCleanup {
-    /**
-     * @type {QChannel<string>}
-     */
-    static #q: QChannel<string>;
-    /**
-     * - `Map` of `EventSignal`, using the `stringName` of the `EventSignal_instance` as `key`;
-     * @type {Map<string, EventSignal<any>>}
-     */
-    static #map: Map<string, EventSignal<any>>;
+export declare class EventSignal<TYPE extends any> implements VivthCleanup {
+    #private;
+    vivthCleanup: () => Promise<void>;
     /**
      * @description
      * - the constructor it self is set to `private`;
@@ -36,95 +32,10 @@ export class EventSignal<TYPE extends unknown> implements VivthCleanup {
      */
     static get: (stringName: string) => Promise<EventSignal<any>>;
     /**
-     * @description
-     * - methods of this static property is lazily created;
-     * - remove signal and effect subscription of the named `EventSignal_instance`;
-     */
-    static remove: {
-        /**
-         * @static remove
-         * @description
-         * - remove subscriber from the named `EventSignal_instance`;
-         * @param {string} name
-         * @param {import('./Effect.mjs').Effect} effectInstance
-         * @returns {void}
-         * @example
-         * import { EventSignal } from 'vivth/neutral';
-         *
-         * EventSignal.remove.subscriber('yourEventSignalName', myEffectInstance);
-         */
-        subscriber: (name: string, effectInstance: import("./Effect.mjs").Effect) => void;
-        /**
-         * @static remove
-         * @description
-         * - remove all subscribers from the named `EventSignal_instance`;
-         * @param {string} name
-         * @returns {void}
-         * @example
-         * import { EventSignal } from 'vivth/neutral';
-         *
-         * EventSignal.remove.allSubscribers('yourEventSignalName');
-         */
-        allSubscribers: (name: string) => void;
-        /**
-         * @static remove
-         * @description
-         * - remove reference of the `proxySignals` of the named `EventSignal_instance`;
-         * @param {string} name
-         * @returns {void}
-         * @example
-         * import { EventSignal } from 'vivth/neutral';
-         *
-         * EventSignal.remove.refs('yourEventSignalName');
-         */
-        refs: (name: string) => void;
-    } & {
-        [x: symbol]: {
-            /**
-             * @static remove
-             * @description
-             * - remove subscriber from the named `EventSignal_instance`;
-             * @param {string} name
-             * @param {import('./Effect.mjs').Effect} effectInstance
-             * @returns {void}
-             * @example
-             * import { EventSignal } from 'vivth/neutral';
-             *
-             * EventSignal.remove.subscriber('yourEventSignalName', myEffectInstance);
-             */
-            subscriber: (name: string, effectInstance: import("./Effect.mjs").Effect) => void;
-            /**
-             * @static remove
-             * @description
-             * - remove all subscribers from the named `EventSignal_instance`;
-             * @param {string} name
-             * @returns {void}
-             * @example
-             * import { EventSignal } from 'vivth/neutral';
-             *
-             * EventSignal.remove.allSubscribers('yourEventSignalName');
-             */
-            allSubscribers: (name: string) => void;
-            /**
-             * @static remove
-             * @description
-             * - remove reference of the `proxySignals` of the named `EventSignal_instance`;
-             * @param {string} name
-             * @returns {void}
-             * @example
-             * import { EventSignal } from 'vivth/neutral';
-             *
-             * EventSignal.remove.refs('yourEventSignalName');
-             */
-            refs: (name: string) => void;
-        };
-    };
-    /**
      * @private
      * @param {string} name
      */
     private constructor();
-    vivthCleanup: () => Promise<void>;
     /**
      * @type {string}
      */
@@ -167,6 +78,90 @@ export class EventSignal<TYPE extends unknown> implements VivthCleanup {
      * myEventSignal.dispatch.value = 'hey';
      */
     listener: Derived<TYPE>;
+    /**
+     * @description
+     * - methods of this static property is lazily created;
+     * - remove signal and effect subscription of the named `EventSignal_instance`;
+     */
+    static remove: {
+        /**
+         * @static remove
+         * @description
+         * - remove subscriber from the named `EventSignal_instance`;
+         * @param {string} name
+         * @param {import('./Effect.mjs').Effect} effectInstance
+         * @returns {void}
+         * @example
+         * import { EventSignal } from 'vivth/neutral';
+         *
+         * EventSignal.remove.subscriber('yourEventSignalName', myEffectInstance);
+         */
+        subscriber: (name: string, effectInstance: import('./Effect.mjs').Effect) => void;
+        /**
+         * @static remove
+         * @description
+         * - remove all subscribers from the named `EventSignal_instance`;
+         * @param {string} name
+         * @returns {void}
+         * @example
+         * import { EventSignal } from 'vivth/neutral';
+         *
+         * EventSignal.remove.allSubscribers('yourEventSignalName');
+         */
+        allSubscribers: (name: string) => void;
+        /**
+         * @static remove
+         * @description
+         * - remove reference of the `proxySignals` of the named `EventSignal_instance`;
+         * @param {string} name
+         * @returns {void}
+         * @example
+         * import { EventSignal } from 'vivth/neutral';
+         *
+         * EventSignal.remove.refs('yourEventSignalName');
+         */
+        refs: (name: string) => void;
+    } & {
+        [x: symbol]: {
+            /**
+             * @static remove
+             * @description
+             * - remove subscriber from the named `EventSignal_instance`;
+             * @param {string} name
+             * @param {import('./Effect.mjs').Effect} effectInstance
+             * @returns {void}
+             * @example
+             * import { EventSignal } from 'vivth/neutral';
+             *
+             * EventSignal.remove.subscriber('yourEventSignalName', myEffectInstance);
+             */
+            subscriber: (name: string, effectInstance: import('./Effect.mjs').Effect) => void;
+            /**
+             * @static remove
+             * @description
+             * - remove all subscribers from the named `EventSignal_instance`;
+             * @param {string} name
+             * @returns {void}
+             * @example
+             * import { EventSignal } from 'vivth/neutral';
+             *
+             * EventSignal.remove.allSubscribers('yourEventSignalName');
+             */
+            allSubscribers: (name: string) => void;
+            /**
+             * @static remove
+             * @description
+             * - remove reference of the `proxySignals` of the named `EventSignal_instance`;
+             * @param {string} name
+             * @returns {void}
+             * @example
+             * import { EventSignal } from 'vivth/neutral';
+             *
+             * EventSignal.remove.refs('yourEventSignalName');
+             */
+            refs: (name: string) => void;
+        };
+    };
     remove: {
         /**
          * @instance remove
@@ -186,7 +181,7 @@ export class EventSignal<TYPE extends unknown> implements VivthCleanup {
          * myEventSignal.dispatch.value = 'hey';
          * eventSignal_instance.remove.subscriber(myEffectInstance);
          */
-        subscriber: (effectInstance: import("./Effect.mjs").Effect) => void;
+        subscriber: (effectInstance: import('./Effect.mjs').Effect) => void;
         /**
          * @instance remove
          * @description
@@ -243,7 +238,7 @@ export class EventSignal<TYPE extends unknown> implements VivthCleanup {
              * myEventSignal.dispatch.value = 'hey';
              * eventSignal_instance.remove.subscriber(myEffectInstance);
              */
-            subscriber: (effectInstance: import("./Effect.mjs").Effect) => void;
+            subscriber: (effectInstance: import('./Effect.mjs').Effect) => void;
             /**
              * @instance remove
              * @description
@@ -283,7 +278,3 @@ export class EventSignal<TYPE extends unknown> implements VivthCleanup {
         };
     };
 }
-export type VivthCleanup = import("../typehints/VivthCleanup.mjs").VivthCleanup;
-import { Signal } from './Signal.mjs';
-import { Derived } from './Derived.mjs';
-import { QChannel } from './QChannel.mjs';

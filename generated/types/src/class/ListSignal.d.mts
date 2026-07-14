@@ -1,3 +1,6 @@
+import { Signal } from './Signal.mjs';
+export type ListArg = import('../typehints/ListArg.mjs').ListArg;
+export type MutationType = import('../typehints/MutationType.mjs').MutationType;
 /**
  * @typedef {import('../typehints/ListArg.mjs').ListArg} ListArg
  * @typedef {import('../typehints/MutationType.mjs').MutationType} MutationType
@@ -8,7 +11,8 @@
  * @template {import('../typehints/ListArg.mjs').ListArg} LISTARG
  * @extends {Signal<LISTARG[]>}
  */
-export class ListSignal<LISTARG extends import("../typehints/ListArg.mjs").ListArg> extends Signal<LISTARG[]> {
+export declare class ListSignal<LISTARG extends import('../typehints/ListArg.mjs').ListArg> extends Signal<LISTARG[]> {
+    #private;
     /**
      * @description
      * - Checks if the input is an array whose first item (if present) is a plain object
@@ -32,6 +36,28 @@ export class ListSignal<LISTARG extends import("../typehints/ListArg.mjs").ListA
      * ]);
      */
     constructor(value?: LISTARG[], performanceChangesReport?: ConstructorParameters<typeof Signal<LISTARG[]>>[1]);
+    /**
+     * @description
+     * - reference to original inputed `value`;
+     * @returns {LISTARG[]}
+     * @override
+     */
+    get value(): LISTARG[];
+    /**
+     * @description
+     * - you cannot mannually set`value` `ListSignal_instance`;
+     * @private
+     * @type {LISTARG[]}
+     * @override
+     */
+    private set value(value);
+    /**
+     * @description
+     * - structuredClone of prev
+     * @type {LISTARG[]|undefined}
+     * @override
+     */
+    get prev(): LISTARG[] | undefined;
     /**
      * @description
      * - methods collection that mimics `Array` API;
@@ -282,8 +308,4 @@ export class ListSignal<LISTARG extends import("../typehints/ListArg.mjs").ListA
             pop: () => void;
         };
     };
-    #private;
 }
-export type ListArg = import("../typehints/ListArg.mjs").ListArg;
-export type MutationType = import("../typehints/MutationType.mjs").MutationType;
-import { Signal } from './Signal.mjs';

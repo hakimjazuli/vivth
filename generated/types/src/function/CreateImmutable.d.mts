@@ -1,3 +1,4 @@
+import { TrySync } from './TrySync.mjs';
 /**
  * @description
  * - function for create immutable object;
@@ -23,7 +24,6 @@
  * 	getMap(name_) => mappedObject.get(name_),
  * })
  */
-export function CreateImmutable<PARENT extends Object, OBJECT extends Object>(parent: PARENT, keyName: string, object: (this: PARENT) => OBJECT, { lazy }?: {
-    lazy?: boolean | undefined;
+export declare function CreateImmutable<PARENT extends Object, OBJECT extends Object>(parent: PARENT, keyName: string, object: (this: PARENT) => OBJECT, { lazy }?: {
+    lazy?: boolean;
 }): ReturnType<typeof TrySync<OBJECT>>;
-import { TrySync } from './TrySync.mjs';

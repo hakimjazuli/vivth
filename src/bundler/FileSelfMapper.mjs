@@ -73,7 +73,7 @@ export class FileSelfMapper {
 	 * @param {string} watchPath
 	 * - `relative`(to `Paths.root`) OR `absolute`, both are accepted;
 	 * @param {Object} options
-	 * @param {Omit<Parameters<import('esbuild')["context"]>[0], "write"|"minify"|"format"|"mainFields"|"outfile"|"bundle">} [options.esbuild]
+	 * @param {Omit<Parameters<typeof import('esbuild')["context"]>[0], "write"|"minify"|"format"|"mainFields"|"outfile"|"bundle">} [options.esbuild]
 	 * - `logLimit`: default = `3`;
 	 * - `outFile`: auto determined by comment line on top level of each files;
 	 * - `minify`: determined by file `relativePath`(to dirname of `watchpath`) name included `.min.`;

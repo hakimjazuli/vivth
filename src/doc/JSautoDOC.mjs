@@ -126,9 +126,7 @@ export class JSautoDOC {
 	 * }>})=>Promise<void>} [options.onLastGeneratedCallback]
 	 * - callback to be run on finishing generating document AND exports;
 	 * - only handle that marked as `isLastCalled`;
-	 * @param { import('typescript').CompilerOptions |
-	 * 	import('typescript').ParsedCommandLine
-	 * } [options.jstsconfigs]
+	 * @param {import('typescript/unstable/sync').CompilerOptions} [options.jstsconfigs]
 	 * - type of `ts/jsconfig` to be assigned to existing respective `.json` file;
 	 * @example
 	 * import { JSautoDOC } from 'vivth/node';

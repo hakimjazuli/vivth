@@ -20,8 +20,8 @@
  *
  * await TsToMjs('./myFile.mts', { encoding: 'utf-8', overrideOutputDir: './other/dir' });
  */
-export function TsToMjs(path: string, { overrideOutputDir, encoding, assemblyScriptOptions, }?: {
-    overrideOutputDir?: string | undefined;
-    encoding?: BufferEncoding | undefined;
-    assemblyScriptOptions?: import("../typehints/AutoDocASOptions.mjs").AutoDocASOptions | undefined;
+export declare function TsToMjs(path: string, { overrideOutputDir, encoding, assemblyScriptOptions, }?: {
+    overrideOutputDir?: string;
+    encoding?: BufferEncoding;
+    assemblyScriptOptions?: import('../typehints/AutoDocASOptions.mjs').AutoDocASOptions;
 }): Promise<void>;

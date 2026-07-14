@@ -1,3 +1,8 @@
+import { WC_createElement_bind } from './bindings/WC_createElement_bind.mjs';
+import { WC_createNamedSlot } from './bindings/WC_createNamedSlot.mjs';
+import type { ArrayToKeys } from '../typehints/ArrayToKeys.mjs';
+import type { WC_TagName_type } from './common/WC_TagName_type.mjs';
+export type TypeMap = typeof import('../function/IsTypeOf.mjs').TypeMap;
 /**
  * @import {ArrayToKeys} from '../typehints/ArrayToKeys.mjs'
  * @import {WC_TagName_type} from './common/WC_TagName_type.mjs'
@@ -91,7 +96,7 @@
  * 	static create = this.define('my-webcomponent', this);
  * }
  */
-export function WC_extendsB<BASE_CONSTRUCTOR extends new (...args: any[]) => HTMLElement, STANDARD extends {
+export declare function WC_extendsB<BASE_CONSTRUCTOR extends new (...args: any[]) => HTMLElement, STANDARD extends {
     class?: string;
     style?: string;
     observedAttributes?: readonly string[];
@@ -132,8 +137,3 @@ export function WC_extendsB<BASE_CONSTRUCTOR extends new (...args: any[]) => HTM
     props?: STANDARD["props"];
     define: <TAG extends string, CLASSREF extends RET>(tagName: WC_TagName_type<TAG>, classRef: CLASSREF, elementDefinitionOptions?: ElementDefinitionOptions) => ReturnType<typeof WC_createElement_bind<CLASSREF>>;
 }>(Base: BASE_CONSTRUCTOR, staticMember?: STANDARD): RET;
-export type TypeMap = typeof import("../function/IsTypeOf.mjs").TypeMap;
-import type { ArrayToKeys } from '../typehints/ArrayToKeys.mjs';
-import { WC_createElement_bind } from './bindings/WC_createElement_bind.mjs';
-import { WC_createNamedSlot } from './bindings/WC_createNamedSlot.mjs';
-import type { WC_TagName_type } from './common/WC_TagName_type.mjs';

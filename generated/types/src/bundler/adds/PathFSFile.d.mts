@@ -3,7 +3,8 @@
  * >- the file are added to `asar` AS IS, OR
  * >- transformed according to the `asar.options.transform` value;
  */
-export class PathFSFile {
+export declare class PathFSFile {
+    #private;
     /**
      * @description
      * @param {string} relativePath
@@ -15,7 +16,7 @@ export class PathFSFile {
      *
      * PathFSFile.vivthFile('../CompileAS.mjs');
      */
-    static vivthFile: (relativePath: string, options?: Parameters<typeof import("./PathFSBundles.mjs").PathFSBundles["vivthBundles"]>[1]) => PathFSFile;
+    static vivthFile: (relativePath: string, options?: Parameters<typeof import('./PathFSBundles.mjs').PathFSBundles["vivthBundles"]>[1]) => PathFSFile;
     /**
      * @private
      * @param {Parameters<typeof PathFSFile["vivthFile"]>[0]} relativePath
@@ -36,5 +37,4 @@ export class PathFSFile {
      * @returns {string}
      */
     get callerPath(): string;
-    #private;
 }

@@ -4,4 +4,4 @@
  * @param {Partial<CSSStyleProperties>} properties
  * @returns {import('lit-html/directive.js').DirectiveResult}
  */
-export function WC_litStyleMap(properties: Partial<CSSStyleProperties>): import("lit-html/directive.js").DirectiveResult;
+export declare function WC_litStyleMap(properties: Partial<CSSStyleProperties>): import('lit-html/directive.js').DirectiveResult;

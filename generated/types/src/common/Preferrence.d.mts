@@ -2,7 +2,7 @@
  * @description
  * - class wrapper for `vivth` innerworking preferrences;
  */
-export class Preferrence {
+export declare class Preferrence {
     /**
      * @description
      * - default `vivth` innerworking encoding;
@@ -20,6 +20,6 @@ export class Preferrence {
      * Preferrence.setup({ encoding: 'utf-8' });
      */
     static setup: ({ encoding }: {
-        encoding: (typeof Preferrence)["encoding"];
+        encoding: typeof Preferrence["encoding"];
     }) => void;
 }

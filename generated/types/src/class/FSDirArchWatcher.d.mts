@@ -1,3 +1,4 @@
+export type VivthCleanup = import('../typehints/VivthCleanup.mjs').VivthCleanup;
 /**
  * @typedef {import('../typehints/VivthCleanup.mjs').VivthCleanup} VivthCleanup
  */
@@ -8,7 +9,38 @@
  * @template {any} PASSEDVALUE
  * @implements {VivthCleanup}
  */
-export class FSDirArchWatcher<PASSEDVALUE extends unknown> implements VivthCleanup {
+export declare class FSDirArchWatcher<PASSEDVALUE extends any> implements VivthCleanup {
+    #private;
+    watcher: import("chokidar").FSWatcher;
+    /**
+     * @description
+     * - callback to handle each path;
+     * @type {(
+     *  eventName: import('chokidar/handler.js').EventName,
+     *  path: import('chokidar/handler.js').Path,
+     *  stats?: import('node:fs').Stats,
+     *  ) => Promise<PASSEDVALUE>
+     * }
+     */
+    eachHandler: (eventName: import('chokidar/handler.js').EventName, path: import('chokidar/handler.js').Path, stats?: import('node:fs').Stats) => Promise<PASSEDVALUE>;
+    /**
+     * @description
+     * - callback to handle all registered path;
+     * - debounced to only handle last changes on full registry with:
+     * >- `options.debounce`;
+     * >- `QChannel` `isLastOnQ`;
+     * @type {(
+     * 		alphabeticallySortedSharedValue: {
+     * 			map: Map<string, PASSEDVALUE>,
+     * 			array: Array<[path: string, PASSEDVALUE]>,
+     * 		}
+     * 	) => Promise<void>
+     * }
+     */
+    fullHandler: (alphabeticallySortedSharedValue: {
+        map: Map<string, PASSEDVALUE>;
+        array: Array<[path: string, PASSEDVALUE]>;
+    }) => Promise<void>;
     /**
      * @description
      * @param {string[]} watchPaths
@@ -56,55 +88,8 @@ export class FSDirArchWatcher<PASSEDVALUE extends unknown> implements VivthClean
     constructor(watchPaths: string[], { chokidarOptions, each: eachHandler, full: fullHandler, debounce }: {
         each: FSDirArchWatcher<PASSEDVALUE>["eachHandler"];
         full: FSDirArchWatcher<PASSEDVALUE>["fullHandler"];
-        debounce?: number | undefined;
-        chokidarOptions?: Partial<{
-            persistent: boolean;
-            ignoreInitial: boolean;
-            followSymlinks: boolean;
-            cwd?: string;
-            usePolling: boolean;
-            interval: number;
-            binaryInterval: number;
-            alwaysStat?: boolean;
-            depth?: number;
-            ignorePermissionErrors: boolean;
-            atomic: boolean | number;
-        } & {
-            ignored: import("chokidar").Matcher | import("chokidar").Matcher[];
-            awaitWriteFinish: boolean | Partial<import("chokidar").AWF>;
-        }> | undefined;
+        debounce?: number;
+        chokidarOptions?: import('chokidar').ChokidarOptions;
     });
-    /**
-     * @description
-     * - callback to handle each path;
-     * @type {(
-     *  eventName: import('chokidar/handler.js').EventName,
-     *  path: import('chokidar/handler.js').Path,
-     *  stats?: import('node:fs').Stats,
-     *  ) => Promise<PASSEDVALUE>
-     * }
-     */
-    eachHandler: (eventName: import("chokidar/handler.js").EventName, path: import("chokidar/handler.js").Path, stats?: import("node:fs").Stats) => Promise<PASSEDVALUE>;
-    /**
-     * @description
-     * - callback to handle all registered path;
-     * - debounced to only handle last changes on full registry with:
-     * >- `options.debounce`;
-     * >- `QChannel` `isLastOnQ`;
-     * @type {(
-     * 		alphabeticallySortedSharedValue: {
-     * 			map: Map<string, PASSEDVALUE>,
-     * 			array: Array<[path: string, PASSEDVALUE]>,
-     * 		}
-     * 	) => Promise<void>
-     * }
-     */
-    fullHandler: (alphabeticallySortedSharedValue: {
-        map: Map<string, PASSEDVALUE>;
-        array: Array<[path: string, PASSEDVALUE]>;
-    }) => Promise<void>;
-    watcher: import("chokidar").FSWatcher;
     vivthCleanup: () => Promise<void>;
-    #private;
 }
-export type VivthCleanup = import("../typehints/VivthCleanup.mjs").VivthCleanup;

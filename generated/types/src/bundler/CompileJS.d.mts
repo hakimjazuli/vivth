@@ -1,3 +1,7 @@
+import { EsBundler } from './EsBundler.mjs';
+import { TryAsync } from '../function/TryAsync.mjs';
+export type PlatformKey = 'win32' | 'linux' | 'darwin' | string;
+export type CreateESPlugin = typeof import('./CreateESPlugin.mjs')["CreateESPlugin"];
 /**
  * @description
  * - function to compile `.ts`|`.mts`|`.mjs` file, into a single executable;
@@ -83,27 +87,23 @@
  * 	Console.error({ errorbun });
  * }
  */
-export function CompileJS({ entryPoint, minifyFirst, encoding, outDir, asar, preprocessEntryPoint, bunCompilerArguments, esBundlerPlugins, esbuildOptions, additionalCommandArgument, }: {
+export declare function CompileJS({ entryPoint, minifyFirst, encoding, outDir, asar, preprocessEntryPoint, bunCompilerArguments, esBundlerPlugins, esbuildOptions, additionalCommandArgument, }: {
     entryPoint: string;
-    encoding?: BufferEncoding | undefined;
-    preprocessEntryPoint?: ((entryPointContent: string) => string) | undefined;
-    minifyFirst?: boolean | undefined;
+    encoding?: BufferEncoding;
+    preprocessEntryPoint?: (entryPointContent: string) => string;
+    minifyFirst?: boolean;
     asar?: {
-        InputMetadata?: Parameters<typeof import("@electron/asar")["createPackageFromFiles"]>[3];
-        options?: Parameters<typeof import("@electron/asar")["createPackageFromFiles"]>[4];
-    } | undefined;
+        InputMetadata?: Parameters<typeof import('@electron/asar')["createPackageFromFiles"]>[3];
+        options?: Parameters<typeof import('@electron/asar')["createPackageFromFiles"]>[4];
+    };
     outDir: string;
-    bunCompilerArguments?: Record<string, string | string[]> | undefined;
-    esBundlerPlugins?: import("esbuild").Plugin[] | undefined;
+    bunCompilerArguments?: Record<string, string[] | string>;
+    esBundlerPlugins?: ReturnType<CreateESPlugin>[];
     esbuildOptions?: Parameters<typeof EsBundler>[1];
-    additionalCommandArgument?: string[] | undefined;
+    additionalCommandArgument?: string[];
 }): ReturnType<typeof TryAsync<{
     compileResult: any;
     commandCalled: string | undefined;
     compiledBinFile: string | undefined;
     bundledJSFile: string | undefined;
 }>>;
-export type PlatformKey = "win32" | "linux" | "darwin" | string;
-export type CreateESPlugin = typeof import("./CreateESPlugin.mjs")["CreateESPlugin"];
-import { EsBundler } from './EsBundler.mjs';
-import { TryAsync } from '../function/TryAsync.mjs';

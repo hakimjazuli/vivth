@@ -1,8 +1,13 @@
+import { SafeExit } from './SafeExit.mjs';
+import { Paths } from './Paths.mjs';
+import { WorkerMainThread } from './WorkerMainThread.mjs';
+import { WorkerThread } from './WorkerThread.mjs';
+import { Preferrence } from '../common/Preferrence.mjs';
 /**
  * @description
  * - class with collections of methods/constructors for setting up necessary variables for vivth internal functionalities;
  */
-export class Setup {
+export declare class Setup {
     /**
      * @description
      * - proxy `SafeExit_instance` for Setup
@@ -41,8 +46,8 @@ export class Setup {
      * });
      */
     static workerMain: ({ workerClass, pathValidator }: {
-        workerClass: (typeof WorkerMainThread)["workerClass"];
-        pathValidator: (typeof WorkerMainThread)["pathValidator"];
+        workerClass: typeof WorkerMainThread["workerClass"];
+        pathValidator: typeof WorkerMainThread["pathValidator"];
     }) => void;
     /**
      * @description
@@ -68,7 +73,7 @@ export class Setup {
      * // default behaviour, technically only need to be call for reactive functionality;
      * Setup.enforceEnvMode('dev');
      */
-    static enforceEnvMode: (mode: EnvModeType) => void;
+    static enforceEnvMode: (mode: import("../common/EnvMode.mjs").EnvModeType) => void;
     /**
      * @description
      * - setup `vivth `preffered encoding;
@@ -78,11 +83,6 @@ export class Setup {
      * Setup.preferrence({ encoding: 'utf-8' });
      */
     static preferrence: ({ encoding }: {
-        encoding: (typeof Preferrence)["encoding"];
+        encoding: typeof Preferrence["encoding"];
     }) => void;
 }
-import { SafeExit } from './SafeExit.mjs';
-import { Paths } from './Paths.mjs';
-import { WorkerMainThread } from './WorkerMainThread.mjs';
-import { WorkerThread } from './WorkerThread.mjs';
-import { Preferrence } from '../common/Preferrence.mjs';

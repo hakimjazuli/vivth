@@ -89,7 +89,7 @@ const removeVivthUnBundledCodeBlock = (originalContent_) => {
  * >- removes `BundledV.vivthUnBundledCodeBlock` code block;
  * @param {string} includedInPath
  * - is generalized path, you can freely uses forward or backward slash;
- * @returns {ReturnType<CreateESPlugin>}
+ * @returns {ReturnType<typeof CreateESPlugin>}
  * @example
  * import { ToBundledJSPlugin } from 'vivth/node';
  *

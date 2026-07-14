@@ -16,7 +16,7 @@ import { Preferrence } from '../common/Preferrence.mjs';
 /**
  * @type {(content:string,
  * validExportName:string,
- * ...options:Parameters<correctBeforeParse>)=>
+ * ...options:Parameters<typeof correctBeforeParse>)=>
  * ReturnType<typeof TryAsync<RetType>>}
  */
 const checkIsFunction = async (content, validExportName, path, encoding) => {
@@ -49,7 +49,7 @@ const checkIsFunction = async (content, validExportName, path, encoding) => {
 /**
  * @type {(content:string,
  * validExportName:string,
- * ...options:Parameters<correctBeforeParse>)=>
+ * ...options:Parameters<typeof correctBeforeParse>)=>
  * ReturnType<typeof TryAsync<RetType>>}
  */
 const checkIsClass = async (content, validExportName, path, encoding) => {

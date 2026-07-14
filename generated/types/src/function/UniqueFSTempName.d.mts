@@ -6,4 +6,4 @@
  * @param {string} [fileExtention]
  * @returns {string}
  */
-export function UniqueFSTempName(path: string, fileExtention?: string): string;
+export declare function UniqueFSTempName(path: string, fileExtention?: string): string;

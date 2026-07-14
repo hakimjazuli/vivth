@@ -1,3 +1,4 @@
+import { EventNameSpace } from '../common/EventNameSpace.mjs';
 /**
  * @description
  * - simple object generation function helper for [EventCheck](#eventcheck), for multiple context, eg: `mainThread` <-> `workerThread`;
@@ -9,7 +10,6 @@
  *
  * export const eventObjectPayload = EventObject('worker:exit');
  */
-export function EventObject<NAME extends string>(name: NAME): {
+export declare function EventObject<NAME extends string>(name: NAME): {
     [EventNameSpace]: NAME;
 };
-import { EventNameSpace } from '../common/EventNameSpace.mjs';

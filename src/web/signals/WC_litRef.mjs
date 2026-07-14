@@ -52,7 +52,7 @@ export class WC_litRef extends Signal {
 		return super.value;
 	}
 	/**
-	 * @returns {EL|undefined}
+	 * @type {EL|undefined}
 	 * @override
 	 */
 	set value(_) {

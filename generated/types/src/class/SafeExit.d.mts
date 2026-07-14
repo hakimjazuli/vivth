@@ -4,13 +4,18 @@
  * - singleton;
  * - most of functionality might need to access `SafeExit.instance.exiting`, if you get warning, you can instantiate `SafeExit` before running anything;
  */
-export class SafeExit {
+export declare class SafeExit {
+    #private;
     /**
      * @description
      * - only accessible after instantiation;
      * @type {SafeExit|undefined}
      */
     static instance: SafeExit | undefined;
+    /**
+     * @type {Set<()=>Promise<void>>}
+     */
+    safeCleanUpCBs: Set<() => Promise<void>>;
     /**
      * @description
      * @param {...NodeJS.Signals} eventNames
@@ -26,10 +31,6 @@ export class SafeExit {
      * new SafeExit('SIGINT', 'SIGTERM', ...eventNames);
      */
     constructor(...eventNames: NodeJS.Signals[]);
-    /**
-     * @type {Set<()=>Promise<void>>}
-     */
-    safeCleanUpCBs: Set<() => Promise<void>>;
     /**
      * @description
      * - `SafeExit` ${eventName}.Callback registration;
@@ -65,5 +66,4 @@ export class SafeExit {
      */
     removeCallback: (cb: () => (Promise<void>)) => void;
     triggerExit: () => Promise<void>;
-    #private;
 }

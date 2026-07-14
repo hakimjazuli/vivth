@@ -1,3 +1,5 @@
+import { TrySync } from '../function/TrySync.mjs';
+export type LitExpKeyType = import("../typehints/LitExpKeyType.mjs").LitExpKeyType;
 /**
  * @description
  * - class helper to created opionated regex helper;
@@ -10,7 +12,8 @@
  * - made primarily for generating string file, that are purely managed programatically;
  * @template {LitExpKeyType} KEYS
  */
-export class LitExp<KEYS extends import("../typehints/LitExpKeyType.mjs").LitExpKeyType> {
+export declare class LitExp<KEYS extends LitExpKeyType> {
+    #private;
     /**
      * @typedef {import("../typehints/LitExpKeyType.mjs").LitExpKeyType} LitExpKeyType
      */
@@ -66,23 +69,7 @@ export class LitExp<KEYS extends import("../typehints/LitExpKeyType.mjs").LitExp
      * 	// recommended to end the template literal with any string but `key`;
      * })()
      */
-    static prepare<KEYS_1 extends import("../typehints/LitExpKeyType.mjs").LitExpKeyType>(keysAndDefaultValuePair: KEYS_1): ReturnType<typeof TrySync<(templateStringArray: TemplateStringsArray, ...values: (keyof KEYS_1)[]) => LitExp<KEYS_1>>>;
-    /**
-     * @template {LitExpKeyType} KEYS
-     * @param {KEYS} instance_rules
-     * @param {(keyof KEYS)[]} intance_values
-     * @param {(value:keyof KEYS, regex:RegExp|false)=>ReturnType<typeof TrySync<string>>} valueHandler
-     * @param {TemplateStringsArray} strings
-     * @returns {ReturnType<typeof TrySync<string[]>>}
-     */
-    static #processTemplate<KEYS_1 extends import("../typehints/LitExpKeyType.mjs").LitExpKeyType>(instance_rules: KEYS_1, intance_values: (keyof KEYS_1)[], valueHandler: (value: keyof KEYS_1, regex: RegExp | false) => ReturnType<typeof TrySync<string>>, strings: TemplateStringsArray): ReturnType<typeof TrySync<string[]>>;
-    /**
-     * @template {LitExpKeyType} KEYS
-     * @param {RegExp|false} regex
-     * @param {keyof KEYS} value
-     * @returns {ReturnType<typeof TrySync<string>>}
-     */
-    static #namedChapture<KEYS_1 extends import("../typehints/LitExpKeyType.mjs").LitExpKeyType>(value: keyof KEYS_1, regex: RegExp | false): ReturnType<typeof TrySync<string>>;
+    static prepare<KEYS extends LitExpKeyType>(keysAndDefaultValuePair: KEYS): ReturnType<typeof TrySync<(templateStringArray: TemplateStringsArray, ...values: (keyof KEYS)[]) => LitExp<KEYS>>>;
     /**
      * @private
      * @param {KEYS} keys
@@ -246,7 +233,7 @@ export class LitExp<KEYS extends import("../typehints/LitExpKeyType.mjs").LitExp
          *	})
          * })()
          */
-        matchedAllAndGrouped: (string: Parameters<LitExp<KEYS>["evaluate"]["execGroups"]>[0], options: Omit<Parameters<LitExp<KEYS>["evaluate"]["execGroups"]>[1], "absoluteLeadAndFollowing">) => ReturnType<typeof TrySync<import("../typehints/LitExpResultType.mjs").LitExpResultType<KEYS>>>;
+        matchedAllAndGrouped: (string: Parameters<LitExp<KEYS>["evaluate"]["execGroups"]>[0], options: Omit<Parameters<LitExp<KEYS>["evaluate"]["execGroups"]>[1], 'absoluteLeadAndFollowing'>) => ReturnType<typeof TrySync<import('../typehints/LitExpResultType.mjs').LitExpResultType<KEYS>>>;
     } & {
         [x: symbol]: {
             /**
@@ -345,9 +332,7 @@ export class LitExp<KEYS extends import("../typehints/LitExpKeyType.mjs").LitExp
              *	})
              * })()
              */
-            matchedAllAndGrouped: (string: Parameters<LitExp<KEYS>["evaluate"]["execGroups"]>[0], options: Omit<Parameters<LitExp<KEYS>["evaluate"]["execGroups"]>[1], "absoluteLeadAndFollowing">) => ReturnType<typeof TrySync<import("../typehints/LitExpResultType.mjs").LitExpResultType<KEYS>>>;
+            matchedAllAndGrouped: (string: Parameters<LitExp<KEYS>["evaluate"]["execGroups"]>[0], options: Omit<Parameters<LitExp<KEYS>["evaluate"]["execGroups"]>[1], 'absoluteLeadAndFollowing'>) => ReturnType<typeof TrySync<import('../typehints/LitExpResultType.mjs').LitExpResultType<KEYS>>>;
         };
     };
-    #private;
 }
-import { TrySync } from '../function/TrySync.mjs';

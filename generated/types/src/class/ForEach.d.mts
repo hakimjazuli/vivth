@@ -1,10 +1,11 @@
+import { TrySync } from '../function/TrySync.mjs';
 /**
  * @description
  * - is collections of safe `.forEach` wrapper;
  * >- via [TrySync](#trysync);
  */
-export class ForEach {
-    static #handler: (iter: any, handler: any) => any[];
+export declare class ForEach {
+    #private;
     /**
      * @description
      * - static method helper for `array` to be iterate safely;
@@ -54,4 +55,3 @@ export class ForEach {
      */
     static map<K, V, R>(map: Map<K, V>, handler: (value: V, key: K, map: Map<K, V>) => R): Array<ReturnType<typeof TrySync<R>>>;
 }
-import { TrySync } from '../function/TrySync.mjs';

@@ -1,3 +1,4 @@
+export type VivthCleanup = import('../typehints/VivthCleanup.mjs').VivthCleanup;
 /**
  * @typedef {import('../typehints/VivthCleanup.mjs').VivthCleanup} VivthCleanup
  */
@@ -39,81 +40,14 @@
  * - for runtime example see file `/dev/auto/` on source code;
  * @implements {VivthCleanup}
  */
-export class FileSelfMapper implements VivthCleanup {
-    /**
-     * @param { string } path
-     * @param { (path:{mapTo:string, src:string}, content:string)=>(string|false) } [postprosess]
-     * @returns { Promise<void> }
-     */
-    static #writeHTML: (path: string, postprosess?: (path: {
-        mapTo: string;
-        src: string;
-    }, content: string) => (string | false)) => Promise<void>;
-    /**
-     * @param { string } path
-     * @param { (path:{mapTo:string, src:string}, content:string)=>(string|false) } [postprosess]
-     * @returns { Promise<void> }
-     */
-    static #writeCommon: (path: string, postprosess?: (path: {
-        mapTo: string;
-        src: string;
-    }, content: string) => (string | false)) => Promise<void>;
-    /**
-     * @param { string } path
-     * @returns { Promise<void> }
-     */
-    static #bundleSCSS: (path: string) => Promise<void>;
-    /**
-     * @param {string[]} esbuildExternal
-     * @returns {Set<string>}
-     */
-    static #createBrowserExternals: (esbuildExternal: string[]) => Set<string>;
-    /**
-     * @param {()=>boolean} isLastOnQ
-     * @param {string} path
-     * @param {string} tempPath
-     * @param {string} target
-     * @returns {Promise<void>}
-     */
-    static #onJSDependencyChanges1: (isLastOnQ: () => boolean, path: string, tempPath: string, target: string) => Promise<void>;
-    /**
-     * @param {()=>boolean} isLastOnQ
-     * @param {string} path
-     * @param {string} tempPath
-     * @param {QChannel<string>} q
-     * @returns {Promise<void>}
-     */
-    static #onJSDependencyChanges0: (isLastOnQ: () => boolean, path: string, tempPath: string, q: QChannel<string>) => Promise<void>;
-    /**
-     * @param {string} tempPath
-     * @param {string} path
-     * @param {QChannel<string>} q
-     * @returns {Promise<void>}
-     */
-    static #onJSDependencyChanges: (tempPath: string, path: string, q: QChannel<string>) => Promise<void>;
-    /**
-     * @param { string } path
-     * @returns { Promise<{
-     * 	targetPaths: Set<string>,
-     * 	content: string,
-     * }> }
-     */
-    static #getTargetPath: (path: string) => Promise<{
-        targetPaths: Set<string>;
-        content: string;
-    }>;
-    /**
-     * @param {string} watcherFullPath
-     * @param {string} path
-     * @returns { string }
-     */
-    static #getRelative: (watcherFullPath: string, path: string) => string;
+export declare class FileSelfMapper implements VivthCleanup {
+    #private;
     /**
      * @description
      * @param {string} watchPath
      * - `relative`(to `Paths.root`) OR `absolute`, both are accepted;
      * @param {Object} options
-     * @param {Omit<Parameters<import('esbuild')["context"]>[0], "write"|"minify"|"format"|"mainFields"|"outfile"|"bundle">} [options.esbuild]
+     * @param {Omit<Parameters<typeof import('esbuild')["context"]>[0], "write"|"minify"|"format"|"mainFields"|"outfile"|"bundle">} [options.esbuild]
      * - `logLimit`: default = `3`;
      * - `outFile`: auto determined by comment line on top level of each files;
      * - `minify`: determined by file `relativePath`(to dirname of `watchpath`) name included `.min.`;
@@ -136,15 +70,12 @@ export class FileSelfMapper implements VivthCleanup {
      * });
      */
     constructor(watchPath: string, options: {
-        esbuild?: Omit<import("esbuild").SameShape<import("esbuild").BuildOptions, import("esbuild").BuildOptions>, "bundle" | "outfile" | "mainFields" | "write" | "format" | "minify"> | undefined;
-        deleteTempFilesAfterExit?: boolean | undefined;
-        postProcessDirectCopy?: ((path: {
+        esbuild?: Omit<Parameters<typeof import('esbuild')["context"]>[0], "write" | "minify" | "format" | "mainFields" | "outfile" | "bundle">;
+        deleteTempFilesAfterExit?: boolean;
+        postProcessDirectCopy?: (path: {
             mapTo: string;
             src: string;
-        }, content: string) => (string | false)) | undefined;
+        }, content: string) => (string | false);
     });
     vivthCleanup: () => Promise<void>;
-    #private;
 }
-export type VivthCleanup = import("../typehints/VivthCleanup.mjs").VivthCleanup;
-import { QChannel } from '../class/QChannel.mjs';

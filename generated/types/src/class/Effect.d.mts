@@ -1,10 +1,13 @@
+import { Signal } from './Signal.mjs';
+import { FactoryKey } from '../common/FactoryKey.mjs';
+export type VivthCleanup = import('../typehints/VivthCleanup.mjs').VivthCleanup;
 /**
  * @typedef { import('../typehints/VivthCleanup.mjs').VivthCleanup } VivthCleanup
  */
 /**
  * @type {Map<Effect, Set<Signal<any>>>}
  */
-export const mapOfEffects: Map<Effect, Set<Signal<any>>>;
+export declare const mapOfEffects: Map<Effect, Set<Signal<any>>>;
 /**
  * @description
  * - a class for creating effect;
@@ -15,11 +18,9 @@ export const mapOfEffects: Map<Effect, Set<Signal<any>>>;
  * >- can dynamically subscribes to signal, even on conditionals, that are not run during first run;
  * @implements {VivthCleanup}
  */
-export class Effect implements VivthCleanup {
-    /**
-     * @type {WeakMap<Object, ()=>void>}
-     */
-    static #mapCurrentCleanupCallback: WeakMap<Object, () => void>;
+export declare class Effect implements VivthCleanup {
+    #private;
+    vivthCleanup: () => Promise<void>;
     /**
      * @description
      * @param {(
@@ -50,7 +51,6 @@ export class Effect implements VivthCleanup {
      * count.value++;
      */
     constructor(effect: (arg0: Effect["options"]) => Promise<void>, maxTimelapseBeingDebounced?: number);
-    vivthCleanup: () => Promise<void>;
     /**
      * @description
      * - collections of methods to handle effect calls of this instance;
@@ -165,7 +165,7 @@ export class Effect implements VivthCleanup {
          * // optional call from outside callback;
          * e.options.removeCollection(f)
          */
-        removeCollection: (collectionInstance: import("./SignalCollection.mjs").SignalCollection<Record<string, Signal<any>>>) => void;
+        removeCollection: (collectionInstance: import('./SignalCollection.mjs').SignalCollection<Record<string, Signal<any>>>) => void;
         /**
          * @instance options
          * @description
@@ -206,8 +206,4 @@ export class Effect implements VivthCleanup {
      * effect.run();
      */
     run: () => void;
-    #private;
 }
-export type VivthCleanup = import("../typehints/VivthCleanup.mjs").VivthCleanup;
-import { Signal } from './Signal.mjs';
-import { FactoryKey } from '../common/FactoryKey.mjs';

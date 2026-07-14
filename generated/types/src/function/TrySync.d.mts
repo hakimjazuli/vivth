@@ -14,4 +14,4 @@
  * 	return readFileSync('./some/file.txt', 'utf-8');
  * });
  */
-export function TrySync<RESULT>(function_: () => RESULT): [RESULT, undefined] | [undefined, Error];
+export declare function TrySync<RESULT>(function_: () => RESULT): [RESULT, undefined] | [undefined, Error];

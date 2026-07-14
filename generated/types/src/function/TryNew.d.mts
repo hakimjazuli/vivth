@@ -15,4 +15,4 @@
  *   // do something with instance safely;
  * }
  */
-export function TryNew<CLASSREF extends new (...args: any[]) => any>(classReference: CLASSREF, ...params: ConstructorParameters<CLASSREF>): [InstanceType<CLASSREF>, undefined] | [undefined, Error];
+export declare function TryNew<CLASSREF extends new (...args: any[]) => any>(classReference: CLASSREF, ...params: ConstructorParameters<CLASSREF>): [InstanceType<CLASSREF>, undefined] | [undefined, Error];

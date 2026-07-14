@@ -14,7 +14,7 @@
  *
  * await Base64URLFromFile(join(Paths.root, '/path/to/file'));
  */
-export function Base64URLFromFile(filePath: string): Promise<{
+export declare function Base64URLFromFile(filePath: string): Promise<{
     data: string;
     mime: string | false;
 } | undefined>;

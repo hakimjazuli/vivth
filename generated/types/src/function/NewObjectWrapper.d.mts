@@ -7,4 +7,4 @@
  * @param {(obj:OBJ)=>MODIFIED} callback
  * @returns {MODIFIED}
  */
-export function NewObjectWrapper<OBJ extends Object, MODIFIED extends unknown>(object: OBJ, callback: (obj: OBJ) => MODIFIED): MODIFIED;
+export declare function NewObjectWrapper<OBJ extends Object, MODIFIED extends any>(object: OBJ, callback: (obj: OBJ) => MODIFIED): MODIFIED;

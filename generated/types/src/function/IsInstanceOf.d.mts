@@ -22,4 +22,4 @@
  *  //
  * };
  */
-export function IsInstanceOf<OBJ>(obj: unknown, classRef: new (...args: any[]) => OBJ): obj is OBJ;
+export declare function IsInstanceOf<OBJ>(obj: unknown, classRef: new (...args: any[]) => OBJ): obj is OBJ;

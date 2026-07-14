@@ -1,3 +1,7 @@
+import { Derived } from './Derived.mjs';
+export type WorkerResult<POST> = import('./WorkerResult.mjs').WorkerResult<POST>;
+export type WorkerThread<RECEIVE, POST> = import('./WorkerThread.mjs').WorkerThread<RECEIVE, POST>;
+export type VivthCleanup = import('../typehints/VivthCleanup.mjs').VivthCleanup;
 /**
  * it supposed to be able to call on browser too
  * ```js
@@ -15,20 +19,8 @@
  * @template {WorkerThread<any, any>} WT
  * @implements {VivthCleanup}
  */
-export class WorkerMainThread<WT extends import("./WorkerThread.mjs").WorkerThread<any, any>> implements VivthCleanup {
-    /**
-     * @template POST
-     * @typedef {import('./WorkerResult.mjs').WorkerResult<POST>} WorkerResult
-     */
-    /**
-     * @template RECEIVE
-     * @template POST
-     * @typedef {import('./WorkerThread.mjs').WorkerThread<RECEIVE, POST>} WorkerThread
-     */
-    /**
-     * @type {boolean}
-     */
-    static #isRegistered: boolean;
+export declare class WorkerMainThread<WT extends WorkerThread<any, any>> implements VivthCleanup {
+    #private;
     /**
      * @description
      * - need to be called first, before any `WorkerMainThread` instantiation:
@@ -67,8 +59,8 @@ export class WorkerMainThread<WT extends import("./WorkerThread.mjs").WorkerThre
      * });
      */
     static setup: ({ workerClass, pathValidator }: {
-        workerClass: (typeof WorkerMainThread)["workerClass"];
-        pathValidator: (typeof WorkerMainThread)["pathValidator"];
+        workerClass: typeof WorkerMainThread["workerClass"];
+        pathValidator: typeof WorkerMainThread["pathValidator"];
     }) => void;
     /**
      * @description
@@ -76,7 +68,7 @@ export class WorkerMainThread<WT extends import("./WorkerThread.mjs").WorkerThre
      * - edit via `setup`;
      * @type {typeof Worker|typeof import('node:worker_threads').Worker}
      */
-    static workerClass: typeof Worker | typeof import("node:worker_threads").Worker;
+    static workerClass: typeof Worker | typeof import('node:worker_threads').Worker;
     /**
      * @description
      * - reference for validating path;
@@ -87,19 +79,6 @@ export class WorkerMainThread<WT extends import("./WorkerThread.mjs").WorkerThre
         worker: string;
         root: string;
     }) => Promise<string>;
-    static #options: import("node:worker_threads").WorkerOptions & {
-        type?: "module";
-    };
-    /**
-     * @template {WorkerThread<any, any>} WT
-     * @param {string} handler
-     * @param { WorkerOptions
-     * | import('node:worker_threads').WorkerOptions} options
-     * @param {WorkerMainThread<WT>} worker
-     * @param {(any:any)=>void} listener
-     * @returns {Promise<void>}
-     */
-    static #workerFilehandler<WT_1 extends import("./WorkerThread.mjs").WorkerThread<any, any>>(handler: string, options: WorkerOptions | import("node:worker_threads").WorkerOptions, worker: WorkerMainThread<WT_1>, listener: (any: any) => void): Promise<void>;
     /**
      * @description
      * - create Worker_instance;
@@ -110,7 +89,7 @@ export class WorkerMainThread<WT extends import("./WorkerThread.mjs").WorkerThre
      *
      * export const myDoubleWorker = new WorkerMainThread(PathFSBundles.vivthBundles('./doubleWorkerThread.mjs'));
      */
-    constructor(handler: import("../bundler/adds/PathFSBundles.mjs").PathFSBundles, options?: Omit<WorkerOptions | import("node:worker_threads").WorkerOptions, "eval" | "type">);
+    constructor(handler: import('../bundler/adds/PathFSBundles.mjs').PathFSBundles, options?: Omit<WorkerOptions | import('node:worker_threads').WorkerOptions, 'eval' | 'type'>);
     /**
      * @description
      * - terminate all signals that are used on this instance;
@@ -131,7 +110,7 @@ export class WorkerMainThread<WT extends import("./WorkerThread.mjs").WorkerThre
      * 	// code
      * })
      */
-    receiverSignal: Derived<import("./WorkerResult.mjs").WorkerResult<WT["POST"]>>;
+    receiverSignal: Derived<WorkerResult<WT["POST"]>>;
     /**
      * @description
      * - callback to send message to the worker thread;
@@ -142,7 +121,4 @@ export class WorkerMainThread<WT extends import("./WorkerThread.mjs").WorkerThre
      * myDoubleWorker.postMessage(90);
      */
     postMessage: (event: WT["RECEIVE"]) => void;
-    #private;
 }
-export type VivthCleanup = import("../typehints/VivthCleanup.mjs").VivthCleanup;
-import { Derived } from './Derived.mjs';

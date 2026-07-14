@@ -14,4 +14,4 @@
  *
  * const mySignal = autoCleanedUpSignal(1);
  */
-export function ObjectRegistrar<ARGS extends any[], OBJ extends unknown>(registrarCallback: (...args: ARGS) => OBJ): Parameters<typeof ObjectRegistrar<ARGS, OBJ>>[0];
+export declare function ObjectRegistrar<ARGS extends any[], OBJ extends any>(registrarCallback: (...args: ARGS) => OBJ): Parameters<typeof ObjectRegistrar<ARGS, OBJ>>[0];

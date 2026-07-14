@@ -43,7 +43,7 @@ export class WorkerThread {
 	 * - need to be called and exported as new `WorkerThread` class reference;
 	 * @template RECEIVE
 	 * @template POST
-	 * @param {{parentPort:import('node:worker_threads')["parentPort"]}} refs
+	 * @param {{parentPort:typeof import('node:worker_threads')["parentPort"]}} refs
 	 * -example:
 	 * ```js
 	 * import { parentPort } from 'node:worker_threads';

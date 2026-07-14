@@ -1,1 +1,1 @@
-export function emptyBufferValue(): Buffer<ArrayBuffer>;
+export declare const emptyBufferValue: () => Buffer<ArrayBuffer>;

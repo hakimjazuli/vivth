@@ -3,4 +3,4 @@
  * - namespacing for event, string as ID, related API;
  * @type {'vivthEvent'}
  */
-export const EventNameSpace: "vivthEvent";
+export declare const EventNameSpace: 'vivthEvent';

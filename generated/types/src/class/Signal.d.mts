@@ -1,23 +1,22 @@
+import { Effect } from './Effect.mjs';
+import { DataLog } from './DataLog.mjs';
+export type VivthCleanup = import('../typehints/VivthCleanup.mjs').VivthCleanup;
 /**
  * @typedef { import('../typehints/VivthCleanup.mjs').VivthCleanup } VivthCleanup
  */
 /**
  * @type {Set<Signal<any>>}
  */
-export const setOFSignals: Set<Signal<any>>;
+export declare const setOFSignals: Set<Signal<any>>;
 /**
  * @description
  * - a class for creating effect to signals;
  * @template VALUE
  * @implements {VivthCleanup}
  */
-export class Signal<VALUE> implements VivthCleanup {
-    /**
-     * @param {Signal<any>} signalInstance
-     * @param {(error:Error|undefined)=>void} [afterCompletion]
-     * @returns {Promise<void>}
-     */
-    static #notify: (signalInstance: Signal<any>, afterCompletion?: (error: Error | undefined) => void) => Promise<void>;
+export declare class Signal<VALUE> implements VivthCleanup {
+    #private;
+    vivthCleanup: () => Promise<void>;
     /**
      * @description
      * - create a `Signal`;
@@ -31,7 +30,6 @@ export class Signal<VALUE> implements VivthCleanup {
      * const count = new Signal(0);
      */
     constructor(value: VALUE, performanceChangesReport?: (data: DataLog<VALUE>) => void);
-    vivthCleanup: () => Promise<void>;
     /**
      * @description
      * - subsrcibers reference of this instance;
@@ -166,19 +164,6 @@ export class Signal<VALUE> implements VivthCleanup {
     get prev(): VALUE | undefined;
     /**
      * @description
-     * - assign new value then automatically notify all subscribers;
-     * @type {VALUE}
-     * @example
-     * import { Signal } from 'vivth/neutral';
-     *
-     * const count = new Signal(0);
-     * count.value++;
-     * // OR
-     * count.value = 9;
-     */
-    set value(newValue: VALUE);
-    /**
-     * @description
      * - value after change;
      * @returns {VALUE}
      * @example
@@ -195,8 +180,17 @@ export class Signal<VALUE> implements VivthCleanup {
      * })
      */
     get value(): VALUE;
-    #private;
+    /**
+     * @description
+     * - assign new value then automatically notify all subscribers;
+     * @type {VALUE}
+     * @example
+     * import { Signal } from 'vivth/neutral';
+     *
+     * const count = new Signal(0);
+     * count.value++;
+     * // OR
+     * count.value = 9;
+     */
+    set value(newValue: VALUE);
 }
-export type VivthCleanup = import("../typehints/VivthCleanup.mjs").VivthCleanup;
-import { Effect } from './Effect.mjs';
-import { DataLog } from './DataLog.mjs';

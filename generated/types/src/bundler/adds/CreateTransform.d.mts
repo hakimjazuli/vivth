@@ -1,3 +1,4 @@
+import { Transform } from 'node:stream';
 /**
  * @description
  * - function helper to turn string into `node:stream.Transform` instance;
@@ -22,5 +23,4 @@
  * };
  * //
  */
-export function CreateTransform(content: string): Transform;
-import { Transform } from 'node:stream';
+export declare function CreateTransform(content: string): Transform;

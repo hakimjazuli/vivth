@@ -19,7 +19,7 @@
  * 	// code
  * })
  */
-export function ForOfAsync<T extends unknown, RETURNTYPE extends unknown>(iterable: Iterable<T>, handlerCallback: (value: T, options: {
+export declare function ForOfAsync<T extends any, RETURNTYPE extends any>(iterable: Iterable<T>, handlerCallback: (value: T, options: {
     prevError: Error | undefined;
     breakEarly: () => void;
 }) => Promise<RETURNTYPE | undefined>): Promise<[Set<RETURNTYPE>, Set<Error>]>;

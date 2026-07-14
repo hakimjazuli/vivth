@@ -6,4 +6,4 @@
  * @param {string} distPath - The distribution folder name to exclude.
  * @returns {import('vite').PluginOption}
  */
-export function ViteGetAllHTMLFile(dirPath: string, distPath: string): import("vite").PluginOption;
+export declare function ViteGetAllHTMLFile(dirPath: string, distPath: string): import('vite').PluginOption;

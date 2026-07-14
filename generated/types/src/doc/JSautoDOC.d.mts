@@ -1,4 +1,21 @@
-export const multiExportEntryPointsPath: "./generated/vivth/exports/";
+import { FSDirArchWatcher } from '../class/FSDirArchWatcher.mjs';
+import { parsedFileForDOC } from './parsedFileForDOC.mjs';
+export declare const multiExportEntryPointsPath = "./generated/vivth/exports/";
+export type returnTypeStringType = 'readme' | *  'handledJS';
+export type FSDirArchWatcher__ = FSDirArchWatcher<{
+    path: string;
+    parsed: undefined;
+    ext: `.${string}`;
+    type: returnTypeStringType;
+    readme?: string;
+} | {
+    path: string;
+    parsed: parsedFileForDOC;
+    ext: string;
+    type: returnTypeStringType;
+    readme?: string;
+}>;
+export type VivthCleanup = import('../typehints/VivthCleanup.mjs').VivthCleanup;
 /**
  * @typedef {import('../typehints/VivthCleanup.mjs').VivthCleanup} VivthCleanup
  */
@@ -42,31 +59,9 @@ export const multiExportEntryPointsPath: "./generated/vivth/exports/";
  * - for runtime example see file `/dev/auto-doc.mjs` on source code;
  * @implements {VivthCleanup}
  */
-export class JSautoDOC implements VivthCleanup {
-    /**
-     * @typedef {'readme' |
-     *  'handledJS'
-     * } returnTypeStringType
-     */
-    /**
-     * @typedef {FSDirArchWatcher<{
-     *     path: string;
-     *     parsed: undefined;
-     *     ext: `.${string}`;
-     *     type: returnTypeStringType;
-     *     readme?:string;
-     * } | {
-     *     path: string;
-     *     parsed: parsedFileForDOC;
-     *     ext: string;
-     *     type: returnTypeStringType;
-     *     readme?:string;
-     * }>} FSDirArchWatcher__
-     */
-    /**
-     * @type {JSautoDOC|undefined}
-     */
-    static #instance: JSautoDOC | undefined;
+export declare class JSautoDOC implements VivthCleanup {
+    #private;
+    vivthCleanup: () => Promise<void>;
     /**
      * @description
      * @param {Object} options
@@ -95,9 +90,7 @@ export class JSautoDOC implements VivthCleanup {
      * }>})=>Promise<void>} [options.onLastGeneratedCallback]
      * - callback to be run on finishing generating document AND exports;
      * - only handle that marked as `isLastCalled`;
-     * @param { import('typescript').CompilerOptions |
-     * 	import('typescript').ParsedCommandLine
-     * } [options.jstsconfigs]
+     * @param {import('typescript/unstable/sync').CompilerOptions} [options.jstsconfigs]
      * - type of `ts/jsconfig` to be assigned to existing respective `.json` file;
      * @example
      * import { JSautoDOC } from 'vivth/node';
@@ -114,44 +107,28 @@ export class JSautoDOC implements VivthCleanup {
      */
     constructor({ src, onLastGeneratedCallback, tableOfContentTitle, copyright, maxDebounceForGeneratingDocAndExport, assemblyScriptOptions, chokidarOptions, jstsconfigs, }: {
         src: string;
-        copyright?: string | undefined;
-        tableOfContentTitle?: string | undefined;
-        maxDebounceForGeneratingDocAndExport?: number | undefined;
-        chokidarOptions?: Partial<{
-            persistent: boolean;
-            ignoreInitial: boolean;
-            followSymlinks: boolean;
-            cwd?: string;
-            usePolling: boolean;
-            interval: number;
-            binaryInterval: number;
-            alwaysStat?: boolean;
-            depth?: number;
-            ignorePermissionErrors: boolean;
-            atomic: boolean | number;
-        } & {
-            ignored: import("chokidar").Matcher | import("chokidar").Matcher[];
-            awaitWriteFinish: boolean | Partial<import("chokidar").AWF>;
-        }> | undefined;
-        assemblyScriptOptions?: import("../typehints/AutoDocASOptions.mjs").AutoDocASOptions | undefined;
-        onLastGeneratedCallback?: ((arg0: {
+        copyright?: string;
+        tableOfContentTitle?: string;
+        maxDebounceForGeneratingDocAndExport?: number;
+        chokidarOptions?: import('chokidar').ChokidarOptions;
+        assemblyScriptOptions?: import('../typehints/AutoDocASOptions.mjs').AutoDocASOptions;
+        onLastGeneratedCallback?: (arg0: {
             map: Map<string, {
                 path: string;
                 parsed: undefined;
                 ext: `.${string}`;
-                type: "readme" | "handledJS";
+                type: returnTypeStringType;
                 readme?: string;
             } | {
                 path: string;
                 parsed: parsedFileForDOC;
                 ext: string;
-                type: "readme" | "handledJS";
+                type: returnTypeStringType;
                 readme?: string;
             }>;
-        }) => Promise<void>) | undefined;
-        jstsconfigs?: import("typescript").CompilerOptions | import("typescript").ParsedCommandLine | undefined;
+        }) => Promise<void>;
+        jstsconfigs?: import('typescript/unstable/sync').CompilerOptions;
     });
-    vivthCleanup: () => Promise<void>;
     /**
      * @type { FSDirArchWatcher<any>|undefined }
      */
@@ -165,8 +142,4 @@ export class JSautoDOC implements VivthCleanup {
         isBeingHandled: boolean;
         content?: string;
     }>;
-    #private;
 }
-export type VivthCleanup = import("../typehints/VivthCleanup.mjs").VivthCleanup;
-import { FSDirArchWatcher } from '../class/FSDirArchWatcher.mjs';
-import { parsedFileForDOC } from './parsedFileForDOC.mjs';

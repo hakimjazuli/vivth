@@ -1,3 +1,4 @@
+import { Signal } from '../../class/Signal.mjs';
 /**
  * @description
  * - helper function to create element;
@@ -32,10 +33,9 @@
  * // fine grain modify
  * text.nodeValue = 'hello world';
  */
-export function E<K extends keyof HTMLElementTagNameMap, RR extends Partial<HTMLElementTagNameMap[K]> & Record<string, any>>(tagName: K, attrs?: (Omit<Record<string, string | Signal<string>>, "style" | "class"> & {
+export declare function E<K extends keyof HTMLElementTagNameMap, RR extends Partial<HTMLElementTagNameMap[K]> & Record<string, any>>(tagName: K, attrs?: (Omit<Record<string, string | Signal<string>>, 'style' | 'class'> & {
     style?: string;
     class?: string;
 }), props?: RR, childNodes?: ChildNode[] | Signal<ChildNode[]>): HTMLElementTagNameMap[K] & RR & {
     onDisconnected: () => void;
 };
-import { Signal } from '../../class/Signal.mjs';

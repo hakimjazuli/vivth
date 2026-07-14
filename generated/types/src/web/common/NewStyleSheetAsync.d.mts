@@ -12,4 +12,4 @@
  * @param {ConstructorParameters<typeof CSSStyleSheet>} arg1
  * @returns {Promise<CSSStyleSheet>}
  */
-export function NewStyleSheetAsync(string: string, options?: CSSStyleSheetInit | undefined): Promise<CSSStyleSheet>;
+export declare function NewStyleSheetAsync(string: string, ...arg1: ConstructorParameters<typeof CSSStyleSheet>): Promise<CSSStyleSheet>;

@@ -1,4 +1,5 @@
-export class PathFSDir {
+export declare class PathFSDir {
+    #private;
     /**
      * @param {string} relativePath
      * @param {RegExp} rule
@@ -13,7 +14,7 @@ export class PathFSDir {
      * @param {Parameters<typeof PathFSDir["vivthDir"]>[2]} [_options]
      * @param {Parameters<typeof PathFSDir["vivthDir"]>[1]} [rule]
      */
-    constructor(relativePath: Parameters<(typeof PathFSDir)["vivthDir"]>[0], _options?: Parameters<(typeof PathFSDir)["vivthDir"]>[2], rule?: Parameters<(typeof PathFSDir)["vivthDir"]>[1]);
+    constructor(relativePath: Parameters<typeof PathFSDir["vivthDir"]>[0], _options?: Parameters<typeof PathFSDir["vivthDir"]>[2], rule?: Parameters<typeof PathFSDir["vivthDir"]>[1]);
     /**
      * @type {RegExp}
      */
@@ -26,5 +27,4 @@ export class PathFSDir {
      * @returns {string}
      */
     get callerPath(): string;
-    #private;
 }

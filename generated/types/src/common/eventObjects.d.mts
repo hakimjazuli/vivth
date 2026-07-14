@@ -1,3 +1,3 @@
-export const closeWorkerThreadEventObject: {
+export declare const closeWorkerThreadEventObject: {
     vivthEvent: "worker:terminate";
 };

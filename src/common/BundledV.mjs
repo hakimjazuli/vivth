@@ -9,7 +9,6 @@ export class BundledV {
 	/**
 	 * @description
 	 * - readonly value of whether the script run after being bundled with `vivth` or not;
-	 * @readonly
 	 * @type {boolean}
 	 * @example
 	 * import { BundledV } from 'vivth/neutral';
@@ -26,7 +25,7 @@ export class BundledV {
 	 * - to create `unbundled` only codeBlock;
 	 * >- when properly bundled via `vivth` bundling mechanism, this code block will be removed;
 	 * @param {()=>void} callback
-	 * @param {import('./VivthUnBundledCodeBlock.mjs').VivthUnBundledCodeBlock} _closing
+	 * @param {typeof import('./VivthUnBundledCodeBlock.mjs').VivthUnBundledCodeBlock} _closing
 	 * - must be filled for regexp detection;
 	 * @returns {void}
 	 * @example

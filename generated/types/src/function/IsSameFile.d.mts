@@ -13,4 +13,4 @@
  * // both path are auto resolved to Paths.root;
  * IsSameFile('D:\\mFile.mjs', 'D:\\notmfile.mjs') // false;
  */
-export function IsSameFile(pathA: string, pathB: string): boolean;
+export declare function IsSameFile(pathA: string, pathB: string): boolean;

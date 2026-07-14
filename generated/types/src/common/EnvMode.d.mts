@@ -1,3 +1,7 @@
+import { Derived } from '../class/Derived.mjs';
+import { Effect } from '../class/Effect.mjs';
+export type EnvModeType = import('../typehints/EnvModeType.mjs').EnvModeType;
+export type DevTestCB = import('../typehints/DevTestCB.mjs').DevTestCB;
 /**
  * @typedef {import('../typehints/EnvModeType.mjs').EnvModeType} EnvModeType
  * @typedef {import('../typehints/DevTestCB.mjs').DevTestCB} DevTestCB
@@ -6,11 +10,8 @@
  * @description
  * - class helper for determining environtment mode to be `developement` or `production`;
  */
-export class EnvMode {
-    /**
-     * @type {Signal<EnvModeType>}
-     */
-    static #mode: Signal<EnvModeType>;
+export declare class EnvMode {
+    #private;
     /**
      * @description
      * - `Derived` wrapper of whether is in `dev` mode or `prod` not;
@@ -42,17 +43,6 @@ export class EnvMode {
      */
     static enforce: (mode: EnvModeType) => void;
     /**
-     * @type {Signal<Map<string,Awaited<ReturnType<typeof TryAsync<boolean>>>>>}
-     */
-    static #notifications: Signal<Map<string, Awaited<ReturnType<typeof TryAsync<boolean>>>>>;
-    /**
-     * @type {DevTestCB}
-     */
-    static #test: DevTestCB;
-    static #effectForCheck: Effect & {
-        [FactoryKey]: FACTORY;
-    };
-    /**
      * @description
      * @param {(options:{devTest:DevTestCB}|
      * {devTest:undefined})=>Promise<void>
@@ -70,10 +60,3 @@ export class EnvMode {
         devTest: undefined;
     }) => Promise<void>, subscribe?: Effect["options"]["subscribe"]): Promise<void>;
 }
-export type EnvModeType = import("../typehints/EnvModeType.mjs").EnvModeType;
-export type DevTestCB = import("../typehints/DevTestCB.mjs").DevTestCB;
-import { Signal } from '../class/Signal.mjs';
-import { Derived } from '../class/Derived.mjs';
-import { TryAsync } from '../function/TryAsync.mjs';
-import { Effect } from '../class/Effect.mjs';
-import { FactoryKey } from './FactoryKey.mjs';

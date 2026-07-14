@@ -4,7 +4,7 @@
  * - internally used as Signal value logging instance;
  * @template {any} VALUE
  */
-export class DataLog<VALUE extends unknown> {
+export declare class DataLog<VALUE extends any> {
     /**
      * @description
      * @param {VALUE} value

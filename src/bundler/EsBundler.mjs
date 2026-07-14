@@ -20,7 +20,7 @@ import { BrowserExternals } from './adds/BrowserExternals.mjs';
  * @param {'.mts'|'.ts'|'.mjs'} options.extension
  * - supported extension;
  * @param {boolean} [options.withBinHeader]
- * @param {Omit<Parameters<build>[0],
+ * @param {Omit<Parameters<typeof build>[0],
  * 'entryPoints'|'bundle'|'write'|'sourcemap'|'outdir'|'splitting'|'format'>
  * } [esbuildOptions]
  * - assume `esm`;

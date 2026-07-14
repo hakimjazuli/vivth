@@ -1,3 +1,5 @@
+import { FSDirArchWatcher } from '../class/FSDirArchWatcher.mjs';
+import { TryAsync } from './TryAsync.mjs';
 /**
  * @description
  * generate generator watcher to `Dynamics`;
@@ -19,31 +21,16 @@
  * @param {(normalizedPath:string)=>boolean} [options.eachFilter]
  * @returns {ReturnType<typeof TryAsync<FSDirArchWatcher<{ handler: string; mime: string | false; lastEditedUnixValue: number; }>>>}
  */
-export function NewDynamicsExport({ rootPath, useFetchForAssets, debounce, chokidarOptions, eachFilter }: {
+export declare function NewDynamicsExport(
+/** */
+{ rootPath, useFetchForAssets, debounce, chokidarOptions, eachFilter }: {
     rootPath: string;
-    debounce?: number | undefined;
-    useFetchForAssets?: boolean | undefined;
-    chokidarOptions?: Partial<{
-        persistent: boolean;
-        ignoreInitial: boolean;
-        followSymlinks: boolean;
-        cwd?: string;
-        usePolling: boolean;
-        interval: number;
-        binaryInterval: number;
-        alwaysStat?: boolean;
-        depth?: number;
-        ignorePermissionErrors: boolean;
-        atomic: boolean | number;
-    } & {
-        ignored: import("chokidar").Matcher | import("chokidar").Matcher[];
-        awaitWriteFinish: boolean | Partial<import("chokidar").AWF>;
-    }> | undefined;
-    eachFilter?: ((normalizedPath: string) => boolean) | undefined;
+    debounce?: number;
+    useFetchForAssets?: boolean;
+    chokidarOptions?: import('chokidar').ChokidarOptions;
+    eachFilter?: (normalizedPath: string) => boolean;
 }): ReturnType<typeof TryAsync<FSDirArchWatcher<{
     handler: string;
     mime: string | false;
     lastEditedUnixValue: number;
 }>>>;
-import { TryAsync } from './TryAsync.mjs';
-import { FSDirArchWatcher } from '../class/FSDirArchWatcher.mjs';

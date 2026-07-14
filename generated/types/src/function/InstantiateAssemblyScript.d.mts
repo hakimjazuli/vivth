@@ -12,4 +12,4 @@
  *
  * InstantiateAssemblyScript(PathFSFile.vivthFile('../function/myAsm.wasm'));;
  */
-export function InstantiateAssemblyScript<RESULTTYPE extends Record<string, unknown>>(filePathFromProject: import("../bundler/adds/PathFSFile.mjs").PathFSFile, imports?: Parameters<import("../typehints/AssemblyScriptLoaderInstantiate.mjs").AssemblyScriptLoaderInstantiate<RESULTTYPE>>[1]): Promise<import("../typehints/AssemblyScriptExportsType.mjs").AssemblyScriptExportsType<RESULTTYPE>>;
+export declare function InstantiateAssemblyScript<RESULTTYPE extends Record<string, unknown>>(filePathFromProject: import('../bundler/adds/PathFSFile.mjs').PathFSFile, imports?: Parameters<import('../typehints/AssemblyScriptLoaderInstantiate.mjs').AssemblyScriptLoaderInstantiate<RESULTTYPE>>[1]): Promise<import('../typehints/AssemblyScriptExportsType.mjs').AssemblyScriptExportsType<RESULTTYPE>>;

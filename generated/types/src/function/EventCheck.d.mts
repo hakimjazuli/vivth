@@ -1,3 +1,4 @@
+import { EventNameSpace } from '../common/EventNameSpace.mjs';
 /**
  * @description
  * - simple validation function for [EventObject](#eventobject), for multiple context, eg: `mainThread` <-> `workerThread`;
@@ -15,5 +16,4 @@
  * // or manually {[EventNameSpace]:'worker:exit'};
  * // which either will result true;
  */
-export function EventCheck(object: any, eventObject: Record<typeof EventNameSpace, string>): boolean;
-import { EventNameSpace } from '../common/EventNameSpace.mjs';
+export declare function EventCheck(object: any, eventObject: Record<typeof EventNameSpace, string>): boolean;

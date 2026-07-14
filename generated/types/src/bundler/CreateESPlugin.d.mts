@@ -14,4 +14,4 @@
  * 	}
  * );
  */
-export function CreateESPlugin(name: string, setup: import("esbuild").Plugin["setup"]): import("esbuild").Plugin;
+export declare function CreateESPlugin(name: string, setup: import('esbuild').Plugin["setup"]): import('esbuild').Plugin;

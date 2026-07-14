@@ -2,7 +2,8 @@
  * @description
  * - when used with `EsBundler+ToBundledJSPlugin` the file on the dir that are match the rule are `Bundled` first before being put on the `.asar`;
  */
-export class PathFSBundles {
+export declare class PathFSBundles {
+    #private;
     /**
      * @description
      * @param {string} relativePath
@@ -44,5 +45,4 @@ export class PathFSBundles {
      * - bundled: `blankString`;
      */
     get callerPath(): string;
-    #private;
 }

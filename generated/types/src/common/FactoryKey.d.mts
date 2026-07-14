@@ -6,4 +6,4 @@
  * >- `Map<any, any>`;
  * @type {symbol}
  */
-export const FactoryKey: symbol;
+export declare const FactoryKey: symbol;

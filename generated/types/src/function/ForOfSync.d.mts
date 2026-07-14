@@ -30,7 +30,7 @@
  * 	return await cb();
  * })[0])
  */
-export function ForOfSync<T extends unknown, RETURNTYPE extends unknown>(iterable: Iterable<T>, handlerCallback: (value: T, options: {
+export declare function ForOfSync<T extends any, RETURNTYPE extends any>(iterable: Iterable<T>, handlerCallback: (value: T, options: {
     prevError: Error | undefined;
     breakEarly: () => void;
 }) => RETURNTYPE | undefined): [Set<RETURNTYPE>, Set<Error>];

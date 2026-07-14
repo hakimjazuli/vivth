@@ -1,3 +1,4 @@
+import { TryAsync } from '../function/TryAsync.mjs';
 /**
  * @description
  * - function helper to generate absolute unique ID;
@@ -17,5 +18,4 @@
  * 	Console.log(myUniqueID); // `myPrefix${Date.now()}mySuffix`
  * })()
  */
-export function CreateStringID(prefix?: string, suffix?: string): ReturnType<typeof TryAsync<string>>;
-import { TryAsync } from '../function/TryAsync.mjs';
+export declare function CreateStringID(prefix?: string, suffix?: string): ReturnType<typeof TryAsync<string>>;

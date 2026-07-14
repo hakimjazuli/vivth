@@ -1,3 +1,6 @@
+import { JSDirMapper } from '../bundler/JSDirMapper.mjs';
+import { FSDirArchWatcher } from '../class/FSDirArchWatcher.mjs';
+export type VivthCleanup = import('../typehints/VivthCleanup.mjs').VivthCleanup;
 /**
  * @typedef {import('../typehints/VivthCleanup.mjs').VivthCleanup} VivthCleanup
  */
@@ -7,7 +10,9 @@
  * >- includes `mts` file too;
  * @implements {VivthCleanup}
  */
-export class BrowserDirMapper implements VivthCleanup {
+export declare class BrowserDirMapper implements VivthCleanup {
+    #private;
+    vivthCleanup: () => Promise<void>;
     /**
      * @description
      * - instantiate the mapper;
@@ -45,12 +50,11 @@ export class BrowserDirMapper implements VivthCleanup {
     constructor({ watch, mapTo, eachFilter }: {
         watch: string;
         mapTo: string;
-        eachFilter?: ((normalizedPath: string) => boolean) | undefined;
+        eachFilter?: (normalizedPath: string) => boolean;
     }, options: ConstructorParameters<typeof JSDirMapper>[1] & {
         debounce?: number;
-        chokidarOptions?: import("chokidar").ChokidarOptions;
+        chokidarOptions?: import('chokidar').ChokidarOptions;
     });
-    vivthCleanup: () => Promise<void>;
     /**
      * @description
      * - `FSDirArchWatcher` instance;
@@ -63,8 +67,4 @@ export class BrowserDirMapper implements VivthCleanup {
      * @type {JSDirMapper<any>|undefined}
      */
     dirMapper: JSDirMapper<any> | undefined;
-    #private;
 }
-export type VivthCleanup = import("../typehints/VivthCleanup.mjs").VivthCleanup;
-import { FSDirArchWatcher } from '../class/FSDirArchWatcher.mjs';
-import { JSDirMapper } from '../bundler/JSDirMapper.mjs';

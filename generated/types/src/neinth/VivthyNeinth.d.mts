@@ -1,3 +1,8 @@
+import { TryAsync } from '../function/TryAsync.mjs';
+import { Signal } from '../class/Signal.mjs';
+import { Effect } from '../class/Effect.mjs';
+import { Derived } from '../class/Derived.mjs';
+export type VivthCleanup = import('../bundler/FileSelfMapper.mjs').VivthCleanup;
 /**
  * @typedef {import('../bundler/FileSelfMapper.mjs').VivthCleanup} VivthCleanup
  */
@@ -7,20 +12,8 @@
  * @template {any} EXPORT
  * @implements {VivthCleanup}
  */
-export class VivthyNeinth<EXPORT extends unknown> implements VivthCleanup {
-    /**
-     * @type {QChannel<string>}
-     */
-    static #q: QChannel<string>;
-    static #hasStarted: boolean;
-    /**
-     * @type {Map<string, VivthyNeinth<any>>}
-     */
-    static #mappedInstance: Map<string, VivthyNeinth<any>>;
-    /**
-     * @type {Parameters<typeof VivthyNeinth["start"]>[0]["assemblyScriptOptions"]}
-     */
-    static #assemblyScriptOptions: Parameters<(typeof VivthyNeinth)["start"]>[0]["assemblyScriptOptions"];
+export declare class VivthyNeinth<EXPORT extends any> implements VivthCleanup {
+    #private;
     /**
      * @description
      * - DO NOT CALL THIS METHOD INSIDE
@@ -31,40 +24,8 @@ export class VivthyNeinth<EXPORT extends unknown> implements VivthCleanup {
      */
     static start: ({ dirPath, assemblyScriptOptions }: {
         dirPath: string;
-        assemblyScriptOptions?: import("../typehints/AutoDocASOptions.mjs").AutoDocASOptions | undefined;
+        assemblyScriptOptions?: import('../typehints/AutoDocASOptions.mjs').AutoDocASOptions;
     }) => ReturnType<typeof TryAsync<void>>;
-    /**
-     * @param {import('chokidar/handler.js').EventName} eventName
-     * @param {string} path
-     * @param {import('node:fs').Stats} [stats]
-     */
-    static #watcherListenerQ: (eventName: import("chokidar/handler.js").EventName, path: string, stats?: import("node:fs").Stats) => Promise<void>;
-    /**
-     * @param {import('chokidar/handler.js').EventName} eventName
-     * @param {string} path
-     * @param {import('node:fs').Stats} [stats]
-     * @returns {void}
-     */
-    static #watcherListener: (eventName: import("chokidar/handler.js").EventName, path: string, stats?: import("node:fs").Stats) => void;
-    /**
-     * @param {'add'|'change'} _eventName
-     * @param {string} path
-     * @param {import('node:fs').Stats} [_stats]
-     * @returns {Promise<void>}
-     */
-    static #addListener: (_eventName: "add" | "change", path: string, _stats?: import("node:fs").Stats) => Promise<void>;
-    /**
-     * @param {string} _eventName
-     * @param {string} path
-     * @param {import('node:fs').Stats} [_stats]
-     * @returns {Promise<void>}
-     */
-    static #negativeListener: (_eventName: string, path: string, _stats?: import("node:fs").Stats) => Promise<void>;
-    /**
-     * @param {string} path
-     * @returns {Promise<void>}
-     */
-    static #ifPrevInstanceExistThenCleanup_: (path: string) => Promise<void>;
     /**
      * @param {Object} options
      * @param {(this:VivthyNeinth<EXPORT>, arg0:VivthyNeinth<EXPORT>)=>Promise<EXPORT>} options.export
@@ -72,7 +33,7 @@ export class VivthyNeinth<EXPORT extends unknown> implements VivthCleanup {
      */
     constructor({ export: exportCallback, I__the_developer__have_provided_onFileMutations_cleanupCallbacks_for_every_long_running_object_in_this_file, }: {
         export: (this: VivthyNeinth<EXPORT>, arg0: VivthyNeinth<EXPORT>) => Promise<EXPORT>;
-        I__the_developer__have_provided_onFileMutations_cleanupCallbacks_for_every_long_running_object_in_this_file?: boolean | undefined;
+        I__the_developer__have_provided_onFileMutations_cleanupCallbacks_for_every_long_running_object_in_this_file?: boolean;
     });
     /**
      * @type { string }
@@ -85,7 +46,6 @@ export class VivthyNeinth<EXPORT extends unknown> implements VivthCleanup {
      * >- usefull for treating `VivthyNeinth` instance as global signal;
      * >- you can accidentally ;
      * @param {EXPORT|undefined} newExportValue
-     * @returns {void}
      * @example
      */
     set exportedValue(newExportValue: EXPORT | undefined);
@@ -131,7 +91,7 @@ export class VivthyNeinth<EXPORT extends unknown> implements VivthCleanup {
      * });
      * ///
      */
-    newDerived: <CB extends ConstructorParameters<typeof Derived>[0]>(callback: CB) => Derived<any>;
+    newDerived: <CB extends ConstructorParameters<typeof Derived>[0]>(callback: CB) => Derived<ReturnType<CB>>;
     /**
      * @description
      * - manually registering object celeanup;
@@ -192,11 +152,4 @@ export class VivthyNeinth<EXPORT extends unknown> implements VivthCleanup {
      * @returns {Promise<void>}
      */
     vivthCleanup: () => Promise<void>;
-    #private;
 }
-export type VivthCleanup = import("../bundler/FileSelfMapper.mjs").VivthCleanup;
-import { Derived } from '../class/Derived.mjs';
-import { Signal } from '../class/Signal.mjs';
-import { Effect } from '../class/Effect.mjs';
-import { QChannel } from '../class/QChannel.mjs';
-import { TryAsync } from '../function/TryAsync.mjs';

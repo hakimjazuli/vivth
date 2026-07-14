@@ -32,4 +32,4 @@
  * 	// .this to get ctx2D reference;
  * })
  */
-export function NewChainable<OBJ extends object>(ctx: OBJ): import("../typehints/ChainableType.mjs").ChainableType<OBJ>;
+export declare function NewChainable<OBJ extends object>(ctx: OBJ): import("../typehints/ChainableType.mjs").ChainableType<OBJ>;

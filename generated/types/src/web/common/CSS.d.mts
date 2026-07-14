@@ -20,4 +20,4 @@
  * }
  * //
  */
-export function CSS(strings: TemplateStringsArray, ...values: string[]): CSSStyleSheet;
+export declare function CSS(strings: TemplateStringsArray, ...values: string[]): CSSStyleSheet;

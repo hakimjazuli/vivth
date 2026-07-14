@@ -1,1 +1,5 @@
-export function resolveErrorArray(unknown: unknown): [undefined, Error];
+/**
+ * @param {unknown} unknown
+ * @returns {[undefined, Error]}
+ */
+export declare const resolveErrorArray: (unknown: unknown) => [undefined, Error];

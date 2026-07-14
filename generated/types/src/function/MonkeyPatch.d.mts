@@ -1,3 +1,4 @@
+import type { MonkeyPatchedType } from '../typehints/MonkeyPatchedType.mjs';
 /**
  * @import {MonkeyPatchedType} from '../typehints/MonkeyPatchedType.mjs'
  */
@@ -27,7 +28,6 @@
  *   - For functions: spread arguments(and when necessary, delegate to `originalObject`).
  * @returns {void}
  */
-export function MonkeyPatch<PAR extends Object, KEY extends keyof PAR>(parent: PAR, key: KEY, newObjectGenerator: (arg0: {
+export declare function MonkeyPatch<PAR extends Object, KEY extends keyof PAR>(parent: PAR, key: KEY, newObjectGenerator: (arg0: {
     originalObject: PAR[KEY];
 }) => MonkeyPatchedType<PAR[KEY]>): void;
-import type { MonkeyPatchedType } from '../typehints/MonkeyPatchedType.mjs';

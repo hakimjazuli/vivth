@@ -1,1 +1,1 @@
-export const pluginVivthBundle: import("esbuild").Plugin;
+export declare const pluginVivthBundle: import("esbuild").Plugin;

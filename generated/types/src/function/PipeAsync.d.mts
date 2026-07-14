@@ -16,4 +16,4 @@
  *  (val) => `${val}:3` // res: Promise<"intialValue:1:2:3">
  * );
  */
-export function PipeAsync<VALUE extends unknown>(intialValue: VALUE, ...pipeFunctions: ((currentvalue: VALUE) => VALUE | Promise<VALUE>)[]): Promise<VALUE>;
+export declare function PipeAsync<VALUE extends any>(intialValue: VALUE, ...pipeFunctions: ((currentvalue: VALUE) => VALUE | Promise<VALUE>)[]): Promise<VALUE>;

@@ -1,3 +1,4 @@
+import { TryAsync } from '../function/TryAsync.mjs';
 /**
  * @description
  * - function to:
@@ -39,25 +40,12 @@
  * 	},
  * })
  */
-export function RunWatchThenCompileJSOnSafeExit({ source, target, additionalSpawnArgument, compileJSargs, showLog, }: {
+export declare function RunWatchThenCompileJSOnSafeExit({ 
+/** */
+source, target, additionalSpawnArgument, compileJSargs, showLog, }: {
     showLog: boolean;
     source: string;
     target: string;
-    additionalSpawnArgument?: string[] | undefined;
-    compileJSargs?: Omit<{
-        entryPoint: string;
-        encoding?: BufferEncoding | undefined;
-        preprocessEntryPoint?: ((entryPointContent: string) => string) | undefined;
-        minifyFirst?: boolean | undefined;
-        asar?: {
-            InputMetadata?: Parameters<typeof import("@electron/asar")["createPackageFromFiles"]>[3];
-            options?: Parameters<typeof import("@electron/asar")["createPackageFromFiles"]>[4];
-        } | undefined;
-        outDir: string;
-        bunCompilerArguments?: Record<string, string | string[]> | undefined;
-        esBundlerPlugins?: import("esbuild").Plugin[] | undefined;
-        esbuildOptions?: Parameters<typeof import("./EsBundler.mjs").EsBundler>[1];
-        additionalCommandArgument?: string[] | undefined;
-    }, "entryPoint" | "outDir"> | undefined;
-}): ReturnType<typeof TryAsync<import("../typehints/VivthCleanup.mjs").VivthCleanup>>;
-import { TryAsync } from '../function/TryAsync.mjs';
+    additionalSpawnArgument?: string[];
+    compileJSargs?: Omit<Parameters<typeof import('./CompileJS.mjs').CompileJS>[0], "entryPoint" | "outDir">;
+}): ReturnType<typeof TryAsync<import('../typehints/VivthCleanup.mjs').VivthCleanup>>;

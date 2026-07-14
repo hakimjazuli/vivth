@@ -4,14 +4,8 @@
  * - useful for iterators that might be modified during iteration;
  * - most likely to be less performant, but with better result clarity;
  */
-export class WalkThrough {
-    /**
-     * @template T
-     * @param {Iterator<T, any, any>} iterator
-     * @param {(value: T) => void} callback
-     * @returns {void}
-     */
-    static #handler<T>(iterator: Iterator<T, any, any>, callback: (value: T) => void): void;
+export declare class WalkThrough {
+    #private;
     /**
      * @description
      * - method helper to WalkThrough `Set`;

@@ -120,7 +120,7 @@ export { TrySync } from '../../../src/function/TrySync.mjs';
  * @typedef {import('../../../src/typehints/LitExpKeyType.mjs').LitExpKeyType} LitExpKeyType
  */
 /**
- * @template {import("./../../../src/typehints/LitExpKeyType.mjs").LitExpKeyType} KEYS
+ * @template {LitExpKeyType} KEYS
  * @typedef {import('../../../src/typehints/LitExpResultType.mjs').LitExpResultType<KEYS>} LitExpResultType
  */
 /**

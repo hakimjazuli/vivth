@@ -22,4 +22,4 @@
  * // example for browser;
  * Base64URL(fileString, 'application/javascript', btoa);
  */
-export function Base64URL(fileString: string, mimeType: string, btoaFunction: (string: string) => string): string;
+export declare function Base64URL(fileString: string, mimeType: string, btoaFunction: (string: string) => string): string;

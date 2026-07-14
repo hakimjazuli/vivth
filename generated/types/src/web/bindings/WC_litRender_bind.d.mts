@@ -1,3 +1,4 @@
+import { render } from 'lit-html';
 /**
  * @description
  * - factory to create simplified render function by omiting args[1++];
@@ -17,4 +18,4 @@
  * }
  * ///
  */
-export function WC_litRender_bind(container: import("lit-html").RenderRootNode, options?: import("lit-html").RenderOptions | undefined): (template: import("lit-html").TemplateResult) => import("lit-html").RootPart;
+export declare function WC_litRender_bind(...args: import('../../typehints/ParametersFollowingN.mts').ParametersFollowingN<typeof render, 1>): (template: import('lit-html').TemplateResult) => import('lit-html').RootPart;

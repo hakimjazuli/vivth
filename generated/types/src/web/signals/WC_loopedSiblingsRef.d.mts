@@ -1,3 +1,4 @@
+import { Signal } from '../../class/Signal.mjs';
 /**
  * @description
  * - `Signal` to check siblingIndex of a looped component;
@@ -16,7 +17,8 @@
  * ```
  * @extends {Signal<number|undefined>}
  */
-export class WC_loopedSiblingsRef extends Signal<number | undefined> {
+export declare class WC_loopedSiblingsRef extends Signal<number | undefined> {
+    #private;
     /**
      * @param {HTMLElement} instanceRef
      */
@@ -39,6 +41,14 @@ export class WC_loopedSiblingsRef extends Signal<number | undefined> {
      * @type {()=>void}
      */
     onDisconnected: () => void;
-    #private;
+    /**
+     * @type {number|undefined}
+     * @override
+     */
+    get value(): number | undefined;
+    /**
+     * @type {number|undefined}
+     * @override
+     */
+    set value(_: number | undefined);
 }
-import { Signal } from '../../class/Signal.mjs';

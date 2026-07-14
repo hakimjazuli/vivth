@@ -1,9 +1,11 @@
+import { TryAsync } from '../function/TryAsync.mjs';
 /**
  * @description
  * - class helper to handle `.json` file;
  * - this class assume, `Paths` already instantiated;
  */
-export class JSONFileHandler {
+export declare class JSONFileHandler {
+    #private;
     /**
      * @param {string} path
      * - `relative`(to `Paths.root`) OR `absolute`, both are accepted;
@@ -45,6 +47,4 @@ export class JSONFileHandler {
      * });
      */
     assign: (object: Object) => ReturnType<typeof TryAsync<void>>;
-    #private;
 }
-import { TryAsync } from '../function/TryAsync.mjs';

@@ -16,4 +16,4 @@
  * IsAsync(a); // false
  * IsAsync(b); // true
  */
-export function IsAsync(functionReference: (...any: any) => (any | Promise<any>)): boolean;
+export declare function IsAsync(functionReference: (...any: any) => (any | Promise<any>)): boolean;

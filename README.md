@@ -502,7 +502,7 @@ PathFSFile.vivthFile("../CompileAS.mjs");
 /**
  * @param {string} includedInPath
  * - is generalized path, you can freely uses forward or backward slash;
- * @returns {ReturnType<CreateESPlugin>}
+ * @returns {ReturnType<typeof CreateESPlugin>}
  */
 ```
 
@@ -540,9 +540,9 @@ export const myBundledPlugin = ToBundledJSPlugin("/myProjectName/src/");
 
 ```js
 /**
- * @param {Parameters<import('assemblyscript/asc')["main"]>} args
+ * @param {Parameters<typeof import('assemblyscript/asc')["main"]>} args
  * - as of `vivth@1.5.x`, `arg0` type `string[]` produce more stable results than `CompilerOptions`;
- * @returns {ReturnType<import('assemblyscript/asc')["main"]>}
+ * @returns {ReturnType<typeof import('assemblyscript/asc')["main"]>}
  */
 ```
 
@@ -704,7 +704,7 @@ export const pluginAddCopyRight = CreateESPlugin(
  * @param {'.mts'|'.ts'|'.mjs'} options.extension
  * - supported extension;
  * @param {boolean} [options.withBinHeader]
- * @param {Omit<Parameters<build>[0],
+ * @param {Omit<Parameters<typeof build>[0],
  * 'entryPoints'|'bundle'|'write'|'sourcemap'|'outdir'|'splitting'|'format'>
  * } [esbuildOptions]
  * - assume `esm`;
@@ -790,7 +790,7 @@ body {
  * @param {string} watchPath
  * - `relative`(to `Paths.root`) OR `absolute`, both are accepted;
  * @param {Object} options
- * @param {Omit<Parameters<import('esbuild')["context"]>[0], "write"|"minify"|"format"|"mainFields"|"outfile"|"bundle">} [options.esbuild]
+ * @param {Omit<Parameters<typeof import('esbuild')["context"]>[0], "write"|"minify"|"format"|"mainFields"|"outfile"|"bundle">} [options.esbuild]
  * - `logLimit`: default = `3`;
  * - `outFile`: auto determined by comment line on top level of each files;
  * - `minify`: determined by file `relativePath`(to dirname of `watchpath`) name included `.min.`;
@@ -2021,9 +2021,9 @@ const isExist = await FileSafe.exist(join(Paths.root, "/some/path.mjs"));
 
 ```js
 /**
- * @param {Parameters<writeFile>[0]} outFile
- * @param {Parameters<writeFile>[1]} content
- * @param {Parameters<writeFile>[2]} [options]
+ * @param {Parameters<typeof writeFile>[0]} outFile
+ * @param {Parameters<typeof writeFile>[1]} content
+ * @param {Parameters<typeof writeFile>[2]} [options]
  * @param {boolean} [checkFuzySame]
  * - true: check while normalize consecutive whitespace into singel white space;
  * - false(default): check absolute value;
@@ -2103,8 +2103,8 @@ const [, errorRename] = await FileSafe.rename(
 
 ```js
 /**
- * @param {Parameters<rm>[0]} path
- * @param {Parameters<rm>[1]} [rmOptions]
+ * @param {Parameters<typeof rm>[0]} path
+ * @param {Parameters<typeof rm>[1]} [rmOptions]
  * @returns {ReturnType<typeof TryAsync<void>>}
  */
 ```
@@ -2116,7 +2116,7 @@ const [, errorRename] = await FileSafe.rename(
 
 ```js
 /**
- * @param {Parameters<mkdir>[0]} outDir
+ * @param {Parameters<typeof mkdir>[0]} outDir
  * - absolute path
  * @returns {ReturnType<typeof TryAsync<string|undefined>>}
  */
@@ -4215,7 +4215,7 @@ myDoubleWorker.postMessage(90);
 /**
  * @template RECEIVE
  * @template POST
- * @param {{parentPort:import('node:worker_threads')["parentPort"]}} refs
+ * @param {{parentPort:typeof import('node:worker_threads')["parentPort"]}} refs
  * -example:
  * ```js
  * import { parentPort } from 'node:worker_threads';
@@ -4371,7 +4371,6 @@ await Base64URLFromFile(join(Paths.root, "/path/to/file"));
 
 ```js
 /**
- * @readonly
  * @type {boolean}
  */
 ```
@@ -4393,7 +4392,7 @@ if (BundledV.isBundled) {
 ```js
 /**
  * @param {()=>void} callback
- * @param {import('./VivthUnBundledCodeBlock.mjs').VivthUnBundledCodeBlock} _closing
+ * @param {typeof import('./VivthUnBundledCodeBlock.mjs').VivthUnBundledCodeBlock} _closing
  * - must be filled for regexp detection;
  * @returns {void}
  */
@@ -4746,9 +4745,7 @@ Console.log(
  * }>})=>Promise<void>} [options.onLastGeneratedCallback]
  * - callback to be run on finishing generating document AND exports;
  * - only handle that marked as `isLastCalled`;
- * @param { import('typescript').CompilerOptions |
- * 	import('typescript').ParsedCommandLine
- * } [options.jstsconfigs]
+ * @param {import('typescript/unstable/sync').CompilerOptions} [options.jstsconfigs]
  * - type of `ts/jsconfig` to be assigned to existing respective `.json` file;
  */
 ```
@@ -6041,7 +6038,6 @@ await TsToMjs("./myFile.mts", {
 ```js
 /**
  * @param {EXPORT|undefined} newExportValue
- * @returns {void}
  */
 ```
 
@@ -6470,7 +6466,10 @@ const esWatcherInstance = this.registerObjectWithAutoCleanup(
 
 ```js
 /**
- * @template {import("../../../src/typehints/LitExpKeyType.mjs").LitExpKeyType} KEYS
+ * @import {LitExpKeyType} from './LitExpKeyType.mjs'
+ */
+/**
+ * @template {LitExpKeyType} KEYS
  * @typedef {{result:{whole:string[], named:Array<Record<keyof KEYS, string>>},
  * regexp: RegExp}} LitExpResultType
  */
@@ -6704,42 +6703,43 @@ const esWatcherInstance = this.registerObjectWithAutoCleanup(
 
 #### reference: `WC_createElement_bind`
 
-- typesafe factory generator for creating element of `WC_extendsA`/`WC_extendsB` class;
-- uses `lit-html` under the hood;
+Typesafe factory generator for creating element of `WC_extendsA`/`WC_extendsB` class;
+Uses `lit-html` under the hood.
 
 ```js
 /**
  * @template {(new (...args: any[]) => HTMLElement) & {
- *  tagName: string;
- * 	extendIsValue: string;
- *  observedAttributes?: readonly string[];
- *  namedSlots?: readonly string[];
- * 	props?: Record<string, keyof TypeMap|(new (...args:any[])=>any)>;
+ *   tagName: string;
+ *   extendIsValue: string;
+ *   observedAttributes?: readonly string[];
+ *   namedSlots?: readonly string[];
+ *   props?: Record<
+ *     string,
+ *     keyof TypeMap | (abstract new (...args: any[]) => any)
+ *   >;
  * }} BASE_CONSTRUCTOR
+ *
  * @param {BASE_CONSTRUCTOR} arg0
  * @returns {(
- * 	param?:{
- * 		attrs?:BASE_CONSTRUCTOR['observedAttributes'] extends readonly string[]
- * 			? Partial<
- * 					Record<ArrayToKeys<BASE_CONSTRUCTOR['observedAttributes']>, string>
- * 				>
- * 			: undefined;
- * 		props?: {[K in keyof NonNullable<BASE_CONSTRUCTOR["props"]>]:
- * 			NonNullable<BASE_CONSTRUCTOR["props"]>[K] extends keyof TypeMap
- * 				? TypeMap[NonNullable<BASE_CONSTRUCTOR["props"]>[K]]
- * 				: InstanceType<NonNullable<BASE_CONSTRUCTOR["props"]>[K]>
- * 		};
- * 		children?:(slotName:Record<ArrayToKeys<BASE_CONSTRUCTOR['namedSlots']>, string>)=>TemplateResult;
- * 		renderOptions?:RenderOptions;
- * 	},
- * )=>InstanceType<BASE_CONSTRUCTOR>}
+ *   param?: {
+ *     attrs?: BASE_CONSTRUCTOR['observedAttributes'] extends readonly string[]
+ *       ? Partial<Record<ArrayToKeys<BASE_CONSTRUCTOR['observedAttributes']>, string>>
+ *       : undefined;
+ *     props?: {
+ *       [K in keyof NonNullable<BASE_CONSTRUCTOR["props"]>]:
+ *         NonNullable<BASE_CONSTRUCTOR["props"]>[K] extends keyof TypeMap
+ *           ? TypeMap[NonNullable<BASE_CONSTRUCTOR["props"]>[K]]
+ *           : NonNullable<BASE_CONSTRUCTOR["props"]>[K] extends abstract new (...args:any[]) => any
+ *             ? InstanceType<NonNullable<BASE_CONSTRUCTOR["props"]>[K]>
+ *             : never
+ *     };
+ *     children?: BASE_CONSTRUCTOR['namedSlots'] extends readonly string[]
+ *       ? (slotName: Record<ArrayToKeys<BASE_CONSTRUCTOR['namedSlots']>, string>) => TemplateResult
+ *       : undefined;
+ *     renderOptions?: RenderOptions;
+ *   }
+ * ) => InstanceType<BASE_CONSTRUCTOR>}
  */
-```
-
-- <i>example</i>:
-
-```js
-
 ```
 
 \*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>

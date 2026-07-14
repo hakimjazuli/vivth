@@ -1,10 +1,13 @@
+import { TryAsync } from '../function/TryAsync.mjs';
+export type createPackageFromFiles = typeof import('@electron/asar')["createPackageFromFiles"];
 /**
  * @description
  * - collections of static method to process content for:
  * >- `FSasar`;
  * - mostly used internally;
  */
-export class FSAnalyzer {
+export declare class FSAnalyzer {
+    #private;
     /**
      * @typedef {typeof import('@electron/asar')["createPackageFromFiles"]} createPackageFromFiles
      */
@@ -34,25 +37,7 @@ export class FSAnalyzer {
      * );
      */
     static finalContent: (entryPoint: string, content: string, asarConfig: {
-        InputMetadata?: Parameters<typeof createPackageFromFiles>[3];
-        options?: Parameters<typeof createPackageFromFiles>[4];
+        InputMetadata?: Parameters<createPackageFromFiles>[3];
+        options?: Parameters<createPackageFromFiles>[4];
     }, bundledJSFilePath: string) => ReturnType<typeof TryAsync<string>>;
-    /**
-     * return regex as string from template literal that are supposed to be regex
-     * @param {string} str
-     * @returns {RegExp}
-     */
-    static #hydrateRegex: (str: string) => RegExp;
-    /**
-     * @param {string} rootPath
-     * @param {string} content
-     * @param {Parameters<typeof FSAnalyzer["finalContent"]>[2]} asarConfig
-     * @param {string} bundledJSFile
-     * @returns {Promise<void>}
-     */
-    static #analyze_asarFile: (rootPath: string, content: string, asarConfig: Parameters<(typeof FSAnalyzer)["finalContent"]>[2], bundledJSFile: string) => Promise<void>;
 }
-import { TryAsync } from '../function/TryAsync.mjs';
-type createPackageFromFiles = typeof import("@electron/asar")["createPackageFromFiles"];
-import { createPackageFromFiles } from '@electron/asar';
-export {};

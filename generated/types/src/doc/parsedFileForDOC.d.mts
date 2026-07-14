@@ -1,14 +1,21 @@
-export class parsedFileForDOC {
-    /**
-     * @param {string} exportName
-     * @returns {boolean}
-     */
-    static #isExportNameValid: (exportName: string) => boolean;
-    /**
-     * @param {string} content
-     * @returns { RegExpExecArray[] }
-     */
-    static getDescription: (content: string) => RegExpExecArray[];
+import { TryAsync } from '../function/TryAsync.mjs';
+export type refType = {
+    instanceOrStatic: {
+        parent: string;
+        type: string;
+    };
+    fullDescription: string;
+    parsedFullDescription: {
+        description: string;
+        jsPreview: string;
+    };
+    isExport: boolean;
+    typeOfVar: string;
+    namedVar: string;
+    reference: string;
+};
+export declare class parsedFileForDOC {
+    #private;
     /**
      * @typedef {{
      *	instanceOrStatic:{parent:string, type:string},
@@ -26,7 +33,7 @@ export class parsedFileForDOC {
      * @param {import('fs').Stats} [stats]
      * @param {BufferEncoding} [encoding]
      */
-    constructor(path: string, stats?: import("fs").Stats, encoding?: BufferEncoding);
+    constructor(path: string, stats?: import('fs').Stats, encoding?: BufferEncoding);
     /**
      * @type {Promise<"browser" | "node" | "neutral" | "unsupported">}
      */
@@ -47,21 +54,7 @@ export class parsedFileForDOC {
         /**
          * @type {Set<refType>}
          */
-        readme: Set<{
-            instanceOrStatic: {
-                parent: string;
-                type: string;
-            };
-            fullDescription: string;
-            parsedFullDescription: {
-                description: string;
-                jsPreview: string;
-            };
-            isExport: boolean;
-            typeOfVar: string;
-            namedVar: string;
-            reference: string;
-        }>;
+        readme: Set<refType>;
     } & {
         [x: symbol]: {
             /**
@@ -78,21 +71,7 @@ export class parsedFileForDOC {
             /**
              * @type {Set<refType>}
              */
-            readme: Set<{
-                instanceOrStatic: {
-                    parent: string;
-                    type: string;
-                };
-                fullDescription: string;
-                parsedFullDescription: {
-                    description: string;
-                    jsPreview: string;
-                };
-                isExport: boolean;
-                typeOfVar: string;
-                namedVar: string;
-                reference: string;
-            }>;
+            readme: Set<refType>;
         };
     };
     /**
@@ -103,6 +82,11 @@ export class parsedFileForDOC {
         readme: string;
     };
     hasValidExportObject: boolean;
+    /**
+     * @param {string} content
+     * @returns { RegExpExecArray[] }
+     */
+    static getDescription: (content: string) => RegExpExecArray[];
     /**
      * @returns {boolean|undefined}
      */
@@ -202,7 +186,7 @@ export class parsedFileForDOC {
             };
         } | {
             exportName: string | undefined;
-            details: ReturnType<(typeof parsedFileForDOC)["getDescription"]>;
+            details: ReturnType<typeof parsedFileForDOC["getDescription"]>;
             error: undefined;
         }>;
     } & {
@@ -225,7 +209,7 @@ export class parsedFileForDOC {
                 };
             } | {
                 exportName: string | undefined;
-                details: ReturnType<(typeof parsedFileForDOC)["getDescription"]>;
+                details: ReturnType<typeof parsedFileForDOC["getDescription"]>;
                 error: undefined;
             }>;
         };
@@ -234,6 +218,4 @@ export class parsedFileForDOC {
      * @returns {ReturnType<typeof TryAsync<any>>}
      */
     importAsModuleJS: () => ReturnType<typeof TryAsync<any>>;
-    #private;
 }
-import { TryAsync } from '../function/TryAsync.mjs';

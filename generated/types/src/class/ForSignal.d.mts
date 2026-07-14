@@ -1,3 +1,5 @@
+import { Signal } from './Signal.mjs';
+export type VivthCleanup = import('../typehints/VivthCleanup.mjs').VivthCleanup;
 /**
  * @typedef {import('../typehints/VivthCleanup.mjs').VivthCleanup} VivthCleanup
  */
@@ -9,7 +11,8 @@
  * @implements {VivthCleanup}
  * @extends {Signal<Array<TYPE|undefined>>}
  */
-export class ForSignal<TYPE extends unknown> extends Signal<(TYPE | undefined)[]> implements VivthCleanup {
+export declare class ForSignal<TYPE extends any> extends Signal<Array<TYPE | undefined>> implements VivthCleanup {
+    #private;
     /**
      * @description
      * @param {(
@@ -57,7 +60,11 @@ export class ForSignal<TYPE extends unknown> extends Signal<(TYPE | undefined)[]
             isPrevDefined: false;
         };
     }) => void, additionalCleanUp?: () => void);
-    #private;
+    /**
+     * @description
+     * - need to be manually called when disposing/cleaning up this instance;
+     * @type {()=>Promise<void>}
+     * @override
+     */
+    vivthCleanup: () => Promise<void>;
 }
-export type VivthCleanup = import("../typehints/VivthCleanup.mjs").VivthCleanup;
-import { Signal } from './Signal.mjs';

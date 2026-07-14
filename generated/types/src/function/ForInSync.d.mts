@@ -30,7 +30,7 @@
  * 	}
  * );
  */
-export function ForInSync<OBJECT extends Record<string | number | symbol, any>, RETURNTYPE extends unknown>(object: OBJECT, handlerCallback: (key: keyof OBJECT, value: OBJECT[keyof OBJECT], options: {
+export declare function ForInSync<OBJECT extends Record<string | number | symbol, any>, RETURNTYPE extends any>(object: OBJECT, handlerCallback: (key: keyof OBJECT, value: OBJECT[keyof OBJECT], options: {
     prevError: Error | undefined;
     breakEarly: () => void;
 }) => RETURNTYPE | undefined): [Set<RETURNTYPE>, Set<Error>];

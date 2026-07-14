@@ -10,7 +10,7 @@
  * @returns {()=>void}
  * - early clearInterval callback;
  */
-export function NewAnimationTimeline({ fps, duration }: {
+export declare function NewAnimationTimeline({ fps, duration }: {
     fps: number;
     duration: {
         seconds: number;

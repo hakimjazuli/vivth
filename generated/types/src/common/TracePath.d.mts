@@ -19,4 +19,4 @@
  * 	})
  * ); // "D://test.mjs:4:2"
  */
-export function TracePath(filterCallback: (stackString: string) => boolean): string | undefined;
+export declare function TracePath(filterCallback: (stackString: string) => boolean): string | undefined;

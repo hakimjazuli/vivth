@@ -12,4 +12,4 @@
  * 	external: Array.from(NodeModuleList()),
  * });
  */
-export function NodeModuleList(): Set<string>;
+export declare function NodeModuleList(): Set<string>;

@@ -1,3 +1,8 @@
+import { EsWatcher } from '../class/EsWatcher.mjs';
+import { TsToMjs } from '../function/TsToMjs.mjs';
+export type VivthCleanup = import('../typehints/VivthCleanup.mjs').VivthCleanup;
+import type { EventName } from 'chokidar/handler.js';
+import type { BuildOptions } from 'esbuild';
 /**
  * @typedef {import('../typehints/VivthCleanup.mjs').VivthCleanup} VivthCleanup
  */
@@ -15,12 +20,8 @@
  * @template {BuildOptions} OPT
  * @implements {VivthCleanup}
  */
-export class JSDirMapper<OPT extends BuildOptions> implements VivthCleanup {
-    /**
-     * @param {string} path
-     * @returns {string}
-     */
-    static #correctEndpointExt: (path: string) => string;
+export declare class JSDirMapper<OPT extends BuildOptions> implements VivthCleanup {
+    #private;
     /**
      * @description
      * @param {Object} path
@@ -102,7 +103,7 @@ export class JSDirMapper<OPT extends BuildOptions> implements VivthCleanup {
     constructor({ mapTo, watch, filter }: {
         watch: string;
         mapTo: string;
-        filter?: ((arg0: {
+        filter?: (arg0: {
             source: string;
             target: string;
             eventName: EventName;
@@ -110,7 +111,7 @@ export class JSDirMapper<OPT extends BuildOptions> implements VivthCleanup {
             shouldProcessDefault: boolean | {
                 selfCleanup: () => Promise<void>;
             };
-        }>) | undefined;
+        }>;
     }, { esbuild, asTsToMjsHandler }: {
         esbuild: {
             buildOptions: Omit<ConstructorParameters<typeof EsWatcher<OPT>>[0], "entryPoints" | "outFile" | "write" | "format" | "bundle" | "logLevel" | "mainFields">;
@@ -119,10 +120,4 @@ export class JSDirMapper<OPT extends BuildOptions> implements VivthCleanup {
         asTsToMjsHandler?: Parameters<typeof TsToMjs>[1];
     });
     vivthCleanup: () => Promise<void>;
-    #private;
 }
-export type VivthCleanup = import("../typehints/VivthCleanup.mjs").VivthCleanup;
-import type { BuildOptions } from 'esbuild';
-import type { EventName } from 'chokidar/handler.js';
-import { EsWatcher } from '../class/EsWatcher.mjs';
-import { TsToMjs } from '../function/TsToMjs.mjs';

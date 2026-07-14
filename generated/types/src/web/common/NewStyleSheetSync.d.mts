@@ -12,4 +12,4 @@
  * @param {ConstructorParameters<typeof CSSStyleSheet>} arg1
  * @returns {CSSStyleSheet}
  */
-export function NewStyleSheetSync(string: string, options?: CSSStyleSheetInit | undefined): CSSStyleSheet;
+export declare function NewStyleSheetSync(string: string, ...arg1: ConstructorParameters<typeof CSSStyleSheet>): CSSStyleSheet;

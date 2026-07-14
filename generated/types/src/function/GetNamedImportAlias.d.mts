@@ -19,4 +19,4 @@
  * GetNamedImportAlias(checkNoAlias, 'something', 'packageName'); // 'something'
  * GetNamedImportAlias(checkAlias, 'something', 'packageName'); // 'somethingElse'
  */
-export function GetNamedImportAlias(content: string, moduleName: string, packageName: string): string | undefined;
+export declare function GetNamedImportAlias(content: string, moduleName: string, packageName: string): string | undefined;

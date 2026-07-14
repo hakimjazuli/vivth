@@ -1,10 +1,12 @@
+import { Signal } from './Signal.mjs';
+import { Effect } from './Effect.mjs';
 /**
  * @description
  * - a class for creating derived version of [Signal](#signal);
  * @template VALUE
  * @extends Signal<VALUE|undefined>
  */
-export class Derived<VALUE> extends Signal<VALUE | undefined> {
+export declare class Derived<VALUE> extends Signal<VALUE | undefined> {
     /**
      * @description
      * - Derived used [Signal](#signal) and [Effect](#effect) under the hood;
@@ -69,6 +71,35 @@ export class Derived<VALUE> extends Signal<VALUE | undefined> {
      *
      */
     dontUpdate: Symbol;
+    /**
+     * @description
+     * - the most recent value of the instance;
+     * - can be turn into reactive with Effect or Derived instantiation;
+     * - value are allowed to be `undefined` and always be `undefined` at the instantiation time;
+     * >- make sure to put a check before consuming(inside an `Effect`);
+     * @returns {VALUE|undefined}
+     * @override
+     * @example
+     * import { Signal, Derived, Effect } from 'vivth/neutral';
+     *
+     * const numberSignal = new Signal(0);
+     * const doubleDerived = new Derived(async({ subscribe }) => {
+     * 	return subscribe(numberSignal).value \* 2;
+     * });
+     *
+     * new Effect(async({ subscribe }) => {
+     * 	console.log(subscribe(doubleDerived).value);
+     * })
+     * numberSignal++;
+     */
+    get value(): VALUE | undefined;
+    /**
+     * @description
+     * - Derived instance value cannot be manually assigned;
+     * - it's value should always be determined by it's own returned value from `derivedFunction`;
+     * @private
+     * @type {(value:VALUE|undefined)=>void}
+     * @override
+     */
+    private set value(value);
 }
-import { Signal } from './Signal.mjs';
-import { Effect } from './Effect.mjs';

@@ -11,4 +11,4 @@
  *
  * const files = await GetFilesFromDir(join(Paths.root, '/dev/'), /[\s\S]\*[noblank]/); // without \[noblank]
  */
-export function GetFilesFromDir(dirAbsolutePath: string, pathRule: RegExp, fileNames?: Set<string>): Promise<Set<string>>;
+export declare function GetFilesFromDir(dirAbsolutePath: string, pathRule: RegExp, fileNames?: Set<string>): Promise<Set<string>>;

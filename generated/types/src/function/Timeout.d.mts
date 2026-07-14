@@ -14,4 +14,4 @@
  * }
  * test();
  */
-export function Timeout(timeMS: number): Promise<void>;
+export declare function Timeout(timeMS: number): Promise<void>;

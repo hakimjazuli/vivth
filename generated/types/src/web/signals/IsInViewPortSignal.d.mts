@@ -1,3 +1,5 @@
+import { Signal } from '../../class/Signal.mjs';
+export type VivthCleanup = import('../../typehints/VivthCleanup.mjs').VivthCleanup;
 /**
  * @typedef {import('../../typehints/VivthCleanup.mjs').VivthCleanup} VivthCleanup
  */
@@ -7,46 +9,29 @@
  * @implements {VivthCleanup}
  * @extends {Signal<boolean>}
  */
-export class IsInViewPortSignal extends Signal<boolean> implements VivthCleanup {
+export declare class IsInViewPortSignal extends Signal<boolean> implements VivthCleanup {
+    #private;
     /**
-     * @type {WeakMap<Element, Signal<boolean>>}
+     * @description
+     * @override
+     * - cleanup callback;
      */
-    static #mapped: WeakMap<Element, Signal<boolean>>;
-    /**
-     * @type {IntersectionObserver|undefined}
-     */
-    static #intersectionObserver_: IntersectionObserver | undefined;
-    static #q: QChannel<import("../../typehints/AnyButUndefined.mjs").AnyButUndefined> & {
-        [x: symbol]: QChannel<import("../../typehints/AnyButUndefined.mjs").AnyButUndefined>;
-    };
-    static get #intersectionObserver(): IntersectionObserver;
-    /**
-     * @type {IntersectionObserverInit}
-     */
-    static #intersectionObserverInit: IntersectionObserverInit;
-    /**
-     * @type {IntersectionObserverCallback}
-     */
-    static #intersectionObserverCallback: IntersectionObserverCallback;
-    /**
-     * @param {()=>boolean} isLastOnQ
-     * @param {Element} target
-     * @param {IntersectionObserverEntry} entry
-     * @returns {Promise<void>}
-     */
-    static #qCB: (isLastOnQ: () => boolean, target: Element, entry: IntersectionObserverEntry) => Promise<void>;
-    /**
-     * @param {Element} element
-     * @returns {boolean}
-     */
-    static #isInViewport(element: Element): boolean;
+    vivthCleanup: () => Promise<void>;
     /**
      * @description
      * @param {Element} element
      */
     constructor(element: Element);
-    #private;
+    /**
+     * @description
+     * - `Signal.value` reference to check if element is in viewport;
+     * @returns {boolean}
+     * @override
+     */
+    get value(): boolean;
+    /**
+     * @type {boolean}
+     * @override
+     */
+    set value(_: boolean);
 }
-export type VivthCleanup = import("../../typehints/VivthCleanup.mjs").VivthCleanup;
-import { Signal } from '../../class/Signal.mjs';
-import { QChannel } from '../../class/QChannel.mjs';

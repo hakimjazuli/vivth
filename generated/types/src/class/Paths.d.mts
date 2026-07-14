@@ -4,11 +4,33 @@
  * - is a singleton;
  * - most of functionality need to access `Paths.root`, if you get warning, you can instantiate `Paths` before running anything;
  */
-export class Paths {
+export declare class Paths {
+    #private;
     /**
-     * @type {Paths|undefined}
+     * @description
+     * @param {Object} options
+     * @param {string} options.root
+     * - browser:
+     * ```js
+     * location.origin
+     * ```
+     * - node/bun compatible:
+     * ```js
+     * import process from 'node:process';
+     * process.env.INIT_CWD ?? process.cwd()
+     * ```
+     * - other: you need to check your JSRuntime for the rootPath reference;
+     * @example
+     * import { Paths } from 'vivth/neutral';
+     *
+     * new Paths({
+     * 	// root: location.origin,
+     * 	// root: process.env.INIT_CWD ?? process.cwd(),
+     * })
      */
-    static #instance: Paths | undefined;
+    constructor({ root }: {
+        root: string;
+    });
     /**
      * @description
      * - MIGHT THROW AN ERROR;
@@ -66,30 +88,4 @@ export class Paths {
      * Paths.normalizesForRoot('\\path\\myFile.mjs'); //  "D://something/path/myFile.mjs"
      */
     static diskAbsolute: (path: string) => string;
-    /**
-     * @description
-     * @param {Object} options
-     * @param {string} options.root
-     * - browser:
-     * ```js
-     * location.origin
-     * ```
-     * - node/bun compatible:
-     * ```js
-     * import process from 'node:process';
-     * process.env.INIT_CWD ?? process.cwd()
-     * ```
-     * - other: you need to check your JSRuntime for the rootPath reference;
-     * @example
-     * import { Paths } from 'vivth/neutral';
-     *
-     * new Paths({
-     * 	// root: location.origin,
-     * 	// root: process.env.INIT_CWD ?? process.cwd(),
-     * })
-     */
-    constructor({ root }: {
-        root: string;
-    });
-    #private;
 }

@@ -1,3 +1,4 @@
+import { FSasar } from '../bundler/FSasar.mjs';
 /**
  * @description
  * - get content from relativePath;
@@ -11,5 +12,4 @@
  *
  * await GetContentFromRelativePath('../doc/parsedFile.mjs', 'utf-8');
  */
-export function GetBufferFromRelativePath(relativePath: string): ReturnType<typeof FSasar.file>;
-import { FSasar } from '../bundler/FSasar.mjs';
+export declare function GetBufferFromRelativePath(relativePath: string): ReturnType<typeof FSasar.file>;

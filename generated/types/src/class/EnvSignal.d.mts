@@ -1,9 +1,11 @@
+import { Derived } from './Derived.mjs';
 /**
  * @description
  * - uses [Signal](#signal) and [Derived](#derived) under the hood;
  * @template VALUE
  */
-export class EnvSignal<VALUE> {
+export declare class EnvSignal<VALUE> {
+    #private;
     /**
      * @description
      * - create `EnvSignal` instance;
@@ -45,6 +47,4 @@ export class EnvSignal<VALUE> {
      * myEnv.correction(false); // this will notify all subscribers;
      */
     correction: (correctedValue: VALUE) => void;
-    #private;
 }
-import { Derived } from './Derived.mjs';

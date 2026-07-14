@@ -2,7 +2,8 @@
  * @description
  * - includes all files, that match the rule to `.asar` specification;
  */
-export class PathFSDir {
+export declare class PathFSDir {
+    #private;
     /**
      * @description
      * @param {string} relativePath
@@ -16,7 +17,7 @@ export class PathFSDir {
      * PathFSDir.vivthDir('../src/', /[\s\S]\*[blank]/);
      * // visible for ide inline check: without `[blank]`;
      */
-    static vivthDir: (relativePath: string, rule: RegExp, options?: Parameters<typeof import("./PathFSBundles.mjs").PathFSBundles["vivthBundles"]>[1]) => PathFSDir;
+    static vivthDir: (relativePath: string, rule: RegExp, options?: Parameters<typeof import('./PathFSBundles.mjs').PathFSBundles["vivthBundles"]>[1]) => PathFSDir;
     /**
      * @private
      * @param {Parameters<typeof PathFSDir["vivthDir"]>[0]} relativePath
@@ -44,5 +45,4 @@ export class PathFSDir {
      * @returns {string}
      */
     get callerPath(): string;
-    #private;
 }
