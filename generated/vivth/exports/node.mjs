@@ -44,3 +44,4 @@ export { VivthyNeinth } from '../../../src/neinth/VivthyNeinth.mjs';
 export { BrowserDirMapper } from '../../../src/web/BrowserDirMapper.mjs';
 export { ViteAddDynamics } from '../../../src/web/ViteAddDynamics.mjs';
 export { ViteGetAllHTMLFile } from '../../../src/web/ViteGetAllHTMLFile.mjs';
+export { ViteScriptTypeModule } from '../../../src/web/ViteScriptTypeModule.mjs';

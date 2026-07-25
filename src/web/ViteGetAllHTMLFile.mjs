@@ -8,6 +8,7 @@ import {
 	// sep,
 } from 'node:path';
 import { readdirSync, statSync } from 'node:fs';
+
 import { Paths } from '../class/Paths.mjs';
 import { TryAsync } from '../function/TryAsync.mjs';
 import { Console } from '../class/Console.mjs';
@@ -71,7 +72,6 @@ export function ViteGetAllHTMLFile(dirPath, distPath) {
 				} catch (error) {
 					throw { autoHtmlInputs: `Error scanning directory '${dirPath}'`, error };
 				}
-
 				build = build || {};
 				const optionsKey = build.rolldownOptions ? 'rolldownOptions' : 'rollupOptions';
 				build[optionsKey] = build[optionsKey] || {};
@@ -81,16 +81,11 @@ export function ViteGetAllHTMLFile(dirPath, distPath) {
 					...input,
 					...inputs,
 				};
-
 				console.log('📦 Dynamic HTML Inputs Generated:', inputs);
 			});
-			const dynamicsHandler = TryAsync(async () => {});
-			const [[, errorBuild], [, errorDynamic]] = await Promise.all([buildPromise, dynamicsHandler]);
+			const [[, errorBuild]] = await Promise.all([buildPromise]);
 			if (errorBuild) {
 				Console.error({ errorBuild });
-			}
-			if (errorDynamic) {
-				Console.error({ errorDynamic });
 			}
 		},
 	};

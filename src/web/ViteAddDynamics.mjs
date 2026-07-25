@@ -14,7 +14,7 @@ export function ViteAddDynamics(...args) {
 	 */
 	let started;
 	return {
-		name: 'vivth/web:AddDynamics',
+		name: 'vivth/web:ViteAddDynamics',
 		apply: 'serve', // <-- only applies in dev server
 		async configureServer(devServer) {
 			if (started) {

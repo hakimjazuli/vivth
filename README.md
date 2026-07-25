@@ -206,6 +206,7 @@ npm i vivth
 - [neutral.WC_loopedSiblingsRef](#wc_loopedsiblingsref)
 - [node.ViteAddDynamics](#viteadddynamics)
 - [node.ViteGetAllHTMLFile](#vitegetallhtmlfile)
+- [node.ViteScriptTypeModule](#vitescripttypemodule)
 - [neutral.WC_extendsA](#wc_extendsa)
 - [neutral.WC_extendsB](#wc_extendsb)
 
@@ -7317,6 +7318,30 @@ text.nodeValue = "hello world";
 /**
  * @param {string} dirPath - The absolute or relative path to the directory to scan.
  * @param {string} distPath - The distribution folder name to exclude.
+ * @returns {import('vite').PluginOption}
+ */
+```
+
+\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+---
+
+<h2 id="vitescripttypemodule">node.ViteScriptTypeModule</h2>
+
+#### reference: `ViteScriptTypeModule`
+
+- vite plugin to always add `[type="module"]` on listed extention file;
+- this module assumes [Paths](#paths) and [SafeExit](#safeexit) to be instantiated;
+
+```js
+/**
+ * @param {string[]} extensions
+ * - file extensions to modify the scripts;
+ * - example: `['.html', '.php']`;
+ * @param {string[]} watchPaths
+ * -
+ * - example: `['/']`;
+ * @param {Omit<ConstructorParameters<typeof FSDirArchWatcher>[1], 'each'|'full'>} fsDirArchWatcherOptions
  * @returns {import('vite').PluginOption}
  */
 ```
