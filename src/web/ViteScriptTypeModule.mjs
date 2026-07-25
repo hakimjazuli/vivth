@@ -1,39 +1,24 @@
 // @ts-check
 
-import { extname } from 'node:path';
-
 import { TryAsync } from '../function/TryAsync.mjs';
 import { FSDirArchWatcher } from '../class/FSDirArchWatcher.mjs';
 import { Preferrence } from '../common/Preferrence.mjs';
 import { readFile } from 'node:fs/promises';
 import { FileSafe } from '../class/FileSafe.mjs';
-import { ForOfSync } from '../function/ForOfSync.mjs';
 import { Console } from '../class/Console.mjs';
 
 /**
  * @description
  * - vite plugin to always add `[type="module"]` on listed extention file;
  * - this module assumes [Paths](#paths) and [SafeExit](#safeexit) to be instantiated;
- * @param {string[]} extensions
- * - file extensions to modify the scripts;
- * - example: `['.html', '.php']`;
  * @param {string[]} watchPaths
- * -
  * - example: `['/']`;
+ * @param {(path:string)=>boolean} pathFilter
+ * - example: `(path) => extname(path) === '.html'`;
  * @param {Omit<ConstructorParameters<typeof FSDirArchWatcher>[1], 'each'|'full'>} fsDirArchWatcherOptions
  * @returns {import('vite').PluginOption}
  */
-export function ViteScriptTypeModule(extensions, watchPaths, fsDirArchWatcherOptions) {
-	/**
-	 * @type {Set<string>}
-	 */
-	const setOfExtensions = new Set();
-	ForOfSync(extensions, (ext) => {
-		if (!ext.startsWith('.')) {
-			ext = `.${ext}`;
-		}
-		setOfExtensions.add(ext);
-	});
+export function ViteScriptTypeModule(watchPaths, pathFilter, fsDirArchWatcherOptions) {
 	let started = false;
 	return {
 		name: 'vivth/web:ViteScriptTypeModule',
@@ -55,11 +40,11 @@ export function ViteScriptTypeModule(extensions, watchPaths, fsDirArchWatcherOpt
 						default:
 							throw '';
 					}
-					if (!setOfExtensions.has(extname(path))) {
+					if (!pathFilter(path)) {
 						throw '';
 					}
 					const encoding = Preferrence.encoding;
-					const [correctedContent, throwedErr] = await TryAsync(async () => {
+					const [correctedContent, throwedWarn] = await TryAsync(async () => {
 						const content = await readFile(path, { encoding });
 						const regex = /<script(?![^>]*\btype=)([^>]*\bsrc=["'][^"']+["'][^>]*)>/gi;
 						if (!regex.test(content)) {
@@ -68,8 +53,8 @@ export function ViteScriptTypeModule(extensions, watchPaths, fsDirArchWatcherOpt
 						regex.lastIndex = 0;
 						return content.replace(regex, (_match, attrs) => `<script type="module"${attrs}>`);
 					});
-					if (throwedErr) {
-						Console.warn(throwedErr);
+					if (throwedWarn) {
+						Console.warn({ throwedWarn, path });
 						throw '';
 					}
 					await FileSafe.write(path, correctedContent, { encoding });

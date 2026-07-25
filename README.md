@@ -7335,12 +7335,10 @@ text.nodeValue = "hello world";
 
 ```js
 /**
- * @param {string[]} extensions
- * - file extensions to modify the scripts;
- * - example: `['.html', '.php']`;
  * @param {string[]} watchPaths
- * -
  * - example: `['/']`;
+ * @param {(path:string)=>boolean} pathFilter
+ * - example: `(path) => extname(path) === '.html'`;
  * @param {Omit<ConstructorParameters<typeof FSDirArchWatcher>[1], 'each'|'full'>} fsDirArchWatcherOptions
  * @returns {import('vite').PluginOption}
  */
