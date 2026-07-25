@@ -48,16 +48,19 @@ export function ViteScriptTypeModule(watchPaths, pathFilter, fsDirArchWatcherOpt
 						const content = await readFile(path, { encoding });
 						const regex = /<script(?![^>]*\btype=)([^>]*\bsrc=["'][^"']+["'][^>]*)>/gi;
 						if (!regex.test(content)) {
-							throw new Error('No <script src> tags without type found');
+							throw 'No <script src> tags without type found';
 						}
 						regex.lastIndex = 0;
 						return content.replace(regex, (_match, attrs) => `<script type="module"${attrs}>`);
 					});
 					if (throwedWarn) {
-						Console.warn({ throwedWarn, path });
 						throw '';
 					}
-					await FileSafe.write(path, correctedContent, { encoding });
+					const [, errorCorrectScript] = await FileSafe.write(path, correctedContent, { encoding });
+					if (errorCorrectScript) {
+						throw '';
+					}
+					Console.info(`successfully change:'${path}'`);
 				},
 				full: async () => {},
 				...fsDirArchWatcherOptions,
