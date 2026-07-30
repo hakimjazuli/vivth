@@ -44,11 +44,11 @@
   },
   "homepage": "https://github.com/hakimjazuli/vivth#readme",
   "scripts": {
-    "dev": "concurrently 'bun dev-a' 'bun t-w'",
-    "dev-a": "bun ./dev/auto-doc.mjs",
+    "dev": "bun ./dev/auto-doc.mjs",
     "t-w": "tsc --watch",
     "test-bundle": "bun ./test/bundle.mjs",
     "test-": "bun ./test/test_.mjs",
+    "test-ssg-dev": "bun ./test/ssgDevMapper/ssgDevMapper.mjs",
     "test-dirmapper": "bun ./test/dirmapper.mjs",
     "test-browser-dirmapper": "bun ./test/browserDirMapper/test.mjs"
   },

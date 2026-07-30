@@ -25,6 +25,9 @@ import { Prettivy } from '../class/Prettivy.mjs';
  * @param {string} options.rootPath
  * - relative path to pseudo root;
  * @param {number} [options.debounce]
+ * @param {string[]} [options.mapperPaths]
+ * - paths to be inserted prior ts-check;
+ * - usefull for vivth [FileSelfMapper](#fileselfmapper);
  * @param {boolean} [options.useFetchForAssets]
  * - default: `true`;
  * >- non js file will be `fetch`ed;
@@ -37,7 +40,7 @@ import { Prettivy } from '../class/Prettivy.mjs';
  */
 export function NewDynamicsExport(
 	/** */
-	{ rootPath, useFetchForAssets = true, debounce, chokidarOptions, eachFilter },
+	{ rootPath, useFetchForAssets = true, debounce, chokidarOptions, eachFilter, mapperPaths },
 ) {
 	const dynamicImports = 'Dynamics';
 	const pathDynamic = Paths.diskAbsolute(join(rootPath, 'vivth', dynamicImports.toLowerCase()));
@@ -203,6 +206,11 @@ export function NewDynamicsExport(
 					mimeTypeHandlers.push(fullTypeVal);
 				});
 				const helpers = ['// @ts-check'];
+				if (mapperPaths) {
+					ForOfSync(mapperPaths, (path) => {
+						helpers.unshift(`// ${path}}`);
+					});
+				}
 				if (withMimeNotCSS.length) {
 					mimeTypeHandlers.unshift('/**');
 					mimeTypeHandlers.push(' */');

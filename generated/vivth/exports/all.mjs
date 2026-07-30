@@ -21,6 +21,7 @@ export { FSAnalyzer } from '../../../src/bundler/FSAnalyzer.mjs';
 export { FSasar } from '../../../src/bundler/FSasar.mjs';
 export { JSDirMapper } from '../../../src/bundler/JSDirMapper.mjs';
 export { RunWatchThenCompileJSOnSafeExit } from '../../../src/bundler/RunWatchThenCompileJSOnSafeExit.mjs';
+export { SSGDevMapper } from '../../../src/bundler/SSGDevMapper.mjs';
 export { AwaitSignal } from '../../../src/class/AwaitSignal.mjs';
 export { Console } from '../../../src/class/Console.mjs';
 export { DataLog } from '../../../src/class/DataLog.mjs';

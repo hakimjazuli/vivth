@@ -80,6 +80,7 @@ npm i vivth
 - [node.FSasar](#fsasar)
 - [node.JSDirMapper](#jsdirmapper)
 - [node.RunWatchThenCompileJSOnSafeExit](#runwatchthencompilejsonsafeexit)
+- [node.SSGDevMapper](#ssgdevmapper)
 - [neutral.AwaitSignal](#awaitsignal)
 - [neutral.Console](#console)
 - [neutral.DataLog](#datalog)
@@ -1083,6 +1084,69 @@ await RunWatchThenCompileJSOnSafeExit({
     asar: {},
     encoding: "utf-8",
   },
+});
+```
+
+\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+---
+
+<h2 id="ssgdevmapper">node.SSGDevMapper</h2>
+
+#### reference: `SSGDevMapper`
+
+- class helper to map files into SSG software that have its own dev server;
+- js extensions supports:
+  > - `.mjs`;
+  > - `.cjs`;
+  > - `.js`;
+- `.html` parse `script` elements to be:
+  > - minifed if has `[minify="true"]`;
+  > - use esm if has `[type="module"]`;
+- `.scss`|`.sass` write compiled `.css`;
+- every other extension will be copied to `targetpath` as is(without `targetpath` as string);
+- look for [FileSelfMapper](#fileselfmapper) on how to add `targetpath`;
+
+```js
+/**
+ * @implements {VivthCleanup}
+ */
+```
+
+#### reference: `new SSGDevMapper`
+
+```js
+/**
+ * @param {Object} options
+ * @param {string} options.sourcePath
+ * @param {import('esbuild').WatchOptions} [options.esbuildWatchOptions]
+ * @param {Omit<Parameters<typeof import('esbuild')["context"]>[0], "write"|"minify"|"format"|"platform"|"mainFields"|"outfile"|"bundle"|"entryPoints">} [options.esbuild]
+ * - `logLimit`: default = `3`;
+ * - `outFile`: auto determined by comment line on top level of each files;
+ * - `minify`: determined by file `relativePath`(to dirname of `watchpath`) name included `.min.`;
+ * - `format`: determined by file `relativePath`(to dirname of `watchpath`) name included `.esm.` or `.iife.`;
+ * - `mainFields`: `module,main`;
+ * - `bundle`: automatically added by `vivth.SSGDevMapper`;
+ * - `write`: automatically added by `vivth.SSGDevMapper`;
+ * @param {(path:{mapTo:string, src:string}, content:string)=>(string|false)} [options.postProcessDirectCopy]
+ * - works for:
+ * >- `.js`;
+ * >- anything that are not `sass` and `module js/ts`;
+ * - return `false` to exclude `target` from mapping;
+ */
+```
+
+- <i>example</i>:
+
+```js
+import { Paths } from "vivth/neutral";
+import { SafeExit, SSGDevMapper } from "vivth/node";
+new Paths({
+  root: process.env.INIT_CWD ?? process.cwd(),
+});
+new SafeExit("SIGINT", "SIGTERM");
+new SSGDevMapper({
+  sourcePath: "/test/ssgDevMapper/dev/",
 });
 ```
 
@@ -5534,6 +5598,9 @@ generate generator watcher to `Dynamics`;
  * @param {string} options.rootPath
  * - relative path to pseudo root;
  * @param {number} [options.debounce]
+ * @param {string[]} [options.mapperPaths]
+ * - paths to be inserted prior ts-check;
+ * - usefull for vivth [FileSelfMapper](#fileselfmapper);
  * @param {boolean} [options.useFetchForAssets]
  * - default: `true`;
  * >- non js file will be `fetch`ed;
@@ -5963,6 +6030,7 @@ const [data, error] = TrySync(() => {
  * @param {string} [options.overrideOutputDir]
  * - default: write conversion to same directory;
  * - path are relative to project root;
+ * @param {string[]} [options.mappedPaths]
  * @param {BufferEncoding} [options.encoding]
  * - default: `utf-8`;
  * @param {import('../typehints/AutoDocASOptions.mjs').AutoDocASOptions} [options.assemblyScriptOptions]
@@ -6671,7 +6739,7 @@ const esWatcherInstance = this.registerObjectWithAutoCleanup(
  * ```js
  * something.vivthCleanup();
  * ```
- * >- class that implements this;
+ * >- instance of a class that implements this;
  * >- function that have this as part of it's return;
  * - to clean up that object, usually a long lived process;
  */

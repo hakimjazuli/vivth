@@ -11,6 +11,7 @@
  * @param {string} [options.overrideOutputDir]
  * - default: write conversion to same directory;
  * - path are relative to project root;
+ * @param {string[]} [options.mappedPaths]
  * @param {BufferEncoding} [options.encoding]
  * - default: `utf-8`;
  * @param {import('../typehints/AutoDocASOptions.mjs').AutoDocASOptions} [options.assemblyScriptOptions]
@@ -20,8 +21,9 @@
  *
  * await TsToMjs('./myFile.mts', { encoding: 'utf-8', overrideOutputDir: './other/dir' });
  */
-export declare function TsToMjs(path: string, { overrideOutputDir, encoding, assemblyScriptOptions, }?: {
+export declare function TsToMjs(path: string, { overrideOutputDir, encoding, assemblyScriptOptions, mappedPaths, }?: {
     overrideOutputDir?: string;
+    mappedPaths?: string[];
     encoding?: BufferEncoding;
     assemblyScriptOptions?: import('../typehints/AutoDocASOptions.mjs').AutoDocASOptions;
 }): Promise<void>;

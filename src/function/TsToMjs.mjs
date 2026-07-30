@@ -30,6 +30,7 @@ const suffixForUniversal = '_ASUniversal';
  * @param {string} [options.overrideOutputDir]
  * - default: write conversion to same directory;
  * - path are relative to project root;
+ * @param {string[]} [options.mappedPaths]
  * @param {BufferEncoding} [options.encoding]
  * - default: `utf-8`;
  * @param {import('../typehints/AutoDocASOptions.mjs').AutoDocASOptions} [options.assemblyScriptOptions]
@@ -45,6 +46,7 @@ export async function TsToMjs(
 		overrideOutputDir = undefined,
 		encoding = Preferrence.encoding,
 		assemblyScriptOptions = undefined,
+		mappedPaths = undefined,
 	} = {},
 ) {
 	path = Paths.diskAbsolute(path);
@@ -108,7 +110,8 @@ export async function TsToMjs(
 				const mjsPath = `${mjsNoExt}.mjs`;
 				const [, errorWrite] = await FileSafe.write(
 					`${pathNoExt}${suffixFor_asar}.mjs`,
-					`// @ts-check
+					`-mappedPaths-
+// @ts-check
 import { InstantiateAssemblyScript } from '${Paths.normalize(importInstantiateAssemblyScriptFrom)}';
 import { PathFSFile } from '${Paths.normalize(importPathFSFrom)}';
 
@@ -123,7 +126,9 @@ import { PathFSFile } from '${Paths.normalize(importPathFSFrom)}';
  * @returns {ReturnType<typeof InstantiateAssemblyScript<import('./fib.js')>>}
  */
 export const ${mjsNoExt} = ( import_ = {} ) => InstantiateAssemblyScript(PathFSFile.vivthFile('./${baseNameNoExt}.wasm'), import_);
-`.replace('-description-', 'description'),
+`
+						.replace('-description-', 'description')
+						.replace('-mappedPaths-', (mappedPaths ?? []).join('\n')),
 					{ encoding: Preferrence.encoding },
 				);
 				if (errorWrite) {
@@ -179,7 +184,8 @@ export const ${mjsNoExt} = ( import_ = {} ) => InstantiateAssemblyScript(PathFSF
 		await Promise.all(
 			ForOfSync(matches, async (match) => {
 				const match1 = match[1];
-				const trueContent = `// @ts-check
+				const trueContent = `-mappedPaths-
+// @ts-check
 
 import ${match1} from './${basename(path)}';
 
@@ -190,7 +196,9 @@ import ${match1} from './${basename(path)}';
  * >- \`nodeJS\` compatible runtime;
  */
 export const ${basename(path.replace(/.js$/, suffixForUniversal))} = ${match1};
-`.replace('-description-', 'description');
+`
+					.replace('-description-', 'description')
+					.replace('-mappedPaths-', (mappedPaths ?? []).join('\n'));
 				await FileSafe.write(path.replace(/.js$/, `${suffixForUniversal}.mjs`), trueContent, {
 					encoding: Preferrence.encoding,
 				});
