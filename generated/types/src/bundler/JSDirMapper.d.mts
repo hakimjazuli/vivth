@@ -77,6 +77,9 @@ export declare class JSDirMapper<OPT extends BuildOptions> implements VivthClean
      * >- handled via `vivth.TsToMjs`;
      * >- preferably to be isolated on a single folder;
      * - when falsy -> ignore `.as.ts`;
+     * @param {number} [options.delay]
+     * - `EsWatcher` delay argument;
+     * - default `0`;
      * @example
      * import process from 'node:process';
      *
@@ -112,12 +115,13 @@ export declare class JSDirMapper<OPT extends BuildOptions> implements VivthClean
                 selfCleanup: () => Promise<void>;
             };
         }>;
-    }, { esbuild, asTsToMjsHandler }: {
+    }, { esbuild, asTsToMjsHandler, delay }: {
         esbuild: {
             buildOptions: Omit<ConstructorParameters<typeof EsWatcher<OPT>>[0], "entryPoints" | "outFile" | "write" | "format" | "bundle" | "logLevel" | "mainFields">;
             watchOption?: ConstructorParameters<typeof EsWatcher<OPT>>[1];
         };
         asTsToMjsHandler?: Parameters<typeof TsToMjs>[1];
+        delay?: number;
     });
     vivthCleanup: () => Promise<void>;
 }

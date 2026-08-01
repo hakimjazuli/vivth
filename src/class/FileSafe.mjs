@@ -3,6 +3,8 @@
 import { writeFile, mkdir, copyFile, rename, rm, readFile, stat } from 'node:fs/promises';
 import { dirname } from 'node:path';
 
+import writeFileAtomic from 'write-file-atomic';
+
 import { TryAsync } from '../function/TryAsync.mjs';
 import { Console } from './Console.mjs';
 
@@ -43,6 +45,59 @@ export class FileSafe {
 		return string.toString().replace(/\s+/, ' ');
 	};
 	/**
+	 * @description
+	 * - method to create file safely by recursively mkdir the dirname of the outFile;
+	 * - also returning promise of result & error as value;
+	 * @param {Parameters<typeof writeFile>[0]} outFile
+	 * @param {Parameters<typeof writeFile>[1]} content
+	 * @param {Parameters<typeof writeFile>[2]} [options]
+	 * @param {boolean} [checkFuzySame]
+	 * - true: check while normalize consecutive whitespace into singel white space;
+	 * - false(default): check absolute value;
+	 * @param {'direct'|'atomic'} writeMode
+	 * @returns {ReturnType<typeof TryAsync<void>>}
+	 * @example
+	 * import { join } from 'node:path';
+	 * import { FileSafe } from 'vivth/node';
+	 * import { Paths } from 'vivth/neutral';
+	 *
+	 * const [, errorWrite] = await FileSafe.write(
+	 * 	join(Paths.root, '/some/path.mjs'),
+	 * 	`console.log("hello-world!!");`,
+	 * 	{ encoding: 'utf-8' }
+	 * );
+	 */
+	static write = async (outFile, content, options, checkFuzySame = true, writeMode = 'direct') => {
+		return await TryAsync(async () => {
+			const [, errorMkDir] = await FileSafe.mkdir(dirname(outFile.toString()));
+			if (errorMkDir) {
+				throw `error mkdir, "${dirname(outFile.toString())}"`;
+			}
+			if (!(await FileSafe.#validToOverWrite(outFile, content, options, checkFuzySame))) {
+				Console.warn(
+					{
+						FileSafe: `write file '${outFile}' is canceled, old file are ${checkFuzySame ? 'almost ' : ''}identical`,
+					},
+					{
+						now: true,
+					},
+				);
+				return;
+			}
+			if (writeMode === 'direct') {
+				await writeFile(outFile, content, options);
+				return;
+			}
+			const [, errorAtomicSave] = await TryAsync(
+				async () => await writeFileAtomic(outFile.toString(), content.toString()),
+			);
+			if (!errorAtomicSave) {
+				return;
+			}
+			Console.error({ errorAtomicSave });
+		});
+	};
+	/**
 	 * @param {Parameters<typeof FileSafe.write>[0]} outFile
 	 * @param {Parameters<typeof FileSafe.write>[1]} content
 	 * @param {Parameters<typeof FileSafe.write>[2]} [options]
@@ -67,48 +122,6 @@ export class FileSafe {
 			return false;
 		}
 		return true;
-	};
-	/**
-	 * @description
-	 * - method to create file safely by recursively mkdir the dirname of the outFile;
-	 * - also returning promise of result & error as value;
-	 * @param {Parameters<typeof writeFile>[0]} outFile
-	 * @param {Parameters<typeof writeFile>[1]} content
-	 * @param {Parameters<typeof writeFile>[2]} [options]
-	 * @param {boolean} [checkFuzySame]
-	 * - true: check while normalize consecutive whitespace into singel white space;
-	 * - false(default): check absolute value;
-	 * @returns {ReturnType<typeof TryAsync<void>>}
-	 * @example
-	 * import { join } from 'node:path';
-	 * import { FileSafe } from 'vivth/node';
-	 * import { Paths } from 'vivth/neutral';
-	 *
-	 * const [, errorWrite] = await FileSafe.write(
-	 * 	join(Paths.root, '/some/path.mjs'),
-	 * 	`console.log("hello-world!!");`,
-	 * 	{ encoding: 'utf-8' }
-	 * );
-	 */
-	static write = async (outFile, content, options, checkFuzySame = true) => {
-		return await TryAsync(async () => {
-			const [, errorMkDir] = await FileSafe.mkdir(dirname(outFile.toString()));
-			if (errorMkDir) {
-				throw `error mkdir, "${dirname(outFile.toString())}"`;
-			}
-			if (!(await FileSafe.#validToOverWrite(outFile, content, options, checkFuzySame))) {
-				Console.warn(
-					{
-						[FileSafe.name]: `write file '${outFile}' is canceled, old file are ${checkFuzySame ? 'almost ' : ''}identical`,
-					},
-					{
-						now: true,
-					},
-				);
-				return;
-			}
-			return await writeFile(outFile, content, options);
-		});
 	};
 	/**
 	 * @description

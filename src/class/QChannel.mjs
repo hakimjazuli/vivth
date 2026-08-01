@@ -68,18 +68,21 @@ export class QChannel {
 		const existing = QChannel.#uniquePromiser.get(id);
 		const { promise, resolve } = Promise.withResolvers();
 		const context = {};
+
 		if (existing === undefined) {
 			QChannel.#uniquePromiser.set(id, [promise, context]);
-			await Promise.resolve();
+			// no await here, first call goes through
 		} else {
 			const [prevPromise] = existing;
-			await prevPromise;
+			await prevPromise; // wait for previous to finish
 			QChannel.#uniquePromiser.set(id, [promise, context]);
 		}
+
 		const resume = () => {
 			resolve(true);
 			QChannel.#uniquePromiser.delete(id);
 		};
+
 		return {
 			resume,
 			isLastOnQ: () => {

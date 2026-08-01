@@ -112,6 +112,9 @@ export class JSDirMapper {
 	 * >- handled via `vivth.TsToMjs`;
 	 * >- preferably to be isolated on a single folder;
 	 * - when falsy -> ignore `.as.ts`;
+	 * @param {number} [options.delay]
+	 * - `EsWatcher` delay argument;
+	 * - default `0`;
 	 * @example
 	 * import process from 'node:process';
 	 *
@@ -135,8 +138,9 @@ export class JSDirMapper {
 	 * );
 	 *
 	 */
-	constructor({ mapTo, watch, filter }, { esbuild, asTsToMjsHandler }) {
+	constructor({ mapTo, watch, filter }, { esbuild, asTsToMjsHandler, delay = 0 }) {
 		this.#watchPath = Paths.diskAbsolute(watch);
+		this.#delay = delay;
 		this.#mapToPath = Paths.diskAbsolute(mapTo);
 		this.#esbuildOptions = esbuild;
 		this.#asTsToMjsHandler = asTsToMjsHandler;
@@ -162,6 +166,10 @@ export class JSDirMapper {
 	 * @type { string }
 	 */
 	#watchPath;
+	/**
+	 * @type { number }
+	 */
+	#delay;
 	/**
 	 * @type { string }
 	 */
@@ -369,6 +377,7 @@ export class JSDirMapper {
 				],
 			},
 			this.#esbuildOptions.watchOption,
+			this.#delay,
 		);
 		if (errorInstantiatingWatcher) {
 			Console.error(
@@ -523,6 +532,7 @@ export class JSDirMapper {
 			this.#mapToPath,
 			this.#depMap,
 			this.#esbuildPathRebuild,
+			this.#delay,
 		);
 	};
 }

@@ -1008,6 +1008,9 @@ forEachFiles(async ({ inputRelative, asar }) => {
  * >- handled via `vivth.TsToMjs`;
  * >- preferably to be isolated on a single folder;
  * - when falsy -> ignore `.as.ts`;
+ * @param {number} [options.delay]
+ * - `EsWatcher` delay argument;
+ * - default `0`;
  */
 ```
 
@@ -1095,14 +1098,16 @@ await RunWatchThenCompileJSOnSafeExit({
 
 #### reference: `SSGDevMapper`
 
-- class helper to map files into SSG software that have its own dev server;
-- js extensions supports:
+- class helper to map files into SSG software that:
+  > - have its own dev server;
+  > - have `Open file with` to be edited via external application;
+- `js` extensions supports:
   > - `.mjs`;
   > - `.cjs`;
   > - `.js`;
 - `.html` parse `script` elements to be:
-  > - minifed if has `[minify="true"]`;
-  > - use esm if has `[type="module"]`;
+  > - `minifed` if has `[minify="true"]`;
+  > - use `esm` if has `[type="module"]`;
 - `.scss`|`.sass` write compiled `.css`;
 - every other extension will be copied to `targetpath` as is(without `targetpath` as string);
 - look for [FileSelfMapper](#fileselfmapper) on how to add `targetpath`;
@@ -1133,6 +1138,11 @@ await RunWatchThenCompileJSOnSafeExit({
  * >- `.js`;
  * >- anything that are not `sass` and `module js/ts`;
  * - return `false` to exclude `target` from mapping;
+ * @param {number} [options.delay]
+ * - `EsWatcher` delay argument;
+ * >- on `SSG` software, there are possiblity that their sync mechanism have debounce/throttle,
+ * >- therefore timeout might necessary;
+ * - default `100`;
  */
 ```
 
@@ -1147,6 +1157,7 @@ new Paths({
 new SafeExit("SIGINT", "SIGTERM");
 new SSGDevMapper({
   sourcePath: "/test/ssgDevMapper/dev/",
+  timeout: 372,
 });
 ```
 
@@ -1804,6 +1815,7 @@ myEnv.correction(false); // this will notify all subscribers;
 /**
  * @param {Partial<O>} buildOptions
  * @param {import('esbuild').WatchOptions} [watchOptions]
+ * @param {number} [delay]
  */
 ```
 
@@ -1825,6 +1837,10 @@ const { context, remove } = new EsWatcher({
  * @type {Promise<import('esbuild').BuildContext<O>>}
  */
 ```
+
+#### reference: `EsWatcher_instance.rebuild`
+
+- rebuild callback;
 
 \*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
@@ -2092,6 +2108,7 @@ const isExist = await FileSafe.exist(join(Paths.root, "/some/path.mjs"));
  * @param {boolean} [checkFuzySame]
  * - true: check while normalize consecutive whitespace into singel white space;
  * - false(default): check absolute value;
+ * @param {'direct'|'atomic'} writeMode
  * @returns {ReturnType<typeof TryAsync<void>>}
  */
 ```

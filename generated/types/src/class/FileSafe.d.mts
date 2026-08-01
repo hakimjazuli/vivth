@@ -33,6 +33,7 @@ export declare class FileSafe {
      * @param {boolean} [checkFuzySame]
      * - true: check while normalize consecutive whitespace into singel white space;
      * - false(default): check absolute value;
+     * @param {'direct'|'atomic'} writeMode
      * @returns {ReturnType<typeof TryAsync<void>>}
      * @example
      * import { join } from 'node:path';
@@ -45,7 +46,7 @@ export declare class FileSafe {
      * 	{ encoding: 'utf-8' }
      * );
      */
-    static write: (outFile: Parameters<typeof writeFile>[0], content: Parameters<typeof writeFile>[1], options?: Parameters<typeof writeFile>[2], checkFuzySame?: boolean) => ReturnType<typeof TryAsync<void>>;
+    static write: (outFile: Parameters<typeof writeFile>[0], content: Parameters<typeof writeFile>[1], options?: Parameters<typeof writeFile>[2], checkFuzySame?: boolean, writeMode?: 'direct' | 'atomic') => ReturnType<typeof TryAsync<void>>;
     /**
      * @description
      * - method to copy file/dir safely by recursively mkdir the dirname of the dest;

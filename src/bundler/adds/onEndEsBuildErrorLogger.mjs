@@ -4,10 +4,11 @@ import { Console } from '../../class/Console.mjs';
 import { IsStringLooksLikeAPath } from '../../function/IsStringLooksLikeAPath.mjs';
 
 /**
+ * @param {string} path
  * @param {import('esbuild').Message[]} errorData
  * @returns { void }
  */
-export const onEndEsBuildErrorLogger = (errorData) => {
+export const onEndEsBuildErrorLogger = (path, errorData) => {
 	const errorLog = {
 		...errorData[0],
 		suggestion: ['modify `FileSelfMapper` constructor `argument[1].esbuild`'],
@@ -29,6 +30,6 @@ export const onEndEsBuildErrorLogger = (errorData) => {
 			});
 		}
 	}
-	Console.error(errorLog, { now: true });
+	Console.error({ errorLog, path }, { now: true });
 	return;
 };

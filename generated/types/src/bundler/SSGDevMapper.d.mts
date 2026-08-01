@@ -40,6 +40,11 @@ export declare class SSGDevMapper implements VivthCleanup {
      * >- `.js`;
      * >- anything that are not `sass` and `module js/ts`;
      * - return `false` to exclude `target` from mapping;
+     * @param {number} [options.delay]
+     * - `EsWatcher` delay argument;
+     * >- on `SSG` software, there are possiblity that their sync mechanism have debounce/throttle,
+     * >- therefore timeout might necessary;
+     * - default `100`;
      * @example
      * import { Paths } from 'vivth/neutral';
      * import { SafeExit, SSGDevMapper } from 'vivth/node';
@@ -52,9 +57,10 @@ export declare class SSGDevMapper implements VivthCleanup {
      *
      * new SSGDevMapper({
      * 	sourcePath: '/test/ssgDevMapper/dev/',
+     * 	timeout: 372,
      * });
      */
-    constructor({ sourcePath, esbuild, esbuildWatchOptions, postProcessDirectCopy }: {
+    constructor({ sourcePath, esbuild, esbuildWatchOptions, postProcessDirectCopy, delay }: {
         sourcePath: string;
         esbuildWatchOptions?: import('esbuild').WatchOptions;
         esbuild?: Omit<Parameters<typeof import('esbuild')["context"]>[0], "write" | "minify" | "format" | "platform" | "mainFields" | "outfile" | "bundle" | "entryPoints">;
@@ -62,6 +68,7 @@ export declare class SSGDevMapper implements VivthCleanup {
             mapTo: string;
             src: string;
         }, content: string) => (string | false);
+        delay?: number;
     });
     vivthCleanup: () => Promise<void>;
 }

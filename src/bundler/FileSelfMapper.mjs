@@ -391,7 +391,7 @@ export class FileSelfMapper {
 					CreateESPlugin('FileSafeMapperWatch', ({ onEnd }) => {
 						onEnd(({ errors }) => {
 							if (errors.length) {
-								onEndEsBuildErrorLogger(errors);
+								onEndEsBuildErrorLogger(path, errors);
 								return;
 							}
 							FileSelfMapper.#onJSDependencyChanges(tempPath, path, this.#q);

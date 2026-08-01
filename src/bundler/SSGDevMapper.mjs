@@ -8,7 +8,6 @@ import { watch } from 'chokidar';
 import { SafeExit } from '../class/SafeExit.mjs';
 import { Paths } from '../class/Paths.mjs';
 import { EsWatcher } from '../class/EsWatcher.mjs';
-import { QChannel } from '../class/QChannel.mjs';
 import { TryAsync } from '../function/TryAsync.mjs';
 import { readFile } from 'node:fs/promises';
 import { Console } from '../class/Console.mjs';
@@ -20,6 +19,7 @@ import { Preferrence } from '../common/Preferrence.mjs';
 import { createDocument } from 'domino';
 import { ForOfSync } from '../function/ForOfSync.mjs';
 import { compileAsync } from 'sass';
+import { Timeout } from '../function/Timeout.mjs';
 
 /**
  * @import {Stats} from 'node:fs'
@@ -62,6 +62,11 @@ export class SSGDevMapper {
 	 * >- `.js`;
 	 * >- anything that are not `sass` and `module js/ts`;
 	 * - return `false` to exclude `target` from mapping;
+	 * @param {number} [options.delay]
+	 * - `EsWatcher` delay argument;
+	 * >- on `SSG` software, there are possiblity that their sync mechanism have debounce/throttle,
+	 * >- therefore timeout might necessary;
+	 * - default `100`;
 	 * @example
 	 * import { Paths } from 'vivth/neutral';
 	 * import { SafeExit, SSGDevMapper } from 'vivth/node';
@@ -74,17 +79,22 @@ export class SSGDevMapper {
 	 *
 	 * new SSGDevMapper({
 	 * 	sourcePath: '/test/ssgDevMapper/dev/',
+	 * 	timeout: 372,
 	 * });
 	 */
-	constructor({ sourcePath, esbuild, esbuildWatchOptions, postProcessDirectCopy }) {
+	constructor({ sourcePath, esbuild, esbuildWatchOptions, postProcessDirectCopy, delay = 100 }) {
 		SafeExit.instance?.addCallback(this.vivthCleanup);
+		this.#delay = delay;
 		this.#esbuildOptions = esbuild;
 		this.#esbuildWatchOptions = esbuildWatchOptions;
 		this.#postProcessDirectCopy = postProcessDirectCopy;
 		const watcherFullPath = (this.#watcherFullPath = Paths.diskAbsolute(sourcePath));
-		const chokidarWatcher = (this.#chokidarWatcher = watch(watcherFullPath));
+		const chokidarWatcher = (this.#chokidarWatcher = watch(watcherFullPath, {
+			awaitWriteFinish: true,
+		}));
 		chokidarWatcher.addListener('all', this.#chokidarListener);
 	}
+	#delay;
 	vivthCleanup = async () => {
 		this.#chokidarWatcher.removeAllListeners();
 		this.#chokidarWatcher.close();
@@ -111,7 +121,6 @@ export class SSGDevMapper {
 	 * @type {Map<string, EsWatcher<any>>}
 	 */
 	#esWatcherMap = new Map();
-	#q = new QChannel('SSGDevMapper:chokidar-all-listener');
 	/**
 	 * @param {import('chokidar/handler.js').EventName} eventName
 	 * @param {string} path
@@ -119,10 +128,8 @@ export class SSGDevMapper {
 	 */
 	#chokidarListener = (eventName, path, stats) => {
 		path = Paths.normalize(path);
-		this.#q.callback(path, async ({ isLastOnQ }) => {
-			if (!isLastOnQ()) {
-				return;
-			}
+		EsWatcher.q.callback(EsWatcher.q, async () => {
+			await Timeout(this.#delay);
 			await this.#qCallbackMainIsHandled(eventName, path, stats);
 		});
 	};
@@ -136,13 +143,14 @@ export class SSGDevMapper {
 		switch (eventName) {
 			case 'add':
 				break;
-			case 'change':
-				this.#esWatcherMap.get(path)?.vivthCleanup();
-				this.#esWatcherMap.delete(path);
-				break;
 			default:
-				this.#esWatcherMap.get(path)?.vivthCleanup();
-				return;
+				await this.#esWatcherMap.get(path)?.vivthCleanup();
+				this.#esWatcherMap.delete(path);
+				this.#esbuildPathRebuild.delete(path);
+				if (eventName !== 'change') {
+					return;
+				}
+				break;
 		}
 		if (!stats || !stats.isFile()) {
 			this.#esWatcherMap.get(path)?.vivthCleanup();
@@ -312,6 +320,7 @@ export class SSGDevMapper {
 				],
 			},
 			this.#esbuildWatchOptions,
+			this.#delay,
 		);
 		if (errorEsWatcherInstance) {
 			Console.error({ errorEsWatcherInstance, path });
@@ -442,7 +451,7 @@ export class SSGDevMapper {
 		Console.info(`✅ Successfully map:'${path}' 👉:'${targetPath}'`, { now: true });
 	};
 	/**
-	 * @type {Map<string, () => Promise<import('esbuild').BuildResult<import('esbuild').BuildOptions>>>}
+	 * @type {Map<string, () => Promise<any>>}
 	 */
 	#esbuildPathRebuild = new Map();
 	/**
@@ -462,6 +471,7 @@ export class SSGDevMapper {
 			'/',
 			this.#depMap,
 			this.#esbuildPathRebuild,
+			this.#delay,
 		);
 	};
 }

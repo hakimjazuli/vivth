@@ -10,6 +10,8 @@ import { Console } from '../../class/Console.mjs';
 import { ForOfSync } from '../../function/ForOfSync.mjs';
 import { FileSafe } from '../../class/FileSafe.mjs';
 import { resolveJSDependencyPath } from './resolveJSDependencyPath.mjs';
+import { EsWatcher } from '../../class/EsWatcher.mjs';
+import { Timeout } from '../../function/Timeout.mjs';
 
 /**
  * @import {Plugin} from 'esbuild'
@@ -22,6 +24,7 @@ import { resolveJSDependencyPath } from './resolveJSDependencyPath.mjs';
  * @param {string} mapToPath
  * @param {Map<string, Set<string>>} depMap
  * @param {Map<string, () => Promise<any>>} esbuildPathRebuild
+ * @param {number} timeout
  * @returns {Plugin}
  */
 export const autoExternalize = (
@@ -31,6 +34,7 @@ export const autoExternalize = (
 	mapToPath,
 	depMap,
 	esbuildPathRebuild,
+	timeout,
 ) => {
 	return CreateESPlugin('JSDirMapper:auto-externalize', ({ onResolve, onEnd }) => {
 		onResolve({ filter: /^\.{1,2}\// }, async ({ resolveDir, path: pathSpecifier }) => {
@@ -54,28 +58,35 @@ export const autoExternalize = (
 			const resolvedPath = `${pathSpecifier}?t=${await LastEditedUnix(fullPath)}`;
 			return { external: true, path: resolvedPath };
 		});
-		onEnd(async ({ errors: errorsBuild }) => {
-			if (errorsBuild.length) {
-				onEndEsBuildErrorLogger(errorsBuild);
-				return;
-			}
-			Console.info(
-				{
-					JSDirMapper: `✅ Successfully Bundle'${path}' 👉 '${targetPath}'`,
-				},
-				{
-					now: true,
-				},
-			);
-			const importers = depMap.get(path);
-			if (!importers) {
-				return;
-			}
-			await Promise.all(
-				ForOfSync(importers, async (importer) => {
+		onEnd(({ errors: errorsBuild }) => {
+			EsWatcher.q.callback(EsWatcher.q, async () => {
+				await Timeout(timeout);
+				if (errorsBuild.length) {
+					onEndEsBuildErrorLogger(path, errorsBuild);
+					return;
+				}
+				const importers = depMap.get(path);
+				if (!importers) {
+					return;
+				}
+				const [, setOfRebuildError] = ForOfSync(importers, async (importer) => {
 					await esbuildPathRebuild.get(importer)?.();
-				})[0],
-			);
+				});
+				if (setOfRebuildError.size) {
+					Console.error({
+						setOfRebuildError,
+					});
+					return;
+				}
+				Console.info(
+					{
+						autoExternalize: `✅ Successfully Bundle:'${path}' 👉 '${targetPath}'`,
+					},
+					{
+						now: true,
+					},
+				);
+			});
 		});
 	});
 };
