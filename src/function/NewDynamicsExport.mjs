@@ -25,7 +25,7 @@ import { Prettivy } from '../class/Prettivy.mjs';
  * @param {string} options.rootPath
  * - relative path to pseudo root;
  * @param {number} [options.debounce]
- * @param {(finalString:string)=>string} [options.postProccesPreFinalString]
+ * @param {(finalString:string)=>Promise<string>} [options.postProccesPreFinalString]
  * @param {string[]} [options.mapperPaths]
  * - paths to be inserted prior ts-check;
  * - usefull for vivth [FileSelfMapper](#fileselfmapper);
@@ -306,7 +306,7 @@ const getCSS = (url, imported) => {
 					pathGeneratedDynamicMapped,
 					!postProccesPreFinalString
 						? contentFormatted
-						: postProccesPreFinalString(contentFormatted),
+						: await postProccesPreFinalString(contentFormatted),
 					{ encoding: 'utf-8' },
 				);
 				if (errorWritePrettifiedDynamicMapped) {
