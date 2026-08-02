@@ -5615,6 +5615,7 @@ generate generator watcher to `Dynamics`;
  * @param {string} options.rootPath
  * - relative path to pseudo root;
  * @param {number} [options.debounce]
+ * @param {(finalString:string)=>string} [options.postProccesPreFinalString]
  * @param {string[]} [options.mapperPaths]
  * - paths to be inserted prior ts-check;
  * - usefull for vivth [FileSelfMapper](#fileselfmapper);

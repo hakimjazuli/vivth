@@ -11,6 +11,7 @@ import { TryAsync } from './TryAsync.mjs';
  * @param {string} options.rootPath
  * - relative path to pseudo root;
  * @param {number} [options.debounce]
+ * @param {(finalString:string)=>string} [options.postProccesPreFinalString]
  * @param {string[]} [options.mapperPaths]
  * - paths to be inserted prior ts-check;
  * - usefull for vivth [FileSelfMapper](#fileselfmapper);
@@ -26,9 +27,10 @@ import { TryAsync } from './TryAsync.mjs';
  */
 export declare function NewDynamicsExport(
 /** */
-{ rootPath, useFetchForAssets, debounce, chokidarOptions, eachFilter, mapperPaths }: {
+{ rootPath, postProccesPreFinalString, useFetchForAssets, debounce, chokidarOptions, eachFilter, mapperPaths, }: {
     rootPath: string;
     debounce?: number;
+    postProccesPreFinalString?: (finalString: string) => string;
     mapperPaths?: string[];
     useFetchForAssets?: boolean;
     chokidarOptions?: import('chokidar').ChokidarOptions;

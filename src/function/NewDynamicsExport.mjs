@@ -25,6 +25,7 @@ import { Prettivy } from '../class/Prettivy.mjs';
  * @param {string} options.rootPath
  * - relative path to pseudo root;
  * @param {number} [options.debounce]
+ * @param {(finalString:string)=>string} [options.postProccesPreFinalString]
  * @param {string[]} [options.mapperPaths]
  * - paths to be inserted prior ts-check;
  * - usefull for vivth [FileSelfMapper](#fileselfmapper);
@@ -40,7 +41,15 @@ import { Prettivy } from '../class/Prettivy.mjs';
  */
 export function NewDynamicsExport(
 	/** */
-	{ rootPath, useFetchForAssets = true, debounce, chokidarOptions, eachFilter, mapperPaths },
+	{
+		rootPath,
+		postProccesPreFinalString,
+		useFetchForAssets = true,
+		debounce,
+		chokidarOptions,
+		eachFilter,
+		mapperPaths,
+	},
 ) {
 	const dynamicImports = 'Dynamics';
 	const pathDynamic = Paths.diskAbsolute(join(rootPath, 'vivth', dynamicImports.toLowerCase()));
@@ -295,7 +304,9 @@ const getCSS = (url, imported) => {
 				}
 				const [, errorWritePrettifiedDynamicMapped] = await FileSafe.write(
 					pathGeneratedDynamicMapped,
-					contentFormatted,
+					!postProccesPreFinalString
+						? contentFormatted
+						: postProccesPreFinalString(contentFormatted),
 					{ encoding: 'utf-8' },
 				);
 				if (errorWritePrettifiedDynamicMapped) {
