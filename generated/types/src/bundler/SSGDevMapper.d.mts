@@ -26,6 +26,8 @@ export declare class SSGDevMapper implements VivthCleanup {
      * @description
      * @param {Object} options
      * @param {string} options.sourcePath
+     * @param {(normalizedAbsolutePath:string)=>boolean} [options.pathFilter]
+     * - filterOut paths;
      * @param {import('esbuild').WatchOptions} [options.esbuildWatchOptions]
      * @param {Omit<Parameters<typeof import('esbuild')["context"]>[0], "write"|"minify"|"format"|"platform"|"mainFields"|"outfile"|"bundle"|"entryPoints">} [options.esbuild]
      * - `logLimit`: default = `3`;
@@ -60,8 +62,9 @@ export declare class SSGDevMapper implements VivthCleanup {
      * 	timeout: 372,
      * });
      */
-    constructor({ sourcePath, esbuild, esbuildWatchOptions, postProcessDirectCopy, delay }: {
+    constructor({ pathFilter, sourcePath, esbuild, esbuildWatchOptions, postProcessDirectCopy, delay, }: {
         sourcePath: string;
+        pathFilter?: (normalizedAbsolutePath: string) => boolean;
         esbuildWatchOptions?: import('esbuild').WatchOptions;
         esbuild?: Omit<Parameters<typeof import('esbuild')["context"]>[0], "write" | "minify" | "format" | "platform" | "mainFields" | "outfile" | "bundle" | "entryPoints">;
         postProcessDirectCopy?: (path: {

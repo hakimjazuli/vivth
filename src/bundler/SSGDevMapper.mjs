@@ -48,6 +48,8 @@ export class SSGDevMapper {
 	 * @description
 	 * @param {Object} options
 	 * @param {string} options.sourcePath
+	 * @param {(normalizedAbsolutePath:string)=>boolean} [options.pathFilter]
+	 * - filterOut paths;
 	 * @param {import('esbuild').WatchOptions} [options.esbuildWatchOptions]
 	 * @param {Omit<Parameters<typeof import('esbuild')["context"]>[0], "write"|"minify"|"format"|"platform"|"mainFields"|"outfile"|"bundle"|"entryPoints">} [options.esbuild]
 	 * - `logLimit`: default = `3`;
@@ -82,9 +84,17 @@ export class SSGDevMapper {
 	 * 	timeout: 372,
 	 * });
 	 */
-	constructor({ sourcePath, esbuild, esbuildWatchOptions, postProcessDirectCopy, delay = 100 }) {
+	constructor({
+		pathFilter,
+		sourcePath,
+		esbuild,
+		esbuildWatchOptions,
+		postProcessDirectCopy,
+		delay = 100,
+	}) {
 		SafeExit.instance?.addCallback(this.vivthCleanup);
 		this.#delay = delay;
+		this.#pathFilter = pathFilter;
 		this.#esbuildOptions = esbuild;
 		this.#esbuildWatchOptions = esbuildWatchOptions;
 		this.#postProcessDirectCopy = postProcessDirectCopy;
@@ -94,6 +104,7 @@ export class SSGDevMapper {
 		}));
 		chokidarWatcher.addListener('all', this.#chokidarListener);
 	}
+	#pathFilter;
 	#delay;
 	vivthCleanup = async () => {
 		this.#chokidarWatcher.removeAllListeners();
@@ -128,6 +139,10 @@ export class SSGDevMapper {
 	 */
 	#chokidarListener = (eventName, path, stats) => {
 		path = Paths.normalize(path);
+		const pathFilter = this.#pathFilter;
+		if (pathFilter && !pathFilter(path)) {
+			return;
+		}
 		EsWatcher.q.callback(EsWatcher.q, async () => {
 			await Timeout(this.#delay);
 			await this.#qCallbackMainIsHandled(eventName, path, stats);
@@ -247,12 +262,11 @@ export class SSGDevMapper {
 					!pathCandidate ||
 					!/^(?:[A-Za-z]:[\\/]|[\\/]|\.{1,2}[\\/])?[A-Za-z0-9._\\/-]+$/g.test(pathCandidate)
 				) {
-					Console.error({
+					throw {
 						pathCandidate,
 						message: 'pathCandidate invalid for testRegex',
 						testRegex: /^(?:[A-Za-z]:[\\/]|[\\/]|\.{1,2}[\\/])?[A-Za-z0-9._\\/-]+$/g,
-					});
-					break;
+					};
 				}
 				perLinesCode[i] = '';
 				targetPath = Paths.normalize(pathCandidate);

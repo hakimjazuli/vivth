@@ -82,6 +82,8 @@ export class FileSelfMapper {
 	 * - `bundle`: automatically added by `vivth.FileSelfMapper`;
 	 * - `write`: automatically added by `vivth.FileSelfMapper`;
 	 * @param {boolean} [options.deleteTempFilesAfterExit]
+	 * @param {(normalizedAbsolutePath:string)=>boolean} [options.pathFilter]
+	 * - filterOut paths;
 	 * @param {(path:{mapTo:string, src:string}, content:string)=>(string|false)} [options.postProcessDirectCopy]
 	 * - works for:
 	 * >- `.js`;
@@ -101,6 +103,10 @@ export class FileSelfMapper {
 		this.#watcher = watch(watcherFullPath, { ignoreInitial: false });
 		this.#watcher.addListener('all', async (eventName, path, stats) => {
 			path = Paths.normalize(path);
+			const pathFilter = options.pathFilter;
+			if (pathFilter && !pathFilter(path)) {
+				return;
+			}
 			const [, errorWatcherListener] = await this.#q.callback(path, async ({ isLastOnQ }) => {
 				await this.#listenerQ(isLastOnQ, eventName, path, watcherFullPath, options, stats);
 			});
@@ -207,7 +213,11 @@ export class FileSelfMapper {
 	 * @returns { Promise<void> }
 	 */
 	static #writeHTML = async (path, postprosess) => {
-		const { content: originalContent, targetPaths } = await FileSelfMapper.#getTargetPath(path);
+		const [targetPathObj, errorGettingTargetPath] = await FileSelfMapper.#getTargetPath(path);
+		if (errorGettingTargetPath) {
+			return;
+		}
+		const { content: originalContent, targetPaths } = targetPathObj;
 		let newContent = originalContent;
 		const resDocument = createDocument(originalContent);
 		const handledScripts = Array.from(resDocument.querySelectorAll(`script`));
@@ -279,7 +289,11 @@ export class FileSelfMapper {
 	 * @returns { Promise<void> }
 	 */
 	static #writeCommon = async (path, postprosess) => {
-		const { content, targetPaths } = await FileSelfMapper.#getTargetPath(path);
+		const [targetPathObj, errorGettingTargetPath] = await FileSelfMapper.#getTargetPath(path);
+		if (errorGettingTargetPath) {
+			return;
+		}
+		const { content, targetPaths } = targetPathObj;
 		const [promiseWrite] = ForOfSync(targetPaths, async (target) => {
 			/**
 			 * @type {string|false}
@@ -324,7 +338,11 @@ export class FileSelfMapper {
 	 * @returns { Promise<void> }
 	 */
 	static #bundleSCSS = async (path) => {
-		const { targetPaths } = await FileSelfMapper.#getTargetPath(path);
+		const [targetPathObj, errorGettingTargetPath] = await FileSelfMapper.#getTargetPath(path);
+		if (errorGettingTargetPath) {
+			return;
+		}
+		const { targetPaths } = targetPathObj;
 		const result = (await compileAsync(path, { style: 'compressed' })).css;
 		const promisedWrite = ForOfSync(targetPaths, async (target) => {
 			const [, errorWriteCSS] = await FileSafe.write(target, result, {
@@ -492,7 +510,11 @@ export class FileSelfMapper {
 		if (!isLastOnQ()) {
 			return;
 		}
-		const { targetPaths } = await FileSelfMapper.#getTargetPath(path);
+		const [targetPathObj, errorGettingTargetPath] = await FileSelfMapper.#getTargetPath(path);
+		if (errorGettingTargetPath) {
+			return;
+		}
+		const { targetPaths } = targetPathObj;
 		await Promise.all(
 			ForOfSync(targetPaths, async (target) => {
 				q.callback(target, async ({ isLastOnQ }) => {
@@ -516,58 +538,58 @@ export class FileSelfMapper {
 
 	/**
 	 * @param { string } path
-	 * @returns { Promise<{
+	 * @returns { ReturnType<typeof TryAsync<{
 	 * 	targetPaths: Set<string>,
 	 * 	content: string,
-	 * }> }
+	 * }>> }
 	 */
-	static #getTargetPath = async (path) => {
-		let raw = await readFile(path, 'utf8');
-		const perLines = raw.split(/\r?\n/);
-		const perLinesCode = structuredClone(perLines);
-		/**
-		 * @type {Set<string>}
-		 */
-		const targetPaths = new Set();
-		for (let i = 0; i < perLines.length; i++) {
-			const lineData = perLines[i];
-			if (!lineData) {
-				continue;
+	static #getTargetPath = (path) => {
+		return TryAsync(async () => {
+			let raw = await readFile(path, 'utf8');
+			const perLines = raw.split(/\r?\n/);
+			const perLinesCode = structuredClone(perLines);
+			/**
+			 * @type {Set<string>}
+			 */
+			const targetPaths = new Set();
+			for (let i = 0; i < perLines.length; i++) {
+				const lineData = perLines[i];
+				if (!lineData) {
+					continue;
+				}
+				const commentRegexForPath =
+					/<!--\s*(.*?)\s*-->|\/\/\/?\s*(.*?)\s*$|\/\*{1,2}!\s*([\s\S]*?)\s*\*\/|\/\*{1,2}\s*([\s\S]*?)\s*\*\/|#\s*(.*?)\s*$|--\s*(.*?)\s*$|;\s*(.*?)\s*$/g;
+				const m = commentRegexForPath.exec(lineData);
+				if (m === null) {
+					break;
+				}
+				const [group] = m.slice(1).filter(Boolean);
+				if (!group) {
+					break;
+				}
+				const pathCandidate = group.trim();
+				if (
+					!pathCandidate ||
+					!/^(?:[A-Za-z]:[\\/]|[\\/]|\.{1,2}[\\/])?[A-Za-z0-9._\\/-]+$/g.test(pathCandidate)
+				) {
+					throw {
+						pathCandidate,
+						message: 'pathCandidate invalid for testRegex',
+						testRegex: /^(?:[A-Za-z]:[\\/]|[\\/]|\.{1,2}[\\/])?[A-Za-z0-9._\\/-]+$/g,
+					};
+				}
+				perLinesCode[i] = '';
+				targetPaths.add(Paths.normalize(pathCandidate));
 			}
-			const commentRegexForPath =
-				/<!--\s*(.*?)\s*-->|\/\/\/?\s*(.*?)\s*$|\/\*{1,2}!\s*([\s\S]*?)\s*\*\/|\/\*{1,2}\s*([\s\S]*?)\s*\*\/|#\s*(.*?)\s*$|--\s*(.*?)\s*$|;\s*(.*?)\s*$/g;
-			const m = commentRegexForPath.exec(lineData);
-			if (m === null) {
-				break;
-			}
-			const [group] = m.slice(1).filter(Boolean);
-			if (!group) {
-				break;
-			}
-			const pathCandidate = group.trim();
-			if (
-				!pathCandidate ||
-				!/^(?:[A-Za-z]:[\\/]|[\\/]|\.{1,2}[\\/])?[A-Za-z0-9._\\/-]+$/g.test(pathCandidate)
-			) {
-				Console.error({
-					pathCandidate,
-					message: 'pathCandidate invalid for testRegex',
-					testRegex: /^(?:[A-Za-z]:[\\/]|[\\/]|\.{1,2}[\\/])?[A-Za-z0-9._\\/-]+$/g,
-				});
-				break;
-			}
-			perLinesCode[i] = '';
-			targetPaths.add(Paths.normalize(pathCandidate));
-		}
-
-		return {
-			get content() {
-				let content = perLinesCode.join('\n').trim();
-				// Remove leading whitespace-only lines until first non-whitespace
-				return (content = content.replace(/^\s*\n+/, '').replace(/\n+/g, '\n'));
-			},
-			targetPaths,
-		};
+			return {
+				get content() {
+					let content = perLinesCode.join('\n').trim();
+					// Remove leading whitespace-only lines until first non-whitespace
+					return (content = content.replace(/^\s*\n+/, '').replace(/\n+/g, '\n'));
+				},
+				targetPaths,
+			};
+		});
 	};
 
 	/**

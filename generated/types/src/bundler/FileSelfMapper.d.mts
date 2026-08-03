@@ -56,6 +56,8 @@ export declare class FileSelfMapper implements VivthCleanup {
      * - `bundle`: automatically added by `vivth.FileSelfMapper`;
      * - `write`: automatically added by `vivth.FileSelfMapper`;
      * @param {boolean} [options.deleteTempFilesAfterExit]
+     * @param {(normalizedAbsolutePath:string)=>boolean} [options.pathFilter]
+     * - filterOut paths;
      * @param {(path:{mapTo:string, src:string}, content:string)=>(string|false)} [options.postProcessDirectCopy]
      * - works for:
      * >- `.js`;
@@ -72,6 +74,7 @@ export declare class FileSelfMapper implements VivthCleanup {
     constructor(watchPath: string, options: {
         esbuild?: Omit<Parameters<typeof import('esbuild')["context"]>[0], "write" | "minify" | "format" | "mainFields" | "outfile" | "bundle">;
         deleteTempFilesAfterExit?: boolean;
+        pathFilter?: (normalizedAbsolutePath: string) => boolean;
         postProcessDirectCopy?: (path: {
             mapTo: string;
             src: string;

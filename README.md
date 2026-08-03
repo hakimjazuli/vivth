@@ -801,6 +801,8 @@ body {
  * - `bundle`: automatically added by `vivth.FileSelfMapper`;
  * - `write`: automatically added by `vivth.FileSelfMapper`;
  * @param {boolean} [options.deleteTempFilesAfterExit]
+ * @param {(normalizedAbsolutePath:string)=>boolean} [options.pathFilter]
+ * - filterOut paths;
  * @param {(path:{mapTo:string, src:string}, content:string)=>(string|false)} [options.postProcessDirectCopy]
  * - works for:
  * >- `.js`;
@@ -1124,6 +1126,8 @@ await RunWatchThenCompileJSOnSafeExit({
 /**
  * @param {Object} options
  * @param {string} options.sourcePath
+ * @param {(normalizedAbsolutePath:string)=>boolean} [options.pathFilter]
+ * - filterOut paths;
  * @param {import('esbuild').WatchOptions} [options.esbuildWatchOptions]
  * @param {Omit<Parameters<typeof import('esbuild')["context"]>[0], "write"|"minify"|"format"|"platform"|"mainFields"|"outfile"|"bundle"|"entryPoints">} [options.esbuild]
  * - `logLimit`: default = `3`;
