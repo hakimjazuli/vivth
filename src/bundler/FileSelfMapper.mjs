@@ -289,7 +289,6 @@ export class FileSelfMapper {
 	 */
 	static #writeCommon = async (path, postprosess) => {
 		const [targetPathObj, errorGettingTargetPath] = await FileSelfMapper.#getTargetPath(path);
-		Console.error({ path, targetPathObj });
 		if (errorGettingTargetPath) {
 			return;
 		}
