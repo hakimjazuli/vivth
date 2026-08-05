@@ -182,7 +182,6 @@ export class FileSelfMapper {
 			default:
 				return;
 		}
-
 		if (this.#releaseCallbackPerPath.has(path) || !stats || !stats.isFile()) {
 			return;
 		}
@@ -290,6 +289,7 @@ export class FileSelfMapper {
 	 */
 	static #writeCommon = async (path, postprosess) => {
 		const [targetPathObj, errorGettingTargetPath] = await FileSelfMapper.#getTargetPath(path);
+		Console.error({ path, targetPathObj });
 		if (errorGettingTargetPath) {
 			return;
 		}
@@ -339,7 +339,7 @@ export class FileSelfMapper {
 	 */
 	static #bundleSCSS = async (path) => {
 		const [targetPathObj, errorGettingTargetPath] = await FileSelfMapper.#getTargetPath(path);
-		if (errorGettingTargetPath) {
+		if (errorGettingTargetPath || !targetPathObj) {
 			return;
 		}
 		const { targetPaths } = targetPathObj;
@@ -572,11 +572,7 @@ export class FileSelfMapper {
 					!pathCandidate ||
 					!/^(?:[A-Za-z]:[\\/]|[\\/]|\.{1,2}[\\/])?[A-Za-z0-9._\\/-]+$/g.test(pathCandidate)
 				) {
-					throw {
-						pathCandidate,
-						message: 'pathCandidate invalid for testRegex',
-						testRegex: /^(?:[A-Za-z]:[\\/]|[\\/]|\.{1,2}[\\/])?[A-Za-z0-9._\\/-]+$/g,
-					};
+					break;
 				}
 				perLinesCode[i] = '';
 				targetPaths.add(Paths.normalize(pathCandidate));
