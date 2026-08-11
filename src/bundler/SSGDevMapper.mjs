@@ -20,6 +20,7 @@ import { createDocument } from 'domino';
 import { ForOfSync } from '../function/ForOfSync.mjs';
 import { compileAsync } from 'sass';
 import { Timeout } from '../function/Timeout.mjs';
+import { BrowserExternals } from './adds/BrowserExternals.mjs';
 
 /**
  * @import {Stats} from 'node:fs'
@@ -95,6 +96,17 @@ export class SSGDevMapper {
 		SafeExit.instance?.addCallback(this.vivthCleanup);
 		this.#delay = delay;
 		this.#pathFilter = pathFilter;
+		/**
+		 * @type {string[]}
+		 */
+		let external = esbuild?.external ?? [];
+		if (!Array.isArray(external)) {
+			external = [external];
+		}
+		if (Array.isArray(external)) {
+			// @ts-expect-error
+			esbuild.external = Array.from(new Set(external).union(BrowserExternals));
+		}
 		this.#esbuildOptions = esbuild;
 		this.#esbuildWatchOptions = esbuildWatchOptions;
 		this.#postProcessDirectCopy = postProcessDirectCopy;
