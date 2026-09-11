@@ -5697,7 +5697,12 @@ const mySignal = autoCleanedUpSignal(1);
 /**
  * @param {string} path
  * @param {(
- *  arg0:{input:Record<string, string>,output:Record<string, string>, sqlString:string}
+ *  arg0:	{
+ * 		input:Record<string, string>;
+ * 		output:Record<string, string>;
+ * 		sqlString:string;
+ * 		path: string
+ * 	}
  * )=>
  *  {ext:string, content:string}
  * } [fileGenerator]

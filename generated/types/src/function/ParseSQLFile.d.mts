@@ -5,7 +5,12 @@ import { TryAsync } from './TryAsync.mjs';
  * - this function assume `Paths` already instantiated;s
  * @param {string} path
  * @param {(
- *  arg0:{input:Record<string, string>,output:Record<string, string>, sqlString:string}
+ *  arg0:	{
+ * 		input:Record<string, string>;
+ * 		output:Record<string, string>;
+ * 		sqlString:string;
+ * 		path: string
+ * 	}
  * )=>
  *  {ext:string, content:string}
  * } [fileGenerator]
@@ -19,6 +24,7 @@ export declare function ParseSQLFile(path: string, fileGenerator?: (arg0: {
     input: Record<string, string>;
     output: Record<string, string>;
     sqlString: string;
+    path: string;
 }) => {
     ext: string;
     content: string;

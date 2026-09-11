@@ -37,7 +37,12 @@ const templater = LazyFactory(() => {
  * - this function assume `Paths` already instantiated;s
  * @param {string} path
  * @param {(
- *  arg0:{input:Record<string, string>,output:Record<string, string>, sqlString:string}
+ *  arg0:	{
+ * 		input:Record<string, string>;
+ * 		output:Record<string, string>;
+ * 		sqlString:string;
+ * 		path: string
+ * 	}
  * )=>
  *  {ext:string, content:string}
  * } [fileGenerator]
@@ -49,7 +54,7 @@ const templater = LazyFactory(() => {
  */
 export async function ParseSQLFile(
 	path,
-	fileGenerator = ({ input, output, sqlString }) => {
+	fileGenerator = ({ input, output, sqlString, path }) => {
 		const exportname = basename(path).replace(/\./g, '').replace(/sql$/, '');
 		const content = `// @ts-check
 /**
@@ -73,7 +78,7 @@ export const ${exportname}SQL = \`${sqlString.replace(/\`/g, '\\`')}\`;
 			return false;
 		}
 		if (!(await FileSafe.exist(path))) {
-			throw `'${!(await FileSafe.exist(path))}' doesn't exist`;
+			throw `'${path}' doesn't exist`;
 		}
 		templater[FactoryKey];
 		const [templateHandler, errorTemplating] = templater;
@@ -111,19 +116,24 @@ export const ${exportname}SQL = \`${sqlString.replace(/\`/g, '\\`')}\`;
 				res.output[name] = type;
 			}
 		});
-		const { content, ext } = fileGenerator({ input: res.input, output: res.output, sqlString });
+		const { content, ext } = fileGenerator({
+			input: res.input,
+			output: res.output,
+			sqlString,
+			path,
+		});
 		let extTrue = ext;
 		if (!ext.startsWith('.')) {
 			extTrue = `.${ext}`;
 		}
-		const pathMJS = `${path}${extTrue}`;
-		const [, errorWrite] = await FileSafe.write(pathMJS, content, {
+		const generatedFilePath = `${path}${extTrue}`;
+		const [, errorWrite] = await FileSafe.write(generatedFilePath, content, {
 			encoding: Preferrence.encoding,
 		});
 		if (errorWrite) {
 			throw { errorWrite };
 		}
-		Console.info(`✅ Successfully generate type from '${path}' to '${pathMJS}'`);
+		Console.info(`✅ Successfully generate type from '${path}' to '${generatedFilePath}'`);
 		return true;
 	});
 }
