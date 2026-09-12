@@ -18,7 +18,7 @@ const templater = LazyFactory(() => {
 	return TrySync(() => {
 		const temp = LitExp.prepare({
 			typeBrace0: /\/\*\s+/,
-			type: /[\w]+/,
+			type: /[^\s]+/, // Matches any character except whitespace (e.g., []byte, map[string]int, *Type)
 			typeBrace1: /\s+\*\/\s*?/,
 			name: /(?:\:|)[\w]+/,
 			closing: /[,\s;]/,
@@ -34,17 +34,17 @@ const templater = LazyFactory(() => {
 /**
  * @description
  * - parse then generate file right next to said sql file;
- * - this function assume `Paths` already instantiated;s
+ * - this function assume `Paths` already instantiated;
  * @param {string} path
  * @param {(
- *  arg0:	{
+ *   arg0: {
  * 		input:Record<string, string>;
  * 		output:Record<string, string>;
  * 		sqlString:string;
  * 		path: string
  * 	}
  * )=>
- *  {ext:string, content:string}
+ *   {ext:string, content:string}
  * } [fileGenerator]
  * - file string generator;
  * - the default will generate mjs callback type, and sql string;

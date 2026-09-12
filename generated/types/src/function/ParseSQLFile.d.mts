@@ -2,17 +2,17 @@ import { TryAsync } from './TryAsync.mjs';
 /**
  * @description
  * - parse then generate file right next to said sql file;
- * - this function assume `Paths` already instantiated;s
+ * - this function assume `Paths` already instantiated;
  * @param {string} path
  * @param {(
- *  arg0:	{
+ *   arg0: {
  * 		input:Record<string, string>;
  * 		output:Record<string, string>;
  * 		sqlString:string;
  * 		path: string
  * 	}
  * )=>
- *  {ext:string, content:string}
+ *   {ext:string, content:string}
  * } [fileGenerator]
  * - file string generator;
  * - the default will generate mjs callback type, and sql string;
