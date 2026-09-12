@@ -5692,6 +5692,9 @@ const mySignal = autoCleanedUpSignal(1);
 
 - parse then generate file right next to said sql file;
 - this function assume `Paths` already instantiated;
+- you can use self closing comment to annotate the type of a field(before the field);
+  > - field prefixed with comment type and prefixed with colon `:` are for inputs;
+  > - field prefixed with comment type but not prefixed with colon `:` are for outputs;
 
 ```js
 /**

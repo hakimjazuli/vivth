@@ -35,6 +35,9 @@ const templater = LazyFactory(() => {
  * @description
  * - parse then generate file right next to said sql file;
  * - this function assume `Paths` already instantiated;
+ * - you can use self closing comment to annotate the type of a field(before the field);
+ * >- field prefixed with comment type and prefixed with colon `:` are for inputs;
+ * >- field prefixed with comment type but not prefixed with colon `:` are for outputs;
  * @param {string} path
  * @param {(
  *   arg0: {
@@ -102,9 +105,6 @@ export const ${exportname}SQL = \`${sqlString.replace(/\`/g, '\\`')}\`;
 		const {
 			result: { named },
 		} = matchedAndGrouped;
-		if (!Object.keys(named).length) {
-			throw { path, message: 'detected no input nor output' };
-		}
 		const res = { input: {}, output: {} };
 		ForOfSync(named, ({ type, name }) => {
 			if (name.startsWith(':')) {
