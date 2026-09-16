@@ -46,8 +46,9 @@
   },
   "homepage": "https://github.com/hakimjazuli/vivth#readme",
   "scripts": {
-    "dev": "bun ./dev/auto-doc.mjs",
-    "t-w": "tsc --watch",
+    "dev": "bun --parallel 'dev:v'",
+    "dev:standard": "bun ./dev/auto-doc.mjs",
+    "dev:t-w": "tsc --watch",
     "test-bundle": "bun ./test/bundle.mjs",
     "test-": "bun ./test/test_.mjs",
     "test-ssg-dev": "bun ./test/ssgDevMapper/ssgDevMapper.mjs",

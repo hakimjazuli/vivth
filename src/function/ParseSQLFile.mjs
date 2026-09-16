@@ -47,7 +47,7 @@ const templater = LazyFactory(() => {
  * 		path: string
  * 	}
  * )=>
- *   {ext:string, content:string}
+ *   Promise<{ext:string, content:string}>
  * } [fileGenerator]
  * - file string generator;
  * - the default will generate mjs callback type, and sql string;
@@ -57,7 +57,7 @@ const templater = LazyFactory(() => {
  */
 export async function ParseSQLFile(
 	path,
-	fileGenerator = ({ input, output, sqlString, path }) => {
+	fileGenerator = async ({ input, output, sqlString, path }) => {
 		const exportname = basename(path).replace(/\./g, '').replace(/sql$/, '');
 		const content = `// @ts-check
 /**
@@ -116,7 +116,7 @@ export const ${exportname}SQL = \`${sqlString.replace(/\`/g, '\\`')}\`;
 				res.output[name] = type;
 			}
 		});
-		const { content, ext } = fileGenerator({
+		const { content, ext } = await fileGenerator({
 			input: res.input,
 			output: res.output,
 			sqlString,

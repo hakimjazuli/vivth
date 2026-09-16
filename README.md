@@ -5707,7 +5707,7 @@ const mySignal = autoCleanedUpSignal(1);
  * 		path: string
  * 	}
  * )=>
- *   {ext:string, content:string}
+ *   Promise<{ext:string, content:string}>
  * } [fileGenerator]
  * - file string generator;
  * - the default will generate mjs callback type, and sql string;

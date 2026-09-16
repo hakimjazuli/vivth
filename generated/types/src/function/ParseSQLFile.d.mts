@@ -15,7 +15,7 @@ import { TryAsync } from './TryAsync.mjs';
  * 		path: string
  * 	}
  * )=>
- *   {ext:string, content:string}
+ *   Promise<{ext:string, content:string}>
  * } [fileGenerator]
  * - file string generator;
  * - the default will generate mjs callback type, and sql string;
@@ -28,7 +28,7 @@ export declare function ParseSQLFile(path: string, fileGenerator?: (arg0: {
     output: Record<string, string>;
     sqlString: string;
     path: string;
-}) => {
+}) => Promise<{
     ext: string;
     content: string;
-}): ReturnType<typeof TryAsync<boolean>>;
+}>): ReturnType<typeof TryAsync<boolean>>;
