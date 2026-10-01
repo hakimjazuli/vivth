@@ -2,7 +2,7 @@ import { FSDirArchWatcher } from '../class/FSDirArchWatcher.mjs';
 /**
  * @description
  * - vite plugin to always add `[type="module"]` on listed extention file;
- * - this module assumes [Paths](#paths) and [SafeExit](#safeexit) to be instantiated;
+ * - this module assumes [Paths](#paths);
  * @param {string[]} watchPaths
  * - example: `['/']`;
  * @param {(path:string)=>boolean} pathFilter

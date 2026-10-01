@@ -12,6 +12,7 @@ import { readdirSync, statSync } from 'node:fs';
 import { Paths } from '../class/Paths.mjs';
 import { TryAsync } from '../function/TryAsync.mjs';
 import { Console } from '../class/Console.mjs';
+import { TrySync } from '../function/TrySync.mjs';
 
 /**
  * @param {string} currentDir
@@ -67,9 +68,10 @@ export function ViteGetAllHTMLFile(dirPath, distPath) {
 				const absoluteDir = Paths.diskAbsolute(dirPath);
 				const absoluteDist = Paths.diskAbsolute(distPath);
 				const inputs = {};
-				try {
+				const [, error] = TrySync(() => {
 					scanDir(absoluteDir, absoluteDist, absoluteDir, inputs);
-				} catch (error) {
+				});
+				if (error) {
 					throw { autoHtmlInputs: `Error scanning directory '${dirPath}'`, error };
 				}
 				build = build || {};

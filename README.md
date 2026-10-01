@@ -7429,7 +7429,7 @@ text.nodeValue = "hello world";
 #### reference: `ViteScriptTypeModule`
 
 - vite plugin to always add `[type="module"]` on listed extention file;
-- this module assumes [Paths](#paths) and [SafeExit](#safeexit) to be instantiated;
+- this module assumes [Paths](#paths);
 
 ```js
 /**
