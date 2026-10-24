@@ -92,6 +92,7 @@ export { ParseSQLFile } from '../../../src/function/ParseSQLFile.mjs';
 export { PipeAsync } from '../../../src/function/PipeAsync.mjs';
 export { PipeSync } from '../../../src/function/PipeSync.mjs';
 export { SafeImport } from '../../../src/function/SafeImport.mjs';
+export { SplitWithEscapedSeparator } from '../../../src/function/SplitWithEscapedSeparator.mjs';
 export { TemplateLiteral } from '../../../src/function/TemplateLiteral.mjs';
 export { Timeout } from '../../../src/function/Timeout.mjs';
 export { Tries } from '../../../src/function/Tries.mjs';
@@ -233,6 +234,11 @@ export type VLifecycleCallbacks<TAGNAME extends keyof HTMLElementTagNameMap> = i
  * @template {keyof HTMLElementTagNameMap} TAGNAME
  * @typedef {import('../../../src/typehints/VLifecycleCallbacks.mjs').VLifecycleCallbacks<TAGNAME>} VLifecycleCallbacks
  */
+export { Wails2Dev } from '../../../src/wails/v2/Wails2Dev.mjs';
+export { Wails2Form } from '../../../src/wails/v2/Wails2Form.mjs';
+export { Wails2Listener } from '../../../src/wails/v2/Wails2Listener.mjs';
+export { Wails2OnSubmit } from '../../../src/wails/v2/Wails2OnSubmit.mjs';
+export { WailsMainQ } from '../../../src/wails/WailsMainQ.mjs';
 export { WC_createElement_bind } from '../../../src/web/bindings/WC_createElement_bind.mjs';
 export { WC_createNamedSlot } from '../../../src/web/bindings/WC_createNamedSlot.mjs';
 export { WC_litRender_bind } from '../../../src/web/bindings/WC_litRender_bind.mjs';

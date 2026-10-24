@@ -46,10 +46,15 @@ npm i vivth
   >   code might changes for improving performance</strike>;
 
 - `1.3.x:beta`:
+
   > - type should now fully fixed, even with strict ts check;
+
 - `1.3.3+:beta`:
+
   > - added class `Dev` for testing and `Dev`/`preBundled` only code block;
+
 - `1.5.x:rc`:
+
   > - move code stripping to [BundledV](#bundledv);
   > - [EnvMode](#envmode) are now independent from whether it's bundled or not, and need to be
   >   separately declared;
@@ -58,6 +63,10 @@ npm i vivth
   > - modify [JSautoDoc](#jsautodoc) for `multi-exports`, as to prevent runtime to run incorrect
   >   platform module due to importing from `libName` still walktrhough all of listed exports
   >   regardless if it's being imported or not;
+
+- `1.5.28+:rc`:
+
+  > - added helper for wails2 project;
 
 ---
 
@@ -152,6 +161,7 @@ npm i vivth
 - [neutral.PipeAsync](#pipeasync)
 - [neutral.PipeSync](#pipesync)
 - [node.SafeImport](#safeimport)
+- [neutral.SplitWithEscapedSeparator](#splitwithescapedseparator)
 - [neutral.TemplateLiteral](#templateliteral)
 - [neutral.Timeout](#timeout)
 - [neutral.Tries](#tries)
@@ -189,6 +199,11 @@ npm i vivth
 - [neutral.TemplateLiteralValueHandler](#templateliteralvaluehandler)
 - [neutral.VivthCleanup](#vivthcleanup)
 - [neutral.VLifecycleCallbacks](#vlifecyclecallbacks)
+- [node.Wails2Dev](#wails2dev)
+- [browser.Wails2Form](#wails2form)
+- [browser.Wails2Listener](#wails2listener)
+- [neutral.Wails2OnSubmit](#wails2onsubmit)
+- [neutral.WailsMainQ](#wailsmainq)
 - [neutral.WC_createElement_bind](#wc_createelement_bind)
 - [neutral.WC_createNamedSlot](#wc_createnamedslot)
 - [neutral.WC_litRender_bind](#wc_litrender_bind)
@@ -220,10 +235,11 @@ npm i vivth
 - esbuild external `Set` for browser platform;
 - this Set is automatically applied to [FileSelfMapper](#fileselfmapper) and [EsBundler](#esbundler) if platform is equal to browser;
 - while `vivth` already exports environtment specific(`node`, `browser`, `neutral`) via `vivth/node.JSAutoDoc`, there are possibility of other library might bleeded out when trying to:
-  > - use esbuild;
-  > - earlier version of `vivth`;
-  > - importing from `vivth`, which is definitely bleeded out, and you need to import from proper `exports`;
-  > - importing from `vivth/all`, which is definitely bleeded out, and you need to import from proper `exports`;
+
+> - use esbuild;
+> - earlier version of `vivth`;
+> - importing from `vivth`, which is definitely bleeded out, and you need to import from proper `exports`;
+> - importing from `vivth/all`, which is definitely bleeded out, and you need to import from proper `exports`;
 
 ```js
 /**
@@ -243,7 +259,7 @@ await build({
 });
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -281,13 +297,13 @@ const transform = (filePath) => {
 //
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
 <h2 id="lasteditedunix">node.LastEditedUnix</h2>
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -315,7 +331,7 @@ await build({
 });
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -372,7 +388,7 @@ PathFSBundles.vivthBundles("../src/entryPoint.mjs", {
  */
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -434,7 +450,7 @@ PathFSDir.vivthDir("../src/", /[\s\S]*/);
  */
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -485,7 +501,7 @@ PathFSFile.vivthFile("../CompileAS.mjs");
  */
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -495,10 +511,11 @@ PathFSFile.vivthFile("../CompileAS.mjs");
 
 - generate `esbuild.Plugin` for changing unbundled time file into runtime file;
 - on using esbuild with this plugin, it will:
-  > - replace any module that have similiar file name but ended with Bundled(before extname);
-  > - works on `.mts`|`.ts`|`.mjs`|`.js`;
-  > - `${fileName}.mjs` -> seek for and use `${fileName}.bundled.mjs`, if not found use `${fileName}.mjs`;
-  > - removes `BundledV.vivthUnBundledCodeBlock` code block;
+
+> - replace any module that have similiar file name but ended with Bundled(before extname);
+> - works on `.mts`|`.ts`|`.mjs`|`.js`;
+> - `${fileName}.mjs` -> seek for and use `${fileName}.bundled.mjs`, if not found use `${fileName}.mjs`;
+> - removes `BundledV.vivthUnBundledCodeBlock` code block;
 
 ```js
 /**
@@ -515,7 +532,7 @@ import { ToBundledJSPlugin } from "vivth/node";
 export const myBundledPlugin = ToBundledJSPlugin("/myProjectName/src/");
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -525,20 +542,27 @@ export const myBundledPlugin = ToBundledJSPlugin("/myProjectName/src/");
 
 - helper to compile `AssemblyScript`;
 - file name should endswith `.as.ts`;
-  > - basename that starts with `-` are excluded, and to be used as sharable library OR code management/split;
+
+> - basename that starts with `-` are excluded, and to be used as sharable library OR code management/split;
+
 - will generate:
-  > - `${fileBaseNameNoExt}_import.mjs`: setting for import input;
-  >   > - also the only file that are editable;
-  > - `${fileBaseNameNoExt}.d.ts`: asc generated typehint;
-  > - `${fileBaseNameNoExt}.js`: asc generated esm binding;
-  > - `${fileBaseNameNoExt}.wasm`: asc compiled;
-  > - `${fileBaseNameNoExt}_ASUniversal.mjs`: able to be `JSautoDOC`ed, for universal runtime;
-  > - `${fileBaseNameNoExt}_ASasar.mjs`: able to be `JSautoDOC`ed, use as `vivth.FSasar` binding;
+
+> - `${fileBaseNameNoExt}_import.mjs`: setting for import input;
+>
+> > - also the only file that are editable;
+>
+> - `${fileBaseNameNoExt}.d.ts`: asc generated typehint;
+> - `${fileBaseNameNoExt}.js`: asc generated esm binding;
+> - `${fileBaseNameNoExt}.wasm`: asc compiled;
+> - `${fileBaseNameNoExt}_ASUniversal.mjs`: able to be `JSautoDOC`ed, for universal runtime;
+> - `${fileBaseNameNoExt}_ASasar.mjs`: able to be `JSautoDOC`ed, use as `vivth.FSasar` binding;
+
 - generated file are on the same directory as the source, so make sure to isolate the source from other file(in a single different directory), as to not make it messy real fast;
 - assuming `js/tsconfig.json` should already set this following value:
-  > - `compilerOptions.allowJs`: true;
-  > - `compilerOptions.checkJs`: false;
-  > - should excludes: `.js`, `.as.ts`, `.wasm`;
+
+> - `compilerOptions.allowJs`: true;
+> - `compilerOptions.checkJs`: false;
+> - should excludes: `.js`, `.as.ts`, `.wasm`;
 
 ```js
 /**
@@ -558,7 +582,7 @@ const { error } = await CompileAS(
 );
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -569,8 +593,9 @@ const { error } = await CompileAS(
 - function to compile `.ts`|`.mts`|`.mjs` file, into a single executable;
 - also generate js representation of the `bundled` version of the target;
 - uses [bun](https://bun.com/docs/bundler/executables) compiler under the hood;
-  > - it is used only as packaging/compiler agent, and doesn't necessarily supports their advanced feature, such as, assets bundling(use [`FSasar`](#fsasar) instead);
-  > - `WorkerThread` will be converted to inline using `FSasar` too;
+
+> - it is used only as packaging/compiler agent, and doesn't necessarily supports their advanced feature, such as, assets bundling(use [`FSasar`](#fsasar) instead);
+> - `WorkerThread` will be converted to inline using `FSasar` too;
 
 ---
 
@@ -655,7 +680,7 @@ if (errorbun) {
 }
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -685,7 +710,7 @@ export const pluginAddCopyRight = CreateESPlugin(
 );
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -730,7 +755,7 @@ const [bundledString, errorBundling] = EsBundler(
 );
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -739,7 +764,8 @@ const [bundledString, errorBundling] = EsBundler(
 #### reference: `FileSelfMapper`
 
 - each file can define it's own `targetPaths` inline by adding comment then fullpath on the begining of the file:
-  > - `mjs`;
+
+> - `mjs`;
 
 ```js
 // D://my/path/something.mjs
@@ -770,12 +796,16 @@ body {
 ```
 
 - files extention:
-  > - `js`/`ts` files will be compiled with `vivth/node.EsWathcer`, using `option.esbuild` as argument;
-  > - `sass`/`scss` it will be compiled to `css` first;
-  > - `html` will be checked for `script`;
-  >   > - has `[type="module]"`: will be processed as `esm`;
-  >   > - has `[minify="true"]`: will be minified;
-  > - other than those files, they will be just copied to `targetPaths`;
+
+> - `js`/`ts` files will be compiled with `vivth/node.EsWathcer`, using `option.esbuild` as argument;
+> - `sass`/`scss` it will be compiled to `css` first;
+> - `html` will be checked for `script`;
+>
+> > - has `[type="module]"`: will be processed as `esm`;
+> > - has `[minify="true"]`: will be minified;
+>
+> - other than those files, they will be just copied to `targetPaths`;
+
 - avoid forbidden filename characters and problematic one such as curly/square/normal-braces, that might be used for file pointing cli;
 - for runtime example see file `/dev/auto/` on source code;
 
@@ -821,7 +851,7 @@ new FileSelfMapper("../ssg-assets/", {
 });
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -830,7 +860,9 @@ new FileSelfMapper("../ssg-assets/", {
 #### reference: `FSAnalyzer`
 
 - collections of static method to process content for:
-  > - `FSasar`;
+
+> - `FSasar`;
+
 - mostly used internally;
 
 #### reference: `FSAnalyzer.finalContent`
@@ -865,7 +897,7 @@ const [resultFinalContent, errorFinalContent] = await FSAnalyzer.finalContent(
 );
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -874,8 +906,9 @@ const [resultFinalContent, errorFinalContent] = await FSAnalyzer.finalContent(
 #### reference: `FSasar`
 
 - class helper to bundle assets files as `.asar`;
-  > - as `type: "buffer"`;
-  > - uses `
+
+> - as `type: "buffer"`;
+> - uses `
 
 ```js
 /**
@@ -933,7 +966,7 @@ forEachFiles(async ({ inputRelative, asar }) => {
 });
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -943,8 +976,9 @@ forEachFiles(async ({ inputRelative, asar }) => {
 
 - class helper for one to one Mapping JS files;
 - only bundles `.mts` AND `.mjs` in the `path.watch` directory, extension restriction to module as to enforce:
-  > - `esm` style input;
-  > - to not confuse IDE and esbuild resolver of extensionless static import;
+
+> - `esm` style input;
+> - to not confuse IDE and esbuild resolver of extensionless static import;
 
 ```js
 /**
@@ -1037,7 +1071,7 @@ new JSDirMapper(
 );
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -1046,9 +1080,11 @@ new JSDirMapper(
 #### reference: `RunWatchThenCompileJSOnSafeExit`
 
 - function to:
-  > - spawn watcher on `source`;
-  > - run the `source`;
-  > - compile `source` to target on `SafeExit`;
+
+> - spawn watcher on `source`;
+> - run the `source`;
+> - compile `source` to target on `SafeExit`;
+
 - this function assume `Paths` and `SafeExit` to be instantiated;
 
 ```js
@@ -1092,7 +1128,7 @@ await RunWatchThenCompileJSOnSafeExit({
 });
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -1101,15 +1137,21 @@ await RunWatchThenCompileJSOnSafeExit({
 #### reference: `SSGDevMapper`
 
 - class helper to map files into SSG software that:
-  > - have its own dev server;
-  > - have `Open file with` to be edited via external application;
+
+> - have its own dev server;
+> - have `Open file with` to be edited via external application;
+
 - `js` extensions supports:
-  > - `.mjs`;
-  > - `.cjs`;
-  > - `.js`;
+
+> - `.mjs`;
+> - `.cjs`;
+> - `.js`;
+
 - `.html` parse `script` elements to be:
-  > - `minifed` if has `[minify="true"]`;
-  > - use `esm` if has `[type="module"]`;
+
+> - `minifed` if has `[minify="true"]`;
+> - use `esm` if has `[type="module"]`;
+
 - `.scss`|`.sass` write compiled `.css`;
 - every other extension will be copied to `targetpath` as is(without `targetpath` as string);
 - look for [FileSelfMapper](#fileselfmapper) on how to add `targetpath`;
@@ -1165,7 +1207,7 @@ new SSGDevMapper({
 });
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -1207,7 +1249,7 @@ new Effect(async ({ subscribe }) => {
 });
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -1293,7 +1335,7 @@ Console.error({
 });
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -1338,7 +1380,7 @@ Console.error({
  */
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -1430,7 +1472,8 @@ const double = new Derived(async ({ subscribe, isLastCalled }) => {
 - the most recent value of the instance;
 - can be turn into reactive with Effect or Derived instantiation;
 - value are allowed to be `undefined` and always be `undefined` at the instantiation time;
-  > - make sure to put a check before consuming(inside an `Effect`);
+
+> - make sure to put a check before consuming(inside an `Effect`);
 
 ```js
 /**
@@ -1466,7 +1509,7 @@ numberSignal++;
  */
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -1476,10 +1519,11 @@ numberSignal++;
 
 - a class for creating effect;
 - behaviour:
-  > - doesn't autosubscribe at first run;
-  > - it is using passed <b>subscribe</b> named `arg0` options as subscriber;
-  > - doesn't block other queues during first run;
-  > - can dynamically subscribes to signal, even on conditionals, that are not run during first run;
+
+> - doesn't autosubscribe at first run;
+> - it is using passed <b>subscribe</b> named `arg0` options as subscriber;
+> - doesn't block other queues during first run;
+> - can dynamically subscribes to signal, even on conditionals, that are not run during first run;
 
 ```js
 /**
@@ -1691,8 +1735,9 @@ const effect = new Effect(async ({ isLastCalled }) => {
   // OR
   const res = await fetch("some/path");
   if (
-    !(await isLastCalled())
-    // no need to add timeoutMS argument, as fetch are naturally add delay;
+    !(await isLastCalled(
+      // no need to add timeoutMS argument, as fetch are naturally add delay;
+    ))
   ) {
     return;
   }
@@ -1719,7 +1764,7 @@ const effect = new Effect(async () => {
 effect.run();
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -1795,7 +1840,7 @@ import { myEnv } from "./myEnv.mjs";
 myEnv.correction(false); // this will notify all subscribers;
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -1846,7 +1891,7 @@ const { context, remove } = new EsWatcher({
 
 - rebuild callback;
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -1868,7 +1913,8 @@ const { context, remove } = new EsWatcher({
 
 - the constructor it self is set to `private`;
 - it's globally queued:
-  > - the `Promise` nature is to prevent race condition on creating the instance;
+
+> - the `Promise` nature is to prevent race condition on creating the instance;
 
 ```js
 /**
@@ -2067,7 +2113,7 @@ const myEffectInstance = new Effect(({ subscribe }) => {
 eventSignal_instance.remove.ref();
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -2219,7 +2265,7 @@ const [str, errorMkDir] = await FileSafe.mkdir(
 );
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -2228,7 +2274,8 @@ const [str, errorMkDir] = await FileSafe.mkdir(
 #### reference: `ForEach`
 
 - is collections of safe `.forEach` wrapper;
-  > - via [TrySync](#trysync);
+
+> - via [TrySync](#trysync);
 
 #### reference: `ForEach.array`
 
@@ -2299,7 +2346,7 @@ ForEach(map, (value, key, map_) => {
 });
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -2370,7 +2417,7 @@ const myLoop = new ForSignal(
  */
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -2407,8 +2454,9 @@ const myLoop = new ForSignal(
 
 - callback to handle all registered path;
 - debounced to only handle last changes on full registry with:
-  > - `options.debounce`;
-  > - `QChannel` `isLastOnQ`;
+
+> - `options.debounce`;
+> - `QChannel` `isLastOnQ`;
 
 ```js
 /**
@@ -2472,7 +2520,7 @@ new FSDirArchWatcher(["/routers/", "/fsrouter.setting.mjs"], {
 });
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -2507,7 +2555,7 @@ localA.set("my new value");
 localA.get(); // 'my new value'
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -2572,7 +2620,7 @@ const [, error] = await packageJSONHandler.assign({
 });
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -2817,7 +2865,7 @@ const myFilteredListSignal = new Derived(async ({ subscribe }) => {
  */
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -2829,9 +2877,11 @@ const myFilteredListSignal = new Derived(async ({ subscribe }) => {
 - named capture uses `es6+` feature, you might need to add polyfill to target extremely old browser;
 - class name refer to `Literal Expression`;
 - please be patient when using this class;
-  > - destructuring is meant for extensive typehelper;
-  > - and destructuring can lead to unhandled error here and there;
-  > - therefore error as value is introduced to help to prevent error on runtime;
+
+> - destructuring is meant for extensive typehelper;
+> - and destructuring can lead to unhandled error here and there;
+> - therefore error as value is introduced to help to prevent error on runtime;
+
 - made primarily for generating string file, that are purely managed programatically;
 
 ```js
@@ -2864,11 +2914,15 @@ new RegExp(escapedLiteral, "g");
 
 - constructor helper;
 - under the hood it is an abstraction of `RegExp`, with more template literal touch;
-  > - you can apply inline `RegExp` features on the string template literal(as constructor RegExp arg0);
-  >   > - by doing so you are opting in to make:
-  >   >   > - your regex detection more robust; but
-  >   >   > - `litExp_instance.make.string` to be `unusable`;
-  >   > - also mind the needs of escape for special characters;
+
+> - you can apply inline `RegExp` features on the string template literal(as constructor RegExp arg0);
+>
+> > - by doing so you are opting in to make:
+> >
+> > > - your regex detection more robust; but
+> > > - `litExp_instance.make.string` to be `unusable`;
+> >
+> > - also mind the needs of escape for special characters;
 
 ````js
 /**
@@ -3041,7 +3095,7 @@ const [resultOfMatchedAllAndGrouped, error] =
   })();
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -3237,7 +3291,7 @@ const myEffectInstance = new Effect(({ subscribe }) => {
 objectSigObjectSignal_instance.remove.ref();
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -3281,11 +3335,14 @@ new Paths({
 #### reference: `Paths.root:getter`
 
 - MIGHT THROW AN ERROR;
-  > - most `vivth` modules uses this value, so you need to instantiate Paths by all means before using them;
+
+> - most `vivth` modules uses this value, so you need to instantiate Paths by all means before using them;
+
 - reference for rootPath
 - `Paths` needed to be instantiated via:
-  > - `Paths` constructor;
-  > - `Setup.paths` constructor;
+
+> - `Paths` constructor;
+> - `Setup.paths` constructor;
 
 ```js
 /**
@@ -3367,7 +3424,7 @@ import { Paths } from "vivth/neutral";
 Paths.normalizesForRoot("\\path\\myFile.mjs"); //  "D://something/path/myFile.mjs"
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -3377,7 +3434,7 @@ Paths.normalizesForRoot("\\path\\myFile.mjs"); //  "D://something/path/myFile.mj
 
 - `prettier` wrapper with option inference from path;
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -3482,8 +3539,9 @@ resume();
 
 - each `QChannelInstance` are managing it's own `queue`, and will not `await` for other `QChannelInstance`;
 - caveat:
-  > - need to manually call resume();
-  > - slightly more performant than `callback`;
+
+> - need to manually call resume();
+> - slightly more performant than `callback`;
 
 ```js
 /**
@@ -3514,8 +3572,9 @@ handler();
 
 - `callbackBlock` with error as value:
 - caveat:
-  > - no need to manually call resume();
-  > - slightly less performant than `key`;
+
+> - no need to manually call resume();
+> - slightly less performant than `key`;
 
 ```js
 /**
@@ -3541,7 +3600,7 @@ const [result, error] = await q.callback(keyID, async ({ isLastOnQ }) => {
 });
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -3588,7 +3647,8 @@ new SafeExit("SIGINT", "SIGTERM", ...eventNames);
 
 - `SafeExit` ${eventName}.Callback registration;
 - `onEventName` all callbacks are called simultanousely using `await Promise.all`;
-  > - for sequential event you need to put them in a single callback;
+
+> - for sequential event you need to put them in a single callback;
 
 ```js
 /**
@@ -3630,7 +3690,7 @@ SafeExit.instance.addCallback(exitCallback);
  SafeExit.instance.removeCallback(exitCallback);
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -3723,7 +3783,7 @@ import { Setup } from "vivth/node";
 Setup.preferrence({ encoding: "utf-8" });
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -3891,7 +3951,7 @@ count.value++;
 count.value = 9;
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -3900,7 +3960,8 @@ count.value = 9;
 #### reference: `SignalCollection`
 
 - class helper for creating Collection of `Signals` for Object of Signals to be subscribed to(on `Effect`/`Derived`) collectively as signals;
-  > - uses as `Facade` Pattern;
+
+> - uses as `Facade` Pattern;
 
 ```js
 /**
@@ -3976,9 +4037,12 @@ const d = new Derived(async function ({ subscribe, isLastCalled }) {
 #### reference: `SignalCollection_instance.forInSignals`
 
 - is looping synchronously;
-  > - will not await any async block;
+
+> - will not await any async block;
+
 - use for operation that doesn't need the value:
-  > - unsub from the signal;
+
+> - unsub from the signal;
 
 ```js
 /**
@@ -4005,7 +4069,7 @@ f.forInSignals((key, signal) => {
 });
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -4083,7 +4147,7 @@ WalkThrough.array(arrayOfSomething, ([index, value]) => {
 });
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -4237,7 +4301,7 @@ import { myDoubleWorker } from "./myDoubleWorker.mjs";
 myDoubleWorker.postMessage(90);
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -4274,7 +4338,7 @@ myDoubleWorker.postMessage(90);
  */
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -4375,7 +4439,7 @@ new MyWorkerThread(handler);
  */
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -4385,7 +4449,8 @@ new MyWorkerThread(handler);
 
 - create inline base64 url;
 - usage:
-  > - can be extremely usefull to display file on desktop app `webview` or any bundled browser, without exposing http server;
+
+> - can be extremely usefull to display file on desktop app `webview` or any bundled browser, without exposing http server;
 
 ````js
 /**
@@ -4412,7 +4477,7 @@ import fileString from "./fileString.mjs";
 Base64URL(fileString, "application/javascript", btoa);
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -4422,8 +4487,9 @@ Base64URL(fileString, "application/javascript", btoa);
 
 - create inline base64 url;
 - usage:
-  > - can be extremely usefull to display file on desktop app webview, without exposing http server;
-  > - when using `FSasar`, use [Base64URL](#base64url) instead;
+
+> - can be extremely usefull to display file on desktop app webview, without exposing http server;
+> - when using `FSasar`, use [Base64URL](#base64url) instead;
 
 ```js
 /**
@@ -4441,7 +4507,7 @@ import { Paths } from "vivth/neutral";
 await Base64URLFromFile(join(Paths.root, "/path/to/file"));
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -4473,7 +4539,8 @@ if (BundledV.isBundled) {
 #### reference: `BundledV.vivthUnBundledCodeBlock`
 
 - to create `unbundled` only codeBlock;
-  > - when properly bundled via `vivth` bundling mechanism, this code block will be removed;
+
+> - when properly bundled via `vivth` bundling mechanism, this code block will be removed;
 
 ```js
 /**
@@ -4493,7 +4560,7 @@ BundledV.vivthUnBundledCodeBlock(() => {
 }, "vivthUnBundledCodeBlock");
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -4503,7 +4570,8 @@ BundledV.vivthUnBundledCodeBlock(() => {
 
 - function helper to generate absolute unique ID;
 - the asynchrounous nature is to prevent race condition that might resulting same Id being generated;
-  > - queued using QChannel;
+
+> - queued using QChannel;
 
 ```js
 /**
@@ -4529,7 +4597,7 @@ import { CreateStringID } from "vivth/neutral";
 })();
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -4542,7 +4610,8 @@ import { CreateStringID } from "vivth/neutral";
 #### reference: `EnvMode.mode`
 
 - `Derived` wrapper of whether is in `dev` mode or `prod` not;
-  > - for listener only;
+
+> - for listener only;
 
 ```js
 /**
@@ -4598,7 +4667,7 @@ EnvMode.enforce("prod");
  */
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -4614,7 +4683,7 @@ EnvMode.enforce("prod");
  */
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -4624,8 +4693,9 @@ EnvMode.enforce("prod");
 
 - key symbol to imediately generate object wrapped by `LazyFactory`;
 - usefull for Object that has different accessor behaviour when being get via Proxy, like:
-  > - `Set<any>`;
-  > - `Map<any, any>`;
+
+> - `Set<any>`;
+> - `Map<any, any>`;
 
 ```js
 /**
@@ -4633,7 +4703,7 @@ EnvMode.enforce("prod");
  */
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -4671,7 +4741,7 @@ import { Preferrence } from "vivth/neutral";
 Preferrence.setup({ encoding: "utf-8" });
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -4681,8 +4751,9 @@ Preferrence.setup({ encoding: "utf-8" });
 
 - returns position of stack trace as string, formatted like `fileName:lineNumber:columnNumber`;
 - extremely usefull for:
-  > - jumping positions to code line;
-  > - creating dynamic string id;
+
+> - jumping positions to code line;
+> - creating dynamic string id;
 
 ```js
 /**
@@ -4698,7 +4769,7 @@ import { Trace, Console } from "vivth/neutral";
 Console.log(Trace(3)); // "D://test.mjs:3:13"
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -4709,8 +4780,9 @@ Console.log(Trace(3)); // "D://test.mjs:3:13"
 - get stack trace path that matched with truthy filterCallback;
 - returns position of stack trace as string, formatted like `fileName:lineNumber:columnNumber`;
 - extremely usefull for:
-  > - jumping positions to code line;
-  > - creating dynamic string id;
+
+> - jumping positions to code line;
+> - creating dynamic string id;
 
 ```js
 /**
@@ -4733,7 +4805,7 @@ Console.log(
 ); // "D://test.mjs:4:2"
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -4749,7 +4821,7 @@ Console.log(
  */
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -4761,38 +4833,53 @@ Console.log(
 - this autodocumenter uses [chokidar](https://npmjs.com/package/chokidar) under the hood;
 - this class also is used to generate this `README.md`;
 - behaviours:
-  > - auto export must follows the following rules;
-  >
-  > 1.  add `"at"noautodoc` on self closing jsdoc comment to opt out from generating documentation on said file;
-  > 2.  will (generate) export all named exported 'const'|'function'|'async function'|'class', alphanumeric name, started with Capital letter, same name with fileName on `options.paths.file`;
-  > 3.  will (generate) declare typedef of existing typedef with alphanumeric name, started with Capital letter, same name with fileName, and have no valid export like on point <sup>1</sup> on `options.paths.file`;
-  > 4.  will (generate) create `README.md` based on, `options.paths.dir` and `README.src.md`;
-  > 5.  extract `"at"description` jsdoc:
-  >     > - on static/prop that have depths, all of children should have `"at"static`/`"at"instance` `nameOfImmediateParent`, same block but before `"at"description` comment line;
-  >     > - `"at"description` are treated as plain `markdown`;
-  >     > - first `"at"${string}` after `"at"description` until `"at"example` will be treated as `javascript` comment block on the `markdown`;
-  >     > - `"at"example` are treated as `javascript` block on the `markdown` file, and should be placed last on the same comment block;
-  >     > - you can always look at `vivth/src` files to check how the source, and the `README.md` and `index.mjs` documentation/generation results;
-  > 6.  this types of arrow functions will be converted to regullar function, for concise type emition, includes:
-  >     > - validly exported function;
-  >     > - static/instance method with generic template;
-  > 7.  transpile `.ts` and `.mts` to `.mjs` with same name and directory;
-  >     > - use `"at"preserve` to preserve tsdoc comment section;
-  > 8.  integrated with assembly script to wasm compiler on the doc;
-  >     > - see [AssemblyScript](#assemblyscript);
-  > 9.  modify following root json files:
-  >     > - `package.json`: assign `exports`, `main`, `module`;
-  >     > - `tsconfig.json`: assign `includes`, anything passed on `options.jstsconfigs`;
-  >     > - `jsconfig.json`: assign `includes`, anything passed on `options.jstsconfigs`;
-  > 10. generates files to `/generated/vivth/exports/`:
-  >     > - `./browser.mjs`: able to be called on `browser` platform;
-  >     > - `./node.mjs`: able to be called on `node` platform;
-  >     > - `./neutral.mjs`: able to be called on `node` and `browser` platform;
-  >     > - `./unsupported.mjs`: most likely will throw error when called, it is more of a logged error to be managed;
-  >     > - `./all.mjs`: collections of all platform;
-  > 11. doesn't support accessor;
-  >     > - due to how TLS way accessor type not casting its getter and setter working around accessor requires ignoring this specific error, and it might become ugly real quick;
-  >     > - we recomend to stick with getter and setter;
+
+> - auto export must follows the following rules;
+>
+> 1.  add `"at"noautodoc` on self closing jsdoc comment to opt out from generating documentation on said file;
+> 2.  will (generate) export all named exported 'const'|'function'|'async function'|'class', alphanumeric name, started with Capital letter, same name with fileName on `options.paths.file`;
+> 3.  will (generate) declare typedef of existing typedef with alphanumeric name, started with Capital letter, same name with fileName, and have no valid export like on point <sup>1</sup> on `options.paths.file`;
+> 4.  will (generate) create `README.md` based on, `options.paths.dir` and `README.src.md`;
+> 5.  extract `"at"description` jsdoc:
+>
+> > - on static/prop that have depths, all of children should have `"at"static`/`"at"instance` `nameOfImmediateParent`, same block but before `"at"description` comment line;
+> > - `"at"description` are treated as plain `markdown`;
+> > - first `"at"${string}` after `"at"description` until `"at"example` will be treated as `javascript` comment block on the `markdown`;
+> > - `"at"example` are treated as `javascript` block on the `markdown` file, and should be placed last on the same comment block;
+> > - you can always look at `vivth/src` files to check how the source, and the `README.md` and `index.mjs` documentation/generation results;
+>
+> 6.  this types of arrow functions will be converted to regullar function, for concise type emition, includes:
+>
+> > - validly exported function;
+> > - static/instance method with generic template;
+>
+> 7.  transpile `.ts` and `.mts` to `.mjs` with same name and directory;
+>
+> > - use `"at"preserve` to preserve tsdoc comment section;
+>
+> 8.  integrated with assembly script to wasm compiler on the doc;
+>
+> > - see [AssemblyScript](#assemblyscript);
+>
+> 9.  modify following root json files:
+>
+> > - `package.json`: assign `exports`, `main`, `module`;
+> > - `tsconfig.json`: assign `includes`, anything passed on `options.jstsconfigs`;
+> > - `jsconfig.json`: assign `includes`, anything passed on `options.jstsconfigs`;
+>
+> 10. generates files to `/generated/vivth/exports/`:
+>
+> > - `./browser.mjs`: able to be called on `browser` platform;
+> > - `./node.mjs`: able to be called on `node` platform;
+> > - `./neutral.mjs`: able to be called on `node` and `browser` platform;
+> > - `./unsupported.mjs`: most likely will throw error when called, it is more of a logged error to be managed;
+> > - `./all.mjs`: collections of all platform;
+>
+> 11. doesn't support accessor;
+>
+> > - due to how TLS way accessor type not casting its getter and setter working around accessor requires ignoring this specific error, and it might become ugly real quick;
+> > - we recomend to stick with getter and setter;
+
 - for runtime example see file `/dev/auto-doc.mjs` on source code;
 
 ```js
@@ -4851,7 +4938,7 @@ new JSautoDOC({
 });
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -4874,7 +4961,7 @@ import { ClearRequireCache } from "vivth/node";
 ClearRequireCache("D://path/to.mjs");
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -4884,7 +4971,8 @@ ClearRequireCache("D://path/to.mjs");
 
 - function for create immutable object;
 - usefull for binding immutable object to global for shared object:
-  > - e.g. to window object in browser;
+
+> - e.g. to window object in browser;
 
 ```js
 /**
@@ -4912,7 +5000,7 @@ ClearRequireCache("D://path/to.mjs");
  })
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -4942,7 +5030,7 @@ console.log(EventCheck(incomingMessage, eventObjectPayload));
 // which either will result true;
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -4967,7 +5055,7 @@ import { EventObject } from "vivth/neutral";
 export const eventObjectPayload = EventObject("worker:exit");
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -4976,7 +5064,8 @@ export const eventObjectPayload = EventObject("worker:exit");
 #### reference: `ForInAsync`
 
 - safe `Object` async iterator helper;
-  > - collect errors then returns it as Set<Error>;
+
+> - collect errors then returns it as Set<Error>;
 
 ```js
 /**
@@ -5013,7 +5102,7 @@ const setOfError = await ForInAsync(
 );
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -5022,7 +5111,8 @@ const setOfError = await ForInAsync(
 #### reference: `ForInSync`
 
 - safe `Object` iterator helper;
-  > - collect errors then returns it as Set<Error>;
+
+> - collect errors then returns it as Set<Error>;
 
 ```js
 /**
@@ -5059,7 +5149,7 @@ const [setOfResult, setOfError] = ForInSync(
 );
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -5094,7 +5184,7 @@ await ForOfAsync(iterable, async (value, { prevError, breakEarly }) => {
 });
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -5144,7 +5234,7 @@ await Promise.all(
 );
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -5171,7 +5261,7 @@ import { GetContentFromRelativePath } from "vivth/node";
 await GetContentFromRelativePath("../doc/parsedFile.mjs", "utf-8");
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -5201,7 +5291,7 @@ const files = await GetFilesFromDir(
 ); // without \[noblank]
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -5220,7 +5310,7 @@ const files = await GetFilesFromDir(
  */
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -5246,7 +5336,7 @@ import { GetModuleEsbuildPlatform } from "vivth/node";
 await GetModuleEsbuildPlatform("./myModule.mjs"); // 'node'; caused of lookupA;
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -5255,8 +5345,9 @@ await GetModuleEsbuildPlatform("./myModule.mjs"); // 'node'; caused of lookupA;
 #### reference: `GetNamedImportAlias`
 
 - regex helper for:
-  > - get named import; OR
-  > - alias of named import;
+
+> - get named import; OR
+> - alias of named import;
 
 ```js
 /**
@@ -5281,7 +5372,7 @@ GetNamedImportAlias(checkNoAlias, "something", "packageName"); // 'something'
 GetNamedImportAlias(checkAlias, "something", "packageName"); // 'somethingElse'
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -5304,7 +5395,7 @@ import { GetRuntime } from "vivth/neutral";
 const runtime = GetRuntime();
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -5332,7 +5423,7 @@ import { PathFSFile, InstantiateAssemblyScript } from "vivth/node";
 InstantiateAssemblyScript(PathFSFile.vivthFile("../function/myAsm.wasm"));
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -5363,7 +5454,7 @@ IsAsync(a); // false
 IsAsync(b); // true
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -5399,7 +5490,7 @@ if (!IsInstanceOf(a, Signal)) {
 }
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -5428,7 +5519,7 @@ IsSameFile("//mFile.mjs", "D://mFile.mjs"); // true;
 IsSameFile("D:\\mFile.mjs", "D:\\notmfile.mjs"); // false;
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -5457,7 +5548,7 @@ looksLikePath("react"); // false
 looksLikePath("node:path"); // false
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -5474,7 +5565,7 @@ A type-safe `typeof` helper.
  */
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -5483,7 +5574,8 @@ A type-safe `typeof` helper.
 #### reference: `LazyFactory`
 
 - function helper for creating lazyObject:
-  > - usefull for lazily instantiating an object, since instance naturally have props/methods;
+
+> - usefull for lazily instantiating an object, since instance naturally have props/methods;
 
 ```js
 /**
@@ -5520,13 +5612,13 @@ const b = a.myProp; // imediately initiated;
 myInstance[FactoryKey]; // forcefully call factory generator;
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
 <h2 id="monkeypatch">neutral.MonkeyPatch</h2>
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -5549,7 +5641,7 @@ myInstance[FactoryKey]; // forcefully call factory generator;
  */
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -5565,7 +5657,8 @@ myInstance[FactoryKey]; // forcefully call factory generator;
 ```
 
 - chain call are synchronous without awaiting;
-  > - if the method are async, it could cause race condition;
+
+> - if the method are async, it could cause race condition;
 
 ```js
 /**
@@ -5597,7 +5690,7 @@ TrySync(() => {
 });
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -5635,7 +5728,7 @@ generate generator watcher to `Dynamics`;
  */
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -5655,7 +5748,7 @@ generate generator watcher to `Dynamics`;
  */
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -5682,7 +5775,7 @@ const autoCleanedUpSignal = ObjectRegistrar(() => {});
 const mySignal = autoCleanedUpSignal(1);
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -5693,8 +5786,9 @@ const mySignal = autoCleanedUpSignal(1);
 - parse then generate file right next to said sql file;
 - this function assume `Paths` already instantiated;
 - you can use self closing comment to annotate the type of a field(before the field);
-  > - field prefixed with comment type and prefixed with colon `:` are for inputs;
-  > - field prefixed with comment type but not prefixed with colon `:` are for outputs;
+
+> - field prefixed with comment type and prefixed with colon `:` are for inputs;
+> - field prefixed with comment type but not prefixed with colon `:` are for outputs;
 
 ```js
 /**
@@ -5717,7 +5811,7 @@ const mySignal = autoCleanedUpSignal(1);
  */
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -5749,7 +5843,7 @@ const res = await PipeAsync(
 );
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -5778,7 +5872,7 @@ const res = PipeSync(
 );
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -5788,8 +5882,10 @@ const res = PipeSync(
 
 - import while imediately call clearing require caches;
 - `usecases`:
-  > - long running process that need to prevent memory leak from uncleanable `cached import`;
-  > - to simply import fresh everytime;
+
+> - long running process that need to prevent memory leak from uncleanable `cached import`;
+> - to simply import fresh everytime;
+
 - the imported module can then just be treated like any other variable, to only lived and tracked by variable reference only;
 - due to how `vivth/node.ClearRequireCache` works, parallel await (like using Promise.all, or not awaited until later) will be done squentially(if targetting the same path);
 
@@ -5814,7 +5910,33 @@ const [importedModule, errorSafeImport] = await SafeImport(
 );
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+---
+
+<h2 id="splitwithescapedseparator">neutral.SplitWithEscapedSeparator</h2>
+
+#### reference: `SplitWithEscapedSeparator`
+
+Splits a string by a given separator, ignoring escaped separators.
+Handles backslash escapes (e.g., `\\` for a literal backslash, `\;` for an escaped separator).
+
+```js
+/**
+ * @param {string} rawString
+ * @param {string} separator
+ * @returns {string[]}
+ */
+```
+
+- <i>example</i>:
+
+```js
+import SplitWithEscapedSeparator from "vivth/neutral";
+SplitWithEscapedSeparator("myString;my\;String", ";"); // ['myString',]
+```
+
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -5849,7 +5971,7 @@ const [importedModule, errorSafeImport] = await SafeImport(
  // this will set innerHTML of body to '<div><button>innerButton</button></div>'
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -5879,7 +6001,7 @@ const test = async () => {
 test();
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -5891,7 +6013,8 @@ test();
 - utility function to brute force which key is able to run;
 - usefull to flatten indentation for error handlings;
 - caveat:
-  > - run in sequence, awaiting each key bofore running next key;
+
+> - run in sequence, awaiting each key bofore running next key;
 
 ```js
 /**
@@ -5942,7 +6065,7 @@ const [[key, result], setOfError] = await Tries({
 });
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -5976,7 +6099,7 @@ let [res, error] = await TryAsync(async () => {
 });
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -6007,7 +6130,7 @@ if (!error) {
 }
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -6037,7 +6160,7 @@ const [data, error] = TrySync(() => {
 });
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -6047,8 +6170,9 @@ const [data, error] = TrySync(() => {
 
 - turn `.mts`||`.ts` file into `.mjs`, no bundling, just traspilation;
 - on certain circumstance where `.mjs` result needed to be typed, you need to manually add `jsdoc`;
-  > - uses `"at"preserve` to register `jsdoc`;
-  > - at
+
+> - uses `"at"preserve` to register `jsdoc`;
+> - at
 
 ```js
 /**
@@ -6078,7 +6202,7 @@ await TsToMjs("./myFile.mts", {
 });
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -6097,7 +6221,7 @@ await TsToMjs("./myFile.mts", {
  */
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -6131,8 +6255,9 @@ await TsToMjs("./myFile.mts", {
 
 - use this to update export value;
 - `WARNING`: this instance setter are accesible from outside, including importer;
-  > - usefull for treating `VivthyNeinth` instance as global signal;
-  > - you can accidentally ;
+
+> - usefull for treating `VivthyNeinth` instance as global signal;
+> - you can accidentally ;
 
 ```js
 /**
@@ -6286,7 +6411,7 @@ const esWatcherInstance = this.registerObjectWithAutoCleanup(
 ///
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -6301,7 +6426,7 @@ const esWatcherInstance = this.registerObjectWithAutoCleanup(
  */
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -6328,7 +6453,7 @@ const esWatcherInstance = this.registerObjectWithAutoCleanup(
  */
 ````
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -6344,7 +6469,7 @@ const esWatcherInstance = this.registerObjectWithAutoCleanup(
  */
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -6360,7 +6485,7 @@ const esWatcherInstance = this.registerObjectWithAutoCleanup(
  */
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -6383,7 +6508,7 @@ const esWatcherInstance = this.registerObjectWithAutoCleanup(
  */
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -6403,7 +6528,7 @@ const esWatcherInstance = this.registerObjectWithAutoCleanup(
  */
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -6422,7 +6547,7 @@ const esWatcherInstance = this.registerObjectWithAutoCleanup(
  */
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -6437,7 +6562,7 @@ const esWatcherInstance = this.registerObjectWithAutoCleanup(
  */
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -6456,7 +6581,7 @@ const esWatcherInstance = this.registerObjectWithAutoCleanup(
  */
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -6476,7 +6601,7 @@ const esWatcherInstance = this.registerObjectWithAutoCleanup(
  */
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -6496,7 +6621,7 @@ const esWatcherInstance = this.registerObjectWithAutoCleanup(
  */
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -6511,7 +6636,7 @@ const esWatcherInstance = this.registerObjectWithAutoCleanup(
  */
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -6526,7 +6651,7 @@ const esWatcherInstance = this.registerObjectWithAutoCleanup(
  */
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -6541,7 +6666,7 @@ const esWatcherInstance = this.registerObjectWithAutoCleanup(
  */
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -6555,7 +6680,7 @@ const esWatcherInstance = this.registerObjectWithAutoCleanup(
  */
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -6574,7 +6699,7 @@ const esWatcherInstance = this.registerObjectWithAutoCleanup(
  */
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -6596,7 +6721,7 @@ const esWatcherInstance = this.registerObjectWithAutoCleanup(
  */
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -6613,7 +6738,7 @@ const esWatcherInstance = this.registerObjectWithAutoCleanup(
  */
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -6631,7 +6756,7 @@ const esWatcherInstance = this.registerObjectWithAutoCleanup(
  */
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -6649,7 +6774,7 @@ const esWatcherInstance = this.registerObjectWithAutoCleanup(
  */
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -6664,7 +6789,7 @@ const esWatcherInstance = this.registerObjectWithAutoCleanup(
  */
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -6679,7 +6804,7 @@ const esWatcherInstance = this.registerObjectWithAutoCleanup(
  */
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -6694,7 +6819,7 @@ const esWatcherInstance = this.registerObjectWithAutoCleanup(
  */
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -6709,7 +6834,7 @@ const esWatcherInstance = this.registerObjectWithAutoCleanup(
  */
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -6729,7 +6854,7 @@ const esWatcherInstance = this.registerObjectWithAutoCleanup(
  */
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -6752,7 +6877,7 @@ const esWatcherInstance = this.registerObjectWithAutoCleanup(
  */
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -6775,7 +6900,7 @@ const esWatcherInstance = this.registerObjectWithAutoCleanup(
  */
 ````
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -6794,7 +6919,193 @@ const esWatcherInstance = this.registerObjectWithAutoCleanup(
  */
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+---
+
+<h2 id="wails2dev">node.Wails2Dev</h2>
+
+#### reference: `Wails2Dev`
+
+suited for wails2 project with getter setter pattern using `sqlite3`;
+this class assume `Paths` and `SafeExit` to be instantiated;
+helper method with pre templated way of:
+
+- sqlite go code generation from SQL file on `{projectroot}/sql`;
+- auto_ipc.go generation from `{projectroot}/backend`;
+
+> > - function commented with `// GETTER`;
+> > - function commented with `// SETTER`;
+>
+> - provide auto formatter and ipc generator for `// GETTER` and `// SETTER` pattern;
+>
+> > - `// GETTER` prefix for getter function;
+> > - `// SETTER` prefix for setter function;
+
+- provide OOP-ish approach snippets(for .vscode):
+
+> - `??staticPrepare`;
+> - `??staticMethod`;
+> - `??instancePrepare`;
+> - `??instanceSingletonPrepare`;
+> - `??instanceMethod`;
+
+- provide `explorer.fileNesting.patterns` on `settings.json` for `.vscode`;
+
+> - will nest based on parent `*.md` and `*.sql`;
+
+- provide standard `backend/Connection.go` for connecting to `sqlite3` database;
+- provide standard internal `backend/UtilsGetterSetter.go` for thread-safe, multiple readers/writters;
+
+#### reference: `new Wails2Dev`
+
+- this is a singleton constructor;
+- dev script to watch multiple directories on your `projectRoot` for auto format and auto generate things;
+
+- <i>example</i>:
+
+```js
+import { Paths } from "vivth/neutral";
+import { Wails2Dev, SafeExit } from "vivth/node";
+new Paths({
+  root: process.env.INIT_CWD ?? process.cwd(),
+});
+new SafeExit("SIGTERM", "SIGINT");
+new Wails2Dev();
+```
+
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+---
+
+<h2 id="wails2form">browser.Wails2Form</h2>
+
+#### reference: `Wails2Form`
+
+Custom `form[is="form-wails"]` element that handles submission by calling a specified Wails SETTER backend function;
+passing form input fields as a JSON object string.
+
+- applies to `form[is="form-wails"]`;
+
+> - this class automatically bind the element with `Wails2OnSubmit` to it's `onsubmit`;
+
+- `[setter]` value to target go wails ipc name;
+
+> - it will call `window['go']['main']['App'][{setter.value}]` with form inputs as `arg0`;
+
+- <i>example</i>:
+
+```js
+import { Wails2Form } from "vivth/browser";
+```
+
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+---
+
+<h2 id="wails2listener">browser.Wails2Listener</h2>
+
+#### reference: `Wails2Listener`
+
+- getter helper;
+- `Wails2Dev` will generate `app_ipc.go`;
+
+```js
+/**
+ * @implements {VivthCleanup}
+ */
+```
+
+#### reference: `Wails2Listener_instance.vivthCleanup`
+
+- when wrapped with vivth `WC_extends_instance.this.ON` this method is to auto cleaned;
+- you can call this method manually on the framework element cleanup lifecycle;
+
+```js
+/**
+ * @type {()=>Promise<void>}
+ */
+```
+
+#### reference: `new Wails2Listener`
+
+```js
+/**
+ * @param {string} getterName
+ * @param {()=>Promise<void>} handler
+ */
+```
+
+- <i>example</i>:
+
+```js
+import { Wails2Listener } from "vivth/browser";
+import { MyIPC } from "../wails/go/App.js";
+const myListener = new Wails2Listener("users", async () => {
+  const res = await MyIPC();
+});
+// when no longer needed, eg. element is disconnected;
+myListener.vivthCleanup();
+```
+
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+---
+
+<h2 id="wails2onsubmit">neutral.Wails2OnSubmit</h2>
+
+#### reference: `Wails2OnSubmit`
+
+- function helper to be used as onsubmit event handler for wails ipc call for setter;
+- `form[setter]` value to target go wails ipc name;
+- `form[input][name]` value will be used as named `arg0` struct on setter ipc;
+- you can generate setter ipc by add comment before function `// SETTER`, which then `Wails2Dev` generate callable ipc on `app_ipc.go`;
+
+> - funtion need to return `[]string` which to notify your getter declared via `Wails2GetterListener`;
+> - function need to be located on `package backend` at `{projectRoot}/backend`;
+> - use `??staticMethod` snipet to generate the function skeleton;
+>
+> > - you might also prepare it with `??staticPrepare`;
+
+```js
+/**
+ * @this {HTMLFormElement}
+ * - you need to call it via `Wails2OnSubmit.call(yourFormElement, submitEvent)` to bind `yourFormElement` to `this`;
+ * @param {SubmitEvent} e
+ * @returns {Promise<void>}
+ */
+```
+
+- <i>example</i>:
+
+```js
+import { Wails2OnSubmit } from "vivth/neutral";
+const myElement = document.querySelector("#myForm");
+const submitHandler = Wails2OnSubmit.bind(myElement);
+myElement.addEventListener("submit", submitHandler);
+// on element no longer exist
+myElement.removeEventListener("submit", submitHandler);
+```
+
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+---
+
+<h2 id="wailsmainq">neutral.WailsMainQ</h2>
+
+#### reference: `WailsMainQ`
+
+- is a [QChannel](#qchannel) instance helper to queue operations;
+- use with certain unique object;
+- don't use primitive like, number | string | etc;
+
+```js
+/**
+ * @type {QChannel<any>}
+ */
+```
+
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -6841,7 +7152,7 @@ Uses `lit-html` under the hood.
  */
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -6873,7 +7184,7 @@ this.createNamedSlot(...args);
 //
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -6907,7 +7218,7 @@ this.createNamedSlot(...args);
  ///
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -6924,7 +7235,7 @@ this.createNamedSlot(...args);
  */
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -6958,7 +7269,7 @@ this.createNamedSlot(...args);
  //
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -6967,7 +7278,8 @@ this.createNamedSlot(...args);
 #### reference: `BrowserDirMapper`
 
 - class helper to map dynamic mjs files;
-  > - includes `mts` file too;
+
+> - includes `mts` file too;
 
 ```js
 /**
@@ -7035,7 +7347,7 @@ new BrowserDirMapper(
  */
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -7072,7 +7384,7 @@ new BrowserDirMapper(
  //
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -7123,7 +7435,7 @@ const div = E(
 text.nodeValue = "hello world";
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -7132,7 +7444,8 @@ text.nodeValue = "hello world";
 #### reference: `NewStyleSheetAsync`
 
 - function helper to asynchronously `CSSStyleSheet`;
-  > - './main.css';
+
+> - './main.css';
 
 ```css
 :host {
@@ -7150,7 +7463,7 @@ text.nodeValue = "hello world";
  */
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -7159,7 +7472,8 @@ text.nodeValue = "hello world";
 #### reference: `NewStyleSheetSync`
 
 - function helper to synchronously `CSSStyleSheet`;
-  > - './main.css';
+
+> - './main.css';
 
 ```css
 :host {
@@ -7177,7 +7491,7 @@ text.nodeValue = "hello world";
  */
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -7197,7 +7511,7 @@ text.nodeValue = "hello world";
  */
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -7212,7 +7526,7 @@ text.nodeValue = "hello world";
  */
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -7257,7 +7571,7 @@ text.nodeValue = "hello world";
  */
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -7308,7 +7622,7 @@ text.nodeValue = "hello world";
 
 - unobserve element;
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -7328,7 +7642,7 @@ text.nodeValue = "hello world";
 
 #### reference: `new WC_litRef`
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -7362,7 +7676,9 @@ text.nodeValue = "hello world";
 
 - self auto register and cleanup when assigned with `ON` jut by passing empty object as second argument;
 - the automatic part only works on `WC_extends${suffix}`;
-  > - the cleanup logic are infered by `WC_extends${suffix}` class inner behaviour;
+
+> - the cleanup logic are infered by `WC_extends${suffix}` class inner behaviour;
+
 - still need to be called manually if used outside `vivth/neutral` `WebComponent`;
 
 ```js
@@ -7375,7 +7691,9 @@ text.nodeValue = "hello world";
 
 - self auto register and cleanup when assigned with `ON` jut by passing empty object as second argument;
 - the automatic part only works on `WC_extends${suffix}`;
-  > - the cleanup logic are infered by `WC_extends${suffix}` class inner behaviour;
+
+> - the cleanup logic are infered by `WC_extends${suffix}` class inner behaviour;
+
 - still need to be called manually if used outside `vivth/neutral` `WebComponent`;
 
 ```js
@@ -7384,7 +7702,7 @@ text.nodeValue = "hello world";
  */
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -7401,7 +7719,7 @@ text.nodeValue = "hello world";
  */
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -7420,7 +7738,7 @@ text.nodeValue = "hello world";
  */
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -7442,7 +7760,7 @@ text.nodeValue = "hello world";
  */
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -7627,7 +7945,7 @@ text.nodeValue = "hello world";
  */
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
@@ -7816,6 +8134,6 @@ text.nodeValue = "hello world";
  */
 ```
 
-\*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---

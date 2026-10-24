@@ -73,7 +73,7 @@ export class FileSafe {
 			if (errorMkDir) {
 				throw `error mkdir, "${dirname(outFile.toString())}"`;
 			}
-			if (!(await FileSafe.#validToOverWrite(outFile, content, options, checkFuzySame))) {
+			if (!(await FileSafe.#validToOverWrite(outFile, content, checkFuzySame))) {
 				Console.warn(
 					{
 						FileSafe: `write file '${outFile}' is canceled, old file are ${checkFuzySame ? 'almost ' : ''}identical`,
@@ -100,21 +100,19 @@ export class FileSafe {
 	/**
 	 * @param {Parameters<typeof FileSafe.write>[0]} outFile
 	 * @param {Parameters<typeof FileSafe.write>[1]} content
-	 * @param {Parameters<typeof FileSafe.write>[2]} [options]
 	 * @param {Parameters<typeof FileSafe.write>[3]} [checkFuzySame]
 	 * @returns {Promise<boolean>}
 	 */
-	static #validToOverWrite = async (outFile, content, options, checkFuzySame = true) => {
+	static #validToOverWrite = async (outFile, content, checkFuzySame = true) => {
 		const [isExist, [isSame]] = await Promise.all([
 			FileSafe.exist(outFile.toString()),
 			TryAsync(async () => {
 				if (!checkFuzySame) {
 					// code
-					return (await readFile(outFile.toString(), options)) === content;
+					return (await readFile(outFile.toString())) === content;
 				}
 				return (
-					FileSafe.#normalize(await readFile(outFile.toString(), options)) ===
-					FileSafe.#normalize(content)
+					FileSafe.#normalize(await readFile(outFile.toString())) === FileSafe.#normalize(content)
 				);
 			}),
 		]);

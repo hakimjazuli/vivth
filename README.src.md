@@ -46,10 +46,15 @@ npm i vivth
   >   code might changes for improving performance</strike>;
 
 - `1.3.x:beta`:
+
   > - type should now fully fixed, even with strict ts check;
+
 - `1.3.3+:beta`:
+
   > - added class `Dev` for testing and `Dev`/`preBundled` only code block;
+
 - `1.5.x:rc`:
+
   > - move code stripping to [BundledV](#bundledv);
   > - [EnvMode](#envmode) are now independent from whether it's bundled or not, and need to be
   >   separately declared;
@@ -58,3 +63,7 @@ npm i vivth
   > - modify [JSautoDoc](#jsautodoc) for `multi-exports`, as to prevent runtime to run incorrect
   >   platform module due to importing from `libName` still walktrhough all of listed exports
   >   regardless if it's being imported or not;
+
+- `1.5.28+:rc`:
+
+  > - added helper for wails2 project;
