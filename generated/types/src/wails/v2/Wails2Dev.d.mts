@@ -24,13 +24,6 @@
 export declare class Wails2Dev {
     #private;
     /**
-     * Formats a Go file using gofumpt in-place (-w)
-     * @param {string} filePath
-     * @param {string} unformattedCode
-     * @returns {string}
-     */
-    static formatGoCodeString: (filePath: string, unformattedCode: string) => string;
-    /**
      * @description
      * - this is a singleton constructor;
      * - dev script to watch multiple directories on your `projectRoot` for auto format and auto generate things;

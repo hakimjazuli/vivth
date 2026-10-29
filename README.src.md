@@ -53,7 +53,7 @@ npm i vivth
 
   > - added class `Dev` for testing and `Dev`/`preBundled` only code block;
 
-- `1.5.x:rc`:
+- `1.5.x:beta`:
 
   > - move code stripping to [BundledV](#bundledv);
   > - [EnvMode](#envmode) are now independent from whether it's bundled or not, and need to be
@@ -64,6 +64,10 @@ npm i vivth
   >   platform module due to importing from `libName` still walktrhough all of listed exports
   >   regardless if it's being imported or not;
 
-- `1.5.28+:rc`:
+- `1.5.28+:beta`:
 
   > - added helper for wails2 project;
+
+- `1.5.28+:beta`:
+
+  > - added helper for wails3 project;

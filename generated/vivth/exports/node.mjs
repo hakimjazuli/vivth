@@ -43,6 +43,7 @@ export { TsToMjs } from '../../../src/function/TsToMjs.mjs';
 export { UniqueFSTempName } from '../../../src/function/UniqueFSTempName.mjs';
 export { VivthyNeinth } from '../../../src/neinth/VivthyNeinth.mjs';
 export { Wails2Dev } from '../../../src/wails/v2/Wails2Dev.mjs';
+export { Wails3Dev } from '../../../src/wails/v3/Wails3Dev.mjs';
 export { BrowserDirMapper } from '../../../src/web/BrowserDirMapper.mjs';
 export { ViteAddDynamics } from '../../../src/web/ViteAddDynamics.mjs';
 export { ViteGetAllHTMLFile } from '../../../src/web/ViteGetAllHTMLFile.mjs';

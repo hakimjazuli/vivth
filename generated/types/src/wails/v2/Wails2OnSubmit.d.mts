@@ -4,7 +4,7 @@
  * - `form[setter]` value to target go wails ipc name;
  * - `form[input][name]` value will be used as named `arg0` struct on setter ipc;
  * - you can generate setter ipc by add comment before function `// SETTER`, which then `Wails2Dev` generate callable ipc on `app_ipc.go`;
- * > - funtion need to return `[]string` which to notify your getter declared via `Wails2GetterListener`;
+ * > - funtion need to return `[]string` which to notify your getter declared via `Wails2Listener`;
  * > - function need to be located on `package backend` at `{projectRoot}/backend`;
  * > - use `??staticMethod` snipet to generate the function skeleton;
  * > > - you might also prepare it with `??staticPrepare`;

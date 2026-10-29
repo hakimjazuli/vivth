@@ -53,7 +53,7 @@ npm i vivth
 
   > - added class `Dev` for testing and `Dev`/`preBundled` only code block;
 
-- `1.5.x:rc`:
+- `1.5.x:beta`:
 
   > - move code stripping to [BundledV](#bundledv);
   > - [EnvMode](#envmode) are now independent from whether it's bundled or not, and need to be
@@ -64,9 +64,13 @@ npm i vivth
   >   platform module due to importing from `libName` still walktrhough all of listed exports
   >   regardless if it's being imported or not;
 
-- `1.5.28+:rc`:
+- `1.5.28+:beta`:
 
   > - added helper for wails2 project;
+
+- `1.5.28+:beta`:
+
+  > - added helper for wails3 project;
 
 ---
 
@@ -203,6 +207,9 @@ npm i vivth
 - [browser.Wails2Form](#wails2form)
 - [browser.Wails2Listener](#wails2listener)
 - [neutral.Wails2OnSubmit](#wails2onsubmit)
+- [node.Wails3Dev](#wails3dev)
+- [neutral.Wails3OnSubmit](#wails3onsubmit)
+- [neutral.Wails3Setter](#wails3setter)
 - [neutral.WailsMainQ](#wailsmainq)
 - [neutral.WC_createElement_bind](#wc_createelement_bind)
 - [neutral.WC_createNamedSlot](#wc_createnamedslot)
@@ -6991,7 +6998,7 @@ passing form input fields as a JSON object string.
 
 - `[setter]` value to target go wails ipc name;
 
-> - it will call `window['go']['main']['App'][{setter.value}]` with form inputs as `arg0`;
+> - it will call `window['go']['main']['App'][{setter.value}]` to your form inputs as `arg0`;
 
 - <i>example</i>:
 
@@ -7061,7 +7068,7 @@ myListener.vivthCleanup();
 - `form[input][name]` value will be used as named `arg0` struct on setter ipc;
 - you can generate setter ipc by add comment before function `// SETTER`, which then `Wails2Dev` generate callable ipc on `app_ipc.go`;
 
-> - funtion need to return `[]string` which to notify your getter declared via `Wails2GetterListener`;
+> - funtion need to return `[]string` which to notify your getter declared via `Wails2Listener`;
 > - function need to be located on `package backend` at `{projectRoot}/backend`;
 > - use `??staticMethod` snipet to generate the function skeleton;
 >
@@ -7085,6 +7092,131 @@ const submitHandler = Wails2OnSubmit.bind(myElement);
 myElement.addEventListener("submit", submitHandler);
 // on element no longer exist
 myElement.removeEventListener("submit", submitHandler);
+```
+
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+---
+
+<h2 id="wails3dev">node.Wails3Dev</h2>
+
+#### reference: `Wails3Dev`
+
+suited for wails3 project with getter setter pattern using `sqlite3`;
+this class assume `Paths` and `SafeExit` to be instantiated;
+helper method with pre templated way of:
+
+- sqlite go code generation from SQL file on `{projectroot}/sql`;
+- main_services.go generation from `{projectroot}/backend`;
+
+> > - function commented with `// SETTER`;
+>
+> - provide auto formatter and ipc generator for `// SETTER` pattern;
+>
+> > - `// SETTER` prefix for setter function;
+
+- provide OOP-ish approach snippets(for .vscode):
+
+> - `??staticPrepare`;
+> - `??staticMethod`;
+> - `??instancePrepare`;
+> - `??instanceSingletonPrepare`;
+> - `??instanceMethod`;
+> - `??servicePrepare`;
+> - `??serviceMethod`;
+
+- provide `explorer.fileNesting.patterns` on `settings.json` for `.vscode`;
+
+> - will nest based on parent `*.md` and `*.sql`;
+
+- provide standard `backend/Connection.go` for connecting to `sqlite3` database;
+- provide standard internal `backend/UtilsGetterSetter.go` for thread-safe, multiple readers/writters;
+- provide standard `backend/Emitter.go` for return template;
+
+#### reference: `new Wails3Dev`
+
+- this is a singleton constructor;
+- dev script to watch multiple directories on your `projectRoot` for auto format and auto generate things;
+
+- <i>example</i>:
+
+```js
+import { Paths } from "vivth/neutral";
+import { Wails3Dev, SafeExit } from "vivth/node";
+new Paths({
+  root: process.env.INIT_CWD ?? process.cwd(),
+});
+new SafeExit("SIGTERM", "SIGINT");
+new Wails3Dev();
+```
+
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+---
+
+<h2 id="wails3onsubmit">neutral.Wails3OnSubmit</h2>
+
+#### reference: `Wails3OnSubmit`
+
+- function helper to be used as onsubmit event handler for wails ipc call for setter;
+- `form[setter]` value to target go wails ipc name;
+- `form[input][name]` value will be used as named `arg0` struct on setter ipc;
+- you can generate setter ipc by add comment before function `// SETTER`, which then `Wails3Dev` generate callable ipc on `main_services.go`;
+
+> - funtion need to return `*EmitterInstance` which to notify your getter declared via `Wails3Listener`;
+> - function need to be located on `package backend` at `{projectRoot}/backend`;
+> - use `??serviceMethod` snipet to generate the function skeleton;
+>
+> > - you might also prepare it with `??servicePrepare`;
+
+```js
+/**
+ * @this {HTMLFormElement}
+ * - you need to call it via `Wails3OnSubmit.call(yourFormElement, submitEvent)` to bind `yourFormElement` to `this`;
+ * @param {SubmitEvent} e
+ * @returns {Promise<void>}
+ */
+```
+
+- <i>example</i>:
+
+```js
+import { Wails3OnSubmit } from "vivth/neutral";
+const myElement = document.querySelector("#myForm");
+const submitHandler = Wails3OnSubmit.bind(myElement);
+myElement.addEventListener("submit", submitHandler);
+// on element no longer exist
+myElement.removeEventListener("submit", submitHandler);
+```
+
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+---
+
+<h2 id="wails3setter">neutral.Wails3Setter</h2>
+
+#### reference: `Wails3Setter`
+
+helper collection to handle `Setter` for `Wails3Listener`
+
+#### reference: `Wails3Setter.register`
+
+- register handler for `Wails3OnSubmit` or `Wails3Form` to use
+
+```js
+/**
+ * @param {string} name
+ * @param {(...args:any)=>Promise<any>} handler
+ */
+```
+
+- <i>example</i>:
+
+```js
+import { Wails3Setter } from "vivth/neutral";
+// need to target your actual wails3 generated service binding
+import { MyGetter } from "../bindings/myProject/mygetterservice.ts";
+Wails3Setter.register("MyGetter", MyGetter);
 ```
 
 *) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>

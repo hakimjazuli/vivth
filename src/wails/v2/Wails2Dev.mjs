@@ -2,7 +2,6 @@
 
 import {
 	/** */
-	join,
 	dirname,
 	basename,
 	extname,
@@ -11,23 +10,21 @@ import {
 
 import { readFile } from 'node:fs/promises';
 
-import { execFileSync } from 'child_process';
 import { QChannel } from '../../class/QChannel.mjs';
-import { TrySync } from '../../function/TrySync.mjs';
 import { Preferrence } from '../../common/Preferrence.mjs';
-import { ParseSQLFile } from '../../function/ParseSQLFile.mjs';
 import { TryAsync } from '../../function/TryAsync.mjs';
 import { Timeout } from '../../function/Timeout.mjs';
 import { FileSafe } from '../../class/FileSafe.mjs';
 import { Paths } from '../../class/Paths.mjs';
 import { FSDirArchWatcher } from '../../class/FSDirArchWatcher.mjs';
 import { Console } from '../../class/Console.mjs';
-import { JSONFileHandler } from '../../class/JSONFileHandler.mjs';
 import {
-	wails2FileContentsConnection,
-	wails2FileContentSQLGoGenerator,
-	wails2FileContentsUtilsGetterSetter,
-} from './wails2FileContents.mjs';
+	wailsProjectHelperSnippet,
+	wailsProjectHelperSettings,
+	wailsFileContentsConnection,
+	wailsFileContentsUtilsGetterSetter,
+} from '../wailsProjectHelper.mjs';
+import { wailsUtils } from '../wailsUtils.mjs';
 
 /**
  * @description
@@ -53,49 +50,11 @@ import {
  * - provide standard internal `backend/UtilsGetterSetter.go` for thread-safe, multiple readers/writters;
  */
 export class Wails2Dev {
+	/**
+	 * @type {Wails2Dev | undefined}
+	 */
+	static #instance;
 	static #q = new QChannel('Vivth:Wails2Dev');
-	/**
-	 * Formats a Go file using gofumpt in-place (-w)
-	 * @param {string} filePath
-	 * @param {string} unformattedCode
-	 * @returns {string}
-	 */
-	static formatGoCodeString = (filePath, unformattedCode) => {
-		const [res, error] = TrySync(() => {
-			// Use goimports to handle both formatting and import organization
-			const args = filePath ? ['-srcdir', filePath] : [];
-
-			return execFileSync('goimports', args, {
-				input: unformattedCode,
-				encoding: Preferrence.encoding,
-			});
-		});
-
-		if (!error) {
-			return res;
-		}
-
-		// Fallback: If goimports fails (e.g., syntax error), log and return unformatted code
-		console.error('Failed to format & organize Go imports:', error.message);
-		return unformattedCode;
-	};
-	/**
-	 * @param {string} str
-	 * @returns {string}
-	 */
-	static #toPascal = (str = '') => {
-		return str.replace(/(^|_|-)+([a-z0-9])/g, (_, __, char) => char.toUpperCase());
-	};
-	/**
-	 * @type {(
-	 * 	obj:Record<string, string>,
-	 * )=>string}
-	 */
-	static #buildFields = (obj = {}) => {
-		return Object.entries(obj)
-			.map(([field, type]) => `\t${Wails2Dev.#toPascal(field)} ${type} \`json:"${field}"\``)
-			.join('\n');
-	};
 	/**
 	 * - parse sql file into typed go function, in same dir;
 	 * - package is always sql, so dirname should be sql;
@@ -106,62 +65,7 @@ export class Wails2Dev {
 	 * @returns {ReturnType<typeof TryAsync<boolean>>}
 	 */
 	static #sql = (path) => {
-		return ParseSQLFile(path, async ({ input, output, sqlString, path: fullPath }) => {
-			// Extract base file name without extension
-			const fileName = fullPath.split(/[/\\]/).pop() || '';
-			const baseName = fileName.substring(0, fileName.lastIndexOf('.')) || fileName;
-
-			// Convert to PascalCase for Go identifiers (e.g., "create_ref" -> "CreateRef")
-			const functionName = baseName.replace(/(^|_|-)+([a-z0-9])/g, (_, __, char) =>
-				char.toUpperCase(),
-			);
-
-			const inputEntries = Object.entries(input ?? {});
-			const outputEntries = Object.entries(output ?? {});
-
-			// Build explicit named SQL parameters: sql.Named("field", input.Field)
-			const namedQueryArgs =
-				inputEntries.length > 0
-					? inputEntries
-							.map(
-								([field]) =>
-									`sql.Named("${field.toLowerCase()}", input.${Wails2Dev.#toPascal(field)})`,
-							)
-							.join(',\n\t\t')
-					: '';
-
-			// Build row scan targets: &item.Field1, &item.Field2
-			const scanTargets =
-				outputEntries.length > 0
-					? outputEntries.map(([field]) => `&item.${Wails2Dev.#toPascal(field)}`).join(', ')
-					: '';
-
-			// Clean comments, strip transaction controls (BEGIN/COMMIT), and escape backticks
-			const cleanSql = sqlString
-				.replace(/\/\*[\s\S]*?\*\//g, '')
-				.replace(/\b(BEGIN\s+(TRANSACTION|WORK)?|COMMIT|ROLLBACK)\s*;/gi, '')
-				.trim();
-
-			const safeSql = cleanSql.replace(/`/g, '` + "`" + `');
-
-			// Determine if query returns rows (SELECT or RETURNING clause)
-			const isReadQuery = /^\s*SELECT/i.test(cleanSql) || /\bRETURNING\b/i.test(cleanSql);
-			const trueInput = Wails2Dev.#buildFields(input);
-			const trueOutput = Wails2Dev.#buildFields(output);
-			const content = wails2FileContentSQLGoGenerator(
-				functionName,
-				trueInput,
-				trueOutput,
-				safeSql,
-				isReadQuery,
-				namedQueryArgs,
-				scanTargets,
-			);
-			return {
-				ext: 'go',
-				content: Wails2Dev.formatGoCodeString(`${fullPath}.go`, content),
-			};
-		});
+		return wailsUtils.pathToSQLHandler(path, 2);
 	};
 	/**
 	 * Parses Go source files to generate wrapper methods on the App struct.
@@ -371,18 +275,7 @@ export class Wails2Dev {
 			};
 		});
 	};
-	/**
-	 * @type {Wails2Dev | undefined}
-	 */
-	static #instance;
-	/**
-	 * @param {string} projectName
-	 * @returns {boolean}
-	 */
-	static #checkGoProjectName = (projectName) => {
-		const regex = /^[a-zA-Z][a-zA-Z0-9]*$/;
-		return regex.test(projectName);
-	};
+
 	/**
 	 * @description
 	 * - this is a singleton constructor;
@@ -400,135 +293,17 @@ export class Wails2Dev {
 		if (!!Wails2Dev.#instance) {
 			return Wails2Dev.#instance;
 		}
-		const projectName = basename(dirname(Paths.root));
-		if (!Wails2Dev.#checkGoProjectName(projectName)) {
+		const projectName = wailsUtils.getProjectName();
+		if (!wailsUtils.checkGoProjectName(projectName)) {
 			throw { problem: 'projectName, must supports go project name standard', projectName };
 		}
-		const projectSnippetPath = Paths.diskAbsolute(join('.vscode', 'project.code-snippets'));
-		FileSafe.exist(projectSnippetPath).then(async (isExist) => {
-			const obj = {
-				staticPrepare: {
-					prefix: '??staticPrepare',
-					scope: 'go',
-					body: [
-						'type ${TM_FILENAME_BASE/^(.)/${1:/downcase}/}Static struct{}',
-						'',
-						'var ${TM_FILENAME_BASE/^(.)/${1:/upcase}/}Static ${TM_FILENAME_BASE/^(.)/${1:/downcase}/}Static',
-					],
-					description: 'staticPrepare',
-				},
-				staticMethod: {
-					prefix: '??staticMethod',
-					scope: 'go',
-					body: [
-						'func (thisClass ${TM_FILENAME_BASE/^(.)/${1:/downcase}/}Static) ${0:methodName}() {',
-						'\t// code',
-						'}',
-					],
-					description: 'staticMethod',
-				},
-				instancePrepare: {
-					prefix: '??instancePrepare',
-					scope: 'go',
-					body: [
-						'type ${TM_FILENAME_BASE/^(.)/${1:/upcase}/}Instance struct{}',
-						'type ${TM_FILENAME_BASE/^(.)/${1:/downcase}/}Static struct{}',
-						'',
-						'var ${TM_FILENAME_BASE/^(.)/${1:/upcase}/}Static ${TM_FILENAME_BASE/^(.)/${1:/downcase}/}Static',
-						'',
-						'func (thisClass ${TM_FILENAME_BASE/^(.)/${1:/downcase}/}Static) New() *${TM_FILENAME_BASE/^(.)/${1:/upcase}/}Instance {',
-						'\treturn &${TM_FILENAME_BASE/^(.)/${1:/upcase}/}Instance{}',
-						'}',
-					],
-					description: 'instancePrepare',
-				},
-				instanceSingletonPrepare: {
-					prefix: '??instanceSingletonPrepare',
-					scope: 'go',
-					body: [
-						'import (',
-						'\t"sync"',
-						')',
-						'',
-						'type ${TM_FILENAME_BASE/^(.)/${1:/upcase}/}Instance struct{}',
-						'type ${TM_FILENAME_BASE/^(.)/${1:/downcase}/}Static struct{}',
-						'',
-						'var (',
-						'\t${TM_FILENAME_BASE/^(.)/${1:/upcase}/}Static ${TM_FILENAME_BASE/^(.)/${1:/downcase}/}Static',
-						'\t${TM_FILENAME_BASE/^(.)/${1:/downcase}/}StaticInstance *${TM_FILENAME_BASE/^(.)/${1:/upcase}/}Instance',
-						'\t${TM_FILENAME_BASE/^(.)/${1:/downcase}/}StaticOnce     sync.Once',
-						')',
-						'',
-						'func (thisClass ${TM_FILENAME_BASE/^(.)/${1:/downcase}/}Static) New() *${TM_FILENAME_BASE/^(.)/${1:/upcase}/}Instance {',
-						'\t${TM_FILENAME_BASE/^(.)/${1:/downcase}/}StaticOnce.Do(func() {',
-						'\t\t${TM_FILENAME_BASE/^(.)/${1:/downcase}/}StaticInstance = &${TM_FILENAME_BASE/^(.)/${1:/upcase}/}Instance{}',
-						'\t})',
-						'\treturn ${TM_FILENAME_BASE/^(.)/${1:/downcase}/}StaticInstance',
-						'}',
-					],
-					description: 'instanceSingletonPrepare',
-				},
-				instanceMethod: {
-					prefix: '??instanceMethod',
-					scope: 'go',
-					body: [
-						'func (thisInstance *${TM_FILENAME_BASE/^(.)/${1:/upcase}/}Instance) ${0:methodName}() {',
-						'\t// code',
-						'}',
-					],
-					description: 'instanceMethod',
-				},
-			};
-			const projectSnippetHandler = new JSONFileHandler(projectSnippetPath);
-			if (!isExist) {
-				const [, errorWritingProjectSnippet] = await projectSnippetHandler.write(obj);
-				if (errorWritingProjectSnippet) {
-					Console.error({ errorWritingProjectSnippet }, { now: true });
-				}
-			} else {
-				const [, errorAsigningProjectSnippet] = await projectSnippetHandler.assign(obj);
-				if (errorAsigningProjectSnippet) {
-					Console.error({ errorAsigningProjectSnippet }, { now: true });
-				}
-			}
-		});
-		const projectSettingsPath = Paths.diskAbsolute(join('.vscode', 'settings.json'));
-		FileSafe.exist(projectSettingsPath).then(async (isExist) => {
-			const obj = {
-				'explorer.fileNesting.patterns': {
-					'*.md': '$(capture)*',
-					'*.sql': '$(capture).sql*',
-				},
-			};
-			const projectSettingsHandler = new JSONFileHandler(projectSettingsPath);
-			if (!isExist) {
-				const [, errorWritingProjectSettings] = await projectSettingsHandler.write(obj);
-				if (errorWritingProjectSettings) {
-					Console.error({ errorWritingProjectSettings }, { now: true });
-				}
-			} else {
-				const [, errorAsigningProjectSettings] = await projectSettingsHandler.assign(obj);
-				if (errorAsigningProjectSettings) {
-					Console.error({ errorAsigningProjectSettings }, { now: true });
-				}
-			}
-		});
-		FileSafe.write(
-			Paths.diskAbsolute(join('backend', 'UtilsGetterSetter.go')),
-			wails2FileContentsUtilsGetterSetter,
-			{
-				encoding: Preferrence.encoding,
-			},
-		).then(([, errorWriteUtilsGetterSetter]) => {
-			if (errorWriteUtilsGetterSetter) {
-				Console.error({ errorWriteUtilsGetterSetter }, { now: true });
-			}
-		});
-		FileSafe.write(
-			Paths.diskAbsolute(join('backend', 'Connection.go')),
-			wails2FileContentsConnection,
-			{ encoding: Preferrence.encoding },
-		);
+		wailsUtils.jsonPrepare([wailsProjectHelperSnippet], ['.vscode', 'project.code-snippets']);
+		wailsUtils.jsonPrepare([wailsProjectHelperSettings], ['.vscode', 'settings.json']);
+		wailsUtils.writeFileContent(wailsFileContentsUtilsGetterSetter, [
+			'backend',
+			'UtilsGetterSetter.go',
+		]);
+		wailsUtils.writeFileContent(wailsFileContentsConnection, ['backend', 'Connection.go']);
 		new FSDirArchWatcher(
 			[
 				/** */
@@ -592,7 +367,7 @@ export class Wails2Dev {
 						funcs.push(funcDeclaration);
 					}
 					const pathToSaveTo = Paths.diskAbsolute('/auto_ipc.go');
-					const trueContent = Wails2Dev.formatGoCodeString(
+					const trueContent = wailsUtils.formatGoCodeString(
 						pathToSaveTo,
 						`package main\nimport(\n${imports.join('\n')}\n)\n\n${funcs.join('\n')}`,
 					);

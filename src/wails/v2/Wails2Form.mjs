@@ -10,7 +10,7 @@ import { Wails2OnSubmit } from './Wails2OnSubmit.mjs';
  * - applies to `form[is="form-wails"]`;
  * > - this class automatically bind the element with `Wails2OnSubmit` to it's `onsubmit`;
  * - `[setter]` value to target go wails ipc name;
- * > - it will call `window['go']['main']['App'][{setter.value}]` with form inputs as `arg0`;
+ * > - it will call `window['go']['main']['App'][{setter.value}]` to your form inputs as `arg0`;
  * @example
  * import { Wails2Form } from 'vivth/browser';
  */
