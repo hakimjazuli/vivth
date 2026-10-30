@@ -30,7 +30,7 @@ export declare const wailsProjectHelperSnippet: {
         description: string;
     };
 };
-export declare const wailsProjcetHelperSnippetService: {
+export declare const wailsProjectHelperSnippetService: {
     servicePrepare: {
         prefix: string;
         scope: string;
@@ -38,6 +38,18 @@ export declare const wailsProjcetHelperSnippetService: {
         description: string;
     };
     serviceMethod: {
+        prefix: string;
+        scope: string;
+        body: string[];
+        description: string;
+    };
+    serviceStartup: {
+        prefix: string;
+        scope: string;
+        body: string[];
+        description: string;
+    };
+    serviceShutdown: {
         prefix: string;
         scope: string;
         body: string[];

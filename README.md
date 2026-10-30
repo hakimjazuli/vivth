@@ -208,8 +208,8 @@ npm i vivth
 - [browser.Wails2Listener](#wails2listener)
 - [neutral.Wails2OnSubmit](#wails2onsubmit)
 - [node.Wails3Dev](#wails3dev)
+- [neutral.Wails3FormRef](#wails3formref)
 - [neutral.Wails3OnSubmit](#wails3onsubmit)
-- [neutral.Wails3Setter](#wails3setter)
 - [neutral.WailsMainQ](#wailsmainq)
 - [neutral.WC_createElement_bind](#wc_createelement_bind)
 - [neutral.WC_createNamedSlot](#wc_createnamedslot)
@@ -6969,6 +6969,14 @@ helper method with pre templated way of:
 - this is a singleton constructor;
 - dev script to watch multiple directories on your `projectRoot` for auto format and auto generate things;
 
+```js
+/**
+ * @param {number} [minDelay]
+ * - used to add timeout for ide go autoformatter;
+ * - default 200;
+ */
+```
+
 - <i>example</i>:
 
 ```js
@@ -7109,11 +7117,11 @@ helper method with pre templated way of:
 - sqlite go code generation from SQL file on `{projectroot}/sql`;
 - main_services.go generation from `{projectroot}/backend`;
 
-> > - function commented with `// SETTER`;
+> > - function commented with `// FORM`;
 >
-> - provide auto formatter and ipc generator for `// SETTER` pattern;
+> - provide auto formatter and ipc generator for `// FORM` pattern;
 >
-> > - `// SETTER` prefix for setter function;
+> > - `// FORM` prefix for setter function;
 
 - provide OOP-ish approach snippets(for .vscode):
 
@@ -7138,6 +7146,14 @@ helper method with pre templated way of:
 - this is a singleton constructor;
 - dev script to watch multiple directories on your `projectRoot` for auto format and auto generate things;
 
+```js
+/**
+ * @param {number} [minDelay]
+ * - used to add timeout for ide go autoformatter;
+ * - default 200;
+ */
+```
+
 - <i>example</i>:
 
 ```js
@@ -7154,14 +7170,44 @@ new Wails3Dev();
 
 ---
 
+<h2 id="wails3formref">neutral.Wails3FormRef</h2>
+
+#### reference: `Wails3FormRef`
+
+helper collection to handle `// FORM` for `Wails3Listener`
+
+#### reference: `Wails3FormRef.register`
+
+- register handler for `Wails3OnSubmit` or `Wails3Form` to use
+
+```js
+/**
+ * @param {string} name
+ * @param {(...args:any)=>Promise<any>} handler
+ */
+```
+
+- <i>example</i>:
+
+```js
+import { Wails3FormRef } from "vivth/neutral";
+// need to target your actual wails3 generated service binding
+import { MyGetter } from "../bindings/myProject/mygetterservice.ts";
+Wails3FormRef.register("MyGetter", MyGetter);
+```
+
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+---
+
 <h2 id="wails3onsubmit">neutral.Wails3OnSubmit</h2>
 
 #### reference: `Wails3OnSubmit`
 
 - function helper to be used as onsubmit event handler for wails ipc call for setter;
-- `form[setter]` value to target go wails ipc name;
+- `form[form-ref]` value to target go wails ipc name;
 - `form[input][name]` value will be used as named `arg0` struct on setter ipc;
-- you can generate setter ipc by add comment before function `// SETTER`, which then `Wails3Dev` generate callable ipc on `main_services.go`;
+- you can generate setter ipc by add comment before function `// FORM`, which then `Wails3Dev` generate callable ipc on `main_services.go`;
 
 > - funtion need to return `*EmitterInstance` which to notify your getter declared via `Wails3Listener`;
 > - function need to be located on `package backend` at `{projectRoot}/backend`;
@@ -7187,36 +7233,6 @@ const submitHandler = Wails3OnSubmit.bind(myElement);
 myElement.addEventListener("submit", submitHandler);
 // on element no longer exist
 myElement.removeEventListener("submit", submitHandler);
-```
-
-*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
-
----
-
-<h2 id="wails3setter">neutral.Wails3Setter</h2>
-
-#### reference: `Wails3Setter`
-
-helper collection to handle `Setter` for `Wails3Listener`
-
-#### reference: `Wails3Setter.register`
-
-- register handler for `Wails3OnSubmit` or `Wails3Form` to use
-
-```js
-/**
- * @param {string} name
- * @param {(...args:any)=>Promise<any>} handler
- */
-```
-
-- <i>example</i>:
-
-```js
-import { Wails3Setter } from "vivth/neutral";
-// need to target your actual wails3 generated service binding
-import { MyGetter } from "../bindings/myProject/mygetterservice.ts";
-Wails3Setter.register("MyGetter", MyGetter);
 ```
 
 *) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>

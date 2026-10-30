@@ -44,7 +44,13 @@ export class Wails2Listener {
 	#handler;
 	/**
 	 * @description
-	 * @param {string} getterName
+	 * @param {string} listenToFORMNotifName
+	 * - `// FORM` will notify names go as array of string via `*EmitterInstance`;
+	 * - `listenToFORMNotifName` is to listen to one specific string value, then you can run a callback;
+	 * > - as of `wails3` they didn't expose `ipc`(now `Service`) with human readable name like on `wails2` so you could technically obfuscate it slightly better;
+	 * > - so this class is to help you wrap that `Service` bindings into your callback;
+	 * - multi instance listening to same name can run in parallel;
+	 * > - so different handler could pass different arguments;
 	 * @param {()=>Promise<void>} handler
 	 * @example
 	 * import { Wails2Listener } from 'vivth/browser';
@@ -55,8 +61,8 @@ export class Wails2Listener {
 	 * // when no longer needed, eg. element is disconnected;
 	 * myListener.vivthCleanup();
 	 */
-	constructor(getterName, handler) {
-		this.#getterName = getterName;
+	constructor(listenToFORMNotifName, handler) {
+		this.#getterName = listenToFORMNotifName;
 		this.#handler = handler;
 		Wails2Listener.#runHandler(handler);
 	}

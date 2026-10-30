@@ -5,9 +5,9 @@
  * helper method with pre templated way of:
  * - sqlite go code generation from SQL file on `{projectroot}/sql`;
  * - main_services.go generation from `{projectroot}/backend`;
- * > > - function commented with `// SETTER`;
- * > - provide auto formatter and ipc generator for `// SETTER` pattern;
- * > > - `// SETTER` prefix for setter function;
+ * > > - function commented with `// FORM`;
+ * > - provide auto formatter and ipc generator for `// FORM` pattern;
+ * > > - `// FORM` prefix for setter function;
  * - provide OOP-ish approach snippets(for .vscode):
  * > - `??staticPrepare`;
  * > - `??staticMethod`;
@@ -28,6 +28,9 @@ export declare class Wails3Dev {
      * @description
      * - this is a singleton constructor;
      * - dev script to watch multiple directories on your `projectRoot` for auto format and auto generate things;
+     * @param {number} [minDelay]
+     * - used to add timeout for ide go autoformatter;
+     * - default 200;
      * @example
      * import { Paths } from 'vivth/neutral';
      * import { Wails3Dev, SafeExit } from 'vivth/node';
@@ -37,5 +40,5 @@ export declare class Wails3Dev {
      * new SafeExit('SIGTERM', 'SIGINT');
      * new Wails3Dev();
      */
-    constructor();
+    constructor(minDelay?: number);
 }

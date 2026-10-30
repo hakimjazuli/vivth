@@ -9,7 +9,7 @@ import { TryAsync } from '../../function/TryAsync.mjs';
 import {
 	wailsFileContentsConnection,
 	wailsFileContentsUtilsGetterSetter,
-	wailsProjcetHelperSnippetService,
+	wailsProjectHelperSnippetService,
 	wailsProjectHelperEmitter,
 	wailsProjectHelperSettings,
 	wailsProjectHelperSnippet,
@@ -28,9 +28,9 @@ import { ForOfSync } from '../../function/ForOfSync.mjs';
  * helper method with pre templated way of:
  * - sqlite go code generation from SQL file on `{projectroot}/sql`;
  * - main_services.go generation from `{projectroot}/backend`;
- * > > - function commented with `// SETTER`;
- * > - provide auto formatter and ipc generator for `// SETTER` pattern;
- * > > - `// SETTER` prefix for setter function;
+ * > > - function commented with `// FORM`;
+ * > - provide auto formatter and ipc generator for `// FORM` pattern;
+ * > > - `// FORM` prefix for setter function;
  * - provide OOP-ish approach snippets(for .vscode):
  * > - `??staticPrepare`;
  * > - `??staticMethod`;
@@ -81,17 +81,18 @@ export class Wails3Dev {
 
 	/**
 	 * @param {string} filePath
+	 * @param {number} timeout
 	 * @returns {ReturnType<typeof TryAsync<{
 	 *   importFromPackage: string;
 	 *   serviceDeclaration: string;
 	 * }>>}
 	 */
-	static #goCheckServices = async (filePath) => {
+	static #goCheckServices = async (filePath, timeout) => {
 		return await Wails3Dev.#q.callback(filePath, async ({ isLastOnQ }) => {
 			/**
 			 * prevent rapid autoformat by go autoformatter to be handled immediately
 			 */
-			await Timeout(200);
+			await Timeout(timeout);
 			if (!isLastOnQ()) {
 				throw 'not the last call';
 			}
@@ -113,7 +114,8 @@ export class Wails3Dev {
 			const baseNameUpperLead = rawBaseName.charAt(0).toUpperCase() + rawBaseName.slice(1);
 
 			// CHECKS HERE: Ensure type ${baseNameUpperLead} struct exists
-			const structRegex = new RegExp(`type\\s+${baseNameUpperLead}\\s+Struct\\s*\\{[\\s\\S]*?\\}`);
+			const structRegex = new RegExp(`type\\s+${baseNameUpperLead}\\s+struct\\s*\\{[\\s\\S]*?\\}`);
+
 			if (!structRegex.test(content)) {
 				throw new Error(`Missing struct type ${baseNameUpperLead} in ${filePath}`);
 			}
@@ -122,9 +124,10 @@ export class Wails3Dev {
 			let needsCorrection = false;
 
 			const setterRegex = new RegExp(
-				`(\\/\\/\\s*SETTER\\s*\\n)(?:\\/\\/.*\\n)*\\s*func\\s*\\(\\s*thisService\\s*(?:\\*)?${baseNameUpperLead}\\s*\\)\\s+([A-Za-z_]\\w*)\\s*\\(([^)]*)\\)\\s*(\\(?[^)]*\\)?)\\s*(\\{[\\s\\S]*?\\})`,
+				`(\\/\\/\\s*FORM\\s*\\n)(?:\\/\\/.*\\n)*\\s*func\\s*\\(\\s*thisService\\s*(?:\\*)?${baseNameUpperLead}\\s*\\)\\s+([A-Za-z_]\\w*)\\s*\\(([^)]*)\\)\\s*(\\(?[^)]*\\)?)\\s*(\\{[\\s\\S]*?\\})`,
 				'g',
 			);
+
 			modifiedContent = modifiedContent.replace(
 				setterRegex,
 				/**
@@ -215,7 +218,7 @@ export class Wails3Dev {
 
 					if (functionNeedsCorrection) {
 						needsCorrection = true;
-						// Prepend the required warning comment right after // SETTER
+						// Prepend the required warning comment right after // FORM
 						const warningComment = `// only one argument is allowed, and it's type must ends with Struct\n`;
 						return `${setterComment}${warningComment}func (thisClass *${baseNameUpperLead}) ${funcName}(${correctedArgs}) ${correctedReturn} ${body}`;
 					}
@@ -242,6 +245,9 @@ export class Wails3Dev {
 	 * @description
 	 * - this is a singleton constructor;
 	 * - dev script to watch multiple directories on your `projectRoot` for auto format and auto generate things;
+	 * @param {number} [minDelay]
+	 * - used to add timeout for ide go autoformatter;
+	 * - default 200;
 	 * @example
 	 * import { Paths } from 'vivth/neutral';
 	 * import { Wails3Dev, SafeExit } from 'vivth/node';
@@ -251,16 +257,17 @@ export class Wails3Dev {
 	 * new SafeExit('SIGTERM', 'SIGINT');
 	 * new Wails3Dev();
 	 */
-	constructor() {
+	constructor(minDelay = 200) {
 		if (Wails3Dev.#instance) {
 			return Wails3Dev.#instance;
 		}
 		const projectName = wailsUtils.getProjectName();
+		const delay = minDelay + 182;
 		if (!wailsUtils.checkGoProjectName(projectName)) {
 			throw { problem: 'projectName, must supports go project name standard', projectName };
 		}
 		wailsUtils.jsonPrepare(
-			[wailsProjectHelperSnippet, wailsProjcetHelperSnippetService],
+			[wailsProjectHelperSnippet, wailsProjectHelperSnippetService],
 			['.vscode', 'project.code-snippets'],
 		);
 		wailsUtils.jsonPrepare([wailsProjectHelperSettings], ['.vscode', 'settings.json']);
@@ -277,7 +284,7 @@ export class Wails3Dev {
 				Paths.diskAbsolute('/sql/'),
 			],
 			{
-				debounce: 382,
+				debounce: delay,
 				each: async (ev, path, stats) => {
 					if (!stats || !stats.isFile()) {
 						throw '';
@@ -295,7 +302,7 @@ export class Wails3Dev {
 							Console.info(`✅ Successfully handles:'${path}'`, { now: true });
 							throw '';
 						case '.go':
-							const [response, err] = await Wails3Dev.#goCheckServices(path);
+							const [response, err] = await Wails3Dev.#goCheckServices(path, minDelay);
 							if (err) {
 								throw err;
 							}

@@ -52,11 +52,11 @@ declare const Wails2Form_base: (new (...args: any[]) => HTMLFormElement & {
 };
 /**
  * @description
- * Custom `form[is="form-wails"]` element that handles submission by calling a specified Wails SETTER backend function;
+ * Custom `form[is="form-wails"]` element that handles submission by calling a specified Wails FORM backend function;
  * passing form input fields as a JSON object string.
  * - applies to `form[is="form-wails"]`;
  * > - this class automatically bind the element with `Wails3OnSubmit` to it's `onsubmit`;
- * - `[setter]` value to target go wails ipc name;
+ * - `[form-ref]` value to target go wails ipc name;
  * > - it will call `wails3 Binded Service` to your form inputs as `arg0`;
  * @example
  * import { Wails2Form } from 'vivth/browser';

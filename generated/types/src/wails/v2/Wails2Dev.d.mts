@@ -27,6 +27,9 @@ export declare class Wails2Dev {
      * @description
      * - this is a singleton constructor;
      * - dev script to watch multiple directories on your `projectRoot` for auto format and auto generate things;
+     * @param {number} [minDelay]
+     * - used to add timeout for ide go autoformatter;
+     * - default 200;
      * @example
      * import { Paths } from 'vivth/neutral';
      * import { Wails2Dev, SafeExit } from 'vivth/node';
@@ -36,5 +39,5 @@ export declare class Wails2Dev {
      * new SafeExit('SIGTERM', 'SIGINT');
      * new Wails2Dev();
      */
-    constructor();
+    constructor(minDelay?: number);
 }

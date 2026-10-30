@@ -73,17 +73,18 @@ export class Wails2Dev {
 	 * - Auto-formats GETTER methods missing a dual return ending in error to (GETTER_need_to_return_something, error).
 	 * - Generates void event-dispatch wrappers for SETTER methods.
 	 * @param {string} filePath
+	 * @param {number} timeout
 	 * @returns {ReturnType<typeof TryAsync<{
 	 *   importFrom: string;
 	 *   funcDeclaration: string;
 	 * }>>}
 	 */
-	static #go = async (filePath) => {
+	static #go = async (filePath, timeout) => {
 		return await Wails2Dev.#q.callback(filePath, async ({ isLastOnQ }) => {
 			/**
 			 * prevent rapid autoformat by go autoformatter to be handled immediately
 			 */
-			await Timeout(200);
+			await Timeout(timeout);
 			if (!isLastOnQ()) {
 				throw 'not the last call';
 			}
@@ -280,6 +281,9 @@ export class Wails2Dev {
 	 * @description
 	 * - this is a singleton constructor;
 	 * - dev script to watch multiple directories on your `projectRoot` for auto format and auto generate things;
+	 * @param {number} [minDelay]
+	 * - used to add timeout for ide go autoformatter;
+	 * - default 200;
 	 * @example
 	 * import { Paths } from 'vivth/neutral';
 	 * import { Wails2Dev, SafeExit } from 'vivth/node';
@@ -289,11 +293,12 @@ export class Wails2Dev {
 	 * new SafeExit('SIGTERM', 'SIGINT');
 	 * new Wails2Dev();
 	 */
-	constructor() {
+	constructor(minDelay = 200) {
 		if (!!Wails2Dev.#instance) {
 			return Wails2Dev.#instance;
 		}
 		const projectName = wailsUtils.getProjectName();
+		const delay = minDelay + 182;
 		if (!wailsUtils.checkGoProjectName(projectName)) {
 			throw { problem: 'projectName, must supports go project name standard', projectName };
 		}
@@ -311,7 +316,7 @@ export class Wails2Dev {
 				Paths.diskAbsolute('/sql/'),
 			],
 			{
-				debounce: 382,
+				debounce: delay,
 				each: async (ev, path, stats) => {
 					if (!stats || !stats.isFile()) {
 						throw '';
@@ -329,7 +334,7 @@ export class Wails2Dev {
 							Console.info(`✅ Successfully handles:'${path}'`, { now: true });
 							throw '';
 						case '.go':
-							const [response, err] = await Wails2Dev.#go(path);
+							const [response, err] = await Wails2Dev.#go(path, minDelay);
 							if (err) {
 								throw err;
 							}

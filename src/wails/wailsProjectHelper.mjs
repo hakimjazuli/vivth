@@ -74,7 +74,7 @@ export const wailsProjectHelperSnippet = {
 	},
 };
 
-export const wailsProjcetHelperSnippetService = {
+export const wailsProjectHelperSnippetService = {
 	servicePrepare: {
 		prefix: '??servicePrepare',
 		scope: 'go',
@@ -90,6 +90,28 @@ export const wailsProjcetHelperSnippetService = {
 			'}',
 		],
 		description: 'serviceMethod',
+	},
+	serviceStartup: {
+		prefix: '??serviceStartup',
+		scope: 'go',
+		body: [
+			'func (thisService *${TM_FILENAME_BASE/^(.)/${1:/upcase}/}) ServiceStartup(ctx context.Context, options application.ServiceOptions) error {',
+			'\t// code',
+			'\t// return error to prevent startup',
+			'}',
+		],
+		description: 'serviceStartup',
+	},
+	serviceShutdown: {
+		prefix: '??serviceShutdown',
+		scope: 'go',
+		body: [
+			'func (thisService *${TM_FILENAME_BASE/^(.)/${1:/upcase}/}) ServiceShutdown() error {',
+			'\t// code',
+			"\t// returning error doesn't prevent shutdown",
+			'}',
+		],
+		description: 'serviceShutdown',
 	},
 };
 
