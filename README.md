@@ -208,7 +208,6 @@ npm i vivth
 - [browser.Wails2Listener](#wails2listener)
 - [neutral.Wails2OnSubmit](#wails2onsubmit)
 - [node.Wails3Dev](#wails3dev)
-- [neutral.Wails3FormRef](#wails3formref)
 - [neutral.Wails3OnSubmit](#wails3onsubmit)
 - [neutral.WailsMainQ](#wailsmainq)
 - [neutral.WC_createElement_bind](#wc_createelement_bind)
@@ -7170,42 +7169,15 @@ new Wails3Dev();
 
 ---
 
-<h2 id="wails3formref">neutral.Wails3FormRef</h2>
-
-#### reference: `Wails3FormRef`
-
-helper collection to handle `// FORM` for `Wails3Listener`
-
-#### reference: `Wails3FormRef.register`
-
-- register handler for `Wails3OnSubmit` or `Wails3Form` to use
-
-```js
-/**
- * @param {string} name
- * @param {(...args:any)=>Promise<any>} handler
- */
-```
-
-- <i>example</i>:
-
-```js
-import { Wails3FormRef } from "vivth/neutral";
-// need to target your actual wails3 generated service binding
-import { MyGetter } from "../bindings/myProject/mygetterservice.ts";
-Wails3FormRef.register("MyGetter", MyGetter);
-```
-
-*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
-
----
-
 <h2 id="wails3onsubmit">neutral.Wails3OnSubmit</h2>
 
 #### reference: `Wails3OnSubmit`
 
 - function helper to be used as onsubmit event handler for wails ipc call for setter;
 - `form[form-ref]` value to target go wails ipc name;
+
+> - value: `${package}.{Struct}.{Method}`;
+
 - `form[input][name]` value will be used as named `arg0` struct on setter ipc;
 - you can generate setter ipc by add comment before function `// FORM`, which then `Wails3Dev` generate callable ipc on `main_services.go`;
 

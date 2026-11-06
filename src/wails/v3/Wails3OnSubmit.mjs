@@ -1,12 +1,15 @@
 // @ts-check
 
 import { IsInstanceOf } from '../../function/IsInstanceOf.mjs';
-import { wails3FormRefObjects } from './Wails3FormRef.mjs';
+import { Call as $Call } from '@wailsio/runtime';
+import { TryAsync } from '../../function/TryAsync.mjs';
+import { Console } from '../../class/Console.mjs';
 
 /**
  * @description
  * - function helper to be used as onsubmit event handler for wails ipc call for setter;
  * - `form[form-ref]` value to target go wails ipc name;
+ * > - value: `${package}.{Struct}.{Method}`;
  * - `form[input][name]` value will be used as named `arg0` struct on setter ipc;
  * - you can generate setter ipc by add comment before function `// FORM`, which then `Wails3Dev` generate callable ipc on `main_services.go`;
  * > - funtion need to return `*EmitterInstance` which to notify your getter declared via `Wails3Listener`;
@@ -43,5 +46,14 @@ export async function Wails3OnSubmit(e) {
 	// Extract named inputs into a Record<string, string>
 	const formData = new FormData(this);
 	const payload = Object.fromEntries(formData.entries());
-	await wails3FormRefObjects.get(formRefNode)?.(payload);
+	const [, errorCalling] = await TryAsync(async () => {
+		await $Call.ByName(`${formRefNode}`, payload);
+	});
+	if (!errorCalling) {
+		return;
+	}
+	Console.error({
+		message: errorCalling,
+		ipcName: formRefNode,
+	});
 }

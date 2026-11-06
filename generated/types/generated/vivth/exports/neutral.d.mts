@@ -197,7 +197,6 @@ export type VLifecycleCallbacks<TAGNAME extends keyof HTMLElementTagNameMap> = i
  * @typedef {import('../../../src/typehints/VLifecycleCallbacks.mjs').VLifecycleCallbacks<TAGNAME>} VLifecycleCallbacks
  */
 export { Wails2OnSubmit } from '../../../src/wails/v2/Wails2OnSubmit.mjs';
-export { Wails3FormRef } from '../../../src/wails/v3/Wails3FormRef.mjs';
 export { Wails3OnSubmit } from '../../../src/wails/v3/Wails3OnSubmit.mjs';
 export { WailsMainQ } from '../../../src/wails/WailsMainQ.mjs';
 export { WC_createElement_bind } from '../../../src/web/bindings/WC_createElement_bind.mjs';

@@ -2,6 +2,7 @@
  * @description
  * - function helper to be used as onsubmit event handler for wails ipc call for setter;
  * - `form[form-ref]` value to target go wails ipc name;
+ * > - value: `${package}.{Struct}.{Method}`;
  * - `form[input][name]` value will be used as named `arg0` struct on setter ipc;
  * - you can generate setter ipc by add comment before function `// FORM`, which then `Wails3Dev` generate callable ipc on `main_services.go`;
  * > - funtion need to return `*EmitterInstance` which to notify your getter declared via `Wails3Listener`;
