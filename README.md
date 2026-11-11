@@ -133,6 +133,7 @@ npm i vivth
 - [neutral.Trace](#trace)
 - [neutral.TracePath](#tracepath)
 - [neutral.VivthUnBundledCodeBlock](#vivthunbundledcodeblock)
+- [node.ExportDatabaseToSqlMigration](#exportdatabasetosqlmigration)
 - [node.SQLite3AutoMigration](#sqlite3automigration)
 - [node.JSautoDOC](#jsautodoc)
 - [node.ClearRequireCache](#clearrequirecache)
@@ -4832,6 +4833,28 @@ Console.log(
 
 ---
 
+<h2 id="exportdatabasetosqlmigration">node.ExportDatabaseToSqlMigration</h2>
+
+#### reference: `ExportDatabaseToSqlMigration`
+
+- is a internal library for SQLite3AutoMigration;
+- Exports all schema objects and table rows from an active better-sqlite3 connection into a SQL file;
+
+```js
+/**
+ * @param {import('better-sqlite3').Database} connection
+ * - Active SQLite database connection
+ * @param {string} outputPath
+ * - Path where the migration .sql file should be saved
+ * @param {(tableName:string, columnName:string)=>boolean} migrationRowFilter
+ * @returns {ReturnType<typeof TryAsync<void>>}
+ */
+```
+
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+---
+
 <h2 id="sqlite3automigration">node.SQLite3AutoMigration</h2>
 
 #### reference: `SQLite3AutoMigration`
@@ -4859,24 +4882,31 @@ Console.log(
 /**
  * @param {string} sqlite3Path
  * - The file path to the SQLite database, relative to project root;
- * @param {(rawSQLMigrationResult: string) => Promise<string>} filter
- * - A callback that receives the complete raw SQL migration dump string and returns a processed/filtered version asynchronously
+ * @param {Parameters<typeof ExportDatabaseToSqlMigration>[2]} migrationRowFilter
  */
 ```
 
 - <i>example</i>:
 
 ```js
- import { SQLite3AutoMigration } from 'vivth/node';
- new SQLite3AutoMigration('/initial_design.db', async (raw) => {
- 	// simple example to delete non complicated thing via regex;
- 	return raw.replace(/insert\s+into[\s\S]
-	?values\s
-	\((?:'(?:''|[^'])
-	'|"(?:""|[^"])
-	"|[^)]+)
-	\);/gi, '');
- })
+import { SQLite3AutoMigration } from "vivth/node";
+new SQLite3AutoMigration(
+  "/initial_design.db",
+  async (tableName, columnName) => {
+    switch (tableName) {
+      case "tbl_do_not_migrate":
+        return false; // no rows in this table will be migrated
+      default:
+        switch (columnName) {
+          case "col_do_not_insert_to_migration":
+            return false; // this specific row of this table will not be migrated;
+          default:
+            return true;
+        }
+        break;
+    }
+  },
+);
 ```
 
 *) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>

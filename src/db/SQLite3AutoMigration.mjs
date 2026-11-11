@@ -6,11 +6,9 @@ import Database from 'better-sqlite3';
 import { SafeExit } from '../class/SafeExit.mjs';
 import { Paths } from '../class/Paths.mjs';
 import { TrySync } from '../function/TrySync.mjs';
-import { exportDatabaseToSqlMigration } from './exportDatabaseToSqlMigration.mjs';
+import { ExportDatabaseToSqlMigration } from './ExportDatabaseToSqlMigration.mjs';
 import { LazyFactory } from '../function/LazyFactory.mjs';
 import { QChannel } from '../class/QChannel.mjs';
-import { FileSafe } from '../class/FileSafe.mjs';
-import { Preferrence } from '../common/Preferrence.mjs';
 import { Timeout } from '../function/Timeout.mjs';
 
 /**
@@ -66,21 +64,29 @@ export class SQLite3AutoMigration {
 	 *
 	 * @param {string} sqlite3Path
 	 * - The file path to the SQLite database, relative to project root;
-	 * @param {(rawSQLMigrationResult: string) => Promise<string>} filter
-	 * - A callback that receives the complete raw SQL migration dump string and returns a processed/filtered version asynchronously
+	 * @param {Parameters<typeof ExportDatabaseToSqlMigration>[2]} migrationRowFilter
 	 * @example
 	 * import { SQLite3AutoMigration } from 'vivth/node';
-	 * new SQLite3AutoMigration('/initial_design.db', async (raw) => {
-	 * 	// simple example to delete non complicated thing via regex;
-	 * 	return raw.replace(/insert\s+into[\s\S]*?values\s*\((?:'(?:''|[^'])*'|"(?:""|[^"])*"|[^)]+)*\);/gi, '');
+	 * new SQLite3AutoMigration('/initial_design.db', async (tableName, columnName) => {
+	 * 	switch (tableName) {
+	 * 		case 'tbl_do_not_migrate':
+	 * 			return false; // no rows in this table will be migrated
+	 * 		default:
+	 *			switch (columnName) {
+	 *				case 'col_do_not_insert_to_migration':
+	 *					return false; // this specific row of this table will not be migrated;
+	 *				default:
+	 *					return true;
+	 *			}
+	 * 			break;
+	 * 	}
 	 * })
 	 */
-	constructor(sqlite3Path, filter) {
+	constructor(sqlite3Path, migrationRowFilter) {
 		this.#sqlite3Path = Paths.diskAbsolute(sqlite3Path);
 		this.#reConnect();
 		const watcher = (this.#watcher = chokidar.watch(this.#sqlite3Path));
 		SafeExit.instance?.addCallback(this.vivthCleanup);
-		const writePathTemp = Paths.diskAbsolute('vivth/sqlite3/migration.temp.sql');
 		const migrationPath = Paths.diskAbsolute('sql/Migration.sql');
 		watcher.addListener('all', (event, path, stats) => {
 			path = Paths.normalize(path);
@@ -107,17 +113,15 @@ export class SQLite3AutoMigration {
 						if (!connection) {
 							return;
 						}
-						const [result, errorMigrating] = await exportDatabaseToSqlMigration(
+						const [, errorMigrating] = await ExportDatabaseToSqlMigration(
 							connection,
-							writePathTemp,
+							migrationPath,
+							migrationRowFilter,
 						);
 						if (errorMigrating) {
 							this.#connection?.close();
 							break;
 						}
-						await FileSafe.write(migrationPath, await filter(result.replace(/--[\s\S]*?\n/g, '')), {
-							encoding: Preferrence.encoding,
-						});
 						break;
 					default:
 						this.#connection?.close();

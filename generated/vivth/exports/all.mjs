@@ -61,6 +61,7 @@ export { Preferrence } from '../../../src/common/Preferrence.mjs';
 export { Trace } from '../../../src/common/Trace.mjs';
 export { TracePath } from '../../../src/common/TracePath.mjs';
 export { VivthUnBundledCodeBlock } from '../../../src/common/VivthUnBundledCodeBlock.mjs';
+export { ExportDatabaseToSqlMigration } from '../../../src/db/ExportDatabaseToSqlMigration.mjs';
 export { SQLite3AutoMigration } from '../../../src/db/SQLite3AutoMigration.mjs';
 export { JSautoDOC } from '../../../src/doc/JSautoDOC.mjs';
 export { ClearRequireCache } from '../../../src/function/ClearRequireCache.mjs';

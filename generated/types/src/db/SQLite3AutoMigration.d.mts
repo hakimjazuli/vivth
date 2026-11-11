@@ -1,3 +1,4 @@
+import { ExportDatabaseToSqlMigration } from './ExportDatabaseToSqlMigration.mjs';
 export type VivthCleanup = import("../typehints/VivthCleanup.mjs").VivthCleanup;
 export type FSWatcher = import("chokidar").FSWatcher;
 /**
@@ -25,14 +26,23 @@ export declare class SQLite3AutoMigration implements VivthCleanup {
      *
      * @param {string} sqlite3Path
      * - The file path to the SQLite database, relative to project root;
-     * @param {(rawSQLMigrationResult: string) => Promise<string>} filter
-     * - A callback that receives the complete raw SQL migration dump string and returns a processed/filtered version asynchronously
+     * @param {Parameters<typeof ExportDatabaseToSqlMigration>[2]} migrationRowFilter
      * @example
      * import { SQLite3AutoMigration } from 'vivth/node';
-     * new SQLite3AutoMigration('/initial_design.db', async (raw) => {
-     * 	// simple example to delete non complicated thing via regex;
-     * 	return raw.replace(/insert\s+into[\s\S]*?values\s*\((?:'(?:''|[^'])*'|"(?:""|[^"])*"|[^)]+)*\);/gi, '');
+     * new SQLite3AutoMigration('/initial_design.db', async (tableName, columnName) => {
+     * 	switch (tableName) {
+     * 		case 'tbl_do_not_migrate':
+     * 			return false; // no rows in this table will be migrated
+     * 		default:
+     *			switch (columnName) {
+     *				case 'col_do_not_insert_to_migration':
+     *					return false; // this specific row of this table will not be migrated;
+     *				default:
+     *					return true;
+     *			}
+     * 			break;
+     * 	}
      * })
      */
-    constructor(sqlite3Path: string, filter: (rawSQLMigrationResult: string) => Promise<string>);
+    constructor(sqlite3Path: string, migrationRowFilter: Parameters<typeof ExportDatabaseToSqlMigration>[2]);
 }
