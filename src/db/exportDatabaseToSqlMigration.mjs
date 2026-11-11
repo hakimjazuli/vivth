@@ -20,10 +20,11 @@ import { TrySync } from '../function/TrySync.mjs';
  */
 export async function ExportDatabaseToSqlMigration(connection, outputPath, migrationRowFilter) {
 	return await TryAsync(async () => {
-		let sqlDump = `-- ==========================================\n`;
-		sqlDump += `-- SQLite Real-Time Migration Dump\n`;
-		sqlDump += `-- Generated: ${new Date().toISOString()}\n`;
-		sqlDump += `-- ==========================================\n\n`;
+		let sqlDump = '';
+		// sqlDump += `-- ==========================================\n`;
+		// sqlDump += `-- SQLite Real-Time Migration Dump\n`;
+		// sqlDump += `-- Generated: ${new Date().toISOString()}\n`;
+		// sqlDump += `-- ==========================================\n\n`;
 
 		// Enable foreign keys constraints safety during migration layout
 		sqlDump += `PRAGMA foreign_keys = OFF;\nBEGIN TRANSACTION;\n\n`;
@@ -48,9 +49,9 @@ export async function ExportDatabaseToSqlMigration(connection, outputPath, migra
 			)
 			.all();
 
-		sqlDump += `-- ------------------------------------------\n`;
-		sqlDump += `-- 1. SCHEMA DEFINITIONS\n`;
-		sqlDump += `-- ------------------------------------------\n`;
+		// sqlDump += `-- ------------------------------------------\n`;
+		// sqlDump += `-- 1. SCHEMA DEFINITIONS\n`;
+		// sqlDump += `-- ------------------------------------------\n`;
 
 		for (const obj of schemaObjects) {
 			// @ts-expect-error
@@ -58,9 +59,9 @@ export async function ExportDatabaseToSqlMigration(connection, outputPath, migra
 		}
 
 		// 2. Extract Data Rows for all tables
-		sqlDump += `-- ------------------------------------------\n`;
-		sqlDump += `-- 2. TABLE DATA ROWS\n`;
-		sqlDump += `-- ------------------------------------------\n`;
+		// sqlDump += `-- ------------------------------------------\n`;
+		// sqlDump += `-- 2. TABLE DATA ROWS\n`;
+		// sqlDump += `-- ------------------------------------------\n`;
 
 		// @ts-expect-error
 		const tables = schemaObjects.filter((obj) => obj.type === 'table');
@@ -78,7 +79,7 @@ export async function ExportDatabaseToSqlMigration(connection, outputPath, migra
 					return;
 				}
 
-				sqlDump += `-- Data for table: ${tbl_name} (${rows.length} rows)\n`;
+				// sqlDump += `-- Data for table: ${tbl_name} (${rows.length} rows)\n`;
 
 				for (const row of rows) {
 					// @ts-expect-error
@@ -134,9 +135,13 @@ export async function ExportDatabaseToSqlMigration(connection, outputPath, migra
 		sqlDump += `PRAGMA foreign_keys = ON;\n`;
 
 		// Write file to disk
-		const [, errorWrittingTempFile] = await FileSafe.write(outputPath, sqlDump, {
-			encoding: Preferrence.encoding,
-		});
+		const [, errorWrittingTempFile] = await FileSafe.write(
+			outputPath,
+			sqlDump.replace(/\n+/g, '\n'),
+			{
+				encoding: Preferrence.encoding,
+			},
+		);
 		if (errorWrittingTempFile) {
 			throw errorWrittingTempFile;
 		}
