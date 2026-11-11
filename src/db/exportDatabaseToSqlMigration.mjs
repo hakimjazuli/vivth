@@ -55,7 +55,27 @@ export async function ExportDatabaseToSqlMigration(connection, outputPath, migra
 
 		for (const obj of schemaObjects) {
 			// @ts-expect-error
-			sqlDump += `${obj.sql};\n\n`;
+			let createSql = obj.sql ? obj.sql.trim() : '';
+
+			// Skip if empty or already has IF NOT EXISTS
+			if (!createSql || createSql.toUpperCase().includes('IF NOT EXISTS')) {
+				sqlDump += `${createSql};\n\n`;
+				continue;
+			}
+
+			// 1. Handle CREATE VIRTUAL TABLE specifically
+			if (/^CREATE\s+VIRTUAL\s+TABLE/i.test(createSql)) {
+				createSql = createSql.replace(/^(CREATE\s+VIRTUAL\s+TABLE)\s+/i, '$1 IF NOT EXISTS ');
+			}
+			// 2. Handle standard TABLE, VIEW, INDEX, TRIGGER (with TEMP/TEMPORARY/UNIQUE modifiers)
+			else {
+				createSql = createSql.replace(
+					/^(CREATE\s+(?:TEMP(?:ORARY)?\s+|UNIQUE\s+)*?(?:TABLE|VIEW|INDEX|TRIGGER))\s+/i,
+					'$1 IF NOT EXISTS ',
+				);
+			}
+
+			sqlDump += `${createSql};\n\n`;
 		}
 
 		// 2. Extract Data Rows for all tables

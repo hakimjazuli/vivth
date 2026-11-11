@@ -27,8 +27,15 @@ export declare class SQLite3AutoMigration implements VivthCleanup {
      * @param {string} sqlite3Path
      * - The file path to the SQLite database, relative to project root;
      * @param {Parameters<typeof ExportDatabaseToSqlMigration>[2]} migrationRowFilter
+     * @param {number} [debounceMS]
+     * - default: `200`;
      * @example
-     * import { SQLite3AutoMigration } from 'vivth/node';
+     * import { Paths } from 'vivth/neutral';
+     * import { SQLite3AutoMigration, SafeExit } from 'vivth/node';
+     * new Paths({
+     * 	root: process.env.INIT_CWD ?? process.cwd(),
+     * });
+     * new SafeExit('SIGTERM', 'SIGINT');
      * new SQLite3AutoMigration('/initial_design.db', async (tableName, columnName) => {
      * 	switch (tableName) {
      * 		case 'tbl_do_not_migrate':
@@ -42,7 +49,7 @@ export declare class SQLite3AutoMigration implements VivthCleanup {
      *			}
      * 			break;
      * 	}
-     * })
+     * }, 300)
      */
-    constructor(sqlite3Path: string, migrationRowFilter: Parameters<typeof ExportDatabaseToSqlMigration>[2]);
+    constructor(sqlite3Path: string, migrationRowFilter: Parameters<typeof ExportDatabaseToSqlMigration>[2], debounceMS?: number);
 }
