@@ -133,6 +133,7 @@ npm i vivth
 - [neutral.Trace](#trace)
 - [neutral.TracePath](#tracepath)
 - [neutral.VivthUnBundledCodeBlock](#vivthunbundledcodeblock)
+- [node.SQLite3AutoMigration](#sqlite3automigration)
 - [node.JSautoDOC](#jsautodoc)
 - [node.ClearRequireCache](#clearrequirecache)
 - [neutral.CreateImmutable](#createimmutable)
@@ -4825,6 +4826,57 @@ Console.log(
 /**
  * @type {'vivthUnBundledCodeBlock'}
  */
+```
+
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+---
+
+<h2 id="sqlite3automigration">node.SQLite3AutoMigration</h2>
+
+#### reference: `SQLite3AutoMigration`
+
+- helper to convert already working `sqlite3` db file into sql migration file;
+- this class assume `Paths` and `SafeExit` already instantiated;
+
+```js
+/**
+ * @implements { VivthCleanup }
+ */
+```
+
+#### reference: `SQLite3AutoMigration_instance.vivthCleanup`
+
+- cleanup method;
+- can be manually called to cleanup resources that are being used by this `instance`;
+
+#### reference: `new SQLite3AutoMigration`
+
+- This constructor provides extremely low abstraction with this filter;
+- You have to filter out from full `rawSQLMigrationResult`;
+
+```js
+/**
+ * @param {string} sqlite3Path
+ * - The file path to the SQLite database, relative to project root;
+ * @param {(rawSQLMigrationResult: string) => Promise<string>} filter
+ * - A callback that receives the complete raw SQL migration dump string and returns a processed/filtered version asynchronously
+ */
+```
+
+- <i>example</i>:
+
+```js
+ import { SQLite3AutoMigration } from 'vivth/node';
+ new SQLite3AutoMigration('/initial_design.db', async (raw) => {
+ 	// simple example to delete non complicated thing via regex;
+ 	return raw.replace(/insert\s+into[\s\S]
+	?values\s
+	\((?:'(?:''|[^'])
+	'|"(?:""|[^"])
+	"|[^)]+)
+	\);/gi, '');
+ })
 ```
 
 *) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
