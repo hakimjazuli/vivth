@@ -154,8 +154,19 @@ export async function exportDatabaseToSqlMigration(connection, outputPath, migra
 						}
 						return `'${String(val).replace(/'/g, "''")}'`;
 					});
-					// Don't forget INSERT OR REPLACE to prevent unique constraint crashes on re-runs!
-					sqlDump += `INSERT OR REPLACE INTO "${tbl_name}" ("${columns.join('", "')}") VALUES (${values.join(', ')});\n`;
+					// 1. Build the update assignments for every column except the primary key ('id')
+					const updateAssignments = columns
+						.filter((col) => col !== 'id')
+						.map((col) => `"${col}" = excluded."${col}"`)
+						.join(', ');
+
+					// 2. Construct the UPSERT statement
+					if (updateAssignments) {
+						sqlDump += `INSERT INTO "${tbl_name}" ("${columns.join('", "')}") VALUES (${values.join(', ')}) ON CONFLICT("id") DO UPDATE SET ${updateAssignments};\n`;
+					} else {
+						// Fallback if the row only contains an 'id' column
+						sqlDump += `INSERT OR IGNORE INTO "${tbl_name}" ("${columns.join('", "')}") VALUES (${values.join(', ')});\n`;
+					}
 				}
 				sqlDump += `\n`;
 			});

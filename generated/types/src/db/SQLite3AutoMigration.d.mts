@@ -16,6 +16,7 @@ export declare class SQLite3AutoMigration implements VivthCleanup {
      * @description
      * - cleanup method;
      * - can be manually called to cleanup resources that are being used by this `instance`;
+     * - for row migration, `id` must be used as primary key;
      */
     vivthCleanup: () => Promise<void>;
     /**

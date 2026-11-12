@@ -133,7 +133,6 @@ npm i vivth
 - [neutral.Trace](#trace)
 - [neutral.TracePath](#tracepath)
 - [neutral.VivthUnBundledCodeBlock](#vivthunbundledcodeblock)
-- [node.ExportDatabaseToSqlMigration](#exportdatabasetosqlmigration)
 - [node.SQLite3AutoMigration](#sqlite3automigration)
 - [node.JSautoDOC](#jsautodoc)
 - [node.ClearRequireCache](#clearrequirecache)
@@ -178,7 +177,6 @@ npm i vivth
 - [node.UniqueFSTempName](#uniquefstempname)
 - [node.VivthyNeinth](#vivthyneinth)
 - [neutral.AnyButUndefined](#anybutundefined)
-- [neutral.ArrayToKeys](#arraytokeys)
 - [neutral.AssemblyScriptExportsType](#assemblyscriptexportstype)
 - [neutral.AssemblyScriptLoaderInstantiate](#assemblyscriptloaderinstantiate)
 - [neutral.AutoDocASOptions](#autodocasoptions)
@@ -4833,32 +4831,6 @@ Console.log(
 
 ---
 
-<h2 id="exportdatabasetosqlmigration">node.ExportDatabaseToSqlMigration</h2>
-
-#### reference: `ExportDatabaseToSqlMigration`
-
-- is a internal library for SQLite3AutoMigration;
-- Exports all schema objects and table rows from an active better-sqlite3 connection into a SQL file;
-
-```js
-/**
- * @param {import('better-sqlite3').Database} connection
- * - Active SQLite database connection
- * @param {string} outputPath
- * - Path where the migration .sql file should be saved
- * @param {(filter:{tableName:string, columnName:string, value:any})=>{column: boolean, row:boolean}} migrationRowFilter
- * - return `column`: `true` -> will include the `column`;
- * - return `column`: `false` -> will not include the `column`;
- * - return `row`: `true` -> will include the `row`;
- * - return `row`: `false` -> will not include the `row`;
- * @returns {ReturnType<typeof TryAsync<void>>}
- */
-```
-
-*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
-
----
-
 <h2 id="sqlite3automigration">node.SQLite3AutoMigration</h2>
 
 #### reference: `SQLite3AutoMigration`
@@ -4876,6 +4848,7 @@ Console.log(
 
 - cleanup method;
 - can be manually called to cleanup resources that are being used by this `instance`;
+- for row migration, `id` must be used as primary key;
 
 #### reference: `new SQLite3AutoMigration`
 
@@ -4886,7 +4859,11 @@ Console.log(
 /**
  * @param {string} sqlite3Path
  * - The file path to the SQLite database, relative to project root;
- * @param {Parameters<typeof ExportDatabaseToSqlMigration>[2]} migrationRowFilter
+ * @param {(filter:{tableName:string, columnName:string, value:any})=>{column: boolean, row:boolean}} migrationFilter
+ * - return `column`: `true` -> will include the `column`(as long as returning `row` also `true`);
+ * - return `column`: `false` -> will NOT include the `column`;
+ * - return `row`: `true` -> will include the `row`;
+ * - return `row`: `false` -> will NOT include the `row`;
  * @param {number} [debounceMS]
  * - default: `200`;
  */
@@ -6530,33 +6507,6 @@ const esWatcherInstance = this.registerObjectWithAutoCleanup(
  * @typedef {{}|null|number|string|boolean|symbol|bigint|function} AnyButUndefined
  */
 ```
-
-*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
-
----
-
-<h2 id="arraytokeys">neutral.ArrayToKeys</h2>
-
-- jsdoc types:
-
-````js
-/**
- * @description
- * - extract unique string from ArrayString[];
- * - Takes an array/tuple type and returns a unique UNION of its elements.
- * ```ts
- * const a = ['hi', 'there'] as const;
- * const check = (aa:ArrayToKeys<typeof a>) => {};
- * ```
- * ```js
- * const a = /** @type {const} *[]/ (['hi', 'there']);
- * /** @param {ArrayToKeys<typeof a>} aa *[]/
- * const check = (aa) => {};
- * ```
- * @template {readonly unknown[]} T
- * @typedef {import('../../../src/typehints/ArrayToKeys.mts').ArrayToKeys<T>} ArrayToKeys
- */
-````
 
 *) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 

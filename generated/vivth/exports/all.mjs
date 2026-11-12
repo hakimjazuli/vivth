@@ -61,7 +61,6 @@ export { Preferrence } from '../../../src/common/Preferrence.mjs';
 export { Trace } from '../../../src/common/Trace.mjs';
 export { TracePath } from '../../../src/common/TracePath.mjs';
 export { VivthUnBundledCodeBlock } from '../../../src/common/VivthUnBundledCodeBlock.mjs';
-export { exportDatabaseToSqlMigration as ExportDatabaseToSqlMigration } from '../../../src/db/exportDatabaseToSqlMigration.mjs';
 export { SQLite3AutoMigration } from '../../../src/db/SQLite3AutoMigration.mjs';
 export { JSautoDOC } from '../../../src/doc/JSautoDOC.mjs';
 export { ClearRequireCache } from '../../../src/function/ClearRequireCache.mjs';
@@ -107,10 +106,6 @@ export { UniqueFSTempName } from '../../../src/function/UniqueFSTempName.mjs';
 export { VivthyNeinth } from '../../../src/neinth/VivthyNeinth.mjs';
 /**
  * @typedef {import('../../../src/typehints/AnyButUndefined.mjs').AnyButUndefined} AnyButUndefined
- */
-/**
- * @template {readonly unknown[]} T
- * @typedef {import('../../../src/typehints/ArrayToKeys.mjs').ArrayToKeys<T>} ArrayToKeys
  */
 /**
  * @template {Record<string, unknown>} RESULTTYPE
