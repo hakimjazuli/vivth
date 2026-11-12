@@ -112,8 +112,9 @@ export async function exportDatabaseToSqlMigration(connection, outputPath, migra
 					ForOfSync(setOfRow, (column_name, { breakEarly, prevError }) => {
 						if (IsInstanceOf(prevError, Error)) {
 							breakEarly();
+							return;
 						}
-						const { column, row } = migrationFilter({
+						const { column, row: row_ } = migrationFilter({
 							tableName: tbl_name,
 							columnName: column_name,
 							// @ts-expect-error
@@ -122,7 +123,7 @@ export async function exportDatabaseToSqlMigration(connection, outputPath, migra
 						if (!column) {
 							setOfRow.delete(column_name);
 						}
-						if (!row) {
+						if (!row_) {
 							skipRow = true;
 							throw 'skipping row';
 						}

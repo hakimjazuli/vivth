@@ -177,6 +177,7 @@ npm i vivth
 - [node.UniqueFSTempName](#uniquefstempname)
 - [node.VivthyNeinth](#vivthyneinth)
 - [neutral.AnyButUndefined](#anybutundefined)
+- [neutral.ArrayToKeys](#arraytokeys)
 - [neutral.AssemblyScriptExportsType](#assemblyscriptexportstype)
 - [neutral.AssemblyScriptLoaderInstantiate](#assemblyscriptloaderinstantiate)
 - [neutral.AutoDocASOptions](#autodocasoptions)
@@ -6507,6 +6508,33 @@ const esWatcherInstance = this.registerObjectWithAutoCleanup(
  * @typedef {{}|null|number|string|boolean|symbol|bigint|function} AnyButUndefined
  */
 ```
+
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+---
+
+<h2 id="arraytokeys">neutral.ArrayToKeys</h2>
+
+- jsdoc types:
+
+````js
+/**
+ * @description
+ * - extract unique string from ArrayString[];
+ * - Takes an array/tuple type and returns a unique UNION of its elements.
+ * ```ts
+ * const a = ['hi', 'there'] as const;
+ * const check = (aa:ArrayToKeys<typeof a>) => {};
+ * ```
+ * ```js
+ * const a = /** @type {const} *[]/ (['hi', 'there']);
+ * /** @param {ArrayToKeys<typeof a>} aa *[]/
+ * const check = (aa) => {};
+ * ```
+ * @template {readonly unknown[]} T
+ * @typedef {import('../../../src/typehints/ArrayToKeys.mts').ArrayToKeys<T>} ArrayToKeys
+ */
+````
 
 *) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 

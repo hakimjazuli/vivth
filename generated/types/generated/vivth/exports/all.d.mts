@@ -104,6 +104,7 @@ export { TsToMjs } from '../../../src/function/TsToMjs.mjs';
 export { UniqueFSTempName } from '../../../src/function/UniqueFSTempName.mjs';
 export { VivthyNeinth } from '../../../src/neinth/VivthyNeinth.mjs';
 export type AnyButUndefined = import('../../../src/typehints/AnyButUndefined.mjs').AnyButUndefined;
+export type ArrayToKeys<T extends readonly unknown[]> = import('../../../src/typehints/ArrayToKeys.mjs').ArrayToKeys<T>;
 export type AssemblyScriptExportsType<RESULTTYPE extends Record<string, unknown>> = import('../../../src/typehints/AssemblyScriptExportsType.mjs').AssemblyScriptExportsType<RESULTTYPE>;
 export type AssemblyScriptLoaderInstantiate<RESULTTYPE extends Record<string, unknown>> = import('../../../src/typehints/AssemblyScriptLoaderInstantiate.mjs').AssemblyScriptLoaderInstantiate<RESULTTYPE>;
 export type AutoDocASOptions = import('../../../src/typehints/AutoDocASOptions.mjs').AutoDocASOptions;
@@ -132,6 +133,10 @@ export type VivthCleanup = import('../../../src/typehints/VivthCleanup.mjs').Viv
 export type VLifecycleCallbacks<TAGNAME extends keyof HTMLElementTagNameMap> = import('../../../src/typehints/VLifecycleCallbacks.mjs').VLifecycleCallbacks<TAGNAME>;
 /**
  * @typedef {import('../../../src/typehints/AnyButUndefined.mjs').AnyButUndefined} AnyButUndefined
+ */
+/**
+ * @template {readonly unknown[]} T
+ * @typedef {import('../../../src/typehints/ArrayToKeys.mjs').ArrayToKeys<T>} ArrayToKeys
  */
 /**
  * @template {Record<string, unknown>} RESULTTYPE

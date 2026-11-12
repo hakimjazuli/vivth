@@ -108,6 +108,10 @@ export { VivthyNeinth } from '../../../src/neinth/VivthyNeinth.mjs';
  * @typedef {import('../../../src/typehints/AnyButUndefined.mjs').AnyButUndefined} AnyButUndefined
  */
 /**
+ * @template {readonly unknown[]} T
+ * @typedef {import('../../../src/typehints/ArrayToKeys.mjs').ArrayToKeys<T>} ArrayToKeys
+ */
+/**
  * @template {Record<string, unknown>} RESULTTYPE
  * @typedef {import('../../../src/typehints/AssemblyScriptExportsType.mjs').AssemblyScriptExportsType<RESULTTYPE>} AssemblyScriptExportsType
  */
