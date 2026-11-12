@@ -1,6 +1,6 @@
 {
   "name": "vivth",
-  "version": "1.5.35",
+  "version": "1.5.36",
   "description": "library primitives",
   "devDependencies": {
     "@types/bun": "^1.4.4",
