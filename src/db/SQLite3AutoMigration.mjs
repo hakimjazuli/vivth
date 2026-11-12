@@ -6,7 +6,7 @@ import Database from 'better-sqlite3';
 import { SafeExit } from '../class/SafeExit.mjs';
 import { Paths } from '../class/Paths.mjs';
 import { TrySync } from '../function/TrySync.mjs';
-import { ExportDatabaseToSqlMigration } from './ExportDatabaseToSqlMigration.mjs';
+import { exportDatabaseToSqlMigration } from './exportDatabaseToSqlMigration.mjs';
 import { LazyFactory } from '../function/LazyFactory.mjs';
 import { QChannel } from '../class/QChannel.mjs';
 import { Timeout } from '../function/Timeout.mjs';
@@ -64,7 +64,11 @@ export class SQLite3AutoMigration {
 	 *
 	 * @param {string} sqlite3Path
 	 * - The file path to the SQLite database, relative to project root;
-	 * @param {Parameters<typeof ExportDatabaseToSqlMigration>[2]} migrationRowFilter
+	 * @param {(filter:{tableName:string, columnName:string, value:any})=>{column: boolean, row:boolean}} migrationFilter
+	 * - return `column`: `true` -> will include the `column`(as long as returning `row` also `true`);
+	 * - return `column`: `false` -> will NOT include the `column`;
+	 * - return `row`: `true` -> will include the `row`;
+	 * - return `row`: `false` -> will NOT include the `row`;
 	 * @param {number} [debounceMS]
 	 * - default: `200`;
 	 * @example
@@ -74,22 +78,27 @@ export class SQLite3AutoMigration {
 	 * 	root: process.env.INIT_CWD ?? process.cwd(),
 	 * });
 	 * new SafeExit('SIGTERM', 'SIGINT');
-	 * new SQLite3AutoMigration('/initial_design.db', async (tableName, columnName) => {
+	 * new SQLite3AutoMigration('/initial_design.db', async ({tableName, columnName, value}) => {
 	 * 	switch (tableName) {
 	 * 		case 'tbl_do_not_migrate':
-	 * 			return false; // no rows in this table will be migrated
+	 * 			return {column: false, row: false};
 	 * 		default:
 	 *			switch (columnName) {
 	 *				case 'col_do_not_insert_to_migration':
-	 *					return false; // this specific row of this table will not be migrated;
+	 *					return {column: false, row: true};
 	 *				default:
-	 *					return true;
+	 *					switch (value) {
+	 *						case 'val_do_not_insert_to_migration':
+	 *							return {column: false, row: false};
+	 *						default:
+	 *							return {column: true, row: true};
+	 *					}
 	 *			}
 	 * 			break;
 	 * 	}
 	 * }, 300)
 	 */
-	constructor(sqlite3Path, migrationRowFilter, debounceMS = 200) {
+	constructor(sqlite3Path, migrationFilter, debounceMS = 200) {
 		this.#sqlite3Path = Paths.diskAbsolute(sqlite3Path);
 		this.#reConnect();
 		const watcher = (this.#watcher = chokidar.watch(this.#sqlite3Path));
@@ -120,10 +129,10 @@ export class SQLite3AutoMigration {
 						if (!connection) {
 							return;
 						}
-						const [, errorMigrating] = await ExportDatabaseToSqlMigration(
+						const [, errorMigrating] = await exportDatabaseToSqlMigration(
 							connection,
 							migrationPath,
-							migrationRowFilter,
+							migrationFilter,
 						);
 						if (errorMigrating) {
 							this.#connection?.close();

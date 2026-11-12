@@ -2,8 +2,9 @@
 
 import { Console } from '../class/Console.mjs';
 import { FileSafe } from '../class/FileSafe.mjs';
-import { WalkThrough } from '../class/WalkThrough.mjs';
 import { Preferrence } from '../common/Preferrence.mjs';
+import { ForOfSync } from '../function/ForOfSync.mjs';
+import { IsInstanceOf } from '../function/IsInstanceOf.mjs';
 import { TryAsync } from '../function/TryAsync.mjs';
 import { TrySync } from '../function/TrySync.mjs';
 
@@ -15,10 +16,14 @@ import { TrySync } from '../function/TrySync.mjs';
  * - Active SQLite database connection
  * @param {string} outputPath
  * - Path where the migration .sql file should be saved
- * @param {(tableName:string, columnName:string)=>boolean} migrationRowFilter
+ * @param {(filter:{tableName:string, columnName:string, value:any})=>{column: boolean, row:boolean}} migrationFilter
+ * - return `column`: `true` -> will include the `column`(as long as returning `row` also `true`);
+ * - return `column`: `false` -> will NOT include the `column`;
+ * - return `row`: `true` -> will include the `row`;
+ * - return `row`: `false` -> will NOT include the `row`;
  * @returns {ReturnType<typeof TryAsync<void>>}
  */
-export async function ExportDatabaseToSqlMigration(connection, outputPath, migrationRowFilter) {
+export async function exportDatabaseToSqlMigration(connection, outputPath, migrationFilter) {
 	return await TryAsync(async () => {
 		let sqlDump = '';
 		// sqlDump += `-- ==========================================\n`;
@@ -100,15 +105,31 @@ export async function ExportDatabaseToSqlMigration(connection, outputPath, migra
 				}
 
 				// sqlDump += `-- Data for table: ${tbl_name} (${rows.length} rows)\n`;
-
 				for (const row of rows) {
+					let skipRow = false;
 					// @ts-expect-error
 					const setOfRow = new Set(Object.keys(row));
-					WalkThrough.set(setOfRow, (column_name) => {
-						if (!migrationRowFilter(tbl_name, column_name)) {
+					ForOfSync(setOfRow, (column_name, { breakEarly, prevError }) => {
+						if (IsInstanceOf(prevError, Error)) {
+							breakEarly();
+						}
+						const { column, row } = migrationFilter({
+							tableName: tbl_name,
+							columnName: column_name,
+							// @ts-expect-error
+							value: row[column_name],
+						});
+						if (!column) {
 							setOfRow.delete(column_name);
 						}
+						if (!row) {
+							skipRow = true;
+							throw 'skipping row';
+						}
 					});
+					if (skipRow) {
+						continue;
+					}
 					const columns = Array.from(setOfRow);
 
 					if (!columns.length) {

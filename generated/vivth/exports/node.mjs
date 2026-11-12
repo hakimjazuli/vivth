@@ -29,7 +29,7 @@ export { Prettivy } from '../../../src/class/Prettivy.mjs';
 export { SafeExit } from '../../../src/class/SafeExit.mjs';
 export { Setup } from '../../../src/class/Setup.mjs';
 export { Base64URLFromFile } from '../../../src/common/Base64URLFromFile.mjs';
-export { ExportDatabaseToSqlMigration } from '../../../src/db/ExportDatabaseToSqlMigration.mjs';
+export { exportDatabaseToSqlMigration as ExportDatabaseToSqlMigration } from '../../../src/db/exportDatabaseToSqlMigration.mjs';
 export { SQLite3AutoMigration } from '../../../src/db/SQLite3AutoMigration.mjs';
 export { JSautoDOC } from '../../../src/doc/JSautoDOC.mjs';
 export { ClearRequireCache } from '../../../src/function/ClearRequireCache.mjs';

@@ -4846,7 +4846,11 @@ Console.log(
  * - Active SQLite database connection
  * @param {string} outputPath
  * - Path where the migration .sql file should be saved
- * @param {(tableName:string, columnName:string)=>boolean} migrationRowFilter
+ * @param {(filter:{tableName:string, columnName:string, value:any})=>{column: boolean, row:boolean}} migrationRowFilter
+ * - return `column`: `true` -> will include the `column`;
+ * - return `column`: `false` -> will not include the `column`;
+ * - return `row`: `true` -> will include the `row`;
+ * - return `row`: `false` -> will not include the `row`;
  * @returns {ReturnType<typeof TryAsync<void>>}
  */
 ```
@@ -4899,16 +4903,21 @@ new Paths({
 new SafeExit("SIGTERM", "SIGINT");
 new SQLite3AutoMigration(
   "/initial_design.db",
-  async (tableName, columnName) => {
+  async ({ tableName, columnName, value }) => {
     switch (tableName) {
       case "tbl_do_not_migrate":
-        return false; // no rows in this table will be migrated
+        return { column: false, row: false };
       default:
         switch (columnName) {
           case "col_do_not_insert_to_migration":
-            return false; // this specific row of this table will not be migrated;
+            return { column: false, row: true };
           default:
-            return true;
+            switch (value) {
+              case "val_do_not_insert_to_migration":
+                return { column: false, row: false };
+              default:
+                return { column: true, row: true };
+            }
         }
         break;
     }
