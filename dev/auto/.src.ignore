@@ -24,5 +24,7 @@
 
 /doesnotwork/
 
+/sql/
+
 # ALWAYS INCLUDE THE README
 !README.md

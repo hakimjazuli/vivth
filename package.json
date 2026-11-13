@@ -53,6 +53,7 @@
     "dev:standard": "bun ./dev/auto-doc.mjs",
     "dev:t-w": "tsc --watch",
     "test-bundle": "bun ./test/bundle.mjs",
+    "test:sqlite3_migration": "bun ./test/SQLite3AutoMigration/test.mjs",
     "test-": "bun ./test/test_.mjs",
     "test-ssg-dev": "bun ./test/ssgDevMapper/ssgDevMapper.mjs",
     "test-dirmapper": "bun ./test/dirmapper.mjs",

@@ -40,7 +40,7 @@ export declare class SQLite3AutoMigration implements VivthCleanup {
      * 	root: process.env.INIT_CWD ?? process.cwd(),
      * });
      * new SafeExit('SIGTERM', 'SIGINT');
-     * new SQLite3AutoMigration('/initial_design.db', async ({tableName, columnName, value}) => {
+     * new SQLite3AutoMigration('/initial_design.db', ({tableName, columnName, value}) => {
      * 	switch (tableName) {
      * 		case 'tbl_do_not_migrate':
      * 			return {column: false, row: false};

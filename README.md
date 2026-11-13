@@ -4881,7 +4881,7 @@ new Paths({
 new SafeExit("SIGTERM", "SIGINT");
 new SQLite3AutoMigration(
   "/initial_design.db",
-  async ({ tableName, columnName, value }) => {
+  ({ tableName, columnName, value }) => {
     switch (tableName) {
       case "tbl_do_not_migrate":
         return { column: false, row: false };

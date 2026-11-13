@@ -3,8 +3,6 @@
 import { Console } from '../class/Console.mjs';
 import { FileSafe } from '../class/FileSafe.mjs';
 import { Preferrence } from '../common/Preferrence.mjs';
-import { ForOfSync } from '../function/ForOfSync.mjs';
-import { IsInstanceOf } from '../function/IsInstanceOf.mjs';
 import { TryAsync } from '../function/TryAsync.mjs';
 import { TrySync } from '../function/TrySync.mjs';
 
@@ -109,11 +107,7 @@ export async function exportDatabaseToSqlMigration(connection, outputPath, migra
 					let skipRow = false;
 					// @ts-expect-error
 					const setOfRow = new Set(Object.keys(row));
-					ForOfSync(setOfRow, (column_name, { breakEarly, prevError }) => {
-						if (IsInstanceOf(prevError, Error)) {
-							breakEarly();
-							return;
-						}
+					for (const column_name of setOfRow) {
 						const { column, row: row_ } = migrationFilter({
 							tableName: tbl_name,
 							columnName: column_name,
@@ -125,9 +119,9 @@ export async function exportDatabaseToSqlMigration(connection, outputPath, migra
 						}
 						if (!row_) {
 							skipRow = true;
-							throw 'skipping row';
+							break;
 						}
-					});
+					}
 					if (skipRow) {
 						continue;
 					}
