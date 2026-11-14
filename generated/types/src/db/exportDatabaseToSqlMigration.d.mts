@@ -7,7 +7,7 @@ import { TryAsync } from '../function/TryAsync.mjs';
  * - Active SQLite database connection
  * @param {string} outputPath
  * - Path where the migration .sql file should be saved
- * @param {(filter:{tableName:string, columnName:string, value:any})=>{column: boolean, row:boolean}} migrationFilter
+ * @param {(filter:{tableName:string, columnName:string, value:any})=>("table" | "column" | "row")[]} migrationFilter
  * - return `column`: `true` -> will include the `column`(as long as returning `row` also `true`);
  * - return `column`: `false` -> will NOT include the `column`;
  * - return `row`: `true` -> will include the `row`;
@@ -18,7 +18,4 @@ export declare function exportDatabaseToSqlMigration(connection: import('better-
     tableName: string;
     columnName: string;
     value: any;
-}) => {
-    column: boolean;
-    row: boolean;
-}): ReturnType<typeof TryAsync<void>>;
+}) => ("table" | "column" | "row")[]): ReturnType<typeof TryAsync<void>>;

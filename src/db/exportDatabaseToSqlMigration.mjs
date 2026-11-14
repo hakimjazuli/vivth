@@ -4,7 +4,6 @@ import { Console } from '../class/Console.mjs';
 import { FileSafe } from '../class/FileSafe.mjs';
 import { Preferrence } from '../common/Preferrence.mjs';
 import { TryAsync } from '../function/TryAsync.mjs';
-import { TrySync } from '../function/TrySync.mjs';
 
 /**
  * @description
@@ -14,7 +13,7 @@ import { TrySync } from '../function/TrySync.mjs';
  * - Active SQLite database connection
  * @param {string} outputPath
  * - Path where the migration .sql file should be saved
- * @param {(filter:{tableName:string, columnName:string, value:any})=>{column: boolean, row:boolean}} migrationFilter
+ * @param {(filter:{tableName:string, columnName:string, value:any})=>("table" | "column" | "row")[]} migrationFilter
  * - return `column`: `true` -> will include the `column`(as long as returning `row` also `true`);
  * - return `column`: `false` -> will NOT include the `column`;
  * - return `row`: `true` -> will include the `row`;
@@ -89,41 +88,42 @@ export async function exportDatabaseToSqlMigration(connection, outputPath, migra
 		// @ts-expect-error
 		const tables = schemaObjects.filter((obj) => obj.type === 'table');
 		Console.log(`[Migration] Found ${tables.length} tables to dump rows from.`, { now: true });
-		for (const table of tables) {
+		tablesLoop: for (const table of tables) {
 			// @ts-expect-error
 			const tbl_name = table.tbl_name;
-			const [, tableErr] = TrySync(async () => {
+			try {
 				// Fetch all rows from the table using tbl_name
 
 				const rows = connection.prepare(`SELECT * FROM "${tbl_name}"`).all();
 
 				if (!rows || rows.length === 0) {
 					Console.log(`[Migration] Table "${tbl_name}" is empty.`, { now: true });
-					return;
+					continue tablesLoop;
 				}
 
 				// sqlDump += `-- Data for table: ${tbl_name} (${rows.length} rows)\n`;
-				for (const row of rows) {
-					let skipRow = false;
+				rowsLoop: for (const row of rows) {
 					// @ts-expect-error
 					const setOfRow = new Set(Object.keys(row));
-					for (const column_name of setOfRow) {
-						const { column, row: row_ } = migrationFilter({
-							tableName: tbl_name,
-							columnName: column_name,
-							// @ts-expect-error
-							value: row[column_name],
-						});
-						if (!column) {
+					columnLoop: for (const column_name of setOfRow) {
+						const trueReturned = new Set(
+							migrationFilter({
+								tableName: tbl_name,
+								columnName: column_name,
+								// @ts-expect-error
+								value: row[column_name],
+							}),
+						);
+						if (!trueReturned.has('table')) {
+							continue tablesLoop;
+						}
+						if (!trueReturned.has('row')) {
+							continue rowsLoop;
+						}
+						if (!trueReturned.has('column')) {
 							setOfRow.delete(column_name);
+							continue columnLoop;
 						}
-						if (!row_) {
-							skipRow = true;
-							break;
-						}
-					}
-					if (skipRow) {
-						continue;
 					}
 					const columns = Array.from(setOfRow);
 
@@ -164,17 +164,16 @@ export async function exportDatabaseToSqlMigration(connection, outputPath, migra
 					}
 				}
 				sqlDump += `\n`;
-			});
-			if (!tableErr) {
+			} catch (tableErr) {
+				Console.error(
+					{
+						'[Migration] Error': ` dumping rows for table "${tbl_name}"`,
+						tableErr,
+					},
+					{ now: true },
+				);
 				continue;
 			}
-			Console.error(
-				{
-					'[Migration] Error': ` dumping rows for table "${tbl_name}"`,
-					details: tableErr.message,
-				},
-				{ now: true },
-			);
 		}
 
 		// Finalize transaction

@@ -65,7 +65,7 @@ export class SQLite3AutoMigration {
 	 *
 	 * @param {string} sqlite3Path
 	 * - The file path to the SQLite database, relative to project root;
-	 * @param {(filter:{tableName:string, columnName:string, value:any})=>{column: boolean, row:boolean}} migrationFilter
+	 * @param {(filter:{tableName:string, columnName:string, value:any})=>("table" | "column" | "row")[]} migrationFilter
 	 * - return `column`: `true` -> will include the `column`(as long as returning `row` also `true`);
 	 * - return `column`: `false` -> will NOT include the `column`;
 	 * - return `row`: `true` -> will include the `row`;
@@ -80,19 +80,20 @@ export class SQLite3AutoMigration {
 	 * });
 	 * new SafeExit('SIGTERM', 'SIGINT');
 	 * new SQLite3AutoMigration('/initial_design.db', ({tableName, columnName, value}) => {
+	 * 	// simple logical to pick which data which to migrate and to not to;
 	 * 	switch (tableName) {
-	 * 		case 'tbl_do_not_migrate':
-	 * 			return {column: false, row: false};
+	 * 		case 'tbl_do_not_insert_table_to_migration':
+	 * 			return [];
 	 * 		default:
 	 *			switch (columnName) {
-	 *				case 'col_do_not_insert_to_migration':
-	 *					return {column: false, row: true};
+	 *				case 'col_do_not_insert_column_to_migration':
+	 *					return ['table', 'row'];
 	 *				default:
 	 *					switch (value) {
-	 *						case 'val_do_not_insert_to_migration':
-	 *							return {column: false, row: false};
+	 *						case 'val_do_not_insert_row_to_migration':
+	 *							return [];
 	 *						default:
-	 *							return {column: true, row: true};
+	 *							return ['table', 'row', 'column'];
 	 *					}
 	 *			}
 	 * 			break;
