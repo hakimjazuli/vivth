@@ -1,4 +1,4 @@
-declare const Wails2Form_base: (new (...args: any[]) => HTMLFormElement & {
+declare const Wails3Form_base: (new (...args: any[]) => HTMLFormElement & {
     setObservedAttributes(attributes: Partial<Record<never, string>>): void;
     props: {
         [x: string]: never;
@@ -59,9 +59,9 @@ declare const Wails2Form_base: (new (...args: any[]) => HTMLFormElement & {
  * - `[form-ref]` value to target go wails ipc name;
  * > - it will call `wails3 Binded Service` to your form inputs as `arg0`;
  * @example
- * import { Wails2Form } from 'vivth/browser';
+ * import { Wails3Form } from 'vivth/browser';
  */
-export declare class Wails2Form extends Wails2Form_base {
+export declare class Wails3Form extends Wails3Form_base {
     constructor();
 }
 export {};

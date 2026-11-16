@@ -8,7 +8,7 @@ export type VivthCleanup = import('../../typehints/VivthCleanup.mjs').VivthClean
  * - `Wails3Dev` will generate `main_services.go`;
  * @implements {VivthCleanup}
  */
-export declare class Wails2Listener implements VivthCleanup {
+export declare class Wails3Listener implements VivthCleanup {
     #private;
     /**
      * @description
@@ -28,9 +28,9 @@ export declare class Wails2Listener implements VivthCleanup {
      * > - so different handler could pass different arguments;
      * @param {()=>Promise<void>} handler
      * @example
-     * import { Wails2Listener } from 'vivth/browser';
+     * import { Wails3Listener } from 'vivth/browser';
      * import { MyIPC } from '../wails/go/App.js'
-     * const myListener = new Wails2Listener('users', async () => {
+     * const myListener = new Wails3Listener('users', async () => {
      * 	const res = await MyIPC();
      * });
      * // when no longer needed, eg. element is disconnected;

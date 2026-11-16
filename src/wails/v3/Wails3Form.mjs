@@ -12,9 +12,9 @@ import { Wails3OnSubmit } from './Wails3OnSubmit.mjs';
  * - `[form-ref]` value to target go wails ipc name;
  * > - it will call `wails3 Binded Service` to your form inputs as `arg0`;
  * @example
- * import { Wails2Form } from 'vivth/browser';
+ * import { Wails3Form } from 'vivth/browser';
  */
-export class Wails2Form extends WC_extendsA(HTMLFormElement) {
+export class Wails3Form extends WC_extendsA(HTMLFormElement) {
 	constructor() {
 		super();
 		const onSubmitHandler = Wails3OnSubmit.bind(this);

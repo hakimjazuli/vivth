@@ -213,6 +213,8 @@ export { Wails2Form } from '../../../src/wails/v2/Wails2Form.mjs';
 export { Wails2Listener } from '../../../src/wails/v2/Wails2Listener.mjs';
 export { Wails2OnSubmit } from '../../../src/wails/v2/Wails2OnSubmit.mjs';
 export { Wails3Dev } from '../../../src/wails/v3/Wails3Dev.mjs';
+export { Wails3Form } from '../../../src/wails/v3/Wails3Form.mjs';
+export { Wails3Listener } from '../../../src/wails/v3/Wails3Listener.mjs';
 export { Wails3OnSubmit } from '../../../src/wails/v3/Wails3OnSubmit.mjs';
 export { WailsMainQ } from '../../../src/wails/WailsMainQ.mjs';
 export { WC_createElement_bind } from '../../../src/web/bindings/WC_createElement_bind.mjs';

@@ -209,6 +209,8 @@ npm i vivth
 - [browser.Wails2Listener](#wails2listener)
 - [neutral.Wails2OnSubmit](#wails2onsubmit)
 - [node.Wails3Dev](#wails3dev)
+- [browser.Wails3Form](#wails3form)
+- [neutral.Wails3Listener](#wails3listener)
 - [neutral.Wails3OnSubmit](#wails3onsubmit)
 - [neutral.WailsMainQ](#wailsmainq)
 - [neutral.WC_createElement_bind](#wc_createelement_bind)
@@ -7241,6 +7243,87 @@ new Paths({
 });
 new SafeExit("SIGTERM", "SIGINT");
 new Wails3Dev();
+```
+
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+---
+
+<h2 id="wails3form">browser.Wails3Form</h2>
+
+#### reference: `Wails3Form`
+
+Custom `form[is="form-wails"]` element that handles submission by calling a specified Wails FORM backend function;
+passing form input fields as a JSON object string.
+
+- applies to `form[is="form-wails"]`;
+
+> - this class automatically bind the element with `Wails3OnSubmit` to it's `onsubmit`;
+
+- `[form-ref]` value to target go wails ipc name;
+
+> - it will call `wails3 Binded Service` to your form inputs as `arg0`;
+
+- <i>example</i>:
+
+```js
+import { Wails3Form } from "vivth/browser";
+```
+
+*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
+
+---
+
+<h2 id="wails3listener">neutral.Wails3Listener</h2>
+
+#### reference: `Wails3Listener`
+
+- getter helper;
+- `Wails3Dev` will generate `main_services.go`;
+
+```js
+/**
+ * @implements {VivthCleanup}
+ */
+```
+
+#### reference: `Wails3Listener_instance.vivthCleanup`
+
+- when wrapped with vivth `WC_extends_instance.this.ON` this method is to auto cleaned;
+- you can call this method manually on the framework element cleanup lifecycle;
+
+```js
+/**
+ * @type {()=>Promise<void>}
+ */
+```
+
+#### reference: `new Wails3Listener`
+
+```js
+/**
+ * @param {string} listenToFORMNotifName
+ * - `// FORM` will notify names go as array of string via `
+ *EmitterInstance`;
+ * - `listenToFORMNotifName` is to listen to one specific string value, then you can run a callback;
+ * > - as of `wails3` they didn't expose `ipc`(now `Service`) with human readable name like on `wails2` so you could technically obfuscate it slightly better;
+ * > - so this class is to help you wrap that `Service` bindings into your callback;
+ * - multi instance listening to same name can run in parallel;
+ * > - so different handler could pass different arguments;
+ * @param {()=>Promise<void>} handler
+ */
+```
+
+- <i>example</i>:
+
+```js
+import { Wails3Listener } from "vivth/browser";
+import { MyIPC } from "../wails/go/App.js";
+const myListener = new Wails3Listener("users", async () => {
+  const res = await MyIPC();
+});
+// when no longer needed, eg. element is disconnected;
+myListener.vivthCleanup();
 ```
 
 *) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>

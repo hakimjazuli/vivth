@@ -16,7 +16,7 @@ import { WailsMainQ } from '../WailsMainQ.mjs';
  * - `Wails3Dev` will generate `main_services.go`;
  * @implements {VivthCleanup}
  */
-export class Wails2Listener {
+export class Wails3Listener {
 	/**
 	 * @type {Map<string, Set<()=>Promise<void>>>}
 	 */
@@ -28,11 +28,11 @@ export class Wails2Listener {
 	 * @type {()=>Promise<void>}
 	 */
 	vivthCleanup = async () => {
-		Wails2Listener.#mappedHandler.get(this.#getterName)?.delete(this.#handler);
-		if (Wails2Listener.#mappedHandler.size) {
+		Wails3Listener.#mappedHandler.get(this.#getterName)?.delete(this.#handler);
+		if (Wails3Listener.#mappedHandler.size) {
 			return;
 		}
-		Wails2Listener.#mappedHandler.delete(this.#getterName);
+		Wails3Listener.#mappedHandler.delete(this.#getterName);
 	};
 	/**
 	 * @type {string}
@@ -53,9 +53,9 @@ export class Wails2Listener {
 	 * > - so different handler could pass different arguments;
 	 * @param {()=>Promise<void>} handler
 	 * @example
-	 * import { Wails2Listener } from 'vivth/browser';
+	 * import { Wails3Listener } from 'vivth/browser';
 	 * import { MyIPC } from '../wails/go/App.js'
-	 * const myListener = new Wails2Listener('users', async () => {
+	 * const myListener = new Wails3Listener('users', async () => {
 	 * 	const res = await MyIPC();
 	 * });
 	 * // when no longer needed, eg. element is disconnected;
@@ -64,7 +64,7 @@ export class Wails2Listener {
 	constructor(listenToFORMNotifName, handler) {
 		this.#getterName = listenToFORMNotifName;
 		this.#handler = handler;
-		Wails2Listener.#runHandler(handler);
+		Wails3Listener.#runHandler(handler);
 	}
 	/**
 	 * @param {() => Promise<void>} handler
@@ -85,11 +85,11 @@ export class Wails2Listener {
 				return;
 			}
 			WalkThrough.array(gettersData, ([_, getter]) => {
-				const setOfHandler = Wails2Listener.#mappedHandler.get(getter);
+				const setOfHandler = Wails3Listener.#mappedHandler.get(getter);
 				if (!setOfHandler) {
 					return;
 				}
-				ForOfSync(setOfHandler, Wails2Listener.#runHandler);
+				ForOfSync(setOfHandler, Wails3Listener.#runHandler);
 			});
 		});
 	}
