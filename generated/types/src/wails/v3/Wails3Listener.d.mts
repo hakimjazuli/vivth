@@ -40,6 +40,7 @@ export declare class Wails3Listener implements VivthCleanup {
     /**
      * @description
      * - prepare class for standard definitions;
+     * - you need to call this callback before using this class;
      * @type {()=>void}
      */
     static prepare: () => void;

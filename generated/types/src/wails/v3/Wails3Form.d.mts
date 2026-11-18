@@ -66,6 +66,7 @@ export declare class Wails3Form extends Wails3Form_base {
     /**
      * @description
      * - prepare class for standard definitions;
+     * - you need to call this callback before using this class;
      * @type {()=>void}
      */
     static prepare: () => void;

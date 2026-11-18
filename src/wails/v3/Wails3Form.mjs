@@ -30,6 +30,7 @@ export class Wails3Form extends WC_extendsA(HTMLFormElement) {
 	/**
 	 * @description
 	 * - prepare class for standard definitions;
+	 * - you need to call this callback before using this class;
 	 * @type {()=>void}
 	 */
 	static prepare = () => {

@@ -7096,6 +7096,7 @@ import { Wails2Form } from "vivth/browser";
 #### reference: `Wails2Form.prepare`
 
 - prepare class for standard definitions;
+- you need to call this callback before using this class;
 
 ```js
 /**
@@ -7143,7 +7144,7 @@ import { Wails2Form } from "vivth/browser";
 - <i>example</i>:
 
 ```js
-import { Wails2Listener } from "vivth/neutral";
+import { Wails2Listener } from "vivth/browser";
 import { MyIPC } from "../wails/go/App.js";
 const myListener = new Wails2Listener("users", async () => {
   const res = await MyIPC();
@@ -7155,6 +7156,7 @@ myListener.vivthCleanup();
 #### reference: `Wails2Listener.prepare`
 
 - prepare class for standard definitions;
+- you need to call this callback before using this class;
 
 ```js
 /**
@@ -7293,6 +7295,7 @@ import { Wails3Form } from "vivth/browser";
 #### reference: `Wails3Form.prepare`
 
 - prepare class for standard definitions;
+- you need to call this callback before using this class;
 
 ```js
 /**
@@ -7359,6 +7362,7 @@ myListener.vivthCleanup();
 #### reference: `Wails3Listener.prepare`
 
 - prepare class for standard definitions;
+- you need to call this callback before using this class;
 
 ```js
 /**
