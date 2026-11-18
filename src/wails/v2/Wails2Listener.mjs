@@ -45,7 +45,7 @@ export class Wails2Listener {
 	 * @param {string} getterName
 	 * @param {()=>Promise<void>} handler
 	 * @example
-	 * import { Wails2Listener } from 'vivth/browser';
+	 * import { Wails2Listener } from 'vivth/neutral';
 	 * import { MyIPC } from '../wails/go/App.js'
 	 * const myListener = new Wails2Listener('users', async () => {
 	 * 	const res = await MyIPC();
@@ -70,9 +70,14 @@ export class Wails2Listener {
 			return await handler();
 		});
 	};
-	static {
+	/**
+	 * @description
+	 * - prepare class for standard definitions;
+	 * @type {()=>void}
+	 */
+	static prepare = () => {
 		// @ts-expect-error
-		window.runtime.EventsOnMultiple(
+		window.runtime.EventsOnMultiple?.(
 			'getter:update',
 			// @ts-expect-error
 			(getters) => {
@@ -89,5 +94,5 @@ export class Wails2Listener {
 			},
 			-1,
 		);
-	}
+	};
 }

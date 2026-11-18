@@ -206,7 +206,7 @@ npm i vivth
 - [neutral.VLifecycleCallbacks](#vlifecyclecallbacks)
 - [node.Wails2Dev](#wails2dev)
 - [browser.Wails2Form](#wails2form)
-- [browser.Wails2Listener](#wails2listener)
+- [neutral.Wails2Listener](#wails2listener)
 - [neutral.Wails2OnSubmit](#wails2onsubmit)
 - [node.Wails3Dev](#wails3dev)
 - [browser.Wails3Form](#wails3form)
@@ -7093,11 +7093,21 @@ passing form input fields as a JSON object string.
 import { Wails2Form } from "vivth/browser";
 ```
 
+#### reference: `Wails2Form.prepare`
+
+- prepare class for standard definitions;
+
+```js
+/**
+ * @type {()=>void}
+ */
+```
+
 *) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
 
-<h2 id="wails2listener">browser.Wails2Listener</h2>
+<h2 id="wails2listener">neutral.Wails2Listener</h2>
 
 #### reference: `Wails2Listener`
 
@@ -7133,13 +7143,23 @@ import { Wails2Form } from "vivth/browser";
 - <i>example</i>:
 
 ```js
-import { Wails2Listener } from "vivth/browser";
+import { Wails2Listener } from "vivth/neutral";
 import { MyIPC } from "../wails/go/App.js";
 const myListener = new Wails2Listener("users", async () => {
   const res = await MyIPC();
 });
 // when no longer needed, eg. element is disconnected;
 myListener.vivthCleanup();
+```
+
+#### reference: `Wails2Listener.prepare`
+
+- prepare class for standard definitions;
+
+```js
+/**
+ * @type {()=>void}
+ */
 ```
 
 *) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
@@ -7270,6 +7290,16 @@ passing form input fields as a JSON object string.
 import { Wails3Form } from "vivth/browser";
 ```
 
+#### reference: `Wails3Form.prepare`
+
+- prepare class for standard definitions;
+
+```js
+/**
+ * @type {()=>void}
+ */
+```
+
 *) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
@@ -7317,13 +7347,23 @@ import { Wails3Form } from "vivth/browser";
 - <i>example</i>:
 
 ```js
-import { Wails3Listener } from "vivth/browser";
+import { Wails3Listener } from "vivth/neutral";
 import { MyIPC } from "../wails/go/App.js";
 const myListener = new Wails3Listener("users", async () => {
   const res = await MyIPC();
 });
 // when no longer needed, eg. element is disconnected;
 myListener.vivthCleanup();
+```
+
+#### reference: `Wails3Listener.prepare`
+
+- prepare class for standard definitions;
+
+```js
+/**
+ * @type {()=>void}
+ */
 ```
 
 *) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>

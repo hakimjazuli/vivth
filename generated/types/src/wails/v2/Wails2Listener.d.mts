@@ -22,7 +22,7 @@ export declare class Wails2Listener implements VivthCleanup {
      * @param {string} getterName
      * @param {()=>Promise<void>} handler
      * @example
-     * import { Wails2Listener } from 'vivth/browser';
+     * import { Wails2Listener } from 'vivth/neutral';
      * import { MyIPC } from '../wails/go/App.js'
      * const myListener = new Wails2Listener('users', async () => {
      * 	const res = await MyIPC();
@@ -31,4 +31,10 @@ export declare class Wails2Listener implements VivthCleanup {
      * myListener.vivthCleanup();
      */
     constructor(getterName: string, handler: () => Promise<void>);
+    /**
+     * @description
+     * - prepare class for standard definitions;
+     * @type {()=>void}
+     */
+    static prepare: () => void;
 }

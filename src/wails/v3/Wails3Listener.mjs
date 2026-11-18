@@ -53,7 +53,7 @@ export class Wails3Listener {
 	 * > - so different handler could pass different arguments;
 	 * @param {()=>Promise<void>} handler
 	 * @example
-	 * import { Wails3Listener } from 'vivth/browser';
+	 * import { Wails3Listener } from 'vivth/neutral';
 	 * import { MyIPC } from '../wails/go/App.js'
 	 * const myListener = new Wails3Listener('users', async () => {
 	 * 	const res = await MyIPC();
@@ -78,7 +78,12 @@ export class Wails3Listener {
 			return await handler();
 		});
 	};
-	static {
+	/**
+	 * @description
+	 * - prepare class for standard definitions;
+	 * @type {()=>void}
+	 */
+	static prepare = () => {
 		Events.On('getter:update', (getters) => {
 			const { data: gettersData } = getters;
 			if (!gettersData || !Array.isArray(gettersData)) {
@@ -92,5 +97,5 @@ export class Wails3Listener {
 				ForOfSync(setOfHandler, Wails3Listener.#runHandler);
 			});
 		});
-	}
+	};
 }

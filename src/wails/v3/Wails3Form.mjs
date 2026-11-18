@@ -27,7 +27,12 @@ export class Wails3Form extends WC_extendsA(HTMLFormElement) {
 			},
 		});
 	}
-	static {
+	/**
+	 * @description
+	 * - prepare class for standard definitions;
+	 * @type {()=>void}
+	 */
+	static prepare = () => {
 		this.define('form-wails', this, { extends: 'form' });
-	}
+	};
 }

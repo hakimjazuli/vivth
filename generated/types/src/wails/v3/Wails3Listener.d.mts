@@ -28,7 +28,7 @@ export declare class Wails3Listener implements VivthCleanup {
      * > - so different handler could pass different arguments;
      * @param {()=>Promise<void>} handler
      * @example
-     * import { Wails3Listener } from 'vivth/browser';
+     * import { Wails3Listener } from 'vivth/neutral';
      * import { MyIPC } from '../wails/go/App.js'
      * const myListener = new Wails3Listener('users', async () => {
      * 	const res = await MyIPC();
@@ -37,4 +37,10 @@ export declare class Wails3Listener implements VivthCleanup {
      * myListener.vivthCleanup();
      */
     constructor(listenToFORMNotifName: string, handler: () => Promise<void>);
+    /**
+     * @description
+     * - prepare class for standard definitions;
+     * @type {()=>void}
+     */
+    static prepare: () => void;
 }

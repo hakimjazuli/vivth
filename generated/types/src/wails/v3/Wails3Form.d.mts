@@ -63,5 +63,11 @@ declare const Wails3Form_base: (new (...args: any[]) => HTMLFormElement & {
  */
 export declare class Wails3Form extends Wails3Form_base {
     constructor();
+    /**
+     * @description
+     * - prepare class for standard definitions;
+     * @type {()=>void}
+     */
+    static prepare: () => void;
 }
 export {};

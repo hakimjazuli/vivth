@@ -63,5 +63,11 @@ declare const Wails2Form_base: (new (...args: any[]) => HTMLFormElement & {
  */
 export declare class Wails2Form extends Wails2Form_base {
     constructor();
+    /**
+     * @description
+     * - prepare class for standard definitions;
+     * @type {()=>void}
+     */
+    static prepare: () => void;
 }
 export {};
