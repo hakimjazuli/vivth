@@ -63,7 +63,13 @@ export class Wails3Listener {
 	 */
 	constructor(listenToFORMNotifName, handler) {
 		this.#getterName = listenToFORMNotifName;
+		if (!Wails3Listener.#mappedHandler.has(listenToFORMNotifName)) {
+			Wails3Listener.#mappedHandler.set(listenToFORMNotifName, new Set());
+		}
 		this.#handler = handler;
+		if (!Wails3Listener.#mappedHandler.get(listenToFORMNotifName)?.has(handler)) {
+			Wails3Listener.#mappedHandler.get(listenToFORMNotifName)?.add(handler);
+		}
 		Wails3Listener.#runHandler(handler);
 	}
 	/**

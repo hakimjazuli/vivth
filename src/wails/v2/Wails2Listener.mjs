@@ -55,7 +55,13 @@ export class Wails2Listener {
 	 */
 	constructor(getterName, handler) {
 		this.#getterName = getterName;
+		if (!Wails2Listener.#mappedHandler.has(getterName)) {
+			Wails2Listener.#mappedHandler.set(getterName, new Set());
+		}
 		this.#handler = handler;
+		if (!Wails2Listener.#mappedHandler.get(getterName)?.has(handler)) {
+			Wails2Listener.#mappedHandler.get(getterName)?.add(handler);
+		}
 		Wails2Listener.#runHandler(handler);
 	}
 	/**
