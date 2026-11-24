@@ -208,10 +208,6 @@ export { VivthyNeinth } from '../../../src/neinth/VivthyNeinth.mjs';
  * @template {keyof HTMLElementTagNameMap} TAGNAME
  * @typedef {import('../../../src/typehints/VLifecycleCallbacks.mjs').VLifecycleCallbacks<TAGNAME>} VLifecycleCallbacks
  */
-export { Wails2Dev } from '../../../src/wails/v2/Wails2Dev.mjs';
-export { Wails2Form } from '../../../src/wails/v2/Wails2Form.mjs';
-export { Wails2Listener } from '../../../src/wails/v2/Wails2Listener.mjs';
-export { Wails2OnSubmit } from '../../../src/wails/v2/Wails2OnSubmit.mjs';
 export { Wails3Dev } from '../../../src/wails/v3/Wails3Dev.mjs';
 export { Wails3Form } from '../../../src/wails/v3/Wails3Form.mjs';
 export { Wails3Listener } from '../../../src/wails/v3/Wails3Listener.mjs';

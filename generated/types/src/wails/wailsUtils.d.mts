@@ -36,10 +36,9 @@ export declare class wailsUtils {
      * @param {boolean} isReadQuery
      * @param {string} namedQueryArgs
      * @param {string} scanTargets
-     * @param {2 | 3} wailsVersion
      * @returns {string}
      */
-    static fileContentSQLGoGenerator: (functionName: string, trueInput: string, trueOutput: string, safeSql: string, isReadQuery: boolean, namedQueryArgs: string, scanTargets: string, wailsVersion: 2 | 3) => string;
+    static fileContentSQLGoGenerator: (functionName: string, trueInput: string, trueOutput: string, safeSql: string, isReadQuery: boolean, namedQueryArgs: string, scanTargets: string) => string;
     /**
      * - parse sql file into typed go function, in same dir;
      * - package is always sql, so dirname should be sql;
@@ -47,10 +46,9 @@ export declare class wailsUtils {
      * - `:` prefix is for input field;
      * - type then no `:` prefix means it is an output field;
      * @param {string} path
-     * @param {2|3} wailsVersion
      * @returns {ReturnType<typeof TryAsync<boolean>>}
      */
-    static pathToSQLHandler: (path: string, wailsVersion: 2 | 3) => ReturnType<typeof TryAsync<boolean>>;
+    static pathToSQLHandler: (path: string) => ReturnType<typeof TryAsync<boolean>>;
     /**
      * @param {Object[]} snippets
      * @param {string[]} pathToJoin

@@ -129,6 +129,8 @@ import (
 	"fmt"
 	"path/filepath"
 	"sync"
+
+	_ "modernc.org/sqlite"
 )
 
 type connectionStatic struct {

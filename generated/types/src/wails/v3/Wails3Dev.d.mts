@@ -19,6 +19,7 @@
  * - provide `explorer.fileNesting.patterns` on `settings.json` for `.vscode`;
  * > - will nest based on parent `*.md` and `*.sql`;
  * - provide standard `backend/Connection.go` for connecting to `sqlite3` database;
+ * > - you should require `modernc.org/sqlite` by running `go get modernc.org/sqlite`;
  * - provide standard internal `backend/UtilsGetterSetter.go` for thread-safe, multiple readers/writters;
  * - provide standard `backend/Emitter.go` for return template;
  */

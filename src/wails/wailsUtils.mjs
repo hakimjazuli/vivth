@@ -71,19 +71,12 @@ export class wailsUtils {
 			.join('\n');
 	};
 	/**
-	 * @param {2 | 3} version
 	 * @param {string[]} datas
 	 * @returns {string}
 	 */
-	static #emitter = (version, ...datas) => {
+	static #emitter = (...datas) => {
 		datas[0] = `"${datas[0]}"`;
-		switch (version) {
-			case 2:
-				datas.unshift('appCtx');
-				return `runtime.EventsEmit(${datas.join(', ')})`;
-			case 3:
-				return `appGet.Event.Emit(${datas.join(', ')})`;
-		}
+		return `appGet.Event.Emit(${datas.join(', ')})`;
 	};
 	/**
 	 * @param {string} functionName
@@ -93,7 +86,6 @@ export class wailsUtils {
 	 * @param {boolean} isReadQuery
 	 * @param {string} namedQueryArgs
 	 * @param {string} scanTargets
-	 * @param {2 | 3} wailsVersion
 	 * @returns {string}
 	 */
 	static fileContentSQLGoGenerator = (
@@ -104,19 +96,12 @@ export class wailsUtils {
 		isReadQuery,
 		namedQueryArgs,
 		scanTargets,
-		wailsVersion,
 	) => {
 		return `package sql
 
-${
-	wailsVersion === 2
-		? `import (
-	'github.com/wailsapp/wails/v2/pkg/runtime'
-)`
-		: `import (
+import (
 	"github.com/wailsapp/wails/v3/pkg/application"
-)`
-}
+)
 
 type ${functionName}InputStruct struct {
 ${trueInput}
@@ -125,11 +110,11 @@ type ${functionName}OutputStruct struct {
 ${trueOutput}
 }
 
-func ${functionName}(${wailsVersion === 2 ? 'appCtx context.Context, ' : ''}connection *sql.DB, input *${functionName}InputStruct) ([]*${functionName}OutputStruct, error) {
-	${wailsVersion === 3 ? 'appGet := application.Get()' : ''}
+func ${functionName}(connection *sql.DB, input *${functionName}InputStruct) ([]*${functionName}OutputStruct, error) {
+	appGet := application.Get()
 	if connection == nil {
 		err := fmt.Errorf("database connection is nil")
-		${wailsUtils.#emitter(wailsVersion, 'Log', 'err')}
+		${wailsUtils.#emitter('Log', 'err')}
 		fmt.Println(err)
 		return nil, err
 	}
@@ -137,7 +122,7 @@ func ${functionName}(${wailsVersion === 2 ? 'appCtx context.Context, ' : ''}conn
 	tx, err := connection.BeginTx(context.Background(), nil)
 	if err != nil {
 		err = fmt.Errorf("${functionName}: failed to begin transaction: %w", err)
-		${wailsUtils.#emitter(wailsVersion, 'Log', 'err')}
+		${wailsUtils.#emitter('Log', 'err')}
 		fmt.Println(err)
 		return nil, err
 	}
@@ -148,7 +133,7 @@ func ${functionName}(${wailsVersion === 2 ? 'appCtx context.Context, ' : ''}conn
 	stmt, err := tx.PrepareContext(context.Background(), query)
 	if err != nil {
 		err = fmt.Errorf("${functionName}: failed to prepare statement: %w", err)
-		${wailsUtils.#emitter(wailsVersion, 'Log', 'err')}
+		${wailsUtils.#emitter('Log', 'err')}
 		fmt.Println(err)
 		return nil, err
 	}
@@ -161,7 +146,7 @@ ${
 	)
 	if err != nil {
 		err = fmt.Errorf("${functionName}: query execution failed: %w", err)
-		${wailsUtils.#emitter(wailsVersion, 'Log', 'err')}
+		${wailsUtils.#emitter('Log', 'err')}
 		fmt.Println(err)
 		return nil, err
 	}
@@ -173,7 +158,7 @@ ${
 		item := &${functionName}OutputStruct{}
 		if err := rows.Scan(${scanTargets}); err != nil {
 			err = fmt.Errorf("${functionName}: failed to scan row: %w", err)
-		${wailsUtils.#emitter(wailsVersion, 'Log', 'err')}
+		${wailsUtils.#emitter('Log', 'err')}
 			fmt.Println(err)
 			return nil, err
 		}
@@ -182,14 +167,14 @@ ${
 
 	if err := rows.Err(); err != nil {
 		err = fmt.Errorf("${functionName}: row iteration error: %w", err)
-		${wailsUtils.#emitter(wailsVersion, 'Log', 'err')}
+		${wailsUtils.#emitter('Log', 'err')}
 		fmt.Println(err)
 		return nil, err
 	}
 
 	if err := tx.Commit(); err != nil {
 		err = fmt.Errorf("${functionName}: transaction commit failed: %w", err)
-		${wailsUtils.#emitter(wailsVersion, 'Log', 'err')}
+		${wailsUtils.#emitter('Log', 'err')}
 		fmt.Println(err)
 		return nil, err
 	}
@@ -201,20 +186,19 @@ ${
 	)
 	if err != nil {
 		err = fmt.Errorf("${functionName}: statement execution failed: %w", err)
-		${wailsUtils.#emitter(wailsVersion, 'Log', 'err')}
+		${wailsUtils.#emitter('Log', 'err')}
 		fmt.Println(err)
 		return nil, err
 	}
 
 	if err := tx.Commit(); err != nil {
 		err = fmt.Errorf("${functionName}: transaction commit failed: %w", err)
-		${wailsUtils.#emitter(wailsVersion, 'Log', 'err')}
+		${wailsUtils.#emitter('Log', 'err')}
 		fmt.Println(err)
 		return nil, err
 	}
-	${wailsUtils.#emitter(wailsVersion, 'Updated', 'nil')}
+	${wailsUtils.#emitter('Updated', 'nil')}
 	${wailsUtils.#emitter(
-		wailsVersion,
 		'Log',
 		/** is a string therefore is quoted */
 		'"database is connected"',
@@ -231,10 +215,9 @@ ${
 	 * - `:` prefix is for input field;
 	 * - type then no `:` prefix means it is an output field;
 	 * @param {string} path
-	 * @param {2|3} wailsVersion
 	 * @returns {ReturnType<typeof TryAsync<boolean>>}
 	 */
-	static pathToSQLHandler = (path, wailsVersion) => {
+	static pathToSQLHandler = (path) => {
 		return ParseSQLFile(path, async ({ input, output, sqlString, path: fullPath }) => {
 			// Extract base file name without extension
 			const fileName = fullPath.split(/[/\\]/).pop() || '';
@@ -285,7 +268,6 @@ ${
 				isReadQuery,
 				namedQueryArgs,
 				scanTargets,
-				wailsVersion,
 			);
 			return {
 				ext: 'go',

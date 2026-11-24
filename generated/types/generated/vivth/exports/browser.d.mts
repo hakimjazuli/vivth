@@ -3,5 +3,4 @@
  * @copyright
  * this library is made and distributed under MIT license;
  */
-export { Wails2Form } from '../../../src/wails/v2/Wails2Form.mjs';
 export { Wails3Form } from '../../../src/wails/v3/Wails3Form.mjs';

@@ -72,6 +72,10 @@ npm i vivth
 
   > - added helper for wails3 project;
 
+- `1.5.44+:beta`:
+
+  > - removed wails2 support;
+
 ---
 
 <h2 id="list-of-exported-api-and-typehelpers">list of exported API and typehelpers</h2>
@@ -204,10 +208,6 @@ npm i vivth
 - [neutral.TemplateLiteralValueHandler](#templateliteralvaluehandler)
 - [neutral.VivthCleanup](#vivthcleanup)
 - [neutral.VLifecycleCallbacks](#vlifecyclecallbacks)
-- [node.Wails2Dev](#wails2dev)
-- [browser.Wails2Form](#wails2form)
-- [neutral.Wails2Listener](#wails2listener)
-- [neutral.Wails2OnSubmit](#wails2onsubmit)
 - [node.Wails3Dev](#wails3dev)
 - [browser.Wails3Form](#wails3form)
 - [neutral.Wails3Listener](#wails3listener)
@@ -7009,204 +7009,6 @@ const esWatcherInstance = this.registerObjectWithAutoCleanup(
 
 ---
 
-<h2 id="wails2dev">node.Wails2Dev</h2>
-
-#### reference: `Wails2Dev`
-
-suited for wails2 project with getter setter pattern using `sqlite3`;
-this class assume `Paths` and `SafeExit` to be instantiated;
-helper method with pre templated way of:
-
-- sqlite go code generation from SQL file on `{projectroot}/sql`;
-- auto_ipc.go generation from `{projectroot}/backend`;
-
-> > - function commented with `// GETTER`;
-> > - function commented with `// SETTER`;
->
-> - provide auto formatter and ipc generator for `// GETTER` and `// SETTER` pattern;
->
-> > - `// GETTER` prefix for getter function;
-> > - `// SETTER` prefix for setter function;
-
-- provide OOP-ish approach snippets(for .vscode):
-
-> - `??staticPrepare`;
-> - `??staticMethod`;
-> - `??instancePrepare`;
-> - `??instanceSingletonPrepare`;
-> - `??instanceMethod`;
-
-- provide `explorer.fileNesting.patterns` on `settings.json` for `.vscode`;
-
-> - will nest based on parent `*.md` and `*.sql`;
-
-- provide standard `backend/Connection.go` for connecting to `sqlite3` database;
-- provide standard internal `backend/UtilsGetterSetter.go` for thread-safe, multiple readers/writters;
-
-#### reference: `new Wails2Dev`
-
-- this is a singleton constructor;
-- dev script to watch multiple directories on your `projectRoot` for auto format and auto generate things;
-
-```js
-/**
- * @param {number} [minDelay]
- * - used to add timeout for ide go autoformatter;
- * - default 200;
- */
-```
-
-- <i>example</i>:
-
-```js
-import { Paths } from "vivth/neutral";
-import { Wails2Dev, SafeExit } from "vivth/node";
-new Paths({
-  root: process.env.INIT_CWD ?? process.cwd(),
-});
-new SafeExit("SIGTERM", "SIGINT");
-new Wails2Dev();
-```
-
-*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
-
----
-
-<h2 id="wails2form">browser.Wails2Form</h2>
-
-#### reference: `Wails2Form`
-
-Custom `form[is="form-wails"]` element that handles submission by calling a specified Wails SETTER backend function;
-passing form input fields as a JSON object string.
-
-- applies to `form[is="form-wails"]`;
-
-> - this class automatically bind the element with `Wails2OnSubmit` to it's `onsubmit`;
-
-- `[setter]` value to target go wails ipc name;
-
-> - it will call `window['go']['main']['App'][{setter.value}]` to your form inputs as `arg0`;
-
-- <i>example</i>:
-
-```js
-import { Wails2Form } from "vivth/browser";
-```
-
-#### reference: `Wails2Form.prepare`
-
-- prepare class for standard definitions;
-- you need to call this callback before using this class;
-
-```js
-/**
- * @type {()=>void}
- */
-```
-
-*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
-
----
-
-<h2 id="wails2listener">neutral.Wails2Listener</h2>
-
-#### reference: `Wails2Listener`
-
-- getter helper;
-- `Wails2Dev` will generate `app_ipc.go`;
-
-```js
-/**
- * @implements {VivthCleanup}
- */
-```
-
-#### reference: `Wails2Listener_instance.vivthCleanup`
-
-- when wrapped with vivth `WC_extends_instance.this.ON` this method is to auto cleaned;
-- you can call this method manually on the framework element cleanup lifecycle;
-
-```js
-/**
- * @type {()=>Promise<void>}
- */
-```
-
-#### reference: `new Wails2Listener`
-
-```js
-/**
- * @param {string} getterName
- * @param {()=>Promise<void>} handler
- */
-```
-
-- <i>example</i>:
-
-```js
-import { Wails2Listener } from "vivth/browser";
-import { MyIPC } from "../wails/go/App.js";
-const myListener = new Wails2Listener("users", async () => {
-  const res = await MyIPC();
-});
-// when no longer needed, eg. element is disconnected;
-myListener.vivthCleanup();
-```
-
-#### reference: `Wails2Listener.prepare`
-
-- prepare class for standard definitions;
-- you need to call this callback before using this class;
-
-```js
-/**
- * @type {()=>void}
- */
-```
-
-*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
-
----
-
-<h2 id="wails2onsubmit">neutral.Wails2OnSubmit</h2>
-
-#### reference: `Wails2OnSubmit`
-
-- function helper to be used as onsubmit event handler for wails ipc call for setter;
-- `form[setter]` value to target go wails ipc name;
-- `form[input][name]` value will be used as named `arg0` struct on setter ipc;
-- you can generate setter ipc by add comment before function `// SETTER`, which then `Wails2Dev` generate callable ipc on `app_ipc.go`;
-
-> - funtion need to return `[]string` which to notify your getter declared via `Wails2Listener`;
-> - function need to be located on `package backend` at `{projectRoot}/backend`;
-> - use `??staticMethod` snipet to generate the function skeleton;
->
-> > - you might also prepare it with `??staticPrepare`;
-
-```js
-/**
- * @this {HTMLFormElement}
- * - you need to call it via `Wails2OnSubmit.call(yourFormElement, submitEvent)` to bind `yourFormElement` to `this`;
- * @param {SubmitEvent} e
- * @returns {Promise<void>}
- */
-```
-
-- <i>example</i>:
-
-```js
-import { Wails2OnSubmit } from "vivth/neutral";
-const myElement = document.querySelector("#myForm");
-const submitHandler = Wails2OnSubmit.bind(myElement);
-myElement.addEventListener("submit", submitHandler);
-// on element no longer exist
-myElement.removeEventListener("submit", submitHandler);
-```
-
-*) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
-
----
-
 <h2 id="wails3dev">node.Wails3Dev</h2>
 
 #### reference: `Wails3Dev`
@@ -7239,6 +7041,9 @@ helper method with pre templated way of:
 > - will nest based on parent `*.md` and `*.sql`;
 
 - provide standard `backend/Connection.go` for connecting to `sqlite3` database;
+
+> - you should require `modernc.org/sqlite` by running `go get modernc.org/sqlite`;
+
 - provide standard internal `backend/UtilsGetterSetter.go` for thread-safe, multiple readers/writters;
 - provide standard `backend/Emitter.go` for return template;
 
