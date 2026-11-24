@@ -142,13 +142,20 @@ var (
 	connectionRef    *UtilsGetterSetterInstance[*sql.DB] = UtilsGetterSetterStatic.New[*sql.DB](nil)
 )
 
-func (thisClass *connectionStatic) set(dirPath string) (*sql.DB, error) {
+func (thisClass *connectionStatic) set(dirPath string, dbName string) (*sql.DB, error) {
 	thisClass.mu.Lock()
 	defer thisClass.mu.Unlock()
 
+	if dirPath == "" {
+		return nil, fmt.Errorf("dirPath cannot be empty")
+	}
+	if dbName == "" {
+		return nil, fmt.Errorf("dbName cannot be empty")
+	}
+
 	// 1. Sanitize directory path and construct target DB filepath
 	cleanDir := filepath.Clean(dirPath)
-	dbPath := filepath.Join(cleanDir, "shinstask.db")
+	dbPath := filepath.Join(cleanDir, dbName+".sqlite3")
 
 	// 2. Close existing connection if active
 	if thisClass.activeConn != nil {
