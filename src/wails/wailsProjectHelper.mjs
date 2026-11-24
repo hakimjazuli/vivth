@@ -132,25 +132,28 @@ import (
 )
 
 type connectionStatic struct {
-	mu         sync.Mutex
-	activeConn *sql.DB
-	activePath string
+	mu   sync.Mutex
+	conn *UtilsGetterSetterInstance[*sql.DB]
+	path *UtilsGetterSetterInstance[string]
 }
 
-var (
-	ConnectionStatic connectionStatic
-	connectionRef    *UtilsGetterSetterInstance[*sql.DB] = UtilsGetterSetterStatic.New[*sql.DB](nil)
-)
+var ConnectionStatic connectionStatic
 
-func (thisClass *connectionStatic) set(dirPath string, dbName string) (*sql.DB, error) {
+func (thisClass *connectionStatic) Set(dirPath string, dbName string) error {
 	thisClass.mu.Lock()
 	defer thisClass.mu.Unlock()
 
+	if thisClass.conn == nil {
+		thisClass.conn = UtilsGetterSetterStatic.New[*sql.DB](nil)
+	}
+	if thisClass.path == nil {
+		thisClass.path = UtilsGetterSetterStatic.New("")
+	}
 	if dirPath == "" {
-		return nil, fmt.Errorf("dirPath cannot be empty")
+		return fmt.Errorf("dirPath cannot be empty")
 	}
 	if dbName == "" {
-		return nil, fmt.Errorf("dbName cannot be empty")
+		return fmt.Errorf("dbName cannot be empty")
 	}
 
 	// 1. Sanitize directory path and construct target DB filepath
@@ -158,12 +161,11 @@ func (thisClass *connectionStatic) set(dirPath string, dbName string) (*sql.DB, 
 	dbPath := filepath.Join(cleanDir, dbName+".sqlite3")
 
 	// 2. Close existing connection if active
-	if thisClass.activeConn != nil {
-		_, _ = thisClass.activeConn.Exec("PRAGMA wal_checkpoint(TRUNCATE);")
-		_ = thisClass.activeConn.Close()
-		thisClass.activeConn = nil
-		thisClass.activePath = ""
-		connectionRef.Set(nil)
+	if oldDB := thisClass.conn.Get(); oldDB != nil {
+		_, _ = oldDB.Exec("PRAGMA wal_checkpoint(TRUNCATE);")
+		_ = oldDB.Close()
+		thisClass.path.Set("")
+		thisClass.conn.Set(nil)
 	}
 
 	// 3. Construct DSN string with SQLite PRAGMA configuration
@@ -175,7 +177,7 @@ func (thisClass *connectionStatic) set(dirPath string, dbName string) (*sql.DB, 
 	// 4. Open new SQLite DB connection
 	db, err := sql.Open("sqlite", dsn)
 	if err != nil {
-		return nil, fmt.Errorf("failed to open sqlite db at %s: %w", dbPath, err)
+		return fmt.Errorf("failed to open sqlite db at %s: %w", dbPath, err)
 	}
 
 	// Configure connection pool limits for SQLite single-writer model
@@ -183,14 +185,14 @@ func (thisClass *connectionStatic) set(dirPath string, dbName string) (*sql.DB, 
 
 	if err := db.Ping(); err != nil {
 		_ = db.Close()
-		return nil, fmt.Errorf("failed to ping sqlite db at %s: %w", dbPath, err)
+		return fmt.Errorf("failed to ping sqlite db at %s: %w", dbPath, err)
 	}
 
 	// Store internal state
-	thisClass.activeConn = db
-	thisClass.activePath = dbPath
+	thisClass.conn.Set(db)
+	thisClass.path.Set(dbPath)
 
-	return db, nil
+	return nil
 }
 `;
 
