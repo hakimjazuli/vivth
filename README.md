@@ -72,7 +72,7 @@ npm i vivth
 
   > - added helper for wails3 project;
 
-- `1.5.44+:beta`:
+- `1.6.x:beta`:
 
   > - removed wails2 support;
 
