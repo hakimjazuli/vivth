@@ -8,7 +8,7 @@ import { Console } from '../../class/Console.mjs';
 /**
  * @description
  * - function helper to be used as onsubmit event handler for wails ipc call for setter;
- * - `form[form-ref]` value to target go wails ipc name;
+ * - `form[data-wails3]` value to target go wails ipc name;
  * > - value: `${package}.{Struct}.{Method}`;
  * - `form[input][name]` value will be used as named `arg0` struct on setter ipc;
  * - you can generate setter ipc by add comment before function `// FORM`, which then `Wails3Dev` generate callable ipc on `main_services.go`;
@@ -18,6 +18,7 @@ import { Console } from '../../class/Console.mjs';
  * > > - you might also prepare it with `??servicePrepare`;
  * @this {HTMLFormElement}
  * - you need to call it via `Wails3OnSubmit.call(yourFormElement, submitEvent)` to bind `yourFormElement` to `this`;
+ * > - optionally your prefered framework might have more direct/efficient way to bind the element;
  * @param {SubmitEvent} e
  * @returns {Promise<void>}
  * @example
@@ -34,26 +35,26 @@ export async function Wails3OnSubmit(e) {
 		return;
 	}
 	e.preventDefault();
-	const formRefNode = this.getAttribute('form-ref');
-	if (!formRefNode) {
+	const wails3Ref = this.dataset.wails3;
+	if (!wails3Ref) {
 		console.error({
 			element: this,
-			message: 'FormWails: Missing "form-ref" attribute on form element;',
+			message: 'FormWails: Missing "data-wails3" attribute on form element;',
 		});
 		return;
 	}
-	// get all input name that have [input-name]
+	// get all input name that have input[name]
 	// Extract named inputs into a Record<string, string>
 	const formData = new FormData(this);
 	const payload = Object.fromEntries(formData.entries());
 	const [, errorCalling] = await TryAsync(async () => {
-		await $Call.ByName(`${formRefNode}`, payload);
+		await $Call.ByName(`${wails3Ref}`, payload);
 	});
 	if (!errorCalling) {
 		return;
 	}
 	Console.error({
 		message: errorCalling,
-		ipcName: formRefNode,
+		ipcName: wails3Ref,
 	});
 }

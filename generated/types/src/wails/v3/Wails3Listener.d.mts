@@ -19,13 +19,11 @@ export declare class Wails3Listener implements VivthCleanup {
     vivthCleanup: () => Promise<void>;
     /**
      * @description
+     * - unlike `wails3` standard emit event listener, this class meant to listen to single `eventName`(`emitter:updated_datas`), with light weight `string[]` `message`(internally handled by this class);
+     * - it is usefull for getter setter pattern, meaning the message should only contains what data on the backends is updated, then you can just call getter `Service` for that particullar name;
      * @param {string} listenToFORMNotifName
      * - `// FORM` will notify names go as array of string via `*EmitterInstance`;
      * - `listenToFORMNotifName` is to listen to one specific string value, then you can run a callback;
-     * > - as of `wails3` they didn't expose `ipc`(now `Service`) with human readable name like on `wails2` so you could technically obfuscate it slightly better;
-     * > - so this class is to help you wrap that `Service` bindings into your callback;
-     * - multi instance listening to same name can run in parallel;
-     * > - so different handler could pass different arguments;
      * @param {()=>Promise<void>} handler
      * @example
      * import { Wails3Listener } from 'vivth/neutral';
@@ -42,6 +40,9 @@ export declare class Wails3Listener implements VivthCleanup {
      * - prepare class for standard definitions;
      * - you need to call this callback before using this class;
      * @type {()=>void}
+     * @example
+     * import { Wails3Listener } from 'vivth/neutral';
+     * Wails3Listener.prepare();
      */
     static prepare: () => void;
 }

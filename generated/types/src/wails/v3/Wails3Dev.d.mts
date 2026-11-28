@@ -1,6 +1,6 @@
 /**
  * @description
- * suited for wails3 project with getter setter pattern using `sqlite3`;
+ * suited for wails3 project with stateless backend getter setter pattern using `sqlite3`;
  * this class assume `Paths` and `SafeExit` to be instantiated;
  * helper method with pre templated way of:
  * - sqlite go code generation from SQL file on `{projectroot}/sql`;
@@ -16,12 +16,14 @@
  * > - `??instanceMethod`;
  * > - `??servicePrepare`;
  * > - `??serviceMethod`;
+ * > - `??eventRegister`;
+ * > - `??initPrepare`;
  * - provide `explorer.fileNesting.patterns` on `settings.json` for `.vscode`;
  * > - will nest based on parent `*.md` and `*.sql`;
  * - provide standard `backend/Connection.go` for connecting to `sqlite3` database;
  * > - you should require `modernc.org/sqlite` by running `go get modernc.org/sqlite`;
  * - provide standard internal `backend/UtilsGetterSetter.go` for thread-safe, multiple readers/writters;
- * - provide standard `backend/Emitter.go` for return template;
+ * - provide getter setter pattern `backend/Emitter.go` for return template;
  */
 export declare class Wails3Dev {
     #private;

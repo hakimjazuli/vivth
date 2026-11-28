@@ -51,7 +51,7 @@
   "scripts": {
     "dev": "bun --parallel 'dev:*'",
     "dev:standard": "bun ./dev/auto-doc.mjs",
-    "dev:t-w": "tsc --watch",
+    "dev:tw": "tsc --watch",
     "test:bundle": "bun ./test/bundle.mjs",
     "test:sqlite3_migration": "bun ./test/SQLite3AutoMigration/test.mjs",
     "test-": "bun ./test/test_.mjs",

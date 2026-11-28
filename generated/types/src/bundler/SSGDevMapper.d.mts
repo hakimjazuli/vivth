@@ -13,7 +13,7 @@ import type { VivthCleanup } from '../typehints/VivthCleanup.mjs';
  * >- `.cjs`;
  * >- `.js`;
  * - `.html` parse `script` elements to be:
- * >- `minifed` if has `[minify="true"]`;
+ * >- `minifed` if has `[data-minify="true"]`;
  * >- use `esm` if has `[type="module"]`;
  * - `.scss`|`.sass` write compiled `.css`;
  * - every other extension will be copied to `targetpath` as is(without `targetpath` as string);

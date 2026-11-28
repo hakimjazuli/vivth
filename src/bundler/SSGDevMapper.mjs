@@ -37,7 +37,7 @@ import { BrowserExternals } from './adds/BrowserExternals.mjs';
  * >- `.cjs`;
  * >- `.js`;
  * - `.html` parse `script` elements to be:
- * >- `minifed` if has `[minify="true"]`;
+ * >- `minifed` if has `[data-minify="true"]`;
  * >- use `esm` if has `[type="module"]`;
  * - `.scss`|`.sass` write compiled `.css`;
  * - every other extension will be copied to `targetpath` as is(without `targetpath` as string);
@@ -423,7 +423,7 @@ export class SSGDevMapper {
 		const handledScripts = Array.from(resDocument.querySelectorAll(`script`));
 		await Promise.all(
 			ForOfSync(handledScripts, async (scriptElement) => {
-				const hasMinifyTrue = (scriptElement.getAttribute('minify') ?? '') === 'true';
+				const hasMinifyTrue = (scriptElement.dataset.minify ?? '') === 'true';
 				const hasTypeModule = (scriptElement.getAttribute('type') ?? '') === 'module';
 				if (!hasMinifyTrue && !hasTypeModule) {
 					return;

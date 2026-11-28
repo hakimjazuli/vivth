@@ -75,3 +75,10 @@ npm i vivth
 - `1.6.x:beta`:
 
   > - removed wails2 support;
+
+- `1.6.1+:beta`:
+
+  > - non standard html attribute are prefixed with `data-`;
+  >
+  > > - `script[minify]` -> `script[data-minify]`;
+  > > - `form[form-ref]` -> `form[data-wails3]`;

@@ -34,7 +34,7 @@ export type VivthCleanup = import('../typehints/VivthCleanup.mjs').VivthCleanup;
  * >- `sass`/`scss` it will be compiled to `css` first;
  * >- `html` will be checked for `script`;
  * >>- has `[type="module]"`: will be processed as `esm`;
- * >>- has `[minify="true"]`: will be minified;
+ * >>- has `[data-minify="true"]`: will be minified;
  * >- other than those files, they will be just copied to `targetPaths`;
  * - avoid forbidden filename characters and problematic one such as curly/square/normal-braces, that might be used for file pointing cli;
  * - for runtime example see file `/dev/auto/` on source code;

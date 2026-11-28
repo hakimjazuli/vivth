@@ -76,6 +76,13 @@ npm i vivth
 
   > - removed wails2 support;
 
+- `1.6.1+:beta`:
+
+  > - non standard html attribute are prefixed with `data-`;
+  >
+  > > - `script[minify]` -> `script[data-minify]`;
+  > > - `form[form-ref]` -> `form[data-wails3]`;
+
 ---
 
 <h2 id="list-of-exported-api-and-typehelpers">list of exported API and typehelpers</h2>
@@ -811,7 +818,7 @@ body {
 > - `html` will be checked for `script`;
 >
 > > - has `[type="module]"`: will be processed as `esm`;
-> > - has `[minify="true"]`: will be minified;
+> > - has `[data-minify="true"]`: will be minified;
 >
 > - other than those files, they will be just copied to `targetPaths`;
 
@@ -1158,7 +1165,7 @@ await RunWatchThenCompileJSOnSafeExit({
 
 - `.html` parse `script` elements to be:
 
-> - `minifed` if has `[minify="true"]`;
+> - `minifed` if has `[data-minify="true"]`;
 > - use `esm` if has `[type="module"]`;
 
 - `.scss`|`.sass` write compiled `.css`;
@@ -7013,7 +7020,7 @@ const esWatcherInstance = this.registerObjectWithAutoCleanup(
 
 #### reference: `Wails3Dev`
 
-suited for wails3 project with getter setter pattern using `sqlite3`;
+suited for wails3 project with stateless backend getter setter pattern using `sqlite3`;
 this class assume `Paths` and `SafeExit` to be instantiated;
 helper method with pre templated way of:
 
@@ -7035,6 +7042,8 @@ helper method with pre templated way of:
 > - `??instanceMethod`;
 > - `??servicePrepare`;
 > - `??serviceMethod`;
+> - `??eventRegister`;
+> - `??initPrepare`;
 
 - provide `explorer.fileNesting.patterns` on `settings.json` for `.vscode`;
 
@@ -7045,7 +7054,7 @@ helper method with pre templated way of:
 > - you should require `modernc.org/sqlite` by running `go get modernc.org/sqlite`;
 
 - provide standard internal `backend/UtilsGetterSetter.go` for thread-safe, multiple readers/writters;
-- provide standard `backend/Emitter.go` for return template;
+- provide getter setter pattern `backend/Emitter.go` for return template;
 
 #### reference: `new Wails3Dev`
 
@@ -7087,7 +7096,7 @@ passing form input fields as a JSON object string.
 
 > - this class automatically bind the element with `Wails3OnSubmit` to it's `onsubmit`;
 
-- `[form-ref]` value to target go wails ipc name;
+- `[data-wails3]` value to target go wails ipc name;
 
 > - it will call `wails3 Binded Service` to your form inputs as `arg0`;
 
@@ -7106,6 +7115,13 @@ import { Wails3Form } from "vivth/browser";
 /**
  * @type {()=>void}
  */
+```
+
+- <i>example</i>:
+
+```js
+import { Wails3Form } from "vivth/browser";
+Wails3Form.prepare();
 ```
 
 *) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
@@ -7138,16 +7154,15 @@ import { Wails3Form } from "vivth/browser";
 
 #### reference: `new Wails3Listener`
 
+- unlike `wails3` standard emit event listener, this class meant to listen to single `eventName`(`emitter:updated_datas`), with light weight `string[]` `message`(internally handled by this class);
+- it is usefull for getter setter pattern, meaning the message should only contains what data on the backends is updated, then you can just call getter `Service` for that particullar name;
+
 ```js
 /**
  * @param {string} listenToFORMNotifName
  * - `// FORM` will notify names go as array of string via `
  *EmitterInstance`;
  * - `listenToFORMNotifName` is to listen to one specific string value, then you can run a callback;
- * > - as of `wails3` they didn't expose `ipc`(now `Service`) with human readable name like on `wails2` so you could technically obfuscate it slightly better;
- * > - so this class is to help you wrap that `Service` bindings into your callback;
- * - multi instance listening to same name can run in parallel;
- * > - so different handler could pass different arguments;
  * @param {()=>Promise<void>} handler
  */
 ```
@@ -7175,6 +7190,13 @@ myListener.vivthCleanup();
  */
 ```
 
+- <i>example</i>:
+
+```js
+import { Wails3Listener } from "vivth/neutral";
+Wails3Listener.prepare();
+```
+
 *) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>
 
 ---
@@ -7184,7 +7206,7 @@ myListener.vivthCleanup();
 #### reference: `Wails3OnSubmit`
 
 - function helper to be used as onsubmit event handler for wails ipc call for setter;
-- `form[form-ref]` value to target go wails ipc name;
+- `form[data-wails3]` value to target go wails ipc name;
 
 > - value: `${package}.{Struct}.{Method}`;
 
@@ -7201,6 +7223,7 @@ myListener.vivthCleanup();
 /**
  * @this {HTMLFormElement}
  * - you need to call it via `Wails3OnSubmit.call(yourFormElement, submitEvent)` to bind `yourFormElement` to `this`;
+ * > - optionally your prefered framework might have more direct/efficient way to bind the element;
  * @param {SubmitEvent} e
  * @returns {Promise<void>}
  */
@@ -7226,13 +7249,31 @@ myElement.removeEventListener("submit", submitHandler);
 #### reference: `WailsMainQ`
 
 - is a [QChannel](#qchannel) instance helper to queue operations;
-- use with certain unique object;
-- don't use primitive like, number | string | etc;
+- use with certain unique object, preferably cached;
+- avoid use primitive like, number | string | etc, if there would be possible name collision, as it will silently runs the callback anyway;
+
+> - you can ofcourse still use them for wails `Events` names;
 
 ```js
 /**
  * @type {QChannel<any>}
  */
+```
+
+- <i>example</i>:
+
+```js
+import { WailsMainQ } from "vivth/neutral";
+const myCallback = async ({ isLastOnQ }) => {
+  if (!isLastOnQ()) {
+    return;
+  }
+  // code
+};
+WailsMainQ.callback(
+  myCallback, // id
+  myCallback, // actual callback to run
+);
 ```
 
 *) <sub>[go to list of exported API and typehelpers](#list-of-exported-api-and-typehelpers)</sub>

@@ -56,18 +56,22 @@ declare const Wails3Form_base: (new (...args: any[]) => HTMLFormElement & {
  * passing form input fields as a JSON object string.
  * - applies to `form[is="form-wails"]`;
  * > - this class automatically bind the element with `Wails3OnSubmit` to it's `onsubmit`;
- * - `[form-ref]` value to target go wails ipc name;
+ * - `[data-wails3]` value to target go wails ipc name;
  * > - it will call `wails3 Binded Service` to your form inputs as `arg0`;
  * @example
  * import { Wails3Form } from 'vivth/browser';
  */
 export declare class Wails3Form extends Wails3Form_base {
+    #private;
     constructor();
     /**
      * @description
      * - prepare class for standard definitions;
      * - you need to call this callback before using this class;
      * @type {()=>void}
+     * @example
+     * import { Wails3Form } from 'vivth/browser';
+     * Wails3Form.prepare();
      */
     static prepare: () => void;
 }

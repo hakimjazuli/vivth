@@ -12,6 +12,10 @@ import { JSONFileHandler } from '../class/JSONFileHandler.mjs';
 import { Console } from '../class/Console.mjs';
 import { ForOfSync } from '../function/ForOfSync.mjs';
 import { ForInSync } from '../function/ForInSync.mjs';
+import {
+	wailsProjectHelperDBLogName,
+	wailsProjectHelperDBUpdatedName,
+} from './wailsProjectHelper.mjs';
 
 export class wailsUtils {
 	/**
@@ -103,18 +107,23 @@ import (
 	"github.com/wailsapp/wails/v3/pkg/application"
 )
 
-type ${functionName}InputStruct struct {
+${
+	!!trueInput
+		? `type ${functionName}InputStruct struct {
 ${trueInput}
+}`
+		: ''
 }
 type ${functionName}OutputStruct struct {
-${trueOutput}
+	${trueOutput}
 }
 
-func ${functionName}(connection *sql.DB, input *${functionName}InputStruct) ([]*${functionName}OutputStruct, error) {
+
+func ${functionName}(connection *sql.DB${!!trueInput ? `, input *${functionName}InputStruct` : ''}) ([]*${functionName}OutputStruct, error) {
 	appGet := application.Get()
 	if connection == nil {
 		err := fmt.Errorf("database connection is nil")
-		${wailsUtils.#emitter('Log', 'err')}
+		${wailsUtils.#emitter(wailsProjectHelperDBLogName, 'err')}
 		fmt.Println(err)
 		return nil, err
 	}
@@ -122,7 +131,7 @@ func ${functionName}(connection *sql.DB, input *${functionName}InputStruct) ([]*
 	tx, err := connection.BeginTx(context.Background(), nil)
 	if err != nil {
 		err = fmt.Errorf("${functionName}: failed to begin transaction: %w", err)
-		${wailsUtils.#emitter('Log', 'err')}
+		${wailsUtils.#emitter(wailsProjectHelperDBLogName, 'err')}
 		fmt.Println(err)
 		return nil, err
 	}
@@ -133,7 +142,7 @@ func ${functionName}(connection *sql.DB, input *${functionName}InputStruct) ([]*
 	stmt, err := tx.PrepareContext(context.Background(), query)
 	if err != nil {
 		err = fmt.Errorf("${functionName}: failed to prepare statement: %w", err)
-		${wailsUtils.#emitter('Log', 'err')}
+		${wailsUtils.#emitter(wailsProjectHelperDBLogName, 'err')}
 		fmt.Println(err)
 		return nil, err
 	}
@@ -146,7 +155,7 @@ ${
 	)
 	if err != nil {
 		err = fmt.Errorf("${functionName}: query execution failed: %w", err)
-		${wailsUtils.#emitter('Log', 'err')}
+		${wailsUtils.#emitter(wailsProjectHelperDBLogName, 'err')}
 		fmt.Println(err)
 		return nil, err
 	}
@@ -158,7 +167,7 @@ ${
 		item := &${functionName}OutputStruct{}
 		if err := rows.Scan(${scanTargets}); err != nil {
 			err = fmt.Errorf("${functionName}: failed to scan row: %w", err)
-		${wailsUtils.#emitter('Log', 'err')}
+			${wailsUtils.#emitter(wailsProjectHelperDBLogName, 'err')}
 			fmt.Println(err)
 			return nil, err
 		}
@@ -167,14 +176,14 @@ ${
 
 	if err := rows.Err(); err != nil {
 		err = fmt.Errorf("${functionName}: row iteration error: %w", err)
-		${wailsUtils.#emitter('Log', 'err')}
+		${wailsUtils.#emitter(wailsProjectHelperDBLogName, 'err')}
 		fmt.Println(err)
 		return nil, err
 	}
 
 	if err := tx.Commit(); err != nil {
 		err = fmt.Errorf("${functionName}: transaction commit failed: %w", err)
-		${wailsUtils.#emitter('Log', 'err')}
+		${wailsUtils.#emitter(wailsProjectHelperDBLogName, 'err')}
 		fmt.Println(err)
 		return nil, err
 	}
@@ -186,20 +195,20 @@ ${
 	)
 	if err != nil {
 		err = fmt.Errorf("${functionName}: statement execution failed: %w", err)
-		${wailsUtils.#emitter('Log', 'err')}
+		${wailsUtils.#emitter(wailsProjectHelperDBLogName, 'err')}
 		fmt.Println(err)
 		return nil, err
 	}
 
 	if err := tx.Commit(); err != nil {
 		err = fmt.Errorf("${functionName}: transaction commit failed: %w", err)
-		${wailsUtils.#emitter('Log', 'err')}
+		${wailsUtils.#emitter(wailsProjectHelperDBLogName, 'err')}
 		fmt.Println(err)
 		return nil, err
 	}
-	${wailsUtils.#emitter('Updated', 'nil')}
+	${wailsUtils.#emitter(wailsProjectHelperDBUpdatedName, 'nil')}
 	${wailsUtils.#emitter(
-		'Log',
+		wailsProjectHelperDBLogName,
 		/** is a string therefore is quoted */
 		'"database is connected"',
 	)}

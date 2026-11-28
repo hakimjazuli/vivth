@@ -1,6 +1,28 @@
 // @ts-check
 
+export const wailsProjectHelperEmitterUpdatedDatasName = 'emitter:updated_datas';
+export const wailsProjectHelperDBLogName = 'db:log';
+export const wailsProjectHelperDBUpdatedName = 'db:updated';
+
 export const wailsProjectHelperSnippet = {
+	eventRegister: {
+		prefix: '??eventRegister',
+		scope: 'go',
+		body: ['application.RegisterEvent[${0:Name}Data](${0:Name}Event)'],
+		description: 'eventRegister',
+	},
+	emit: {
+		prefix: '??emit',
+		scope: 'go',
+		body: ['application.Get().Event.Emit(${1:EventName}, ${2:eventPayload})'],
+		description: 'emit',
+	},
+	initPrepare: {
+		prefix: '??initPrepare',
+		scope: 'go',
+		body: ['func init() {', '\t${0:// code}', '}'],
+		description: 'initPrepare',
+	},
 	staticPrepare: {
 		prefix: '??staticPrepare',
 		scope: 'go',
@@ -131,12 +153,23 @@ import (
 	"sync"
 
 	_ "modernc.org/sqlite"
+	"github.com/wailsapp/wails/v3/pkg/application"
 )
 
 type connectionStatic struct {
 	mu   sync.Mutex
 	conn *UtilsGetterSetterInstance[*sql.DB]
 	path *UtilsGetterSetterInstance[string]
+}
+
+const (
+	ConnectionDbLogEvent  = "${wailsProjectHelperDBLogName}"
+	ConnectionDbUpdateEvent = "${wailsProjectHelperDBUpdatedName}"
+)
+
+func init() {
+	application.RegisterEvent[string](ConnectionDbLogEvent)
+	application.RegisterEvent[string](ConnectionDbUpdateEvent)
 }
 
 var ConnectionStatic connectionStatic
@@ -234,7 +267,6 @@ func (thisInstance *UtilsGetterSetterInstance[T]) Set(value T) {
 	thisInstance.utilsGetterSettervalue = value
 }
 `;
-
 export const wailsProjectHelperEmitter = `package backend
 
 import (
@@ -246,13 +278,20 @@ type (
 	emitterStatic   struct {}
 )
 
+const EmitterUpdateEvent = "${wailsProjectHelperEmitterUpdatedDatasName}"
+
+func init() {
+	application.RegisterEvent[[]string](EmitterUpdateEvent)
+}
+
 var EmitterStatic emitterStatic
 
+// return type generator
 func (thisClass emitterStatic) New(events []string) *EmitterInstance {
 	if len(events) == 0 {
 		return &EmitterInstance{}
 	}
-	application.Get().Event.Emit("getter:update", events)
+	application.Get().Event.Emit(EmitterUpdateEvent, events)
 	return &EmitterInstance{}
 }
 `;

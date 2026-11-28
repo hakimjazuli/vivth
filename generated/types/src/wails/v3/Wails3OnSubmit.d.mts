@@ -1,7 +1,7 @@
 /**
  * @description
  * - function helper to be used as onsubmit event handler for wails ipc call for setter;
- * - `form[form-ref]` value to target go wails ipc name;
+ * - `form[data-wails3]` value to target go wails ipc name;
  * > - value: `${package}.{Struct}.{Method}`;
  * - `form[input][name]` value will be used as named `arg0` struct on setter ipc;
  * - you can generate setter ipc by add comment before function `// FORM`, which then `Wails3Dev` generate callable ipc on `main_services.go`;
@@ -11,6 +11,7 @@
  * > > - you might also prepare it with `??servicePrepare`;
  * @this {HTMLFormElement}
  * - you need to call it via `Wails3OnSubmit.call(yourFormElement, submitEvent)` to bind `yourFormElement` to `this`;
+ * > - optionally your prefered framework might have more direct/efficient way to bind the element;
  * @param {SubmitEvent} e
  * @returns {Promise<void>}
  * @example

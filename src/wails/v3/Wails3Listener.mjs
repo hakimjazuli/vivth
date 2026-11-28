@@ -1,10 +1,10 @@
 // @ts-check
 
 import { Events } from '@wailsio/runtime';
-
-import { WalkThrough } from '../../class/WalkThrough.mjs';
 import { ForOfSync } from '../../function/ForOfSync.mjs';
 import { WailsMainQ } from '../WailsMainQ.mjs';
+import { wailsProjectHelperEmitterUpdatedDatasName } from '../wailsProjectHelper.mjs';
+import { TryAsync } from '../../function/TryAsync.mjs';
 
 /**
  * @typedef {import('../../typehints/VivthCleanup.mjs').VivthCleanup} VivthCleanup
@@ -28,8 +28,12 @@ export class Wails3Listener {
 	 * @type {()=>Promise<void>}
 	 */
 	vivthCleanup = async () => {
-		Wails3Listener.#mappedHandler.get(this.#getterName)?.delete(this.#handler);
-		if (Wails3Listener.#mappedHandler.size) {
+		const handlers = Wails3Listener.#mappedHandler.get(this.#getterName);
+		if (!handlers) {
+			return;
+		}
+		handlers.delete(this.#handler);
+		if (handlers.size !== 0) {
 			return;
 		}
 		Wails3Listener.#mappedHandler.delete(this.#getterName);
@@ -44,13 +48,11 @@ export class Wails3Listener {
 	#handler;
 	/**
 	 * @description
+	 * - unlike `wails3` standard emit event listener, this class meant to listen to single `eventName`(`emitter:updated_datas`), with light weight `string[]` `message`(internally handled by this class);
+	 * - it is usefull for getter setter pattern, meaning the message should only contains what data on the backends is updated, then you can just call getter `Service` for that particullar name;
 	 * @param {string} listenToFORMNotifName
 	 * - `// FORM` will notify names go as array of string via `*EmitterInstance`;
 	 * - `listenToFORMNotifName` is to listen to one specific string value, then you can run a callback;
-	 * > - as of `wails3` they didn't expose `ipc`(now `Service`) with human readable name like on `wails2` so you could technically obfuscate it slightly better;
-	 * > - so this class is to help you wrap that `Service` bindings into your callback;
-	 * - multi instance listening to same name can run in parallel;
-	 * > - so different handler could pass different arguments;
 	 * @param {()=>Promise<void>} handler
 	 * @example
 	 * import { Wails3Listener } from 'vivth/neutral';
@@ -74,7 +76,7 @@ export class Wails3Listener {
 	}
 	/**
 	 * @param {() => Promise<void>} handler
-	 * @returns {Promise<[undefined, Error] | [void, undefined]>}
+	 * @returns {ReturnType<typeof TryAsync<void>>}
 	 */
 	static #runHandler = async (handler) => {
 		return await WailsMainQ.callback(handler, async ({ isLastOnQ }) => {
@@ -84,25 +86,33 @@ export class Wails3Listener {
 			return await handler();
 		});
 	};
+	static #isPrepared = false;
 	/**
 	 * @description
 	 * - prepare class for standard definitions;
 	 * - you need to call this callback before using this class;
 	 * @type {()=>void}
+	 * @example
+	 * import { Wails3Listener } from 'vivth/neutral';
+	 * Wails3Listener.prepare();
 	 */
 	static prepare = () => {
-		Events.On('getter:update', (getters) => {
+		if (Wails3Listener.#isPrepared) {
+			return;
+		}
+		Wails3Listener.#isPrepared = true;
+		Events.On(wailsProjectHelperEmitterUpdatedDatasName, (getters) => {
 			const { data: gettersData } = getters;
 			if (!gettersData || !Array.isArray(gettersData)) {
 				return;
 			}
-			WalkThrough.array(gettersData, ([_, getter]) => {
+			for (const getter of gettersData) {
 				const setOfHandler = Wails3Listener.#mappedHandler.get(getter);
 				if (!setOfHandler) {
-					return;
+					continue;
 				}
 				ForOfSync(setOfHandler, Wails3Listener.#runHandler);
-			});
+			}
 		});
 	};
 }
