@@ -20,6 +20,10 @@ import { readFile } from 'node:fs/promises';
 import { Preferrence } from '../../common/Preferrence.mjs';
 import { FileSafe } from '../../class/FileSafe.mjs';
 import { ForOfSync } from '../../function/ForOfSync.mjs';
+import { LazyFactory } from '../../function/LazyFactory.mjs';
+import { Signal } from '../../class/Signal.mjs';
+import { Effect } from '../../class/Effect.mjs';
+import { toValidJsConstName } from '../wails3BindingsGeneratorHelper.mjs';
 
 /**
  * @description
@@ -81,21 +85,142 @@ export class Wails3Dev {
 	static #getPackageFromContent = (filePath) => {
 		return Paths.normalize(join(basename(Paths.root), relative(Paths.root, dirname(filePath))));
 	};
+	/**
+	 * Extracts string elements from `EmitterStatic.New([]string{...})`.
+	 * Returns an empty array if no non-empty string slice is found.
+	 *
+	 * @param {string} content
+	 * @returns {string[]}
+	 */
+	static #extractEmitterStrings = (content) => {
+		const blockMatch = content.match(/EmitterStatic\.New\(\s*\[\s*\]string\s*\{([\s\S]*?)\}\s*\)/);
+		if (!blockMatch) {
+			return [];
+		}
 
+		const inner = blockMatch[1];
+		if (!inner) {
+			return [];
+		}
+		const items = [];
+		const literalPattern = /"(?:\\.|[^"\\])*"|`[^`]*`/g;
+
+		for (const match of inner.matchAll(literalPattern)) {
+			const raw = match[0];
+			if (raw.startsWith('"')) {
+				items.push(JSON.parse(raw));
+			} else {
+				items.push(raw.slice(1, -1));
+			}
+		}
+
+		return items;
+	};
+	static #Wails3ListenersBindings = LazyFactory(
+		/**
+		 * @returns {Signal<Map<string, Set<string>>>}
+		 */ () => new Signal(new Map()),
+	);
+	/**
+	 * @param {Set<string>} trueBindings
+	 * @returns {string}
+	 */
+	static #CreateVivthWails3BindingsString = (trueBindings) => {
+		/**
+		 * @type {string[]}
+		 */
+		const base = ['// @ts-check', "import { Wails3Listener } from 'vivth/neutral';"];
+		const ascArr = Array.from(trueBindings).sort((a, b) => a.localeCompare(b));
+		for (let i = 0; i < ascArr.length; i++) {
+			const str = ascArr[i];
+			if (!str) {
+				continue;
+			}
+			const varName = toValidJsConstName(str);
+			base.push(
+				`/**
+ * @description
+ * - call to generate Wails3Listener instance for \`${varName}\`;
+ * - call the returned \`.vivthCleanup\` to prevent leaks;
+ * > - like on component destroyed/unmout, etc.;
+ * @param { ConstructorParameters<typeof Wails3Listener>[1] } handler
+ * @returns { Wails3Listener }
+ */
+export const NewWails3ListenerFor_${varName} = (handler) => new Wails3Listener('${str}', handler);`,
+			);
+		}
+		return `${base.join('\n')}\n`;
+	};
+	static #Wails3ListenersBindingsEffect = LazyFactory(
+		() =>
+			new Effect(async ({ subscribe, isLastCalled }) => {
+				await Timeout(Wails3Dev.#delay);
+				if (!(await isLastCalled())) {
+					throw 'not the last call';
+				}
+				const core = subscribe(Wails3Dev.#Wails3ListenersBindings).value;
+				const trueBindings = new Set();
+				ForOfSync(core, ([, setOfString]) => {
+					ForOfSync(setOfString, (string) => {
+						trueBindings.add(string);
+					});
+				});
+				const stringBindings = Wails3Dev.#CreateVivthWails3BindingsString(trueBindings);
+				await FileSafe.write(
+					Paths.diskAbsolute('/frontend/vivth/wails/listenerEvents.mjs'),
+					stringBindings,
+					{
+						encoding: Preferrence.encoding,
+					},
+				);
+			}),
+	);
 	/**
 	 * @param {string} filePath
-	 * @param {number} timeout
+	 * @param {'add'|'delete'} eventName
+	 * @returns {Promise<void>}
+	 */
+	static #goRegisterVivthWails3Emitters = async (filePath, eventName) => {
+		const [content, errorRead] = await TryAsync(async () => {
+			return readFile(filePath, { encoding: Preferrence.encoding });
+		});
+
+		if (errorRead) {
+			Wails3Dev.#Wails3ListenersBindings.value.delete(filePath);
+		} else {
+			const emitterEvents = Wails3Dev.#extractEmitterStrings(content);
+			if (emitterEvents.length === 0) {
+				return;
+			}
+			// accessing 1 of the property to trigger lazy factory generator
+			Wails3Dev.#Wails3ListenersBindingsEffect.options;
+			switch (eventName) {
+				case 'add':
+					Wails3Dev.#Wails3ListenersBindings.value.set(filePath, new Set(emitterEvents));
+					break;
+				case 'delete':
+					Wails3Dev.#Wails3ListenersBindings.value.delete(filePath);
+					break;
+			}
+			Wails3Dev.#Wails3ListenersBindings.subscribers.notify();
+			if (errorRead) {
+				throw errorRead;
+			}
+		}
+	};
+	/**
+	 * @param {string} filePath
 	 * @returns {ReturnType<typeof TryAsync<{
 	 *   importFromPackage: string;
 	 *   serviceDeclaration: string;
 	 * }>>}
 	 */
-	static #goCheckServices = async (filePath, timeout) => {
+	static #goCheckServices = async (filePath) => {
 		return await Wails3Dev.#q.callback(filePath, async ({ isLastOnQ }) => {
 			/**
 			 * prevent rapid autoformat by go autoformatter to be handled immediately
 			 */
-			await Timeout(timeout);
+			await Timeout(Wails3Dev.#delay);
 			if (!isLastOnQ()) {
 				throw 'not the last call';
 			}
@@ -243,7 +368,10 @@ export class Wails3Dev {
 			};
 		});
 	};
-
+	/**
+	 * @type {number}
+	 */
+	static #delay = 182;
 	/**
 	 * @description
 	 * - this is a singleton constructor;
@@ -265,7 +393,7 @@ export class Wails3Dev {
 			return Wails3Dev.#instance;
 		}
 		const projectName = wailsUtils.getProjectName();
-		const delay = minDelay + 182;
+		Wails3Dev.#delay = minDelay + Wails3Dev.#delay;
 		if (!wailsUtils.checkGoProjectName(projectName)) {
 			throw { problem: 'projectName, must supports go project name standard', projectName };
 		}
@@ -287,16 +415,19 @@ export class Wails3Dev {
 				Paths.diskAbsolute('/sql/'),
 			],
 			{
-				debounce: delay,
+				debounce: Wails3Dev.#delay,
 				each: async (ev, path, stats) => {
 					if (!stats || !stats.isFile()) {
+						await Wails3Dev.#goRegisterVivthWails3Emitters(path, 'delete');
 						throw '';
 					}
 					switch (ev) {
 						case 'add':
 						case 'change':
+							await Wails3Dev.#goRegisterVivthWails3Emitters(path, 'add');
 							break;
 						default:
+							await Wails3Dev.#goRegisterVivthWails3Emitters(path, 'delete');
 							throw '';
 					}
 					switch (extname(path)) {
@@ -305,7 +436,7 @@ export class Wails3Dev {
 							Console.info(`✅ Successfully handles:'${path}'`, { now: true });
 							throw '';
 						case '.go':
-							const [response, err] = await Wails3Dev.#goCheckServices(path, minDelay);
+							const [response, err] = await Wails3Dev.#goCheckServices(path);
 							if (err) {
 								throw err;
 							}

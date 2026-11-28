@@ -7056,6 +7056,20 @@ helper method with pre templated way of:
 - provide standard internal `backend/UtilsGetterSetter.go` for thread-safe, multiple readers/writters;
 - provide getter setter pattern `backend/Emitter.go` for return template;
 
+#### reference: `Wails3Dev`
+
+- call to generate Wails3Listener instance for \`${varName}\`;
+- call the returned \`.vivthCleanup\` to prevent leaks;
+
+> - like on component destroyed/unmout, etc.;
+
+```js
+/**
+ * @param { ConstructorParameters<typeof Wails3Listener>[1] } handler
+ * @returns { Wails3Listener }
+ */
+```
+
 #### reference: `new Wails3Dev`
 
 - this is a singleton constructor;
